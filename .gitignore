@@ -1,0 +1,5 @@
+*.ready
+__pycache__
+*.gz
+*.gzi
+access.json
