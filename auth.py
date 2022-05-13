@@ -14,6 +14,8 @@ def get_site_admin_token():
 	response = requests.post(f"{os.environ.get('KEYCLOAK_PUBLIC_URL')}/auth/realms/candig/protocol/openid-connect/token", data=payload)
 	if response.status_code == 200:
 		return response.json()["access_token"]
+	else:
+		raise Exception("Check for environment variables")
 	
 
 if __name__ == "__main__":

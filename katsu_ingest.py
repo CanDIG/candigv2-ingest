@@ -2,6 +2,7 @@ import sys
 import argparse
 import json
 import requests
+import auth
 
 """
 An ingest script that automates the initial data ingest for katsu service.
@@ -11,6 +12,7 @@ You should run the script in an active virtualenv that has `requests` installed.
 Please note that the data_file you supply must be available for Katsu to read. In other words, it should be located on the same server or within the same container as the Katsu instance.
 """
 
+TOKEN = auth.get_site_admin_token()
 
 def create_project(katsu_server_url, project_title):
     """
@@ -23,9 +25,10 @@ def create_project(katsu_server_url, project_title):
         "title": project_title,
         "description": "A new project."
     }
+	headers = {"Authorization": f"Bearer {TOKEN}"}
 
     try:
-        r = requests.post(katsu_server_url + "/api/projects", json=project_request)
+        r = requests.post(katsu_server_url + "/api/projects", json=project_request, headers=headers)
     except requests.exceptions.ConnectionError:
         print(
             "Connection to the API server {} cannot be established.".format(
@@ -69,8 +72,9 @@ def create_dataset(katsu_server_url, project_uuid, dataset_title):
             "data_use_requirements": [{"code": "COL"}, {"code": "PUB"}],
         },
     }
+	headers = {"Authorization": f"Bearer {TOKEN}"}
 
-    r2 = requests.post(katsu_server_url + "/api/datasets", json=dataset_request)
+    r2 = requests.post(katsu_server_url + "/api/datasets", json=dataset_request, headers=headers)
 
     if r2.status_code == 201:
         dataset_uuid = r2.json()["identifier"]
@@ -102,8 +106,9 @@ def create_table(katsu_server_url, dataset_uuid, table_name, data_type):
         "data_type": data_type,
         "dataset": dataset_uuid
     }
+	headers = {"Authorization": f"Bearer {TOKEN}"}
 
-    r3 = requests.post(katsu_server_url + "/tables", json=table_request)
+    r3 = requests.post(katsu_server_url + "/tables", json=table_request, headers=headers)
 
     if r3.status_code == 200 or r3.status_code == 201:
         table_id = r3.json()["id"]
@@ -146,9 +151,10 @@ def ingest_data(katsu_server_url, table_id, data_file, data_type):
     }
 
     print("Ingesting {} data, this may take a while...".format(data_type))
+	headers = {"Authorization": f"Bearer {TOKEN}"}
 
     r5 = requests.post(
-        katsu_server_url + "/private/ingest", json=private_ingest_request
+        katsu_server_url + "/private/ingest", json=private_ingest_request, headers=headers
     )
 
     if r5.status_code == 200 or r5.status_code == 201 or r5.status_code == 204:
