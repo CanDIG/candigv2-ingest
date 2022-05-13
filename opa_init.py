@@ -2,10 +2,12 @@ import sys
 import argparse
 import json
 import requests
+import os
+import auth
 
 
-def update_user_dataset(user, dataset, opa_url, opa_secret):
-	headers = {"Authorization": f"Bearer {opa_secret}"}
+def update_user_dataset(user, dataset, opa_url, token):
+	headers = {"Authorization": f"Bearer {token}"}
 	# get current access:
 	access = requests.get(opa_url + "/v1/data/access", headers=headers).json()
 	if "result" not in access:
@@ -27,18 +29,24 @@ def update_user_dataset(user, dataset, opa_url, opa_secret):
 def main():
 	parser = argparse.ArgumentParser(description="Script to add authorization of a dataset to a user in Opa.")
 	
-	parser.add_argument("user", help="user name")
-	parser.add_argument("dataset", help="dataset name")
-	parser.add_argument("opa_url", help="Opa URL")
-	parser.add_argument("opa_secret", help="Opa admin secret")
+	parser.add_argument("--user", help="user name", required=False)
+	parser.add_argument("--userfile", help="user file", required=False)
+	parser.add_argument("--dataset", help="dataset name")
+	parser.add_argument("--opa_url", help="Opa URL")
 	
 	args = parser.parse_args()
-	dataset = args.dataset
-	user = args.user
-	opa_url = args.opa_url
-	opa_secret = args.opa_secret
+	token = auth.get_site_admin_token()
 	
-	print(json.dumps(update_user_dataset(user, dataset, opa_url, opa_secret), indent=4))
+	if args.userfile is not None:
+		with open(args.userfile) as f:
+			lines = f.readlines()
+			for line in lines:
+				last = update_user_dataset(line.strip(), args.dataset, args.opa_url, token)
+			print(json.dumps(last, indent=4))
+	elif args.user is not None:
+		print(json.dumps(update_user_dataset(args.user, args.dataset, args.opa_url, token), indent=4))
+	else:
+		raise Exception("Either a user name or a file of users is required.")
 
 
 if __name__ == "__main__":

@@ -1,8 +1,10 @@
 import argparse
 import requests
+import auth
 
 
-def post_object(sample_id, file_dir, htsget_url):
+def post_object(sample_id, file_dir, htsget_url, token):
+	headers = {"Authorization": f"Bearer {token}"}
     obj = {
             "access_methods": [
               {
@@ -18,13 +20,13 @@ def post_object(sample_id, file_dir, htsget_url):
             "version": "v1"
           }
     url = f"{htsget_url}/ga4gh/drs/v1/objects"
-    response = requests.post(url, json=obj)
+    response = requests.post(url, json=obj, headers=headers)
     obj["access_methods"][0]["access_url"]["url"] += ".tbi"
     obj["id"] += ".tbi"
     obj["name"] += ".tbi"
     obj["self_uri"] += ".tbi"
 
-    response = requests.post(url, json=obj)
+    response = requests.post(url, json=obj, headers=headers)
 
     obj = {
         "contents": [
@@ -49,12 +51,13 @@ def post_object(sample_id, file_dir, htsget_url):
         "version": "v1"
     }
     
-    response = requests.post(url, json=obj)
+    response = requests.post(url, json=obj, headers=headers)
 
     return response
 
 
-def post_to_dataset(sample_id, dataset, htsget_url):
+def post_to_dataset(sample_id, dataset, htsget_url, token):
+	headers = {"Authorization": f"Bearer {token}"}
     obj = {
         "id": dataset,
         "drsobjects": [
@@ -62,7 +65,7 @@ def post_to_dataset(sample_id, dataset, htsget_url):
         ]
     }
     url = f"{htsget_url}/ga4gh/drs/v1/datasets"
-    response = requests.post(url, json=obj)
+    response = requests.post(url, json=obj, headers=headers)
 
 
 def main():
@@ -74,13 +77,10 @@ def main():
     parser.add_argument("dataset", help="dataset name")
 
     args = parser.parse_args()
-    sample = args.sample
-    file_dir = args.dir
-    server_url = args.server_url
-    dataset = args.dataset
+	token = auth.get_site_admin_token()
 
-    post_object(sample, file_dir, server_url)
-    post_to_dataset(sample, dataset, server_url)
+    post_object(args.sample, args.dir, args.server_url, token)
+    post_to_dataset(args.sample, args.dataset, args.server_url, token)
 
 
 if __name__ == "__main__":
