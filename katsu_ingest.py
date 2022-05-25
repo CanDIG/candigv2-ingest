@@ -177,24 +177,21 @@ def ingest_data(katsu_server_url, table_id, data_file, data_type):
 def main():
     parser = argparse.ArgumentParser(description="A script that facilitates initial data ingestion of Katsu service.")
 
-    parser.add_argument("project", help="Project name.")
-    parser.add_argument("dataset", help="Dataset name.")
-    parser.add_argument("table", help="Table name.")
-    parser.add_argument("server_url", help="The URL of Katsu instance.")
-    parser.add_argument("data_file", help="The absolute path to the local data file, readable by Katsu.")
-    parser.add_argument("data_type", help="The type of data. Only phenopacket and mcodepacket are supported.")
+    parser.add_argument("--dataset", help="Dataset name.")
+    parser.add_argument("--input", help="The absolute path to the local data file, readable by Katsu.")
 
     args = parser.parse_args()
-    project_title = args.project
     dataset_title = args.dataset
-    table_name = args.table
-    katsu_server_url = args.server_url
-    data_file = args.data_file
-    data_type = args.data_type
+    project_title = dataset_title
+    table_name = dataset_title
+    data_file = args.input
+    data_type = "mcodepacket"
 
-    if data_type not in ['phenopacket', 'mcodepacket']:
-        print("Data type must be either phenopacket or mcodepacket.")
-        sys.exit()
+    katsu_server_url = os.environ.get("CANDIG_URL")
+    if katsu_server_url is None:
+        raise Exception("CANDIG_URL environment variable is not set")
+    else:
+        katsu_server_url = katsu_server_url + "/katsu"
 
     project_uuid = create_project(katsu_server_url, project_title)
     dataset_uuid = create_dataset(katsu_server_url, project_uuid, dataset_title)

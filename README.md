@@ -20,7 +20,7 @@ vault
 * List of users that will have access to this dataset.
 * Clinical data, saved as either an Excel file or as a set of csv files.
 * Genomic data files in vcf format.
-* File map of genomic files in a csv file, linking vcf files to the clinical samples.
+* File map of genomic files in a csv file, linking genomic sample IDs to the clinical samples.
 * Reference genome used for the variant files.
 * Manifest and mappings for clinical_ETL conversion.
 
@@ -31,21 +31,54 @@ ingest into:
 * katsu: clinical data and link to htsget
 * candig-server: patientID, sampleID, vcf file for variant search
 
+
 ## Set environment variables:
+* CANDIG_URL (same as TYK_LOGIN_TARGET_URL, if you're using CanDIGv2's example.env)
+* KEYCLOAK_PUBLIC_URL
 * CANDIG_CLIENT_ID
 * CANDIG_CLIENT_SECRET
 * CANDIG_SITE_ADMIN_USER
 * CANDIG_SITE_ADMIN_PASSWORD
-* KEYCLOAK_PUBLIC_URL
+
+For convenience, you can update these in env.sh and run `source env.sh`.
 
 ## OPA
-We probably need to keep a stable copy of access.json somewhere, whether or not we're running this via docker.
-Change the entrypoint script for the docker container
+Create a new access.json file:
+```bash
+python opa_init.py --dataset <dataset> --userfile <user file> > access.json
+```
+
+If you're running OPA in the CanDIGv2 Docker stack, you should copy the file to the Docker volume to persist the change between restarts:
+```bash
+docker cp access.json candigv2_opa_1:/app/permissions_engine/access.json
+``` 
 
 ## Htsget
+### Genomic file preparation:
+Files need to be in vcf or vcf.gz format.
+* If .tbi file does not exist, create it
+* Copy files to ECS
+
+```bash
+python htsget_ingest.py --dataset <dataset> --userfile <user file>
+```
 
 
 ## Katsu
+You'll need to generate a mapping file using the clinical_ETL tool, to translate your raw clinical data into an mcodepacket-compatible format:
+```bash
+python clinical_ETL/CSVConvert.py --input <directory of clinical csv files> --mapping <mapping manifest file>
+```
+
+Once you've generated the json ingest file, copy it to the katsu server, so that it is locally accessible:
+```bash
+docker cp input.json candigv2_chord-metadata_1:input.json
+```
+
+Then run the ingest tool:
+```bash
+python katsu_ingest.py --dataset $(DATASET) --input /input.json
+```
 
 
 ## Candig-server
@@ -56,17 +89,18 @@ Candig-server needs its data ingested from the local command line; there is no R
 * The variant files need to be mounted on a path that is accessible to candig-server.
 
 Run the candig_server_ingest.py script to generate a shell script and input json that you can copy and run on your candig-server instance.
-```
+```bash
 python candig_server_ingest.py --dataset DATASET --input_file INPUT_FILE --patient_id PATIENT_ID_COL_NAME --variant_file_id VARIANT_ID_COL_NAME --path FILE_PATH --reference REFSET_NAME
 ```
 
 This command will generate two files in a temp directory, `candigv1_data.json` and `candigv1_ingest.sh`. Copy these onto the candig_server instance and run `bash candigv1_ingest.sh`.
 
-
-
-## Katsu
-Use clinical_etl to generate an input json file.
-
+If you're running candig-server in the CanDIGv2 Docker stack:
+```bash
+docker cp temp/candigv1_data.json candigv2_candig-server_1:/app/candig-server/
+docker cp temp/candigv1_ingest.sh candigv2_candig-server_1:/app/candig-server/
+docker exec candigv2_candig-server_1 /app/candig-server/candigv1_ingest.sh
+``` 
 
 
 Run `make all` to install a synthetic project called `mohccn` and a dataset called `mcode-synthetic`.
