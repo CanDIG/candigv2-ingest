@@ -21,13 +21,15 @@ vault
 * Clinical data, saved as either an Excel file or as a set of csv files.
 * Genomic data files in vcf format.
 * File map of genomic files in a csv file, linking genomic sample IDs to the clinical samples.
+* (if needed) Credentials for s3 endpoints: url, access ID, secret key.
 * Reference genome used for the variant files.
 * Manifest and mappings for clinical_ETL conversion.
 
 
 ingest into:
 * opa: set up permissions for dataset
-* htsget: ingest DRS object
+* minio: if needed, upload local files to minio store
+* htsget: ingest DRS objects
 * katsu: clinical data and link to htsget
 * candig-server: patientID, sampleID, vcf file for variant search
 
@@ -45,7 +47,7 @@ For convenience, you can update these in env.sh and run `source env.sh`.
 ## OPA
 Create a new access.json file:
 ```bash
-python opa_init.py --dataset <dataset> --userfile <user file> > access.json
+python opa_ingest.py --dataset <dataset> --userfile <user file> > access.json
 ```
 
 If you're running OPA in the CanDIGv2 Docker stack, you should copy the file to the Docker volume to persist the change between restarts:
@@ -56,13 +58,20 @@ docker cp access.json candigv2_opa_1:/app/permissions_engine/access.json
 ## Htsget
 ### Genomic file preparation:
 Files need to be in vcf or vcf.gz format.
-* If .tbi file does not exist, create it
-* Copy files to ECS
+* If .tbi files do not exist, create them.
+* Ingest files in S3-compatible stores one endpoint/bucket at a time.
+* Save the credentials to a file in the format of `more ~/.aws/credentials` (please list only one credential in the file; the ingest will only process the first credential it finds.).
 
-```bash
-python htsget_ingest.py --dataset <dataset> --userfile <user file>
+```
+[default]
+aws_access_key_id = xxxxx
+aws_secret_access_key = xxxxx
 ```
 
+Then run:
+```bash
+python htsget_ingest.py --sample <sample>|--samplefile <samplefile> --dataset <dataset> --endpoint <S3 endpoint> --bucket <S3 bucket> --awsfile <aws credentials>
+```
 
 ## Katsu
 You'll need to generate a mapping file using the clinical_ETL tool, to translate your raw clinical data into an mcodepacket-compatible format:
@@ -102,9 +111,6 @@ docker cp temp/candigv1_ingest.sh candigv2_candig-server_1:/app/candig-server/
 docker exec candigv2_candig-server_1 /app/candig-server/candigv1_ingest.sh
 ``` 
 
-
-Run `make all` to install a synthetic project called `mohccn` and a dataset called `mcode-synthetic`.
-Opa will allow the user specified in `$CANDIG_HOME/tmp/secrets/keycloak-test-user` to access the dataset.
 
 After installation, you should be able to access the synthetic dataset:
 
