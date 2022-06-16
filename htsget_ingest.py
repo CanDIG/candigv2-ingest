@@ -141,7 +141,7 @@ def add_aws_credential(endpoint, bucket, awsfile, token):
         headers["X-Vault-Token"] = client_token
     
     # check to see if credential exists:
-    url = f"{VAULT_URL}/v1/aws/{endpoint}/{bucket}"
+    url = f"{VAULT_URL}/v1/aws/{endpoint}-{bucket}"
     response = requests.get(url, headers=headers)
     print(response.status_code)
     if response.status_code == 404:
