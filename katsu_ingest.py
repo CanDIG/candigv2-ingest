@@ -72,7 +72,7 @@ def create_dataset(katsu_server_url, project_uuid, dataset_title):
             "data_use_requirements": [{"code": "COL"}, {"code": "PUB"}],
         },
     }
-	headers = {"Authorization": f"Bearer {TOKEN}"}
+    headers = {"Authorization": f"Bearer {TOKEN}"}
 
     r2 = requests.post(katsu_server_url + "/api/datasets", json=dataset_request, headers=headers)
 
@@ -106,7 +106,7 @@ def create_table(katsu_server_url, dataset_uuid, table_name, data_type):
         "data_type": data_type,
         "dataset": dataset_uuid
     }
-	headers = {"Authorization": f"Bearer {TOKEN}"}
+    headers = {"Authorization": f"Bearer {TOKEN}"}
 
     r3 = requests.post(katsu_server_url + "/tables", json=table_request, headers=headers)
 
@@ -151,7 +151,7 @@ def ingest_data(katsu_server_url, table_id, data_file, data_type):
     }
 
     print("Ingesting {} data, this may take a while...".format(data_type))
-	headers = {"Authorization": f"Bearer {TOKEN}"}
+    headers = {"Authorization": f"Bearer {TOKEN}"}
 
     r5 = requests.post(
         katsu_server_url + "/private/ingest", json=private_ingest_request, headers=headers
