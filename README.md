@@ -79,12 +79,28 @@ python htsget_ingest.py --sample <sample>|--samplefile <samplefile> --dataset <d
 ```
 
 ## Katsu
-You'll need to generate a mapping file using the clinical_ETL tool, to translate your raw clinical data into an mcodepacket-compatible format:
+You'll need to generate a mapping file using the clinical_ETL tool to translate your raw clinical data into an mcodepacket-compatible format. Instructions about use of the clinical_ETL tool can be found at https://github.com/CanDIG/clinical_ETL.
+
+In order to connect genomic sample IDs to clinical sample IDs, you'll need to include a mapping function for the mcodepacket's genomics_reports schema:
+
+```
+"genomics_report.extra_properties", {mcode.connect_variant("your_genomic_id")}
+```
+
+```python
+def connect_variant(mapping):
+    genomic_id = mappings.single_val({"GenomicID": mapping["your_genomic_id"]})
+    if genomic_id is None:
+        return None
+    return {"genomic_id": genomic_id}
+```
+
+Once you've written your mapper, map your data to mcodepackets:
 ```bash
 python clinical_ETL/CSVConvert.py --input <directory of clinical csv files> --mapping <mapping manifest file>
 ```
 
-Once you've generated the json ingest file, copy it to the katsu server, so that it is locally accessible:
+Copy it to the katsu server, so that it is locally accessible:
 ```bash
 docker cp input.json candigv2_chord-metadata_1:input.json
 ```
