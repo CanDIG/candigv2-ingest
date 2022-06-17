@@ -25,7 +25,7 @@ def create_project(katsu_server_url, project_title):
         "title": project_title,
         "description": "A new project."
     }
-	headers = {"Authorization": f"Bearer {TOKEN}"}
+    headers = {"Authorization": f"Bearer {TOKEN}"}
 
     try:
         r = requests.post(katsu_server_url + "/api/projects", json=project_request, headers=headers)
