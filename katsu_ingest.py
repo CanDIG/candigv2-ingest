@@ -3,6 +3,7 @@ import argparse
 import json
 import requests
 import auth
+import os
 
 """
 An ingest script that automates the initial data ingest for katsu service.
