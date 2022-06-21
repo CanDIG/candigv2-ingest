@@ -20,7 +20,6 @@ def collect_samples_for_genomic_id(genomic_id, client):
     samples = []
     while len(files) > 0:
         f = files.pop(0)
-        print(f)
         index_parse = re.match(r"(.+)\.(tbi|bai|crai|csi)", f)
         if index_parse is not None:
             # this is an index file, so it should have a corresponding file
@@ -45,7 +44,6 @@ def collect_samples_for_genomic_id(genomic_id, client):
         if len(files) == 1: # hey, clearly this file doesn't have a buddy. This is wrong!
             print(f"Error: {name} doesn't have its matching index or file")
             break
-    print(samples)
     return samples
 
 
@@ -165,7 +163,6 @@ def add_aws_credential(client, token):
     # check to see if credential exists:
     url = f"{VAULT_URL}/v1/aws/{client['endpoint']}-{client['bucket']}"
     response = requests.get(url, headers=headers)
-    print(response.status_code)
     if response.status_code == 404:
         # add credential:
         body = {
@@ -208,25 +205,11 @@ def main():
     token = auth.get_site_admin_token()
     
     # parse the awsfile:
-    access = None
-    secret = None
-    with open(args.awsfile) as f:
-        lines = f.readlines()
-        while len(lines) > 0 and (access is None or secret is None):
-            line = lines.pop(0)
-            parse_access = re.match(r"(aws_access_key_id|AWSAccessKeyId)\s*=\s*(.+)$", line)
-            if parse_access is not None:
-                access = parse_access.group(2)
-            parse_secret = re.match(r"(aws_secret_access_key|AWSSecretKey)\s*=\s*(.+)$", line)
-            if parse_secret is not None:
-                secret = parse_secret.group(2)
-    if access is None:
-        return False, "awsfile did not contain access ID"
-    if secret is None:
-        return False, "awsfile did not contain secret key"
+    result = auth.parse_aws_credential(args.awsfile)
+    if "error" in result:
+        raise Exception(f"Failed to parse awsfile: {result['error']}")
 
-    client = auth.get_minio_client(args.endpoint, args.bucket, access_key=access, secret_key=secret, region=args.region)
-    print(client)
+    client = auth.get_minio_client(args.endpoint, args.bucket, access_key=result["access"], secret_key=result["secret"], region=args.region)
     success, reason = add_aws_credential(client, token)
     if not success:
         raise Exception(f"Failed to add AWS credential to vault: {reason}")
