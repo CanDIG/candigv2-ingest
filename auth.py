@@ -30,8 +30,8 @@ def get_minio_client(s3_endpoint, bucket, access_key=None, secret_key=None, regi
     # if it's any sort of amazon endpoint, it can just be s3.amazonaws.com
     if "amazonaws.com" in s3_endpoint:
         endpoint = "s3.amazonaws.com"
-    print(endpoint)
-
+    else:
+        endpoint = s3_endpoint
     if bucket is None:
         bucket = "candigtest"
     if s3_endpoint is not None:
@@ -55,7 +55,13 @@ def get_minio_client(s3_endpoint, bucket, access_key=None, secret_key=None, regi
             secret_key = secret_key,
             region = region
         )
-                
+
+    if not client.bucket_exists(bucket):
+        if 'region' is None:
+            client.make_bucket(bucket)
+        else:
+            client.make_bucket(bucket, location=region)
+
     return {
         "endpoint": endpoint,
         "client": client, 

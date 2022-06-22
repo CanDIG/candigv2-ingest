@@ -4,6 +4,10 @@ import json
 import requests
 import os
 import auth
+from pathlib import Path
+
+
+CANDIG_URL = os.getenv("CANDIG_URL", "")
 
 
 def main():
@@ -31,7 +35,18 @@ def main():
 
     if CANDIG_URL == "":
         raise Exception("CANDIG_URL environment variable is not set")
+        
+    # parse the awsfile:
+    result = auth.parse_aws_credential(args.awsfile)
+    if "error" in result:
+        raise Exception(f"Failed to parse awsfile: {result['error']}")
+    client = auth.get_minio_client(args.endpoint, args.bucket, access_key=result["access"], secret_key=result["secret"])
 
+    for sample in samples:
+        file = Path(sample)
+        with open(file, "rb") as fp:
+            result = client["client"].put_object(args.bucket, file.name, fp, file.stat().st_size)
+            print(f"uploaded {result.object_name}")
 
 
 if __name__ == "__main__":
