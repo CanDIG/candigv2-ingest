@@ -11,9 +11,9 @@ HTSGET_URL = CANDIG_URL + "/genomics"
 VAULT_URL = CANDIG_URL + "/vault"
 HOSTNAME = CANDIG_URL.replace(f"{urlparse(CANDIG_URL).scheme}://","")
 
-def collect_samples_for_genomic_id(genomic_id, client):
+def collect_samples_for_genomic_id(genomic_id, blob_id, client):
     # first, find all files that are related to this sample at the endpoint:
-    files_iterator = client['client'].list_objects(client["bucket"], prefix=genomic_id)
+    files_iterator = client['client'].list_objects(client["bucket"], prefix=blob_id)
     files = []
     for f in files_iterator:
         files.append(f.object_name)
@@ -189,11 +189,17 @@ def main():
     args = parser.parse_args()
 
     samples = []
+    blobs = []
     if args.samplefile is not None:
         with open(args.samplefile) as f:
             lines = f.readlines()
             for line in lines:
-                samples.append(line.strip())
+                if '\t' in line:
+                    s, b = line.strip().split('\t')
+                    samples.append(s)
+                    blobs.append(b)
+                else:
+                    samples.append(line.strip())
     elif args.sample is not None:
         samples.append(args.sample)
     else:
@@ -213,10 +219,13 @@ def main():
     success, reason = add_aws_credential(client, token)
     if not success:
         raise Exception(f"Failed to add AWS credential to vault: {reason}")
-    for sample in samples:
+    for i in [0, len(samples)]:
         # first, find all of the s3 objects related to this sample:
-        objects_to_create = collect_samples_for_genomic_id(sample, client)
-        post_objects(sample, objects_to_create, client, token)
+        if len(blobs) > 0:
+            objects_to_create = collect_samples_for_genomic_id(samples[i], blobs[i], client)
+        else:
+            objects_to_create = collect_samples_for_genomic_id(samples[i], samples[i], client)
+        post_objects(samples[i], objects_to_create, client, token)
     post_to_dataset(samples, args.dataset, token)
     response = get_dataset_objects(args.dataset, token)
     print(json.dumps(response, indent=4))
