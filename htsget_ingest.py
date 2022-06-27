@@ -20,7 +20,9 @@ def collect_samples_for_genomic_id(genomic_id, client, prefix=""):
     samples = []
     while len(files) > 0:
         f = files.pop(0)
-        index_parse = re.match(r"{prefix}(.+)\.(tbi|bai|crai|csi)", f)
+        index_pattern = re.compile(f"{prefix}(.+)\.(tbi|bai|crai|csi)")
+        print(index_pattern)
+        index_parse = index_pattern.match(f)
         if index_parse is not None:
             # this is an index file, so it should have a corresponding file
             files.remove(index_parse.group(1))
