@@ -11,9 +11,9 @@ HTSGET_URL = CANDIG_URL + "/genomics"
 VAULT_URL = CANDIG_URL + "/vault"
 HOSTNAME = CANDIG_URL.replace(f"{urlparse(CANDIG_URL).scheme}://","")
 
-def collect_samples_for_genomic_id(genomic_id, client):
+def collect_samples_for_genomic_id(genomic_id, client, prefix=""):
     # first, find all files that are related to this sample at the endpoint:
-    files_iterator = client['client'].list_objects(client["bucket"], prefix=genomic_id)
+    files_iterator = client['client'].list_objects(client["bucket"], prefix=prefix+genomic_id)
     files = []
     for f in files_iterator:
         files.append(f.object_name)
@@ -185,6 +185,7 @@ def main():
     parser.add_argument("--dataset", help="dataset name")
     parser.add_argument("--awsfile", help="s3 credentials")
     parser.add_argument("--region", help="optional: s3 region", required=False)
+    parser.add_argument("--prefix", help="optional: s3 prefix", required=False, default="")
 
     args = parser.parse_args()
 
@@ -215,7 +216,8 @@ def main():
         raise Exception(f"Failed to add AWS credential to vault: {reason}")
     for sample in samples:
         # first, find all of the s3 objects related to this sample:
-        objects_to_create = collect_samples_for_genomic_id(sample, client)
+        objects_to_create = collect_samples_for_genomic_id(sample, client, prefix=args.prefix)
+        print(objects_to_create)
         post_objects(sample, objects_to_create, client, token)
     post_to_dataset(samples, args.dataset, token)
     response = get_dataset_objects(args.dataset, token)
