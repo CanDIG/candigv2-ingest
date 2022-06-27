@@ -227,6 +227,7 @@ def main():
             objects_to_create = collect_samples_for_genomic_id(samples[i], blobs[i], client)
         else:
             objects_to_create = collect_samples_for_genomic_id(samples[i], samples[i], client)
+        print(objects_to_create)
         post_objects(samples[i], objects_to_create, client, token)
     post_to_dataset(samples, args.dataset, token)
     response = get_dataset_objects(args.dataset, token)
