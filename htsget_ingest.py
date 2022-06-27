@@ -85,7 +85,7 @@ def post_objects(genomic_id, samples_to_create, client, token, prefix=""):
         obj = {
             "access_methods": [
                 {
-                    "access_id": f"{endpoint}/{bucket}{prefix}{s['file']}",
+                    "access_id": f"{endpoint}/{bucket}/{prefix}{s['file']}",
                     "type": "s3"
                 }
             ],
