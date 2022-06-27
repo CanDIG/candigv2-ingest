@@ -33,7 +33,7 @@ def collect_samples_for_genomic_id(genomic_id, blob_id, client):
             id_parse = re.match(r"(.+)\.(vcf|bam|cram|sam|bcf)(\.gz)*", file)
             samples.append(
                 {
-                    "id": id_parse.group(1),
+                    "id": genomic_id,
                     "file": file,
                     "index": index,
                     "type": type
