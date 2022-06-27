@@ -3,17 +3,18 @@ import argparse
 import json
 import requests
 import auth
-
+import os
 TOKEN = auth.get_site_admin_token()
 
 
 def get_uuids(katsu_server_url, dataset_title):
     headers = {"Authorization": f"Bearer {TOKEN}"}
     results = requests.get(katsu_server_url + "/api/datasets", headers=headers)
-    for r in results.json()["results"]:
-        if r["title"] == dataset_title:
-            return r["identifier"], r["project"]
-    return None
+    if "results" in results.json():
+        for r in results.json()["results"]:
+            if r["title"] == dataset_title:
+                return r["identifier"], r["project"]
+    return None, None
 
 
 def delete_dataset(katsu_server_url, dataset_uuid):
@@ -42,7 +43,6 @@ def main():
     parser.add_argument("data_file", help="The absolute path to the local data file, readable by Katsu.")
 
     args = parser.parse_args()
-    project_title = args.project
     dataset_title = args.dataset
     katsu_server_url = args.server_url
 
@@ -53,7 +53,7 @@ def main():
         katsu_server_url = katsu_server_url + "/katsu"
 
     dataset_uuid, project_uuid = get_uuids(katsu_server_url, dataset_title)
-    delete_data(katsu_server_url, data_file, data_type)
+    delete_data(katsu_server_url, args.data_file, "mcodepacket")
     delete_dataset(katsu_server_url, dataset_uuid)
     delete_project(katsu_server_url, project_uuid)
     
