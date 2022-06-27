@@ -219,6 +219,8 @@ def main():
     success, reason = add_aws_credential(client, token)
     if not success:
         raise Exception(f"Failed to add AWS credential to vault: {reason}")
+    print(blobs)
+    print(samples)
     for i in [0, len(samples)]:
         # first, find all of the s3 objects related to this sample:
         if len(blobs) > 0:
