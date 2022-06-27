@@ -5,6 +5,7 @@ import os
 import re
 import json
 from urllib.parse import urlparse
+import time
 
 CANDIG_URL = os.getenv("CANDIG_URL", "")
 HTSGET_URL = CANDIG_URL + "/genomics"
@@ -225,9 +226,7 @@ def main():
     success, reason = add_aws_credential(client, token)
     if not success:
         raise Exception(f"Failed to add AWS credential to vault: {reason}")
-    print(blobs)
-    print(samples)
-    for i in [0, len(samples)-1]:
+    for i in range(0, len(samples)):
         # first, find all of the s3 objects related to this sample:
         objects_to_create = collect_samples_for_genomic_id(samples[i], client, prefix=args.prefix)
         print(objects_to_create)
