@@ -27,7 +27,7 @@ def collect_samples_for_genomic_id(genomic_id, client, prefix=""):
             files.remove(index_parse.group(1))
             file = index_parse.group(2)
             # files.remove(f)
-            index = f
+            index = file + "." + index_parse.group(3)
             type = 'read'
             if index_parse.group(3) == 'tbi':
                 type = 'variant'
