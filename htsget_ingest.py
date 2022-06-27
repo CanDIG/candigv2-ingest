@@ -92,6 +92,7 @@ def post_objects(genomic_id, samples_to_create, client, token, prefix=""):
             "self_uri": f"drs://{HOSTNAME}/{s['file']}",
             "version": "v1"
         }
+        print(obj)
         response = requests.post(url, json=obj, headers=headers)
 
         # index object:
@@ -226,7 +227,7 @@ def main():
         # first, find all of the s3 objects related to this sample:
         objects_to_create = collect_samples_for_genomic_id(samples[i], client, prefix=args.prefix)
         print(objects_to_create)
-        post_objects(samples[i], objects_to_create, client, token)
+        post_objects(samples[i], objects_to_create, client, token, prefix=args.prefix)
     post_to_dataset(samples, args.dataset, token)
     response = get_dataset_objects(args.dataset, token)
     print(json.dumps(response, indent=4))
