@@ -20,7 +20,7 @@ def collect_samples_for_genomic_id(genomic_id, client, prefix=""):
     samples = []
     while len(files) > 0:
         f = files.pop(0)
-        index_parse = re.match(r"(.+)\.(tbi|bai|crai|csi)", f)
+        index_parse = re.match(r"{prefix}(.+)\.(tbi|bai|crai|csi)", f)
         if index_parse is not None:
             # this is an index file, so it should have a corresponding file
             files.remove(index_parse.group(1))
@@ -84,12 +84,12 @@ def post_objects(genomic_id, samples_to_create, client, token, prefix=""):
         obj = {
             "access_methods": [
                 {
-                    "access_id": f"{endpoint}/{bucket}/{s['file']}",
+                    "access_id": f"{endpoint}/{bucket}{prefix}{s['file']}",
                     "type": "s3"
                 }
             ],
-            "id": s['file'].replace(prefix,""),
-            "name": s['file'].replace(prefix,""),
+            "id": s['file'],
+            "name": s['file'],
             "self_uri": f"drs://{HOSTNAME}/{s['file']}",
             "version": "v1"
         }
@@ -101,12 +101,12 @@ def post_objects(genomic_id, samples_to_create, client, token, prefix=""):
         obj = {
             "access_methods": [
                 {
-                    "access_id": f"{endpoint}/{bucket}/{s['index']}",
+                    "access_id": f"{endpoint}/{bucket}/{prefix}{s['index']}",
                     "type": "s3"
                 }
             ],
-            "id": s['index'].replace(prefix,""),
-            "name": s['index'].replace(prefix,""),
+            "id": s['index'],
+            "name": s['index'],
             "self_uri": f"drs://{HOSTNAME}/{s['index']}",
             "version": "v1"
         }
