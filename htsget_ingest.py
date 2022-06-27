@@ -20,22 +20,21 @@ def collect_samples_for_genomic_id(genomic_id, client, prefix=""):
     samples = []
     while len(files) > 0:
         f = files.pop(0)
-        index_pattern = re.compile(f"{prefix}(.+)\.(tbi|bai|crai|csi)")
-        print(index_pattern)
+        index_pattern = re.compile(f"({prefix}(.+))\.(tbi|bai|crai|csi)")
         index_parse = index_pattern.match(f)
         if index_parse is not None:
             # this is an index file, so it should have a corresponding file
             files.remove(index_parse.group(1))
-            file = index_parse.group(1)
+            file = index_parse.group(2)
             # files.remove(f)
             index = f
             type = 'read'
-            if index_parse.group(2) == 'tbi':
+            if index_parse.group(3) == 'tbi':
                 type = 'variant'
             id_parse = re.match(r"(.+)\.(vcf|bam|cram|sam|bcf)(\.gz)*", file)
             samples.append(
                 {
-                    "id": genomic_id,
+                    "id": id_parse.group(1),
                     "file": file,
                     "index": index,
                     "type": type
