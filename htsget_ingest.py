@@ -78,6 +78,7 @@ def post_objects(genomic_id, samples_to_create, client, token, prefix=""):
             "version": "v1"
         }
         response = requests.post(url, json=obj, headers=headers)
+        print(response)
 
         # file object:
         obj = {
@@ -94,6 +95,7 @@ def post_objects(genomic_id, samples_to_create, client, token, prefix=""):
         }
         print(obj)
         response = requests.post(url, json=obj, headers=headers)
+        print(response)
 
         # index object:
         obj = {
@@ -109,6 +111,7 @@ def post_objects(genomic_id, samples_to_create, client, token, prefix=""):
             "version": "v1"
         }
         response = requests.post(url, json=obj, headers=headers)
+        print(response)
 
     return response
 
