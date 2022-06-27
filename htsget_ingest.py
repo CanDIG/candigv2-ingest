@@ -221,7 +221,7 @@ def main():
         raise Exception(f"Failed to add AWS credential to vault: {reason}")
     print(blobs)
     print(samples)
-    for i in [0, len(samples)]:
+    for i in [0, len(samples)-1]:
         # first, find all of the s3 objects related to this sample:
         if len(blobs) > 0:
             objects_to_create = collect_samples_for_genomic_id(samples[i], blobs[i], client)
