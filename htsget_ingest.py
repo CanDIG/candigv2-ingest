@@ -47,7 +47,7 @@ def collect_samples_for_genomic_id(genomic_id, client, prefix=""):
     return samples
 
 
-def post_objects(genomic_id, samples_to_create, client, token):
+def post_objects(genomic_id, samples_to_create, client, token, prefix=""):
     endpoint = client["endpoint"]
     bucket = client["bucket"]
     headers = {"Authorization": f"Bearer {token}"}
@@ -87,8 +87,8 @@ def post_objects(genomic_id, samples_to_create, client, token):
                     "type": "s3"
                 }
             ],
-            "id": s['file'],
-            "name": s['file'],
+            "id": s['file'].replace(prefix,""),
+            "name": s['file'].replace(prefix,""),
             "self_uri": f"drs://{HOSTNAME}/{s['file']}",
             "version": "v1"
         }
@@ -102,8 +102,8 @@ def post_objects(genomic_id, samples_to_create, client, token):
                     "type": "s3"
                 }
             ],
-            "id": s['index'],
-            "name": s['index'],
+            "id": s['index'].replace(prefix,""),
+            "name": s['index'].replace(prefix,""),
             "self_uri": f"drs://{HOSTNAME}/{s['index']}",
             "version": "v1"
         }
