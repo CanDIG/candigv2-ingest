@@ -28,16 +28,8 @@ def create_project(katsu_server_url, project_title):
     }
     headers = {"Authorization": f"Bearer {TOKEN}"}
 
-    try:
-        r = requests.post(katsu_server_url + "/api/projects", json=project_request, headers=headers)
-    except requests.exceptions.ConnectionError:
-        print(
-            "Connection to the API server {} cannot be established.".format(
-                katsu_server_url
-            )
-        )
-        sys.exit()
-
+    r = requests.post(katsu_server_url + "/api/projects", json=project_request, headers=headers)
+    print(katsu_server_url)
     if r.status_code == 201:
         project_uuid = r.json()["identifier"]
         print(
@@ -47,7 +39,8 @@ def create_project(katsu_server_url, project_title):
         )
         return project_uuid
     elif r.status_code == 400:
-        results = requests.get(katsu_server_url + "/api/projects")
+        results = requests.get(katsu_server_url + "/api/projects", headers=headers)
+        print(results.json())
         for r in results.json()["results"]:
             if r["title"] == project_title:
                 return r["identifier"]
@@ -86,7 +79,7 @@ def create_dataset(katsu_server_url, project_uuid, dataset_title):
         )
         return dataset_uuid
     elif r2.status_code == 400:
-        results = requests.get(katsu_server_url + "/api/datasets")
+        results = requests.get(katsu_server_url + "/api/datasets", headers=headers)
         for r in results.json()["results"]:
             if r["title"] == dataset_title:
                 return r["identifier"]
@@ -116,7 +109,7 @@ def create_table(katsu_server_url, dataset_uuid, table_name, data_type):
         print("Table {} with uuid {} has been created!".format(table_name, table_id))
         return table_id
     elif r3.status_code == 500:
-        results = requests.get(katsu_server_url + "/api/tables")
+        results = requests.get(katsu_server_url + "/api/tables", headers=headers)
         for r in results.json()["results"]:
             if r["name"] == table_name:
                 return r["identifier"]
