@@ -4,6 +4,7 @@ import json
 import requests
 import os
 import auth
+import re
 
 
 def update_user_dataset(user, dataset, opa_url, token):
@@ -44,6 +45,8 @@ def main():
         with open(args.userfile) as f:
             lines = f.readlines()
             for line in lines:
+                if re.match(r"^/s*$", line) is not None:
+                    continue
                 last = update_user_dataset(line.strip(), args.dataset, candig_url, token)
             print(json.dumps(last, indent=4))
     elif args.user is not None:
