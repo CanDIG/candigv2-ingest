@@ -86,6 +86,8 @@ docker cp temp/candigv1_ingest.sh candigv2_candig-server_1:/app/candig-server/
 docker exec candigv2_candig-server_1 /app/candig-server/candigv1_ingest.sh
 ``` 
 
+Don't forget that you need to restart the candig-server instance to pick up the changes!
+
 ## Ingest clinical data
 ### Transform raw data into mcodepacket format
 You'll need to generate a mapping file using the clinical_ETL tool to translate your raw clinical data into an mcodepacket-compatible format. Instructions about use of the clinical_ETL tool can be found at https://github.com/CanDIG/clinical_ETL.
