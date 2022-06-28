@@ -1,3 +1,5 @@
+set -xuo pipefail
+
 CANDIGV2=$1
 more $CANDIGV2/tmp/secrets/keycloak-client-local_candig-secret 
 more $CANDIGV2/tmp/secrets/minio-secret-key 
