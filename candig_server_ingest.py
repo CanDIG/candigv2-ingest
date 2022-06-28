@@ -45,7 +45,8 @@ def main():
             # write sample into output_data:
             sample = {
                 "Sample": {
-                    "sampleId": input_data[args.patient_id][s]
+                    "sampleId": input_data[args.patient_id][s],
+                    "patientId": input_data[args.patient_id][s]
                 },
                 "Patient": {
                     "patientId": input_data[args.patient_id][s]
