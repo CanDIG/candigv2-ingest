@@ -68,7 +68,26 @@ python htsget_ingest.py --sample <sample>|--samplefile <samplefile> --dataset <d
 ### Ingest into candig-server
 Candig-server performs variant search for CanDIG. It needs its data ingested from the local command line; there is no REST API for ingest.
 
-* You'll need to know the name of the referenceset on your candig-server instance. Make sure that the referenceset needed for your variant files is already created on your candig-server instance (see https://candig-server.readthedocs.io/en/v1.6.0/datarepo.html#add-referenceset for details).
+* You'll need to know the name of the referenceset on your candig-server instance. Make sure that the referenceset needed for your variant files is already created on your candig-server instance.
+
+<blockquote><details><summary>How do I add a referenceset?</summary>
+See https://candig-server.readthedocs.io/en/v1.6.0/datarepo.html#add-referenceset for detailed instructions, but a quick version:
+
+From inside the candig-server instance, download the reference files:
+```bash
+curl https://daisietestbucket1.s3.amazonaws.com/hs37d5.fa.gz > /hs37d5.fa.gz
+curl https://daisietestbucket1.s3.amazonaws.com/hs37d5.fa.gz.gzi > /hs37d5.fa.gz.gzi
+```
+Then add the reference set:
+```bash
+candig_repo add-referenceset <your db> /hs37d5.fa.gz \
+		--description "NCBI37 assembly of the human genome" \
+		--species '{"termId": "NCBI:9606", "term": "Homo sapiens"}' \
+		--name hs37d5 \
+		--sourceUri http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/technical/reference/phase2_reference_assembly_sequence/hs37d5.fa.gz
+```
+</details></blockquote>
+
 * You'll need a csv input file containing the mapping between the patient_ids and the variant_ids and the names of the columns corresponding to each. 
 * The variant files need to be mounted on a path that is accessible to candig-server.
 
