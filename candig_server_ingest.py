@@ -34,12 +34,12 @@ def main():
     }
     
     with open("temp/candigv1_ingest.sh", "w") as scriptfile:
-        scriptfile.write("#!/usr/bin/env bash\n\nset -uo pipefail\n\n")
+        scriptfile.write("#!/usr/bin/env bash\n\nset -xuo pipefail\n\n")
         scriptfile.write("# Execute this script with the path to the candig database as an argument.\n\n")
         scriptfile.write("DATABASE=$1\n\n")
-        scriptfile.write('ingest\nif [ $? -ne 0 ]; then\n  echo "Is candig-ingest installed? https://candig-server.readthedocs.io/en/v1.5.0-alpha/datarepo.html#ingest"\n  exit 1\nfi\n\n')
+        scriptfile.write('ingest\nif [ $? -ne 1 ]; then\n  echo "Is candig-ingest installed? https://candig-server.readthedocs.io/en/v1.5.0-alpha/datarepo.html#ingest"\n  exit 1\nfi\n\n')
         
-        scriptfile.write("ingest candig-example-data/registry.db " + args.dataset + " candigv1_data.json\n\n")
+        scriptfile.write("ingest $DATABASE " + args.dataset + " candigv1_data.json\n\n")
                    
         for s in range(0,len(input_data[args.patient_id])):
             # write sample into output_data:
