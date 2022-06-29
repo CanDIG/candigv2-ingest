@@ -1,0 +1,14 @@
+##mcodepacket element (* is required),description (overwrite with mapped element)
+"id",{single_val(Subject)}
+"subject.id*",{single_val(Subject)}
+"subject.date_of_birth",{date("Date of Birth")}
+"subject.sex",{single_val(Gender)}
+"subject.deceased",{has_value("Date of Death")}
+"subject.ethnicity",{single_val(Ethnicity)}
+"subject.extra_properties.communication_language",{mcode.language("Subject")}
+"date_of_death",{date("Date of Death")}
+"genomics_report.id",{single_val(Subject)}
+"genomics_report.code",{mcode.connect_code("1000 Genomes_ID")}
+"genomics_report.performing_organization_name",{mcode.connect_org("1000 Genomes_ID")}
+"genomics_report.issued*",{mcode.date("1000 Genomes_ID")}
+"genomics_report.extra_properties",{mcode.connect_variant("1000 Genomes_ID")}

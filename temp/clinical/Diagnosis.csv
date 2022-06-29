@@ -1,0 +1,60 @@
+Subject,Site ,Date of Diagnosis,,Metastasis,Metastasic Site,,Grade,Histology
+UBU001,Spleen ,2017 AUG 18,,Yes,Liver,,GX,Adenocarcinoma
+UBU002,Pancreas,2016 JUL 27,,No,,,G2,Adenocarcinoma
+UBU003,Lung,2013 JUL 11,,No,,,G2,Adenocarcinoma
+UBU004,Lung,2015 JUL 09,,Yes ,Liver,,G2,Adenocarcinoma
+UBU005,Liver,2016 OCT UN,,Yes ,Peritoneum,,G2,Adenocarcinoma
+UBU006,Pancreas,2015 FEB 06,,Yes ,Peritoneum,,G2,Adenocarcinoma
+UBU007,Liver,2016 JAN 20,,No,,,G2,Adenocarcinoma
+UBU008,Liver,2012 AUG 08,,No,,,G2,Adenocarcinoma
+UBU009,Pancreas,2015 MAR UN,,No,,,G2,Adenocarcinoma
+UBU010,Pancreas,2017 SEP 28,,No,,,G2,Adenocarcinoma
+UBU011,Liver,2016 MAR 11,,No,,,G2,Adenocarcinoma
+UBU012,Adrenal gland ,2014 MAY 22,,No,,,GX,Adenocarcinoma
+UBU013,Liver,2015 JUN UN,,No,,,GX,Adenocarcinoma
+UBU014,Liver,2016 APR 06,,No,,,GX,Adenocarcinoma
+UBU015,Pancreas,2016 JAN 07,,No,,,GX,Adenocarcinoma
+UBU016,Lung,2004 DEC 17,,No,,,GX,Adenocarcinoma
+UBU017,Liver,2015 MAR 09,,No,,,GX,Adenocarcinoma
+UBU018,Liver,2016 DEC 31,,No,,,GX,Adenocarcinoma
+UBU019,Pancreas,2015 DEC 31,,No,,,GX,Adenocarcinoma
+UBU020,Pancreas,2015 NOV 25,,No,,,GX,Adenocarcinoma
+UBU021,Liver,2013 NOV 14,,No,,,G2,Adenocarcinoma
+UBU022,Spleen ,2014 NOV 19,,Yes,Liver,,G2,Adenocarcinoma
+UBU023,Spleen ,2012 JAN UN,,Yes,Liver,,G2,Adenocarcinoma
+UBU024,Pancreas,2013 SEP UN,,Yes,Peritoneum,,G2,Adenocarcinoma
+UBU025,Lung,2013 NOV 08,,Yes,Lymph Node,,G2,Adenocarcinoma
+UBU026,Liver,2015 JAN 01,,Yes,Lymph Node,,G2,Adenocarcinoma
+UBU027,Liver,2014 OCT 27,,Yes,Lymph Node,,GX,Adenocarcinoma
+UBU028,Pancreas,2012 OCT 11,,Yes,Liver,,G2,Adenocarcinoma
+UBU029,Liver,2012 NOV 15,,Yes,Spleen,,GX,Adenocarcinoma
+UBU030,Pancreas,2014 NOV 11,,Yes,Peritoneum,,G2,Adenocarcinoma
+UBU031,Lung,2013 MAR 12,,Yes,Peritoneum,,GX,Adenocarcinoma
+UBU032,Liver,2016 JUN 24,,No,,,GX,Adenocarcinoma
+UBU033,Pancreas,2013 NOV 11,,No,,,GX,Adenocarcinoma
+UBU034,Liver,2014 MAR 25,,No,,,GX,Adenocarcinoma
+UBU035,Liver,2015 JUL 09,,No,,,GX,Adenocarcinoma
+UBU036,Pancreas,2013 SEP 17,,No,,,GX,Adenocarcinoma
+UBU037,Liver,2016 OCT 10,,No,,,GX,Adenocarcinoma
+UBU038,Pancreas,2014 MAY 27,,Yes,,,GX,Adenocarcinoma
+UBU039,Pancreas,2016 DEC 23,,Yes,Liver,,GX,Adenocarcinoma
+UBU040,Pancreas,2012 OCT 15,,Yes,Lymph Node,,GX,Adenocarcinoma
+UBU041,Lymph nodes,2014 APR 22,,Yes,Peritoneum,,GX,Adenocarcinoma
+UBU042,Kidney,2013 MAY 06,,Yes,Liver,,GX,Adenocarcinoma
+UBU043,Lymph nodes,2013 MAR 05,,Yes,Liver,,GX,Adenocarcinoma
+UBU044,Lung,2015 JAN 30,,Yes,Liver,,GX,Adenocarcinoma
+UBU045,Liver,2016 DEC 31,,Yes,Spleen,,G2,Adenocarcinoma
+UBU046,Pancreas,2017 MAY 24,,Yes,Spleen,,G2,Adenocarcinoma
+UBU047,Lung,2014 JUL 11,,No,,,G2,Adenocarcinoma
+UBU048,Pancreas,2012 JUL 13,,Yes,UN,,GX,Adenocarcinoma
+UBU049,Liver,2017 OCT 05,,Yes,UN,,GX,Adenocarcinoma
+UBU050,Spleen ,2015 OCT 11,,Yes,UN,,GX,Adenocarcinoma
+UBU051,Liver,2017 JUL 12,,No,,,GX,Adenocarcinoma
+UBU052,Pancreas,2013 AUG 21,,No,,,GX,Adenocarcinoma
+UBU053,Liver,2017 JUL 01,,No,,,GX,Adenocarcinoma
+UBU054,Liver,2015 NOV 03,,No,,,GX,Adenocarcinoma
+UBU055,Pancreas,2014 DEC 09,,No,,,GX,Adenocarcinoma
+UBU056,Pancreas,2016 MAY 10,,No,,,GX,Adenocarcinoma
+UBU057,Liver,2015 SEP 29,,No,,,GX,Adenocarcinoma
+UBU058,Peritoneum,2015 OCT 20,,No,,,GX,Adenocarcinoma
+UBU059,Pancreas,2016 OCT 09,,Yes,Liver,,GX,Adenocarcinoma

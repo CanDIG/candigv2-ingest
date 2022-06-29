@@ -1,0 +1,60 @@
+Subject,InstanceName,Page Name,Imaging Modality,Date,Measurable?,Lesion Type,Lesion Number,Tumour Site,Target Lesion Response,Non-target Lesion Response,Overall Response
+UBU001,Cycle 02,RECISTv1.1,CT,,Measurable ,,Target,Spleen ,SD,Non_CR_Non_PD,SD
+UBU002,Cycle 02,RECISTv1.2,CT,,Non-Measurable ,,Non-Target,Pancreas,SD,Non_CR_Non_PD,SD
+UBU003,Cycle 02,RECISTv1.3,CT,,Measurable ,,Target,Lung,SD,Non_CR_Non_PD,SD
+UBU004,Cycle 02,RECISTv1.4,CT,,Non-Measurable ,,Non-Target,Lung,SD,Non_CR_Non_PD,SD
+UBU005,Cycle 02,RECISTv1.5,CT,,Measurable ,,Target,Liver,SD,Non_CR_Non_PD,SD
+UBU006,Cycle 02,RECISTv1.6,CT,,Measurable ,,Target,Pancreas,SD,Non_CR_Non_PD,SD
+UBU007,Cycle 02,RECISTv1.7,CT,,Measurable ,,Target,Mesentery,PR,Non_CR_Non_PD,SD
+UBU008,Cycle 02,RECISTv1.8,CT,,Measurable ,,Target,Liver,PR,Non_CR_Non_PD,SD
+UBU009,Cycle 02,RECISTv1.9,CT,,Measurable ,,Target,Pancreas,PR,Non_CR_Non_PD,SD
+UBU010,Cycle 02,RECISTv1.10,CT,,Non-Measurable ,,Non-Target,Lymph Nodes,PR,Non_CR_Non_PD,PR
+UBU011,Cycle 02,RECISTv1.11,CT,,Measurable ,,Target,Liver,PR,Non_CR_Non_PD,PR
+UBU012,Cycle 02,RECISTv1.12,CT,,Non-Measurable ,,Non-Target,Adrenal gland ,PR,Non_CR_Non_PD,PR
+UBU013,Cycle 02,RECISTv1.13,CT,,Measurable ,,Target,Mesentery,PR,Non_CR_Non_PD,PR
+UBU014,Cycle 02,RECISTv1.14,CT,,Non-Measurable ,,Non-Target,Lymph Nodes Mesenteric,PR,Non_CR_Non_PD,PR
+UBU015,Cycle 02,RECISTv1.15,CT,,Measurable ,,Target,Pancreas,PR,Non_CR_Non_PD,PR
+UBU016,Cycle 02,RECISTv1.16,CT,,Non-Measurable ,,Non-Target,Lung,PR,Non_CR_Non_PD,PR
+UBU017,Cycle 02,RECISTv1.17,CT,,Measurable ,,Target,Retroperitoneum,PR,Non_CR_Non_PD,PR
+UBU018,Cycle 02,RECISTv1.18,CT,,Non-Measurable ,,Non-Target,Liver,PR,Non_CR_Non_PD,PR
+UBU019,Cycle 02,RECISTv1.19,CT,,Non-Measurable ,,Non-Target,Mesentery,PR,Non_CR_Non_PD,PR
+UBU020,Cycle 02,RECISTv1.20,CT,,Non-Measurable ,,Non-Target,Pancreas,PR,Non_CR_Non_PD,PR
+UBU021,Cycle 02,RECISTv1.21,CT,,Non-Measurable ,,Non-Target,Liver,PR,Non_CR_Non_PD,PR
+UBU022,Cycle 02,RECISTv1.22,CT,,Non-Measurable ,,Non-Target,Retroperitoneum,PR,Non_CR_Non_PD,PR
+UBU023,Cycle 02,RECISTv1.23,CT,,Non-Measurable ,,Non-Target,Lymph Nodes Mesenteric,PR,Non_CR_Non_PD,PR
+UBU024,Cycle 02,RECISTv1.24,CT,,Non-Measurable ,,Non-Target,Pancreas,PR,Non_CR_Non_PD,PR
+UBU025,Cycle 02,RECISTv1.25,CT,,Measurable ,,Target,Lung,PR,Non_CR_Non_PD,PR
+UBU026,Cycle 02,RECISTv1.26,CT,,Non-Measurable ,,Non-Target,Peritoneal cavity,PR,Non_CR_Non_PD,PR
+UBU027,Cycle 02,RECISTv1.27,CT,,Measurable ,,Target,Liver,PR,Non_CR_Non_PD,PR
+UBU028,Cycle 02,RECISTv1.28,CT,,Non-Measurable ,,Non-Target,Pancreas,NA,Non_CR_Non_PD,
+UBU029,Cycle 02,RECISTv1.29,CT,,Measurable ,,Target,Liver,NA,Non_CR_Non_PD,
+UBU030,Cycle 02,RECISTv1.30,CT,,Non-Measurable ,,Non-Target,Pancreas,NA,Non_CR_Non_PD,
+UBU031,Cycle 02,RECISTv1.31,CT,,Non-Measurable ,,Non-Target,Lymph Nodes Supraclav,NA,Non_CR_Non_PD,
+UBU032,Cycle 02,RECISTv1.32,CT,,Non-Measurable ,,Non-Target,Peritoneal cavity,NA,Non_CR_Non_PD,
+UBU033,Cycle 02,RECISTv1.33,CT,,Measurable ,,Target,Aqueous Fluid,NA,Non_CR_Non_PD,
+UBU034,Cycle 02,RECISTv1.34,CT,,Non-Measurable ,,Non-Target,Liver,NA,Non_CR_Non_PD,
+UBU035,Cycle 02,RECISTv1.35,CT,,Measurable ,,Target,Liver,NA,Non_CR_Non_PD,
+UBU036,Cycle 02,RECISTv1.36,CT,,Non-Measurable ,,Non-Target,Pancreas,NA,Non_CR_Non_PD,
+UBU037,Cycle 02,RECISTv1.37,CT,,Measurable ,,Target,Liver,,Non_CR_Non_PD,PD
+UBU038,Cycle 02,RECISTv1.38,CT,,Non-Measurable ,,Non-Target,Pancreas,,Non_CR_Non_PD,PD
+UBU039,Cycle 02,RECISTv1.39,CT,,Non-Measurable ,,Non-Target,Lymph nodes Regional,,Non_CR_Non_PD,PD
+UBU040,Cycle 02,RECISTv1.40,CT,,Non-Measurable ,,Non-Target,Pancreas,NE,PD,PD
+UBU041,Cycle 02,RECISTv1.41,CT,,Non-Measurable ,,Non-Target,Lymph nodes,NE,PD,PD
+UBU042,Cycle 02,RECISTv1.42,CT,,Non-Measurable ,,Non-Target,Kidney,NE,PD,PD
+UBU043,Cycle 02,RECISTv1.43,CT,,Measurable ,,Target,Lymph nodes,NE,PD,PD
+UBU044,Cycle 02,RECISTv1.44,CT,,Non-Measurable ,,Non-Target,Lung,NE,PD,PD
+UBU045,Cycle 02,RECISTv1.45,CT,,Non-Measurable ,,Non-Target,Lymph Nodes Mesenteric,NE,PD,PD
+UBU046,Cycle 02,RECISTv1.46,CT,,Non-Measurable ,,Non-Target,Pancreas,NE,PD,PD
+UBU047,Cycle 02,RECISTv1.47,CT,,Measurable ,,Target,Lung,NE,PD,PD
+UBU048,Cycle 02,RECISTv1.48,CT,,Non-Measurable ,,Non-Target,Pancreas,PR,Non_CR_Non_PD,SD
+UBU049,Cycle 02,RECISTv1.49,CT,,Measurable ,,Target,Liver,PR,Non_CR_Non_PD,SD
+UBU050,Cycle 02,RECISTv1.50,CT,,Non-Measurable ,,Non-Target,Retroperitoneum,PR,Non_CR_Non_PD,SD
+UBU051,Cycle 02,RECISTv1.51,CT,,Measurable ,,Target,Mesentery,PR,Non_CR_Non_PD,SD
+UBU052,Cycle 02,RECISTv1.52,CT,,Non-Measurable ,,Non-Target,Pancreas,PR,Non_CR_Non_PD,SD
+UBU053,Cycle 02,RECISTv1.53,CT,,Measurable ,,Target,Liver,PR,Non_CR_Non_PD,SD
+UBU054,Cycle 02,RECISTv1.54,CT,,Non-Measurable ,,Non-Target,Liver,PR,Non_CR_Non_PD,SD
+UBU055,Cycle 02,RECISTv1.55,CT,,Measurable ,,Target,Pancreas,PR,Non_CR_Non_PD,SD
+UBU056,Cycle 02,RECISTv1.56,CT,,Non-Measurable ,,Non-Target,Pancreas,NA,Non_CR_Non_PD,
+UBU057,Cycle 02,RECISTv1.57,CT,,Non-Measurable ,,Non-Target,Lymph Nodes Supraclav,NA,Non_CR_Non_PD,
+UBU058,Cycle 02,RECISTv1.58,CT,,Non-Measurable ,,Non-Target,Peritoneal cavity,NA,Non_CR_Non_PD,
+UBU059,Cycle 02,RECISTv1.59,CT,,Measurable ,,Target,Pancreas,NA,Non_CR_Non_PD,

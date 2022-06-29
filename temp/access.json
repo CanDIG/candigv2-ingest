@@ -1,0 +1,42 @@
+{
+    "access": {
+        "controlled_access_list": {
+            "jimli": [
+                "mock1",
+                "mock2",
+                "1kgenome"
+            ],
+            "temp/users.txt": [
+                "mcode-synthetic"
+            ],
+            "user": [
+                "controlled4"
+            ],
+            "user1": [
+                "controlled4",
+                "mock1"
+            ],
+            "user2": [
+                "controlled5"
+            ],
+            "user3": [
+                "controlled4",
+                "controlled6"
+            ],
+            "user4": [
+                "controlled5"
+            ]
+        },
+        "open_datasets": [
+            "open1",
+            "open2",
+            "dataset_3"
+        ],
+        "opt_in_datasets": [
+            "controlled4"
+        ],
+        "registered_datasets": [
+            "registered3"
+        ]
+    }
+}

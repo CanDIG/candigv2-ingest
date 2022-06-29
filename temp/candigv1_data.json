@@ -1,0 +1,400 @@
+{
+    "metadata": [
+        {
+            "Sample": {
+                "sampleId": "UBU001",
+                "patientId": "UBU001"
+            },
+            "Patient": {
+                "patientId": "UBU001"
+            }
+        },
+        {
+            "Sample": {
+                "sampleId": "UBU003",
+                "patientId": "UBU003"
+            },
+            "Patient": {
+                "patientId": "UBU003"
+            }
+        },
+        {
+            "Sample": {
+                "sampleId": "UBU005",
+                "patientId": "UBU005"
+            },
+            "Patient": {
+                "patientId": "UBU005"
+            }
+        },
+        {
+            "Sample": {
+                "sampleId": "UBU009",
+                "patientId": "UBU009"
+            },
+            "Patient": {
+                "patientId": "UBU009"
+            }
+        },
+        {
+            "Sample": {
+                "sampleId": "UBU024",
+                "patientId": "UBU024"
+            },
+            "Patient": {
+                "patientId": "UBU024"
+            }
+        },
+        {
+            "Sample": {
+                "sampleId": "UBU010",
+                "patientId": "UBU010"
+            },
+            "Patient": {
+                "patientId": "UBU010"
+            }
+        },
+        {
+            "Sample": {
+                "sampleId": "UBU025",
+                "patientId": "UBU025"
+            },
+            "Patient": {
+                "patientId": "UBU025"
+            }
+        },
+        {
+            "Sample": {
+                "sampleId": "UBU012",
+                "patientId": "UBU012"
+            },
+            "Patient": {
+                "patientId": "UBU012"
+            }
+        },
+        {
+            "Sample": {
+                "sampleId": "UBU022",
+                "patientId": "UBU022"
+            },
+            "Patient": {
+                "patientId": "UBU022"
+            }
+        },
+        {
+            "Sample": {
+                "sampleId": "UBU032",
+                "patientId": "UBU032"
+            },
+            "Patient": {
+                "patientId": "UBU032"
+            }
+        },
+        {
+            "Sample": {
+                "sampleId": "UBU033",
+                "patientId": "UBU033"
+            },
+            "Patient": {
+                "patientId": "UBU033"
+            }
+        },
+        {
+            "Sample": {
+                "sampleId": "UBU026",
+                "patientId": "UBU026"
+            },
+            "Patient": {
+                "patientId": "UBU026"
+            }
+        },
+        {
+            "Sample": {
+                "sampleId": "UBU028",
+                "patientId": "UBU028"
+            },
+            "Patient": {
+                "patientId": "UBU028"
+            }
+        },
+        {
+            "Sample": {
+                "sampleId": "UBU035",
+                "patientId": "UBU035"
+            },
+            "Patient": {
+                "patientId": "UBU035"
+            }
+        },
+        {
+            "Sample": {
+                "sampleId": "UBU036",
+                "patientId": "UBU036"
+            },
+            "Patient": {
+                "patientId": "UBU036"
+            }
+        },
+        {
+            "Sample": {
+                "sampleId": "UBU040",
+                "patientId": "UBU040"
+            },
+            "Patient": {
+                "patientId": "UBU040"
+            }
+        },
+        {
+            "Sample": {
+                "sampleId": "UBU046",
+                "patientId": "UBU046"
+            },
+            "Patient": {
+                "patientId": "UBU046"
+            }
+        },
+        {
+            "Sample": {
+                "sampleId": "UBU047",
+                "patientId": "UBU047"
+            },
+            "Patient": {
+                "patientId": "UBU047"
+            }
+        },
+        {
+            "Sample": {
+                "sampleId": "UBU048",
+                "patientId": "UBU048"
+            },
+            "Patient": {
+                "patientId": "UBU048"
+            }
+        },
+        {
+            "Sample": {
+                "sampleId": "UBU049",
+                "patientId": "UBU049"
+            },
+            "Patient": {
+                "patientId": "UBU049"
+            }
+        },
+        {
+            "Sample": {
+                "sampleId": "UBU013",
+                "patientId": "UBU013"
+            },
+            "Patient": {
+                "patientId": "UBU013"
+            }
+        },
+        {
+            "Sample": {
+                "sampleId": "UBU034",
+                "patientId": "UBU034"
+            },
+            "Patient": {
+                "patientId": "UBU034"
+            }
+        },
+        {
+            "Sample": {
+                "sampleId": "UBU015",
+                "patientId": "UBU015"
+            },
+            "Patient": {
+                "patientId": "UBU015"
+            }
+        },
+        {
+            "Sample": {
+                "sampleId": "UBU016",
+                "patientId": "UBU016"
+            },
+            "Patient": {
+                "patientId": "UBU016"
+            }
+        },
+        {
+            "Sample": {
+                "sampleId": "UBU017",
+                "patientId": "UBU017"
+            },
+            "Patient": {
+                "patientId": "UBU017"
+            }
+        },
+        {
+            "Sample": {
+                "sampleId": "UBU050",
+                "patientId": "UBU050"
+            },
+            "Patient": {
+                "patientId": "UBU050"
+            }
+        },
+        {
+            "Sample": {
+                "sampleId": "UBU042",
+                "patientId": "UBU042"
+            },
+            "Patient": {
+                "patientId": "UBU042"
+            }
+        },
+        {
+            "Sample": {
+                "sampleId": "UBU019",
+                "patientId": "UBU019"
+            },
+            "Patient": {
+                "patientId": "UBU019"
+            }
+        },
+        {
+            "Sample": {
+                "sampleId": "UBU051",
+                "patientId": "UBU051"
+            },
+            "Patient": {
+                "patientId": "UBU051"
+            }
+        },
+        {
+            "Sample": {
+                "sampleId": "UBU020",
+                "patientId": "UBU020"
+            },
+            "Patient": {
+                "patientId": "UBU020"
+            }
+        },
+        {
+            "Sample": {
+                "sampleId": "UBU052",
+                "patientId": "UBU052"
+            },
+            "Patient": {
+                "patientId": "UBU052"
+            }
+        },
+        {
+            "Sample": {
+                "sampleId": "UBU023",
+                "patientId": "UBU023"
+            },
+            "Patient": {
+                "patientId": "UBU023"
+            }
+        },
+        {
+            "Sample": {
+                "sampleId": "UBU053",
+                "patientId": "UBU053"
+            },
+            "Patient": {
+                "patientId": "UBU053"
+            }
+        },
+        {
+            "Sample": {
+                "sampleId": "UBU054",
+                "patientId": "UBU054"
+            },
+            "Patient": {
+                "patientId": "UBU054"
+            }
+        },
+        {
+            "Sample": {
+                "sampleId": "UBU055",
+                "patientId": "UBU055"
+            },
+            "Patient": {
+                "patientId": "UBU055"
+            }
+        },
+        {
+            "Sample": {
+                "sampleId": "UBU056",
+                "patientId": "UBU056"
+            },
+            "Patient": {
+                "patientId": "UBU056"
+            }
+        },
+        {
+            "Sample": {
+                "sampleId": "UBU057",
+                "patientId": "UBU057"
+            },
+            "Patient": {
+                "patientId": "UBU057"
+            }
+        },
+        {
+            "Sample": {
+                "sampleId": "UBU058",
+                "patientId": "UBU058"
+            },
+            "Patient": {
+                "patientId": "UBU058"
+            }
+        },
+        {
+            "Sample": {
+                "sampleId": "UBU059",
+                "patientId": "UBU059"
+            },
+            "Patient": {
+                "patientId": "UBU059"
+            }
+        },
+        {
+            "Sample": {
+                "sampleId": "UBU002",
+                "patientId": "UBU002"
+            },
+            "Patient": {
+                "patientId": "UBU002"
+            }
+        },
+        {
+            "Sample": {
+                "sampleId": "UBU027",
+                "patientId": "UBU027"
+            },
+            "Patient": {
+                "patientId": "UBU027"
+            }
+        },
+        {
+            "Sample": {
+                "sampleId": "UBU030",
+                "patientId": "UBU030"
+            },
+            "Patient": {
+                "patientId": "UBU030"
+            }
+        },
+        {
+            "Sample": {
+                "sampleId": "UBU043",
+                "patientId": "UBU043"
+            },
+            "Patient": {
+                "patientId": "UBU043"
+            }
+        },
+        {
+            "Sample": {
+                "sampleId": "UBU021",
+                "patientId": "UBU021"
+            },
+            "Patient": {
+                "patientId": "UBU021"
+            }
+        }
+    ]
+}
