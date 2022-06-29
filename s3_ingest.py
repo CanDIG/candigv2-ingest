@@ -17,7 +17,6 @@ def main():
     parser.add_argument("--samplefile", help="file with list of file names of samples", required=False)
     parser.add_argument("--endpoint", help="s3 endpoint")
     parser.add_argument("--bucket", help="s3 bucket name")
-    parser.add_argument("--dataset", help="dataset name")
     parser.add_argument("--awsfile", help="s3 credentials")
     
     args = parser.parse_args()

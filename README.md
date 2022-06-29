@@ -55,7 +55,7 @@ aws_secret_access_key = xxxxx
 Ingest files into S3-compatible stores one endpoint/bucket at a time.
 
 ```bash
-python s3_ingest.py --sample <sample>|--samplefile <samplefile> --dataset <dataset> --endpoint <S3 endpoint> --bucket <S3 bucket> --awsfile <aws credentials>
+python s3_ingest.py --sample <sample>|--samplefile <samplefile> --endpoint <S3 endpoint> --bucket <S3 bucket> --awsfile <aws credentials>
 ```
 
 ### Ingest into Htsget
