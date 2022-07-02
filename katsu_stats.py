@@ -16,7 +16,7 @@ TOKEN = auth.get_site_admin_token()
 def list_data_type(katsu_server_url, data_type):
     """
     Lists the current datasets.
-
+    Does not currently handle pagination for individuals, so you only get the first 25.
     """
     headers = {"Authorization": f"Bearer {TOKEN}"}
 
