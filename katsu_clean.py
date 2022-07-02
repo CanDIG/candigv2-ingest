@@ -10,6 +10,8 @@ TOKEN = auth.get_site_admin_token()
 def get_uuids(katsu_server_url, dataset_title):
     headers = {"Authorization": f"Bearer {TOKEN}"}
     results = requests.get(katsu_server_url + "/api/datasets", headers=headers)
+    print(headers)
+    print(results.json())
     if "results" in results.json():
         for r in results.json()["results"]:
             if r["title"] == dataset_title:
@@ -32,6 +34,7 @@ def delete_data(katsu_server_url, data_file, data_type):
     with open(data_file) as f:
         packets = json.load(f)
         for p in packets:
+            print(f"deleting {data_type} {p['id']}")
             r = requests.delete(katsu_server_url + f"/api/{data_type}s/{p['id']}", headers=headers)
 
 
@@ -47,13 +50,16 @@ def main():
     katsu_server_url = args.server_url
 
     katsu_server_url = os.environ.get("CANDIG_URL")
+    print(katsu_server_url)
     if katsu_server_url is None:
         raise Exception("CANDIG_URL environment variable is not set")
     else:
         katsu_server_url = katsu_server_url + "/katsu"
 
     dataset_uuid, project_uuid = get_uuids(katsu_server_url, dataset_title)
+    print(f"dataset {dataset_uuid}, project {project_uuid}")
     delete_data(katsu_server_url, args.data_file, "mcodepacket")
+    delete_data(katsu_server_url, args.data_file, "individual")
     delete_dataset(katsu_server_url, dataset_uuid)
     delete_project(katsu_server_url, project_uuid)
     
