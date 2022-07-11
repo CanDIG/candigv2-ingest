@@ -40,11 +40,12 @@ def create_project(katsu_server_url, project_title):
         return project_uuid
     elif r.status_code == 400:
         results = requests.get(katsu_server_url + "/api/projects", headers=headers)
-        print(results.json())
         for r in results.json()["results"]:
             if r["title"] == project_title:
+                print(f"Project {project_title} already exists")
                 return r["identifier"]
     else:
+        print(f"Problem creating project {project_title}")
         print(r.json())
         sys.exit()
 
@@ -82,6 +83,7 @@ def create_dataset(katsu_server_url, project_uuid, dataset_title):
         results = requests.get(katsu_server_url + "/api/datasets", headers=headers)
         for r in results.json()["results"]:
             if r["title"] == dataset_title:
+                print(f"Dataset {dataset_title} already exists")
                 return r["identifier"]
     else:
         print(r2.json())
@@ -153,6 +155,7 @@ def ingest_data(katsu_server_url, table_id, data_file, data_type):
 
     if r5.status_code == 200 or r5.status_code == 201 or r5.status_code == 204:
         print("{} Data have been ingested from source at {}".format(data_type, data_file))
+        print(f"Status code {r5.status_code}")
     elif r5.status_code == 400:
         print(r5.text)
         sys.exit()
@@ -176,7 +179,7 @@ def main():
 
     args = parser.parse_args()
     dataset_title = args.dataset
-    project_title = dataset_title
+    project_title = dataset_title 
     table_name = dataset_title
     data_file = args.input
     data_type = "mcodepacket"

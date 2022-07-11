@@ -141,6 +141,8 @@ Then run the ingest tool:
 python katsu_ingest.py --dataset $(DATASET) --input /input.json
 ```
 
+As a quick sanity check, there is a simple little `katsu_status.py` script that will tell you how many
+projects, datasets, and individuals are in the katsu at `$CANDIG_URL`.
 
 After installation, you should be able to access the synthetic dataset:
 
