@@ -46,7 +46,7 @@ def create_project(katsu_server_url, project_title):
                 return r["identifier"]
     else:
         print(f"Problem creating project {project_title}")
-        print(r.json())
+        print(r.text)
         sys.exit()
 
 
