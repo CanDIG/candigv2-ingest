@@ -4,3 +4,4 @@ __pycache__
 *.gzi
 access.json
 temp/
+env.sh
