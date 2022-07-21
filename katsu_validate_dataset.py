@@ -55,7 +55,9 @@ def main():
         expected = json.load(f)
 
     compare = Compare().check(expected, actual)
-    
+    print("Katsu returned the following:")
+    print(json.dumps(actual, indent=4))
+    print("\n\nDifferences between expected and actual:")
     print(json.dumps(compare, indent=4))
 
 if __name__ == "__main__":
