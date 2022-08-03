@@ -11,14 +11,13 @@ Gives some stats about what is in katsu
 Lists projects, datasets, individuals
 """
 
-TOKEN = auth.get_site_admin_token()
 
 def list_data_type(katsu_server_url, data_type):
     """
     Lists the current datasets.
     Does not currently handle pagination for individuals, so you only get the first 25.
     """
-    headers = {"Authorization": f"Bearer {TOKEN}"}
+    headers = auth.get_auth_header()
 
     results = requests.get(katsu_server_url + "/api/" + data_type, headers=headers)
     count = len(results.json()["results"])

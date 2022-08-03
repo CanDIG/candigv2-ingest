@@ -14,14 +14,13 @@ You should run the script in an active virtualenv that has `requests` installed.
 Please note that the data_file you supply must be available for Katsu to read. In other words, it should be located on the same server or within the same container as the Katsu instance.
 """
 
-TOKEN = auth.get_site_admin_token()
 
 def get_dataset(katsu_server_url, dataset):
     """
     Get a dataset from katsu
     """
 
-    headers = {"Authorization": f"Bearer {TOKEN}"}
+    headers = auth.get_auth_header()
 
     r = requests.get(katsu_server_url + "/api/mcodepackets", params={"datasets": dataset}, headers=headers)
     if r.status_code == 200:

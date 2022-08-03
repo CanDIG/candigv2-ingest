@@ -4,11 +4,10 @@ import json
 import requests
 import auth
 import os
-TOKEN = auth.get_site_admin_token()
 
 
 def get_uuids(katsu_server_url, dataset_title):
-    headers = {"Authorization": f"Bearer {TOKEN}"}
+    headers = auth.get_auth_header()
     results = requests.get(katsu_server_url + "/api/datasets", headers=headers)
     print(headers)
     print(results.json())
@@ -20,17 +19,17 @@ def get_uuids(katsu_server_url, dataset_title):
 
 
 def delete_dataset(katsu_server_url, dataset_uuid):
-    headers = {"Authorization": f"Bearer {TOKEN}"}
+    headers = auth.get_auth_header()
     return requests.delete(katsu_server_url + f"/api/datasets/{dataset_uuid}", headers=headers)
 
 
 def delete_project(katsu_server_url, project_uuid):
-    headers = {"Authorization": f"Bearer {TOKEN}"}
+    headers = auth.get_auth_header()
     return requests.delete(katsu_server_url + f"/api/projects/{project_uuid}", headers=headers)
 
 
 def delete_data(katsu_server_url, data_file, data_type):
-    headers = {"Authorization": f"Bearer {TOKEN}"}
+    headers = auth.get_auth_header()
     with open(data_file) as f:
         packets = json.load(f)
         for p in packets:

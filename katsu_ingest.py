@@ -13,8 +13,6 @@ You should run the script in an active virtualenv that has `requests` installed.
 Please note that the data_file you supply must be available for Katsu to read. In other words, it should be located on the same server or within the same container as the Katsu instance.
 """
 
-TOKEN = auth.get_site_admin_token()
-
 def create_project(katsu_server_url, project_title):
     """
     Create a new Katsu project.
@@ -26,7 +24,7 @@ def create_project(katsu_server_url, project_title):
         "title": project_title,
         "description": "A new project."
     }
-    headers = {"Authorization": f"Bearer {TOKEN}"}
+    headers = auth.get_auth_header()
 
     r = requests.post(katsu_server_url + "/api/projects", json=project_request, headers=headers)
     print(katsu_server_url)
@@ -67,7 +65,7 @@ def create_dataset(katsu_server_url, project_uuid, dataset_title):
             "data_use_requirements": [{"code": "COL"}, {"code": "PUB"}],
         },
     }
-    headers = {"Authorization": f"Bearer {TOKEN}"}
+    headers = auth.get_auth_header()
 
     r2 = requests.post(katsu_server_url + "/api/datasets", json=dataset_request, headers=headers)
 
@@ -102,7 +100,7 @@ def create_table(katsu_server_url, dataset_uuid, table_name, data_type):
         "data_type": data_type,
         "dataset": dataset_uuid
     }
-    headers = {"Authorization": f"Bearer {TOKEN}"}
+    headers = auth.get_auth_header()
 
     r3 = requests.post(katsu_server_url + "/tables", json=table_request, headers=headers)
 
@@ -147,7 +145,7 @@ def ingest_data(katsu_server_url, table_id, data_file, data_type):
     }
 
     print("Ingesting {} data, this may take a while...".format(data_type))
-    headers = {"Authorization": f"Bearer {TOKEN}"}
+    headers = auth.get_auth_header()
 
     r5 = requests.post(
         katsu_server_url + "/private/ingest", json=private_ingest_request, headers=headers
