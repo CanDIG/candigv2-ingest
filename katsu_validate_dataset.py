@@ -22,7 +22,7 @@ def get_dataset(katsu_server_url, dataset):
 
     headers = auth.get_auth_header()
 
-    r = requests.get(katsu_server_url + "/api/mcodepackets", params={"datasets": dataset}, headers=headers)
+    r = requests.get(katsu_server_url + "/api/mcodepackets", params={"datasets": dataset, "page_size": 200}, headers=headers)
     if r.status_code == 200:
         return r.json()["results"]
     else:
