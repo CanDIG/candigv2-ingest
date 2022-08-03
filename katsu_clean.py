@@ -41,7 +41,6 @@ def main():
     parser = argparse.ArgumentParser(description="A script that facilitates initial data ingestion of Katsu service.")
 
     parser.add_argument("dataset", help="Dataset name.")
-    parser.add_argument("server_url", help="The URL of Katsu instance.")
     parser.add_argument("data_file", help="The absolute path to the local data file, readable by Katsu.")
     parser.add_argument('--no_auth', action="store_true", help="Do not use authentication.")
     parser.add_argument('--katsu_url', help="Direct URL for katsu.", required=False)
@@ -53,17 +52,13 @@ def main():
         auth.AUTH = True
 
     dataset_title = args.dataset
-    katsu_server_url = args.server_url
-
-    katsu_server_url = os.environ.get("CANDIG_URL")
-    print(katsu_server_url)
-    if katsu_server_url is None:
-        if args.katsu_url is None:
+    if args.katsu_url is None:
+        if os.environ.get("CANDIG_URL") is None:
             raise Exception("Either CANDIG_URL must be set or a katsu_url argument must be provided")
         else:
-            katsu_server_url = args.katsu_url
+            katsu_server_url = os.environ.get("CANDIG_URL") + "/katsu"
     else:
-        katsu_server_url = katsu_server_url + "/katsu"
+        katsu_server_url = args.katsu_url
 
     dataset_uuid, project_uuid = get_uuids(katsu_server_url, dataset_title)
     print(f"dataset {dataset_uuid}, project {project_uuid}")

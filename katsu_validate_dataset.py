@@ -47,14 +47,13 @@ def main():
     else:
         auth.AUTH = True
 
-    katsu_server_url = os.environ.get("CANDIG_URL")
-    if katsu_server_url is None:
-        if args.katsu_url is None:
+    if args.katsu_url is None:
+        if os.environ.get("CANDIG_URL") is None:
             raise Exception("Either CANDIG_URL must be set or a katsu_url argument must be provided")
         else:
-            katsu_server_url = args.katsu_url
+            katsu_server_url = os.environ.get("CANDIG_URL") + "/katsu"
     else:
-        katsu_server_url = katsu_server_url + "/katsu"
+        katsu_server_url = args.katsu_url
 
     actual = get_dataset(katsu_server_url, dataset_title)
     expected = {}
