@@ -172,8 +172,10 @@ def ingest_data(katsu_server_url, table_id, data_file, data_type):
 def main():
     parser = argparse.ArgumentParser(description="A script that facilitates initial data ingestion of Katsu service.")
 
-    parser.add_argument("--dataset", help="Dataset name.")
-    parser.add_argument("--input", help="The absolute path to the local data file, readable by Katsu.")
+    parser.add_argument("--dataset", help="Dataset name.", required=True)
+    parser.add_argument("--input", help="The absolute path to the local data file, readable by Katsu.", required=True)
+    parser.add_argument('--no_auth', action="store_true", help="Do not use authentication.")
+    parser.add_argument('--katsu_url', help="Direct URL for katsu.", required=False)
 
     args = parser.parse_args()
     dataset_title = args.dataset
@@ -181,10 +183,17 @@ def main():
     table_name = dataset_title
     data_file = args.input
     data_type = "mcodepacket"
+    if args.no_auth:
+        auth.AUTH = False
+    else:
+        auth.AUTH = True
 
     katsu_server_url = os.environ.get("CANDIG_URL")
     if katsu_server_url is None:
-        raise Exception("CANDIG_URL environment variable is not set")
+        if args.katsu_url is None:
+            raise Exception("Either CANDIG_URL must be set or a katsu_url argument must be provided")
+        else:
+            katsu_server_url = args.katsu_url
     else:
         katsu_server_url = katsu_server_url + "/katsu"
 
