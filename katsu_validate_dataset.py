@@ -15,14 +15,14 @@ Please note that the data_file you supply must be available for Katsu to read. I
 """
 
 
-def get_dataset(katsu_server_url, dataset):
+def get_dataset(katsu_server_url, dataset, page_size):
     """
     Get a dataset from katsu
     """
 
     headers = auth.get_auth_header()
 
-    r = requests.get(katsu_server_url + "/api/mcodepackets", params={"datasets": dataset, "page_size": 200}, headers=headers)
+    r = requests.get(katsu_server_url + "/api/mcodepackets", params={"datasets": dataset, "page_size": page_size}, headers=headers)
     if r.status_code == 200:
         return r.json()["results"]
     else:
@@ -38,10 +38,12 @@ def main():
     parser.add_argument("--input", help="Local copy of mcodepacket file uploaded to Katsu.")
     parser.add_argument('--no_auth', action="store_true", help="Do not use authentication.")
     parser.add_argument('--katsu_url', help="Direct URL for katsu.", required=False)
+    parser.add_argument('--limit', help="Only look at this many results", required=False, default=200)
 
     args = parser.parse_args()
     dataset_title = args.dataset
     data_file = args.input
+    limit = int(args.limit)
     if args.no_auth:
         auth.AUTH = False
     else:
@@ -55,10 +57,12 @@ def main():
     else:
         katsu_server_url = args.katsu_url
 
-    actual = get_dataset(katsu_server_url, dataset_title)
+    actual = get_dataset(katsu_server_url, dataset_title, limit)
     expected = {}
     with open(args.input) as f:
         expected = json.load(f)
+        if limit < len(expected):
+            expected = expected[0:limit]
 
     compare = Compare().check(expected, actual)
     print("Katsu returned the following:")
