@@ -1,7 +1,16 @@
 import os
 import re
 import requests
-from minio import Minio
+
+
+AUTH = True
+
+def get_auth_header():
+    if AUTH:
+        import auth
+        token = auth.get_site_admin_token()
+        return {"Authorization": f"Bearer {token}"}
+    return ""
 
 
 def get_site_admin_token():
@@ -17,7 +26,7 @@ def get_site_admin_token():
     if response.status_code == 200:
         return response.json()["access_token"]
     else:
-        raise Exception("Check for environment variables")
+        raise Exception(f"Check for environment variables: {response.text}")
     
 
 
@@ -42,6 +51,8 @@ def get_minio_client(s3_endpoint, bucket, access_key=None, secret_key=None, regi
         endpoint = "play.min.io:9000"
         access_key="Q3AM3UQ867SPQQA43P2F"
         secret_key="zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG"
+
+    from minio import Minio
     if region is None:
         client = Minio(
             endpoint = endpoint,
@@ -57,7 +68,7 @@ def get_minio_client(s3_endpoint, bucket, access_key=None, secret_key=None, regi
         )
 
     if not client.bucket_exists(bucket):
-        if 'region' is None:
+        if region is None:
             client.make_bucket(bucket)
         else:
             client.make_bucket(bucket, location=region)
