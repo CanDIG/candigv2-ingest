@@ -38,7 +38,7 @@ def main():
     parser.add_argument("--input", help="Local copy of mcodepacket file uploaded to Katsu.")
     parser.add_argument('--no_auth', action="store_true", help="Do not use authentication.")
     parser.add_argument('--katsu_url', help="Direct URL for katsu.", required=False)
-    parser.add_argument('--limit', help="Only look at this many results", required=False, default=200)
+    parser.add_argument('--limit', type=int, help="Only look at this many results", required=False, default=200)
 
     args = parser.parse_args()
     dataset_title = args.dataset
