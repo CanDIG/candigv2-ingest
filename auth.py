@@ -27,7 +27,6 @@ def get_site_admin_token():
         return response.json()["access_token"]
     else:
         raise Exception(f"Check for environment variables: {response.text}")
-    
 
 
 def get_minio_client(s3_endpoint, bucket, access_key=None, secret_key=None, region=None):
@@ -101,6 +100,39 @@ def parse_aws_credential(awsfile):
     if secret is None:
         return {"error": "awsfile did not contain secret key"}
     return {"access": access, "secret": secret}
+
+
+def store_aws_credential(client, token):
+    # get client token for site_admin:
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json",
+        "charset": "utf-8"
+    }
+    body = {
+        "jwt": token,
+        "role": "site_admin"
+    }
+    url = f"{VAULT_URL}/v1/auth/jwt/login"
+    response = requests.post(url, json=body, headers=headers)
+    if response.status_code == 200:
+        client_token = response.json()["auth"]["client_token"]
+        headers["X-Vault-Token"] = client_token
+    
+    # check to see if credential exists:
+    url = f"{VAULT_URL}/v1/aws/{client['endpoint']}-{client['bucket']}"
+    response = requests.get(url, headers=headers)
+    if response.status_code == 404:
+        # add credential:
+        body = {
+            "access": client['access'],
+            "secret": client['secret']
+        }
+        response = requests.post(url, headers=headers, json=body)
+    if response.status_code >= 200 and response.status_code < 300:
+        return True, None
+    return False, json.dumps(response.json())
+
 
 if __name__ == "__main__":
     print(get_site_admin_token())
