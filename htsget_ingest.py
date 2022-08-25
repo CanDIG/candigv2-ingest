@@ -149,38 +149,6 @@ def get_dataset_objects(dataset, token):
     return response.json()
 
 
-def add_aws_credential(client, token):
-    # get client token for site_admin:
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json",
-        "charset": "utf-8"
-    }
-    body = {
-        "jwt": token,
-        "role": "site_admin"
-    }
-    url = f"{VAULT_URL}/v1/auth/jwt/login"
-    response = requests.post(url, json=body, headers=headers)
-    if response.status_code == 200:
-        client_token = response.json()["auth"]["client_token"]
-        headers["X-Vault-Token"] = client_token
-    
-    # check to see if credential exists:
-    url = f"{VAULT_URL}/v1/aws/{client['endpoint']}-{client['bucket']}"
-    response = requests.get(url, headers=headers)
-    if response.status_code == 404:
-        # add credential:
-        body = {
-            "access": client['access'],
-            "secret": client['secret']
-        }
-        response = requests.post(url, headers=headers, json=body)
-    if response.status_code >= 200 and response.status_code < 300:
-        return True, None
-    return False, json.dumps(response.json())
-
-
 def main():
     parser = argparse.ArgumentParser(description="A script that ingests a sample vcf and its index into htsget.")
 
@@ -223,7 +191,7 @@ def main():
         raise Exception(f"Failed to parse awsfile: {result['error']}")
 
     client = auth.get_minio_client(args.endpoint, args.bucket, access_key=result["access"], secret_key=result["secret"], region=args.region)
-    success, reason = add_aws_credential(client, token)
+    success, reason = auth.store_aws_credential(client, token)
     if not success:
         raise Exception(f"Failed to add AWS credential to vault: {reason}")
     for i in range(0, len(samples)):

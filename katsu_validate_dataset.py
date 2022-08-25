@@ -14,16 +14,15 @@ You should run the script in an active virtualenv that has `requests` installed.
 Please note that the data_file you supply must be available for Katsu to read. In other words, it should be located on the same server or within the same container as the Katsu instance.
 """
 
-TOKEN = auth.get_site_admin_token()
 
-def get_dataset(katsu_server_url, dataset):
+def get_dataset(katsu_server_url, dataset, page_size):
     """
     Get a dataset from katsu
     """
 
-    headers = {"Authorization": f"Bearer {TOKEN}"}
+    headers = auth.get_auth_header()
 
-    r = requests.get(katsu_server_url + "/api/mcodepackets", params={"datasets": dataset}, headers=headers)
+    r = requests.get(katsu_server_url + "/api/mcodepackets", params={"datasets": dataset, "page_size": page_size}, headers=headers)
     if r.status_code == 200:
         return r.json()["results"]
     else:
@@ -37,22 +36,33 @@ def main():
 
     parser.add_argument("--dataset", help="Dataset name.")
     parser.add_argument("--input", help="Local copy of mcodepacket file uploaded to Katsu.")
+    parser.add_argument('--no_auth', action="store_true", help="Do not use authentication.")
+    parser.add_argument('--katsu_url', help="Direct URL for katsu.", required=False)
+    parser.add_argument('--limit', type=int, help="Only look at this many results", required=False, default=200)
 
     args = parser.parse_args()
     dataset_title = args.dataset
     data_file = args.input
-    data_type = "mcodepacket"
-
-    katsu_server_url = os.environ.get("CANDIG_URL")
-    if katsu_server_url is None:
-        raise Exception("CANDIG_URL environment variable is not set")
+    limit = int(args.limit)
+    if args.no_auth:
+        auth.AUTH = False
     else:
-        katsu_server_url = katsu_server_url + "/katsu"
+        auth.AUTH = True
 
-    actual = get_dataset(katsu_server_url, dataset_title)
+    if args.katsu_url is None:
+        if os.environ.get("CANDIG_URL") is None:
+            raise Exception("Either CANDIG_URL must be set or a katsu_url argument must be provided")
+        else:
+            katsu_server_url = os.environ.get("CANDIG_URL") + "/katsu"
+    else:
+        katsu_server_url = args.katsu_url
+
+    actual = get_dataset(katsu_server_url, dataset_title, limit)
     expected = {}
     with open(args.input) as f:
         expected = json.load(f)
+        if limit < len(expected):
+            expected = expected[0:limit]
 
     compare = Compare().check(expected, actual)
     print("Katsu returned the following:")

@@ -13,8 +13,6 @@ You should run the script in an active virtualenv that has `requests` installed.
 Please note that the data_file you supply must be available for Katsu to read. In other words, it should be located on the same server or within the same container as the Katsu instance.
 """
 
-TOKEN = auth.get_site_admin_token()
-
 def create_project(katsu_server_url, project_title):
     """
     Create a new Katsu project.
@@ -26,7 +24,7 @@ def create_project(katsu_server_url, project_title):
         "title": project_title,
         "description": "A new project."
     }
-    headers = {"Authorization": f"Bearer {TOKEN}"}
+    headers = auth.get_auth_header()
 
     r = requests.post(katsu_server_url + "/api/projects", json=project_request, headers=headers)
     print(katsu_server_url)
@@ -67,7 +65,7 @@ def create_dataset(katsu_server_url, project_uuid, dataset_title):
             "data_use_requirements": [{"code": "COL"}, {"code": "PUB"}],
         },
     }
-    headers = {"Authorization": f"Bearer {TOKEN}"}
+    headers = auth.get_auth_header()
 
     r2 = requests.post(katsu_server_url + "/api/datasets", json=dataset_request, headers=headers)
 
@@ -102,7 +100,7 @@ def create_table(katsu_server_url, dataset_uuid, table_name, data_type):
         "data_type": data_type,
         "dataset": dataset_uuid
     }
-    headers = {"Authorization": f"Bearer {TOKEN}"}
+    headers = auth.get_auth_header()
 
     r3 = requests.post(katsu_server_url + "/tables", json=table_request, headers=headers)
 
@@ -147,7 +145,7 @@ def ingest_data(katsu_server_url, table_id, data_file, data_type):
     }
 
     print("Ingesting {} data, this may take a while...".format(data_type))
-    headers = {"Authorization": f"Bearer {TOKEN}"}
+    headers = auth.get_auth_header()
 
     r5 = requests.post(
         katsu_server_url + "/private/ingest", json=private_ingest_request, headers=headers
@@ -174,8 +172,10 @@ def ingest_data(katsu_server_url, table_id, data_file, data_type):
 def main():
     parser = argparse.ArgumentParser(description="A script that facilitates initial data ingestion of Katsu service.")
 
-    parser.add_argument("--dataset", help="Dataset name.")
-    parser.add_argument("--input", help="The absolute path to the local data file, readable by Katsu.")
+    parser.add_argument("--dataset", help="Dataset name.", required=True)
+    parser.add_argument("--input", help="The absolute path to the local data file, readable by Katsu.", required=True)
+    parser.add_argument('--no_auth', action="store_true", help="Do not use authentication.")
+    parser.add_argument('--katsu_url', help="Direct URL for katsu.", required=False)
 
     args = parser.parse_args()
     dataset_title = args.dataset
@@ -183,12 +183,18 @@ def main():
     table_name = dataset_title
     data_file = args.input
     data_type = "mcodepacket"
-
-    katsu_server_url = os.environ.get("CANDIG_URL")
-    if katsu_server_url is None:
-        raise Exception("CANDIG_URL environment variable is not set")
+    if args.no_auth:
+        auth.AUTH = False
     else:
-        katsu_server_url = katsu_server_url + "/katsu"
+        auth.AUTH = True
+
+    if args.katsu_url is None:
+        if os.environ.get("CANDIG_URL") is None:
+            raise Exception("Either CANDIG_URL must be set or a katsu_url argument must be provided")
+        else:
+            katsu_server_url = os.environ.get("CANDIG_URL") + "/katsu"
+    else:
+        katsu_server_url = args.katsu_url
 
     project_uuid = create_project(katsu_server_url, project_title)
     dataset_uuid = create_dataset(katsu_server_url, project_uuid, dataset_title)

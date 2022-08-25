@@ -11,14 +11,13 @@ Gives some stats about what is in katsu
 Lists projects, datasets, individuals
 """
 
-TOKEN = auth.get_site_admin_token()
 
 def list_data_type(katsu_server_url, data_type):
     """
     Lists the current datasets.
     Does not currently handle pagination for individuals, so you only get the first 25.
     """
-    headers = {"Authorization": f"Bearer {TOKEN}"}
+    headers = auth.get_auth_header()
 
     results = requests.get(katsu_server_url + "/api/" + data_type, headers=headers)
     count = len(results.json()["results"])
@@ -34,12 +33,23 @@ def list_data_type(katsu_server_url, data_type):
 
 
 def main():
+    parser.add_argument('--no_auth', action="store_true", help="Do not use authentication.")
+    parser.add_argument('--katsu_url', help="Direct URL for katsu.", required=False)
 
-    katsu_server_url = os.environ.get("CANDIG_URL")
-    if katsu_server_url is None:
-        raise Exception("CANDIG_URL environment variable is not set")
+    args = parser.parse_args()
+
+    if args.no_auth:
+        auth.AUTH = False
     else:
-        katsu_server_url = katsu_server_url + "/katsu"
+        auth.AUTH = True
+
+    if args.katsu_url is None:
+        if os.environ.get("CANDIG_URL") is None:
+            raise Exception("Either CANDIG_URL must be set or a katsu_url argument must be provided")
+        else:
+            katsu_server_url = os.environ.get("CANDIG_URL") + "/katsu"
+    else:
+        katsu_server_url = args.katsu_url
 
     data_type = "projects"
     list_data_type(katsu_server_url,data_type)
