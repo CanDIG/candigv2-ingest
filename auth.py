@@ -4,6 +4,7 @@ import requests
 
 
 AUTH = True
+VAULT_URL = os.getenv("VAULT_URL")
 
 def get_auth_header():
     if AUTH:
