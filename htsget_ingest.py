@@ -49,7 +49,7 @@ def collect_samples_for_genomic_id(genomic_id, client, prefix=""):
     return samples
 
 
-def post_objects(genomic_id, samples_to_create, client, token, prefix=""):
+def post_objects(genomic_id, samples_to_create, client, token, prefix="", ref_genome="hg38"):
     endpoint = client["endpoint"]
     bucket = client["bucket"]
     headers = {"Authorization": f"Bearer {token}"}
@@ -114,7 +114,10 @@ def post_objects(genomic_id, samples_to_create, client, token, prefix=""):
         }
         response = requests.post(url, json=obj, headers=headers)
         print(response)
-
+        
+        # index for search:
+        url = f"{HTSGET_URL}/htsget/v1/variants/{genomic_id}/index"
+        response = requests.get(url, params={"genome": ref_genome}, headers=headers)
     return response
 
 
@@ -160,6 +163,7 @@ def main():
     parser.add_argument("--awsfile", help="s3 credentials")
     parser.add_argument("--region", help="optional: s3 region", required=False)
     parser.add_argument("--prefix", help="optional: s3 prefix", required=False, default="")
+    parser.add_argument("--reference", help="optional: reference genome, either hg37 or hg38", required=False, default="hg38")
 
     args = parser.parse_args()
 
@@ -198,7 +202,7 @@ def main():
         # first, find all of the s3 objects related to this sample:
         objects_to_create = collect_samples_for_genomic_id(samples[i], client, prefix=args.prefix)
         print(objects_to_create)
-        post_objects(samples[i], objects_to_create, client, token, prefix=args.prefix)
+        post_objects(samples[i], objects_to_create, client, token, prefix=args.prefix, ref_genome=args.reference)
     post_to_dataset(samples, args.dataset, token)
     response = get_dataset_objects(args.dataset, token)
     print(json.dumps(response, indent=4))
