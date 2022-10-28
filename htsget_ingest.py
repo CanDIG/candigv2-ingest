@@ -55,6 +55,7 @@ def post_objects(samples_to_create, client, token, prefix="", ref_genome="hg38",
     headers = {"Authorization": f"Bearer {token}"}
 
     for s in samples_to_create:
+        print(f"working on {s['id']}")
         url = f"{HTSGET_URL}/ga4gh/drs/v1/objects"
         # master object:
         obj = {
