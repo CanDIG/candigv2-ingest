@@ -53,9 +53,9 @@ def post_objects(genomic_id, samples_to_create, client, token, prefix="", ref_ge
     endpoint = client["endpoint"]
     bucket = client["bucket"]
     headers = {"Authorization": f"Bearer {token}"}
-    url = f"{HTSGET_URL}/ga4gh/drs/v1/objects"
 
     for s in samples_to_create:
+        url = f"{HTSGET_URL}/ga4gh/drs/v1/objects"
         # master object:
         obj = {
             "contents": [
@@ -80,7 +80,8 @@ def post_objects(genomic_id, samples_to_create, client, token, prefix="", ref_ge
             "version": "v1"
         }
         response = requests.post(url, json=obj, headers=headers)
-        print(response)
+        if response.status_code > 200:
+            print(response.text)
 
         # file object:
         obj = {
@@ -95,9 +96,9 @@ def post_objects(genomic_id, samples_to_create, client, token, prefix="", ref_ge
             "self_uri": f"drs://{HOSTNAME}/{s['file']}",
             "version": "v1"
         }
-        print(obj)
         response = requests.post(url, json=obj, headers=headers)
-        print(response)
+        if response.status_code > 200:
+            print(response.text)
 
         # index object:
         obj = {
@@ -113,11 +114,14 @@ def post_objects(genomic_id, samples_to_create, client, token, prefix="", ref_ge
             "version": "v1"
         }
         response = requests.post(url, json=obj, headers=headers)
-        print(response)
+        if response.status_code > 200:
+            print(response.text)
         
         # index for search:
-        url = f"{HTSGET_URL}/htsget/v1/variants/{genomic_id}/index"
+        url = f"{HTSGET_URL}/htsget/v1/variants/{s['id']}/index"
         response = requests.get(url, params={"genome": ref_genome}, headers=headers)
+        if response.status_code > 200:
+            print(response.text)
     return response
 
 
@@ -201,7 +205,6 @@ def main():
     for i in range(0, len(samples)):
         # first, find all of the s3 objects related to this sample:
         objects_to_create = collect_samples_for_genomic_id(samples[i], client, prefix=args.prefix)
-        print(objects_to_create)
         post_objects(samples[i], objects_to_create, client, token, prefix=args.prefix, ref_genome=args.reference)
     post_to_dataset(samples, args.dataset, token)
     response = get_dataset_objects(args.dataset, token)
