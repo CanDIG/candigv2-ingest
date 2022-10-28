@@ -60,10 +60,14 @@ python s3_ingest.py --sample <sample>|--samplefile <samplefile> --endpoint <S3 e
 </details></blockquote>
 
 ### Ingest into Htsget
+Create a text file that list all sample IDs available in a particular S3 bucket. The ingest script will find all files starting with that particular ID in that bucket; for example, specifying AB0001 will ingest, if available, AB0001.vcf.gz/tbi, AB0001.mutect2.vcf.gz/tbi, and AB0001_comparison.vcf.gz/tbi. The bucket should contain both bgzipped VCF files and their corresponding tabix index files.
+
+Connecting the genomic IDs and files to patient clinical data will be handled during clinical data ingest; see below.
+
 To make the genomic files accessible to the htsget server, run:
 
 ```bash
-python htsget_ingest.py --sample <sample>|--samplefile <samplefile> --dataset <dataset> --endpoint <S3 endpoint> --bucket <S3 bucket> --awsfile <aws credentials>
+python htsget_ingest.py --sample <sample>|--samplefile <samplefile> --dataset <dataset>  --awsfile <aws credentials> --endpoint <S3 endpoint> --bucket <S3 bucket> --prefix <optional, prefix for files in S3 bucket> --reference <reference genome, either hg37 or hg38>
 ```
 
 ## Ingest clinical data
@@ -79,9 +83,17 @@ In order to connect genomic sample IDs to clinical sample IDs, you'll need to in
 ```python
 def connect_variant(mapping):
     genomic_id = mappings.single_val({"GenomicID": mapping["your_genomic_id"]})
+    genomic_file_ids = [
+        genomic_id, # if there's a genomic_id.vcf.gz
+        f"{genomic_id}.mutect2", # if there is a mutect analysis
+        f"{genomic_id}_other_analysis"
+    ]
     if genomic_id is None:
         return None
-    return {"genomic_id": genomic_id}
+    return {
+        "genomic_id": genomic_id, 
+        "genomic_file_ids": genomic_file_ids
+    }
 ```
 
 Once you've written your mapper, map your data to mcodepackets:
