@@ -49,7 +49,7 @@ def collect_samples_for_genomic_id(genomic_id, client, prefix=""):
     return samples
 
 
-def post_objects(genomic_id, samples_to_create, client, token, prefix="", ref_genome="hg38"):
+def post_objects(samples_to_create, client, token, prefix="", ref_genome="hg38", force=False):
     endpoint = client["endpoint"]
     bucket = client["bucket"]
     headers = {"Authorization": f"Bearer {token}"}
@@ -119,7 +119,7 @@ def post_objects(genomic_id, samples_to_create, client, token, prefix="", ref_ge
         
         # index for search:
         url = f"{HTSGET_URL}/htsget/v1/variants/{s['id']}/index"
-        response = requests.get(url, params={"genome": ref_genome}, headers=headers)
+        response = requests.get(url, params={"genome": ref_genome, "force": force}, headers=headers)
         if response.status_code > 200:
             print(response.text)
     return response
@@ -168,6 +168,7 @@ def main():
     parser.add_argument("--region", help="optional: s3 region", required=False)
     parser.add_argument("--prefix", help="optional: s3 prefix", required=False, default="")
     parser.add_argument("--reference", help="optional: reference genome, either hg37 or hg38", required=False, default="hg38")
+    parser.add_argument('--indexing', action="store_true", help="optional: force re-indexing")
 
     args = parser.parse_args()
 
@@ -205,8 +206,8 @@ def main():
     for i in range(0, len(samples)):
         # first, find all of the s3 objects related to this sample:
         objects_to_create = collect_samples_for_genomic_id(samples[i], client, prefix=args.prefix)
-        post_objects(samples[i], objects_to_create, client, token, prefix=args.prefix, ref_genome=args.reference)
     post_to_dataset(samples, args.dataset, token)
+        post_objects(objects_to_create, client, token, prefix=args.prefix, ref_genome=args.reference, force=args.indexing)
     response = get_dataset_objects(args.dataset, token)
     print(json.dumps(response, indent=4))
 
