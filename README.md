@@ -66,48 +66,6 @@ To make the genomic files accessible to the htsget server, run:
 python htsget_ingest.py --sample <sample>|--samplefile <samplefile> --dataset <dataset> --endpoint <S3 endpoint> --bucket <S3 bucket> --awsfile <aws credentials>
 ```
 
-### Ingest into candig-server
-Candig-server performs variant search for CanDIG. It needs its data ingested from the local command line; there is no REST API for ingest.
-
-* You'll need to know the name of the referenceset on your candig-server instance. Make sure that the referenceset needed for your variant files is already created on your candig-server instance.
-
-<blockquote><details><summary>How do I add a referenceset?</summary>
-See https://candig-server.readthedocs.io/en/v1.6.0/datarepo.html#add-referenceset for detailed instructions, but a quick version:
-
-From inside the candig-server instance, download the reference files:
-```bash
-curl https://daisietestbucket1.s3.amazonaws.com/hs37d5.fa.gz > /hs37d5.fa.gz
-curl https://daisietestbucket1.s3.amazonaws.com/hs37d5.fa.gz.gzi > /hs37d5.fa.gz.gzi
-```
-Then add the reference set:
-```bash
-candig_repo add-referenceset <your db> /hs37d5.fa.gz \
-		--description "NCBI37 assembly of the human genome" \
-		--species '{"termId": "NCBI:9606", "term": "Homo sapiens"}' \
-		--name hs37d5 \
-		--sourceUri http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/technical/reference/phase2_reference_assembly_sequence/hs37d5.fa.gz
-```
-</details></blockquote>
-
-* You'll need a csv input file containing the mapping between the patient_ids and the variant_ids and the names of the columns corresponding to each. 
-* The variant files need to be mounted on a path that is accessible to candig-server.
-
-Run the candig_server_ingest.py script to generate a shell script and input json that you can copy and run on your candig-server instance.
-```bash
-python candig_server_ingest.py --dataset DATASET --input_file INPUT_FILE --patient_id PATIENT_ID_COL_NAME --variant_file_id VARIANT_ID_COL_NAME --path FILE_PATH --reference REFSET_NAME
-```
-
-This command will generate two files in a temp directory, `candigv1_data.json` and `candigv1_ingest.sh`. Copy these onto the candig_server instance and run `bash candigv1_ingest.sh`.
-
-If you're running candig-server in the CanDIGv2 Docker stack:
-```bash
-docker cp temp/candigv1_data.json candigv2_candig-server_1:/app/candig-server/
-docker cp temp/candigv1_ingest.sh candigv2_candig-server_1:/app/candig-server/
-docker exec candigv2_candig-server_1 /app/candig-server/candigv1_ingest.sh
-``` 
-
-Don't forget that you need to restart the candig-server instance to pick up the changes!
-
 ## Ingest clinical data
 ### Transform raw data into mcodepacket format
 You'll need to generate a mapping file using the clinical_ETL tool to translate your raw clinical data into an mcodepacket-compatible format. Instructions about use of the clinical_ETL tool can be found at https://github.com/CanDIG/clinical_ETL.
