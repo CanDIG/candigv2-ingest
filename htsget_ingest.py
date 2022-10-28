@@ -204,6 +204,7 @@ def main():
     if not success:
         raise Exception(f"Failed to add AWS credential to vault: {reason}")
     for i in range(0, len(samples)):
+        token = auth.get_site_admin_token()
         # first, find all of the s3 objects related to this sample:
         objects_to_create = collect_samples_for_genomic_id(samples[i], client, prefix=args.prefix)
     post_to_dataset(samples, args.dataset, token)
