@@ -49,7 +49,7 @@ def collect_samples_for_genomic_id(genomic_id, client, prefix=""):
     return samples
 
 
-def post_objects(samples_to_create, client, token, prefix="", ref_genome="hg38", force=False):
+def post_objects(genomic_id, samples_to_create, client, token, prefix="", ref_genome="hg38", force=False):
     endpoint = client["endpoint"]
     bucket = client["bucket"]
     headers = {"Authorization": f"Bearer {token}"}
@@ -120,7 +120,7 @@ def post_objects(samples_to_create, client, token, prefix="", ref_genome="hg38",
         
         # index for search:
         url = f"{HTSGET_URL}/htsget/v1/variants/{s['id']}/index"
-        response = requests.get(url, params={"genome": ref_genome, "force": force}, headers=headers)
+        response = requests.get(url, params={"genome": ref_genome, "force": force, "genomic_id": genomic_id}, headers=headers)
         if response.status_code > 200:
             print(response.text)
     return response
@@ -209,7 +209,7 @@ def main():
         token = auth.get_site_admin_token()
         # first, find all of the s3 objects related to this sample:
         objects_to_create = collect_samples_for_genomic_id(samples[i], client, prefix=args.prefix)
-        post_objects(objects_to_create, client, token, prefix=args.prefix, ref_genome=args.reference, force=args.indexing)
+        post_objects(samples[i], objects_to_create, client, token, prefix=args.prefix, ref_genome=args.reference, force=args.indexing)
         created.extend(map(lambda s : s['id'], objects_to_create))
     post_to_dataset(created, args.dataset, token)
     response = get_dataset_objects(args.dataset, token)
