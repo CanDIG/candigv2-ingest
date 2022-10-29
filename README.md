@@ -67,7 +67,7 @@ Connecting the genomic IDs and files to patient clinical data will be handled du
 To make the genomic files accessible to the htsget server, run:
 
 ```bash
-python htsget_ingest.py --sample <sample>|--samplefile <samplefile> --dataset <dataset>  --awsfile <aws credentials> --endpoint <S3 endpoint> --bucket <S3 bucket> --prefix <optional, prefix for files in S3 bucket> --reference <reference genome, either hg37 or hg38>
+python htsget_s3_ingest.py --sample <sample>|--samplefile <samplefile> --dataset <dataset>  --awsfile <aws credentials> --endpoint <S3 endpoint> --bucket <S3 bucket> --prefix <optional, prefix for files in S3 bucket> --reference <reference genome, either hg37 or hg38>
 ```
 
 ## Ingest clinical data
