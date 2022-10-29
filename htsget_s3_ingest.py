@@ -53,7 +53,7 @@ def post_objects(genomic_id, samples_to_create, client, token, prefix="", ref_ge
     endpoint = client["endpoint"]
     bucket = client["bucket"]
     headers = {"Authorization": f"Bearer {token}"}
-
+    response = None
     for s in samples_to_create:
         print(f"working on {s['id']}")
         url = f"{HTSGET_URL}/ga4gh/drs/v1/objects"
