@@ -2,3 +2,4 @@ requests==2.26.0
 urllib3==1.26.7
 minio==7.1.7
 jsoncomparison~=1.1.0
+awscli==1.26.5
