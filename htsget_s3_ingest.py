@@ -21,31 +21,27 @@ def collect_samples_for_genomic_id(genomic_id, client, prefix=""):
     samples = []
     while len(files) > 0:
         f = files.pop(0)
-        index_pattern = re.compile(f"({prefix}(.+))\.(tbi|bai|crai|csi)")
+        index_pattern = re.compile(f"({prefix}(.+?))(\.tbi|\.bai|\.crai|\.csi)$")
         index_parse = index_pattern.match(f)
-        if index_parse is not None:
-            # this is an index file, so it should have a corresponding file
-            files.remove(index_parse.group(1))
-            file = index_parse.group(2)
-            # files.remove(f)
-            index = file + "." + index_parse.group(3)
-            type = 'read'
-            if index_parse.group(3) == 'tbi':
-                type = 'variant'
-            id_parse = re.match(r"(.+)\.(vcf|bam|cram|sam|bcf)(\.gz)*", file)
-            samples.append(
-                {
-                    "id": id_parse.group(1),
-                    "file": file,
-                    "index": index,
-                    "type": type
-                }
-            )
-        else:
-            files.append(f)
-        if len(files) == 1: # hey, clearly this file doesn't have a buddy. This is wrong!
-            print(f"Error: {name} doesn't have its matching index or file")
-            break
+        if index_parse is not None: # this is a file we're interested in
+            if index_parse.group(3) is not None and index_parse.group(3) != "":
+                index = index_parse.group(2) + index_parse.group(3)
+                # f is an index file, so it should have a corresponding file
+                file = index_parse.group(2)
+                if index_parse.group(1) in files:
+                    files.remove(index_parse.group(1))
+                type = 'read'
+                if index_parse.group(3) == '.tbi':
+                    type = 'variant'
+                id_parse = re.match(r"(.+)\.(vcf|bam|cram|sam|bcf)(\.gz)*", file)
+                samples.append(
+                    {
+                        "id": id_parse.group(1),
+                        "file": file,
+                        "index": index,
+                        "type": type
+                    }
+                )
     return samples
 
 
@@ -209,11 +205,13 @@ def main():
         token = auth.get_site_admin_token()
         # first, find all of the s3 objects related to this sample:
         objects_to_create = collect_samples_for_genomic_id(samples[i], client, prefix=args.prefix)
+        print(objects_to_create)
         post_objects(samples[i], objects_to_create, client, token, prefix=args.prefix, ref_genome=args.reference, force=args.indexing)
         created.extend(map(lambda s : s['id'], objects_to_create))
     post_to_dataset(created, args.dataset, token)
-    response = get_dataset_objects(args.dataset, token)
-    print(json.dumps(response, indent=4))
+    print(created)
+    # response = get_dataset_objects(args.dataset, token)
+    # print(json.dumps(response, indent=4))
 
 
 if __name__ == "__main__":
