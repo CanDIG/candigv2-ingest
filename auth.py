@@ -1,4 +1,5 @@
 import authx.auth
+import os
 import re
 
 
@@ -14,11 +15,17 @@ def get_auth_header():
 
 
 def get_site_admin_token():
-    return authx.auth.get_site_admin_token()
+    return authx.auth.get_access_token(
+    keycloak_url=os.getenv('KEYCLOAK_PUBLIC_URL'),
+    client_id=os.getenv('CANDIG_CLIENT_ID'),
+    client_secret=os.getenv('CANDIG_CLIENT_SECRET'),
+    username=os.getenv('CANDIG_SITE_ADMIN_USER'),
+    password=os.getenv('CANDIG_SITE_ADMIN_PASSWORD')
+    )
 
 
 def get_minio_client(s3_endpoint, bucket, access_key=None, secret_key=None, region=None):
-    return authx.auth.get_minio_client(s3_endpoint, bucket, access_key, secret_key, region)
+    return authx.auth.get_minio_client(token=get_site_admin_token(), s3_endpoint=s3_endpoint, bucket=bucket, access_key=access_key, secret_key=secret_key, region=region)
 
 
 def parse_aws_credential(awsfile):
@@ -42,8 +49,9 @@ def parse_aws_credential(awsfile):
     return {"access": access, "secret": secret}
 
 
-def store_aws_credential(client, token):
-    return authx.auth.store_aws_credential(client, token)
+def store_aws_credential(endpoint=None, bucket=None, access=None, secret=None):
+    result, status_code = authx.auth.store_aws_credential(endpoint=endpoint, bucket=bucket, access=access, secret=secret)
+    return status_code == 200
 
 
 if __name__ == "__main__":
