@@ -7,4 +7,5 @@ more $CANDIGV2/tmp/secrets/keycloak-test-user-password
 more $CANDIGV2/tmp/secrets/keycloak-test-user2-password 
 more $CANDIGV2/tmp/secrets/vault-s3-token 
 more $CANDIGV2/tmp/secrets/keycloak-admin-password 
+more $CANDIGV2/tmp/secrets/opa-root-token 
 docker exec candigv2_vault-runner_1 tail -n 1 /vault/config/keys.txt
