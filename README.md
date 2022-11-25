@@ -20,7 +20,11 @@ Ingest data into the CanDIGv2 stack. This repository assumes that you have a fun
 * CANDIG_SITE_ADMIN_USER
 * CANDIG_SITE_ADMIN_PASSWORD
 
-For convenience, you can copy env.sh.template to a file called env.sh, update the values, and run `source env.sh`.
+For convenience, you can generate a file `env.sh` from your CanDIGv2 repo:
+```bash
+python settings.py ../CanDIGv2/
+```
+and run `source env.sh`.
 
 ## Authorizing users for the new dataset
 Create a new access.json file:
