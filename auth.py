@@ -49,8 +49,10 @@ def parse_aws_credential(awsfile):
     return {"access": access, "secret": secret}
 
 
-def store_aws_credential(endpoint=None, bucket=None, access=None, secret=None):
-    result, status_code = authx.auth.store_aws_credential(endpoint=endpoint, bucket=bucket, access=access, secret=secret)
+def store_aws_credential(token=None, endpoint=None, url=None, bucket=None, access=None, secret=None):
+    if token is None:
+        token = get_site_admin_token()
+    result, status_code = authx.auth.store_aws_credential(token=token, endpoint=endpoint, s3_url=url, bucket=bucket, access=access, secret=secret)
     return status_code == 200
 
 
