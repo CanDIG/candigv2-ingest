@@ -25,6 +25,10 @@ def main():
         vars["CANDIG_SITE_ADMIN_USER"] = f.read().splitlines().pop()
     with open(f"{candigv2}/tmp/secrets/keycloak-test-user2-password") as f:
         vars["CANDIG_SITE_ADMIN_PASSWORD"] = f.read().splitlines().pop()
+    with open(f"{candigv2}/tmp/secrets/keycloak-test-user") as f:
+        vars["CANDIG_NOT_ADMIN_USER"] = f.read().splitlines().pop()
+    with open(f"{candigv2}/tmp/secrets/keycloak-test-user-password") as f:
+        vars["CANDIG_NOT_ADMIN_PASSWORD"] = f.read().splitlines().pop()
     with open(f"{candigv2}/tmp/secrets/vault-s3-token") as f:
         vars["VAULT_S3_TOKEN"] = f.read().splitlines().pop()
     with open(f"{candigv2}/tmp/secrets/opa-root-token") as f:
