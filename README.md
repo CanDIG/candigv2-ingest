@@ -34,7 +34,7 @@ python opa_ingest.py --dataset <dataset> --userfile <user file> > access.json
 
 Alternately, you can add a single user:
 ```bash
-python opa_ingest.py --dataset <dataset> --user <username> > access.json
+python opa_ingest.py --dataset <dataset> --user <user email> > access.json
 ```
 
 If you're running OPA in the CanDIGv2 Docker stack, you should copy the file to the Docker volume to persist the change between restarts:
