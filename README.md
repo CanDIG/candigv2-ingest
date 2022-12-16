@@ -22,9 +22,10 @@ Ingest data into the CanDIGv2 stack. This repository assumes that you have a fun
 
 For convenience, you can generate a file `env.sh` from your CanDIGv2 repo:
 ```bash
-python settings.py ../CanDIGv2/
+cd CanDIGv2
+python settings.py
+source env.sh
 ```
-and run `source env.sh`.
 
 ## Authorizing users for the new dataset
 Create a new access.json file:
