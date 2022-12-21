@@ -24,8 +24,8 @@ def get_site_admin_token():
     )
 
 
-def get_minio_client(s3_endpoint, bucket, access_key=None, secret_key=None, region=None):
-    return authx.auth.get_minio_client(token=get_site_admin_token(), s3_endpoint=s3_endpoint, bucket=bucket, access_key=access_key, secret_key=secret_key, region=region)
+def get_minio_client(s3_endpoint, bucket, access_key=None, secret_key=None, region=None, secure=True):
+    return authx.auth.get_minio_client(token=get_site_admin_token(), s3_endpoint=s3_endpoint, bucket=bucket, access_key=access_key, secret_key=secret_key, region=region, secure=secure)
 
 
 def parse_aws_credential(awsfile):
@@ -49,11 +49,13 @@ def parse_aws_credential(awsfile):
     return {"access": access, "secret": secret}
 
 
-def store_aws_credential(token=None, endpoint=None, url=None, bucket=None, access=None, secret=None):
+def store_aws_credential(token=None, client=None):
     if token is None:
         token = get_site_admin_token()
-    result, status_code = authx.auth.store_aws_credential(token=token, endpoint=endpoint, s3_url=url, bucket=bucket, access=access, secret=secret)
-    return status_code == 200
+    if client is None:
+        return {"error": "No client provided"}, 500
+    print(client)
+    return authx.auth.store_aws_credential(token=token, endpoint=client["endpoint"], bucket=client["bucket"], access=client["access"], secret=client["secret"])
 
 
 if __name__ == "__main__":
