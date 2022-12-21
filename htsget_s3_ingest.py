@@ -161,7 +161,9 @@ def main():
     parser.add_argument("--endpoint", help="s3 endpoint")
     parser.add_argument("--bucket", help="s3 bucket name")
     parser.add_argument("--dataset", help="dataset name")
-    parser.add_argument("--awsfile", help="s3 credentials")
+    parser.add_argument("--awsfile", help="s3 credentials", required=False)
+    parser.add_argument("--access", help="access key", required=False)
+    parser.add_argument("--secret", help="secret key", required=False)
     parser.add_argument("--region", help="optional: s3 region", required=False)
     parser.add_argument("--prefix", help="optional: s3 prefix", required=False, default="")
     parser.add_argument("--reference", help="optional: reference genome, either hg37 or hg38", required=False, default="hg38")
@@ -190,16 +192,24 @@ def main():
         raise Exception("CANDIG_URL environment variable is not set")
 
     token = auth.get_site_admin_token()
-    
-    # parse the awsfile:
-    result = auth.parse_aws_credential(args.awsfile)
-    if "error" in result:
-        raise Exception(f"Failed to parse awsfile: {result['error']}")
 
-    client = auth.get_minio_client(args.endpoint, args.bucket, access_key=result["access"], secret_key=result["secret"], region=args.region)
-    success, reason = auth.store_aws_credential(client, token)
-    if not success:
-        raise Exception(f"Failed to add AWS credential to vault: {reason}")
+    if args.awsfile:
+        # parse the awsfile:
+        result = auth.parse_aws_credential(args.awsfile)
+        access_key = result["access"]
+        secret_key = result["secret"]
+        if "error" in result:
+            raise Exception(f"Failed to parse awsfile: {result['error']}")
+    elif args.access and args.secret:
+        access_key = args.access
+        secret_key = args.secret
+    else:
+        raise Exception("Either awsfile or access/secret need to be provided.")
+
+    client = auth.get_minio_client(args.endpoint, args.bucket, access_key=access_key, secret_key=secret_key)
+    result, status_code = auth.store_aws_credential(token=token, client=client)
+    if status_code != 200:
+        raise Exception(f"Failed to add AWS credential to vault: {result}")
     created = []
     for i in range(0, len(samples)):
         token = auth.get_site_admin_token()
