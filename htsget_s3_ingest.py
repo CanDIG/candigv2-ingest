@@ -192,10 +192,6 @@ def main():
         raise Exception("CANDIG_URL environment variable is not set")
 
     token = auth.get_site_admin_token()
-    client = auth.get_minio_client(args.endpoint, args.bucket, access_key=result["access"], secret_key=result["secret"], region=args.region)
-    success, reason = auth.store_aws_credential(client, token)
-    if not success:
-        raise Exception(f"Failed to add AWS credential to vault: {reason}")
 
     if args.awsfile:
         # parse the awsfile:
@@ -210,6 +206,10 @@ def main():
     else:
         raise Exception("Either awsfile or access/secret need to be provided.")
 
+    client = auth.get_minio_client(args.endpoint, args.bucket, access_key=access_key, secret_key=secret_key)
+    result, status_code = auth.store_aws_credential(token=token, client=client)
+    if status_code != 200:
+        raise Exception(f"Failed to add AWS credential to vault: {result}")
     created = []
     for i in range(0, len(samples)):
         token = auth.get_site_admin_token()
