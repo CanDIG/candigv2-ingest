@@ -61,29 +61,6 @@ ordered_name_dict = OrderedDict(
 # katsu_server_url = "http://docker.localhost:5080/katsu"
 katsu_server_url = "http://127.0.0.1:8000"
 
-# Load the JSON data from the file
-# with open("Program.json", "r") as f:
-#     payload = json.load(f)
-
-# # Make the POST request
-# # katsu_server_url = "http://docker.localhost:5080/katsu"
-# katsu_server_url = "http://127.0.0.1:8000"
-# program_post_url = "/api/v1/ingest/programs"
-# url = katsu_server_url + program_post_url
-# headers = {"Content-Type": "application/json"}
-# response = requests.post(url, headers=headers, data=json.dumps(payload))
-
-
-# # Check the status code of the response
-# if response.status_code == HTTPStatus.CREATED:
-#     print(
-#         f"\nREQUEST STATUS CODE: {response.status_code} \nRETURN MESSAGE: {response.text}\n"
-#     )
-# else:
-#     print(
-#         f"\nREQUEST STATUS CODE: {response.status_code} \nRETURN MESSAGE: {response.text}\n"
-#     )
-
 # Load the JSON data from the ordered_name_dict
 for api_name, file_name in ordered_name_dict.items():
     with open(f"data/{file_name}", "r") as f:
