@@ -23,16 +23,19 @@ def list_data_type(katsu_server_url, data_type):
     count = len(results.json()["results"])
     print(f"{data_type} (n={count}):")
     for r in results.json()["results"]:
-        try:    
+        try:
             # projects and datasets
             print(f"\t{r['title']}, uuid {r['identifier']}")
         except KeyError:
             # individuals
             print(f"\t{r['id']}")
-            
+
 
 
 def main():
+    parser = argparse.ArgumentParser(
+        prog = 'katsu_test',
+        description = 'Status check utility for Katsu')
     parser.add_argument('--no_auth', action="store_true", help="Do not use authentication.")
     parser.add_argument('--katsu_url', help="Direct URL for katsu.", required=False)
 
