@@ -7,15 +7,43 @@ import requests
 import auth
 
 
-def read_json_from_url(file_url):
-    try:
-        response = requests.get(file_url)
-        response.raise_for_status()
-        data = response.json()
-        return data
-    except requests.exceptions.RequestException as e:
-        print("Failed to retrieve data. Error:", e)
-        return None
+def read_json(file_path):
+    """Read data from either a URL or a local file in JSON format.
+
+    Parameters
+    ----------
+    file_path : str
+        The URL or the local file path from which the data should be read.
+
+    Returns
+    -------
+    data : dict or None
+        A dictionary containing the data read from the URL or local file,
+        or `None` if the data could not be retrieved or the file does not exist.
+
+    Examples
+    --------
+    >>> read_json("https://example.com/remote_file.json")
+    >>> read_json("data/local_file.json")
+    """
+
+    if file_path.startswith("http"):
+        try:
+            response = requests.get(file_path)
+            response.raise_for_status()
+            data = response.json()
+            return data
+        except requests.exceptions.RequestException as e:
+            print("Failed to retrieve data. Error:", e)
+            return None
+    else:
+        try:
+            with open(file_path, "r") as f:
+                data = json.load(f)
+                return data
+        except FileNotFoundError as e:
+            print("File not found. Error:", e)
+            return None
 
 
 def clean_data():
@@ -70,6 +98,7 @@ def ingest_data():
     katsu_server_url = "http://127.0.0.1:8000"
     synthetic_data_url = "https://raw.githubusercontent.com/CanDIG/katsu/sonchau/moh_part_22/chord_metadata_service/mohpackets/data/small_dataset/synthetic_data/"
 
+    ingest_finished = False
     for api_name, file_name in file_mapping.items():
         post_url = f"/api/v1/ingest/{api_name}"
         url = katsu_server_url + post_url
@@ -77,19 +106,27 @@ def ingest_data():
         headers = {"Content-Type": "application/json"}
 
         print(f"Loading {file_name}...")
-        payload = read_json_from_url(synthetic_data_url + file_name)
-        if payload is None:
-            break
+        payload = read_json(synthetic_data_url + file_name)
+        if payload is not None:
+            response = requests.post(url, headers=headers, data=json.dumps(payload))
 
-        response = requests.post(url, headers=headers, data=json.dumps(payload))
+            if response.status_code == HTTPStatus.CREATED:
+                print(f"INGEST OK! \nRETURN MESSAGE: {response.text}\n")
+            elif response.status_code == HTTPStatus.NOT_FOUND:
+                print(f"ERROR: {url} was not found! Please check the URL.")
+                break
+            else:
+                print(
+                    f"\nREQUEST STATUS CODE: {response.status_code} \nRETURN MESSAGE: {response.text}\n"
+                )
+                break
+    else:
+        ingest_finished = True
 
-        if response.status_code == HTTPStatus.CREATED:
-            print(f"INGEST OK! \nRETURN MESSAGE: {response.text}\n")
-        else:
-            print(
-                f"\nREQUEST STATUS CODE: {response.status_code} \nRETURN MESSAGE: {response.text}\n"
-            )
-            break
+    if ingest_finished:
+        print("All files have been processed successfully.")
+    else:
+        print("Aborting processing due to an error.")
 
 
 def main():
