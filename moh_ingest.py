@@ -1,4 +1,5 @@
 import json
+import os
 from collections import OrderedDict
 from http import HTTPStatus
 
@@ -97,7 +98,7 @@ def ingest_data():
     # katsu_server_url = "http://docker.localhost:5080/katsu"
     katsu_server_url = "http://127.0.0.1:8000"
     synthetic_data_url = "https://raw.githubusercontent.com/CanDIG/katsu/sonchau/moh_part_22/chord_metadata_service/mohpackets/data/small_dataset/synthetic_data/"
-
+    moh_data_location = os.environ.get("MOH_DATA_LOCATION") or synthetic_data_url
     ingest_finished = False
     for api_name, file_name in file_mapping.items():
         post_url = f"/api/v1/ingest/{api_name}"
@@ -106,14 +107,14 @@ def ingest_data():
         headers = {"Content-Type": "application/json"}
 
         print(f"Loading {file_name}...")
-        payload = read_json(synthetic_data_url + file_name)
+        payload = read_json(moh_data_location + file_name)
         if payload is not None:
             response = requests.post(url, headers=headers, data=json.dumps(payload))
 
             if response.status_code == HTTPStatus.CREATED:
-                print(f"INGEST OK! \nRETURN MESSAGE: {response.text}\n")
+                print(f"INGEST OK 201! \nRETURN MESSAGE: {response.text}\n")
             elif response.status_code == HTTPStatus.NOT_FOUND:
-                print(f"ERROR: {url} was not found! Please check the URL.")
+                print(f"ERROR 404: {url} was not found! Please check the URL.")
                 break
             else:
                 print(
