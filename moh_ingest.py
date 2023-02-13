@@ -4,6 +4,7 @@ from collections import OrderedDict
 from http import HTTPStatus
 
 import requests
+from requests.exceptions import ConnectionError
 
 import auth
 
@@ -47,19 +48,15 @@ def read_json(file_path):
             return None
 
 
-def clean_data():
+def clean_data(katsu_server_url, headers):
     """
     Sends a DELETE request to the Katsu server to delete all data.
     """
     response = input("Are you sure you want to delete the database? (yes/no): ")
 
     if response == "yes":
-        katsu_server_url = "http://127.0.0.1:8000"
         delete_url = "/api/v1/delete/all"
         url = katsu_server_url + delete_url
-
-        # headers = auth.get_auth_header()
-        headers = {"Content-Type": "application/json"}
 
         res = requests.delete(url, headers=headers)
         if res.status_code == HTTPStatus.NO_CONTENT:
@@ -73,7 +70,7 @@ def clean_data():
         exit()
 
 
-def ingest_data():
+def ingest_data(katsu_server_url, location_str, synthetic_data_url, headers):
     """
     Send POST requests to the Katsu server to ingest data.
     """
@@ -95,26 +92,24 @@ def ingest_data():
             ("comorbidities", "Comorbidity.json"),
         ]
     )
-    # katsu_server_url = "http://docker.localhost:5080/katsu"
-    katsu_server_url = "http://127.0.0.1:8000"
-    synthetic_data_url = "https://raw.githubusercontent.com/CanDIG/katsu/sonchau/moh_part_22/chord_metadata_service/mohpackets/data/small_dataset/synthetic_data/"
-    moh_data_location = os.environ.get("MOH_DATA_LOCATION") or synthetic_data_url
+    # get local data from environment or use synthetic data
+    moh_data_location = os.environ.get(location_str) or synthetic_data_url
     ingest_finished = False
     for api_name, file_name in file_mapping.items():
-        post_url = f"/api/v1/ingest/{api_name}"
-        url = katsu_server_url + post_url
-        # headers = auth.get_auth_header()
-        headers = {"Content-Type": "application/json"}
+        ingest_str = f"/api/v1/ingest/{api_name}"
+        ingest_url = katsu_server_url + ingest_str
 
         print(f"Loading {file_name}...")
         payload = read_json(moh_data_location + file_name)
         if payload is not None:
-            response = requests.post(url, headers=headers, data=json.dumps(payload))
+            response = requests.post(
+                ingest_url, headers=headers, data=json.dumps(payload)
+            )
 
             if response.status_code == HTTPStatus.CREATED:
                 print(f"INGEST OK 201! \nRETURN MESSAGE: {response.text}\n")
             elif response.status_code == HTTPStatus.NOT_FOUND:
-                print(f"ERROR 404: {url} was not found! Please check the URL.")
+                print(f"ERROR 404: {ingest_url} was not found! Please check the URL.")
                 break
             else:
                 print(
@@ -130,19 +125,78 @@ def ingest_data():
         print("Aborting processing due to an error.")
 
 
+def run_check(katsu_server_url, env_file, moh_data_location, headers):
+    # Check if environment file exists
+    if os.path.exists(env_file):
+        print("PASS: The environment file exists.")
+    else:
+        print("ERROR: The environment file does not exist.")
+
+    # Check if environment variable is set
+    if os.environ.get(moh_data_location):
+        print("PASS: MOH_DATA_LOCATION environment variable is set.")
+    else:
+        print(
+            "WARNING: MOH_DATA_LOCATION environment variable is not set. Ignore this if using synthetic data."
+        )
+
+    # check if Katsu server is running
+    health_check_url = katsu_server_url + "/api/v1/health_check"
+    try:
+        response = requests.get(health_check_url)
+        if response.status_code == HTTPStatus.OK:
+            print("PASS: Katsu is running")
+        else:
+            print(f"ERROR {response.status_code}: {response.text}")
+    except ConnectionError as e:
+        print(f"ERROR: {e}")
+        return
+
+    # check authorization
+    try:
+        headers = auth.get_auth_header()
+        print("PASS: Auth header is set.")
+    except Exception as e:
+        print(f"ERROR: {e}")
+
+
 def main():
     print("Select an option:")
-    print("1. Ingest data")
-    print("2. Clean data")
-    print("3. Exit")
+    print("1. Run check")
+    print("2. Ingest data")
+    print("3. Clean data")
+    print("4. Exit")
+
+    # NOTE: FOR DEVELOPMENT ONLY: if you have a local Katsu running and
+    # doesn't want to use auth stack, uncomment the line below and
+    # comment out the line after that
+    katsu_server_url = "http://127.0.0.1:8000"
+    headers = {"Content-Type": "application/json"}
+    # headers = auth.get_auth_header()
+    # katsu_server_url = os.environ.get("CANDIG_URL") + "/katsu"
+    env_str = "env.sh"
+    location_str = "MOH_DATA_LOCATION"
+    synthetic_data_url = "https://raw.githubusercontent.com/CanDIG/katsu/sonchau/moh_part_22/chord_metadata_service/mohpackets/data/small_dataset/synthetic_data/"
 
     choice = int(input("Enter your choice [1-3]: "))
 
     if choice == 1:
-        ingest_data()
+        run_check(
+            katsu_server_url=katsu_server_url,
+            env_str=env_str,
+            location_str=location_str,
+            headers=headers,
+        )
     elif choice == 2:
-        clean_data()
+        ingest_data(
+            katsu_server_url=katsu_server_url,
+            location_str=location_str,
+            synthetic_data_url=synthetic_data_url,
+            headers=headers,
+        )
     elif choice == 3:
+        clean_data(katsu_server_url, headers)
+    elif choice == 4:
         exit()
     else:
         print("Invalid option. Please try again.")
