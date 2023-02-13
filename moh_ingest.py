@@ -9,6 +9,19 @@ from requests.exceptions import ConnectionError
 import auth
 
 
+def check_api_version(ingest_version, katsu_version):
+    ingest_version_parts = ingest_version.split(".")
+    ingest_major, ingest_minor, ingest_patch = map(int, ingest_version_parts)
+    katsu_version_parts = katsu_version.split(".")
+    katsu_major, katsu_minor, katsu_patch = map(int, katsu_version_parts)
+
+    if ingest_major == katsu_major:
+        if ingest_minor == katsu_minor:
+            if ingest_patch <= katsu_patch:
+                return True
+    return False
+
+
 def read_json(file_path):
     """Read data from either a URL or a local file in JSON format.
 
@@ -58,6 +71,8 @@ def clean_data(katsu_server_url, headers):
         delete_url = "/api/v1/delete/all"
         url = katsu_server_url + delete_url
 
+        # if headers == "GET_AUTH_HEADER":
+        #     headers = auth.get_auth_header()
         res = requests.delete(url, headers=headers)
         if res.status_code == HTTPStatus.NO_CONTENT:
             print(f"Delete successful with status code {res.status_code}")
@@ -102,6 +117,8 @@ def ingest_data(katsu_server_url, location_str, synthetic_data_url, headers):
         print(f"Loading {file_name}...")
         payload = read_json(moh_data_location + file_name)
         if payload is not None:
+            # if headers == "GET_AUTH_HEADER":
+            #     headers = auth.get_auth_header()
             response = requests.post(
                 ingest_url, headers=headers, data=json.dumps(payload)
             )
@@ -125,15 +142,15 @@ def ingest_data(katsu_server_url, location_str, synthetic_data_url, headers):
         print("Aborting processing due to an error.")
 
 
-def run_check(katsu_server_url, env_file, moh_data_location, headers):
+def run_check(katsu_server_url, env_str, location_str, headers):
     # Check if environment file exists
-    if os.path.exists(env_file):
+    if os.path.exists(env_str):
         print("PASS: The environment file exists.")
     else:
         print("ERROR: The environment file does not exist.")
 
     # Check if environment variable is set
-    if os.environ.get(moh_data_location):
+    if os.environ.get(location_str):
         print("PASS: MOH_DATA_LOCATION environment variable is set.")
     else:
         print(
@@ -145,7 +162,17 @@ def run_check(katsu_server_url, env_file, moh_data_location, headers):
     try:
         response = requests.get(health_check_url)
         if response.status_code == HTTPStatus.OK:
-            print("PASS: Katsu is running")
+            # check if response.text > v0.1.0
+            katsu_version = response.json()["version"]
+            ingest_version = "0.9.0"
+            if check_api_version(
+                ingest_version=ingest_version, katsu_version=katsu_version
+            ):
+                print(f"PASS: Katsu server is running.")
+            else:
+                print(
+                    f"ERROR: Katsu server is running on {katsu_version}. Required version {ingest_version} or greater."
+                )
         else:
             print(f"ERROR {response.status_code}: {response.text}")
     except ConnectionError as e:
@@ -153,11 +180,12 @@ def run_check(katsu_server_url, env_file, moh_data_location, headers):
         return
 
     # check authorization
-    try:
-        headers = auth.get_auth_header()
-        print("PASS: Auth header is set.")
-    except Exception as e:
-        print(f"ERROR: {e}")
+    if headers == "GET_AUTH_HEADER":
+        try:
+            headers = auth.get_auth_header()
+            print("PASS: Auth header is set.")
+        except Exception as e:
+            print(f"ERROR: {e}")
 
 
 def main():
@@ -168,12 +196,12 @@ def main():
     print("4. Exit")
 
     # NOTE: FOR DEVELOPMENT ONLY: if you have a local Katsu running and
-    # doesn't want to use auth stack, uncomment the line below and
-    # comment out the line after that
+    # doesn't want to use auth stack, uncomment the lines below and
+    # comment out the lines after that
     katsu_server_url = "http://127.0.0.1:8000"
-    headers = {"Content-Type": "application/json"}
-    # headers = auth.get_auth_header()
+    # headers = {"Content-Type": "application/json"}
     # katsu_server_url = os.environ.get("CANDIG_URL") + "/katsu"
+    headers = "GET_AUTH_HEADER"
     env_str = "env.sh"
     location_str = "MOH_DATA_LOCATION"
     synthetic_data_url = "https://raw.githubusercontent.com/CanDIG/katsu/sonchau/moh_part_22/chord_metadata_service/mohpackets/data/small_dataset/synthetic_data/"
