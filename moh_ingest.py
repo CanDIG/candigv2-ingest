@@ -1,3 +1,4 @@
+import argparse
 import json
 import os
 from collections import OrderedDict
@@ -179,6 +180,7 @@ def run_check(katsu_server_url, env_str, data_location, headers, ingest_version)
             print("PASS: Auth header is set.")
         except Exception as e:
             print(f"ERROR AUTH CHECK: {e}")
+            exit()
 
     # check if Katsu server is running correct version
     version_check_url = katsu_server_url + "/api/v1/version_check"
@@ -221,7 +223,25 @@ def main():
     env_str = "env.sh"
     ingest_version = "0.9.0"
 
-    choice = int(input("Enter your choice [1-3]: "))
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "choice",
+        nargs="?",
+        type=int,
+        choices=range(1, 5),
+        help="Select an option: 1=Run check, 2=Ingest data, 3=Clean data, 4=Exit",
+    )
+    args = parser.parse_args()
+
+    if args.choice is not None:
+        choice = args.choice
+    else:
+        print("Select an option:")
+        print("1. Run check")
+        print("2. Ingest data")
+        print("3. Clean data")
+        print("4. Exit")
+        choice = int(input("Enter your choice [1-4]: "))
 
     if choice == 1:
         run_check(
