@@ -172,10 +172,18 @@ def run_check(katsu_server_url, env_str, data_location, headers, ingest_version)
     else:
         print("ERROR LOCATION CHECK: data location is not set.")
 
+    # check authorization
+    if headers == "GET_AUTH_HEADER":
+        try:
+            headers = auth.get_auth_header()
+            print("PASS: Auth header is set.")
+        except Exception as e:
+            print(f"ERROR AUTH CHECK: {e}")
+
     # check if Katsu server is running correct version
     version_check_url = katsu_server_url + "/api/v1/version_check"
     try:
-        response = requests.get(version_check_url)
+        response = requests.get(version_check_url, headers=headers)
         if response.status_code == HTTPStatus.OK:
             katsu_version = response.json()["version"]
             if check_api_version(
@@ -191,14 +199,6 @@ def run_check(katsu_server_url, env_str, data_location, headers, ingest_version)
     except ConnectionError as e:
         print(f"ERROR VERSION CHECK: {e}")
         return
-
-    # check authorization
-    if headers == "GET_AUTH_HEADER":
-        try:
-            headers = auth.get_auth_header()
-            print("PASS: Auth header is set.")
-        except Exception as e:
-            print(f"ERROR AUTH CHECK: {e}")
 
 
 def main():
