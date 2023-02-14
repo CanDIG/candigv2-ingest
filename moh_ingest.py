@@ -10,6 +10,17 @@ import auth
 
 
 def check_api_version(ingest_version, katsu_version):
+    """
+    Return True if the major and minor versions of the ingest and katsu are the same.
+    The patch version of the ingest can be lower than katsu.
+
+    Parameters:
+    - ingest_version (str): in the format "major.minor.patch".
+    - katsu_version (str): in the format "major.minor.patch".
+
+    Returns:
+    - bool
+    """
     ingest_version_parts = ingest_version.split(".")
     ingest_major, ingest_minor, ingest_patch = map(int, ingest_version_parts)
     katsu_version_parts = katsu_version.split(".")
@@ -71,8 +82,8 @@ def clean_data(katsu_server_url, headers):
         delete_url = "/api/v1/delete/all"
         url = katsu_server_url + delete_url
 
-        # if headers == "GET_AUTH_HEADER":
-        #     headers = auth.get_auth_header()
+        if headers == "GET_AUTH_HEADER":
+            headers = auth.get_auth_header()
         res = requests.delete(url, headers=headers)
         if res.status_code == HTTPStatus.NO_CONTENT:
             print(f"Delete successful with status code {res.status_code}")
@@ -85,7 +96,7 @@ def clean_data(katsu_server_url, headers):
         exit()
 
 
-def ingest_data(katsu_server_url, location_str, synthetic_data_url, headers):
+def ingest_data(katsu_server_url, data_location, headers):
     """
     Send POST requests to the Katsu server to ingest data.
     """
@@ -107,18 +118,16 @@ def ingest_data(katsu_server_url, location_str, synthetic_data_url, headers):
             ("comorbidities", "Comorbidity.json"),
         ]
     )
-    # get local data from environment or use synthetic data
-    moh_data_location = os.environ.get(location_str) or synthetic_data_url
     ingest_finished = False
     for api_name, file_name in file_mapping.items():
         ingest_str = f"/api/v1/ingest/{api_name}"
         ingest_url = katsu_server_url + ingest_str
 
         print(f"Loading {file_name}...")
-        payload = read_json(moh_data_location + file_name)
+        payload = read_json(data_location + file_name)
         if payload is not None:
-            # if headers == "GET_AUTH_HEADER":
-            #     headers = auth.get_auth_header()
+            if headers == "GET_AUTH_HEADER":
+                headers = auth.get_auth_header()
             response = requests.post(
                 ingest_url, headers=headers, data=json.dumps(payload)
             )
@@ -137,46 +146,49 @@ def ingest_data(katsu_server_url, location_str, synthetic_data_url, headers):
         ingest_finished = True
 
     if ingest_finished:
-        print("All files have been processed successfully.")
+        print("All files have been processed.")
     else:
         print("Aborting processing due to an error.")
 
 
-def run_check(katsu_server_url, env_str, location_str, headers):
+def run_check(katsu_server_url, env_str, data_location, headers, ingest_version):
+    """
+    Run a series of checks to ensure that the ingest is ready to run.
+        - Check if the environment file exists
+        - Check if the environment variable is set
+        - Check if the Katsu server is running the correct version
+        - Check header authentication
+    """
     # Check if environment file exists
     if os.path.exists(env_str):
         print("PASS: The environment file exists.")
     else:
-        print("ERROR: The environment file does not exist.")
+        print("ERROR ENV CHECK: The environment file does not exist.")
 
     # Check if environment variable is set
-    if os.environ.get(location_str):
-        print("PASS: MOH_DATA_LOCATION environment variable is set.")
+    if data_location:
+        print("PASS: data location is set.")
     else:
-        print(
-            "WARNING: MOH_DATA_LOCATION environment variable is not set. Ignore this if using synthetic data."
-        )
+        print("ERROR LOCATION CHECK: data location is not set.")
 
-    # check if Katsu server is running
-    health_check_url = katsu_server_url + "/api/v1/health_check"
+    # check if Katsu server is running correct version
+    version_check_url = katsu_server_url + "/api/v1/version_check"
     try:
-        response = requests.get(health_check_url)
+        response = requests.get(version_check_url)
         if response.status_code == HTTPStatus.OK:
-            # check if response.text > v0.1.0
             katsu_version = response.json()["version"]
-            ingest_version = "0.9.0"
             if check_api_version(
                 ingest_version=ingest_version, katsu_version=katsu_version
             ):
-                print(f"PASS: Katsu server is running.")
+                print(f"PASS: Katsu server is running on a compatible version.")
             else:
                 print(
                     f"ERROR: Katsu server is running on {katsu_version}. Required version {ingest_version} or greater."
                 )
         else:
-            print(f"ERROR {response.status_code}: {response.text}")
+            print(f"ERROR VERSION CHECK {response.status_code}: {response.text}")
     except ConnectionError as e:
-        print(f"ERROR: {e}")
+        print(f"ERROR VERSION CHECK: {e}")
         return
 
     # check authorization
@@ -185,7 +197,7 @@ def run_check(katsu_server_url, env_str, location_str, headers):
             headers = auth.get_auth_header()
             print("PASS: Auth header is set.")
         except Exception as e:
-            print(f"ERROR: {e}")
+            print(f"ERROR AUTH CHECK: {e}")
 
 
 def main():
@@ -198,13 +210,15 @@ def main():
     # NOTE: FOR DEVELOPMENT ONLY: if you have a local Katsu running and
     # doesn't want to use auth stack, uncomment the lines below and
     # comment out the lines after that
-    katsu_server_url = "http://127.0.0.1:8000"
+    # katsu_server_url = "http://127.0.0.1:8000"
     # headers = {"Content-Type": "application/json"}
-    # katsu_server_url = os.environ.get("CANDIG_URL") + "/katsu"
+    # data_location = "https://raw.githubusercontent.com/CanDIG/katsu/sonchau/moh_part_22/chord_metadata_service/mohpackets/data/small_dataset/synthetic_data/"
+    katsu_server_url = os.environ.get("CANDIG_URL") + "/katsu"
     headers = "GET_AUTH_HEADER"
+    data_location = os.environ.get("MOH_DATA_LOCATION")
+
     env_str = "env.sh"
-    location_str = "MOH_DATA_LOCATION"
-    synthetic_data_url = "https://raw.githubusercontent.com/CanDIG/katsu/sonchau/moh_part_22/chord_metadata_service/mohpackets/data/small_dataset/synthetic_data/"
+    ingest_version = "0.9.0"
 
     choice = int(input("Enter your choice [1-3]: "))
 
@@ -212,14 +226,14 @@ def main():
         run_check(
             katsu_server_url=katsu_server_url,
             env_str=env_str,
-            location_str=location_str,
+            data_location=data_location,
             headers=headers,
+            ingest_version=ingest_version,
         )
     elif choice == 2:
         ingest_data(
             katsu_server_url=katsu_server_url,
-            location_str=location_str,
-            synthetic_data_url=synthetic_data_url,
+            data_location=data_location,
             headers=headers,
         )
     elif choice == 3:
