@@ -164,3 +164,9 @@ Run moh_ingest.py. This will represent severals options:
 1. Run check: check if the you are ready to ingest the data.
 2. Ingest data: import the data into katsu
 3. Clean data: reset the database to the clean state. Use this if you want to start over. WARNING: be careful in production environment, as it irreversibe.
+
+You can also run the script with the `-choice` to skip the menu and go straight to the choice you want.
+
+```bash
+python moh_ingest.py -choice 2
+```
