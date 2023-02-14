@@ -204,12 +204,6 @@ def run_check(katsu_server_url, env_str, data_location, headers, ingest_version)
 
 
 def main():
-    print("Select an option:")
-    print("1. Run check")
-    print("2. Ingest data")
-    print("3. Clean data")
-    print("4. Exit")
-
     # NOTE: FOR DEVELOPMENT ONLY: if you have a local Katsu running and
     # doesn't want to use auth stack, uncomment the lines below and
     # comment out the lines after that
@@ -225,8 +219,7 @@ def main():
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "choice",
-        nargs="?",
+        "-choice",
         type=int,
         choices=range(1, 5),
         help="Select an option: 1=Run check, 2=Ingest data, 3=Clean data, 4=Exit",
