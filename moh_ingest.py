@@ -167,7 +167,7 @@ def run_check(katsu_server_url, env_str, data_location, headers, ingest_version)
 
     # Check if environment variable is set
     if data_location:
-        print("PASS: data location is set.")
+        print("PASS: Data location is set.")
     else:
         print("ERROR LOCATION CHECK: data location is not set.")
 
