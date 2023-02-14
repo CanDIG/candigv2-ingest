@@ -128,6 +128,7 @@ def ingest_data(katsu_server_url, data_location, headers):
         if payload is not None:
             if headers == "GET_AUTH_HEADER":
                 headers = auth.get_auth_header()
+            headers["Content-Type"] = "application/json"
             response = requests.post(
                 ingest_url, headers=headers, data=json.dumps(payload)
             )
