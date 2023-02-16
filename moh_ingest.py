@@ -209,7 +209,7 @@ def main():
     # comment out the lines after that
     # katsu_server_url = "http://127.0.0.1:8000"
     # headers = {"Content-Type": "application/json"}
-    # data_location = "https://github.com/CanDIG/katsu/blob/develop/chord_metadata_service/mohpackets/data/small_dataset/synthetic_data/"
+    # data_location = "https://raw.githubusercontent.com/CanDIG/katsu/develop/chord_metadata_service/mohpackets/data/small_dataset/synthetic_data/"
     katsu_server_url = os.environ.get("CANDIG_URL") + "/katsu"
     headers = "GET_AUTH_HEADER"
     data_location = os.environ.get("MOH_DATA_LOCATION")
