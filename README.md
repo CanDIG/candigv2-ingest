@@ -99,7 +99,7 @@ You'll need to generate a mapping file using the clinical_ETL tool to translate 
 
 In order to connect genomic sample IDs to clinical sample IDs, you'll need to include a mapping function for the mcodepacket's genomics_reports schema:
 
-```json
+```yml
 "genomics_report.extra_properties", {mcode.connect_variant("your_genomic_id")}
 ```
 
