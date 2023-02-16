@@ -221,8 +221,8 @@ def main():
     parser.add_argument(
         "-choice",
         type=int,
-        choices=range(1, 5),
-        help="Select an option: 1=Run check, 2=Ingest data, 3=Clean data, 4=Exit",
+        choices=range(1, 4),
+        help="Select an option: 1=Run check, 2=Ingest data, 3=Clean data",
     )
     args = parser.parse_args()
 
