@@ -183,7 +183,7 @@ export MOH_DATA_LOCATION=path/to/moh/data/
 
 Run moh_ingest.py. This will represent severals options:
 
-1. Run check: check if the you are ready to ingest the data.
+1. Run check: check if ingest is possible
 2. Ingest data: import the data into katsu
 3. Clean data: reset the database to the clean state. Use this if you want to start over. WARNING: be careful in production environment, as it irreversibe.
 
