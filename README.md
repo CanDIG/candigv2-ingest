@@ -175,10 +175,20 @@ curl "http://docker.localhost:3333/htsget/v1/variants/NA20787" \
 
 Before you can ingest the clinical data, you need to obtain the data from the [clinical_ETL](https://github.com/CanDIG/clinical_ETL_data) and put it in the `data` folder, then set the environment variable `MOH_DATA_LOCATION`:
 
-NOTE: if you just want to use the [synthetic data](https://github.com/CanDIG/katsu/tree/develop/chord_metadata_service/mohpackets/data/small_dataset/synthetic_data), you can skip this step.
-
 ```bash
 export MOH_DATA_LOCATION=path/to/moh/data/
+```
+
+NOTE: if you want to skip ETL process and use ready-made [synthetic data](https://github.com/CanDIG/katsu/tree/develop/chord_metadata_service/mohpackets/data/small_dataset/synthetic_data), set the path to:
+
+```bash
+export MOH_DATA_LOCATION=https://raw.githubusercontent.com/CanDIG/katsu/develop/chord_metadata_service/mohpackets/data/small_dataset/synthetic_data/
+```
+
+Reload the environment variables:
+
+```bash
+source env.sh
 ```
 
 Run moh_ingest.py. This will represent severals options:
