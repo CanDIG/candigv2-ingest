@@ -204,12 +204,6 @@ def run_check(katsu_server_url, env_str, data_location, headers, ingest_version)
 
 
 def main():
-    # NOTE: FOR DEVELOPMENT ONLY: if you have a local Katsu running and
-    # doesn't want to use auth stack, uncomment the lines below and
-    # comment out the lines after that
-    # katsu_server_url = "http://127.0.0.1:8000"
-    # headers = {"Content-Type": "application/json"}
-    # data_location = "https://raw.githubusercontent.com/CanDIG/katsu/develop/chord_metadata_service/mohpackets/data/small_dataset/synthetic_data/"
     katsu_server_url = os.environ.get("CANDIG_URL") + "/katsu"
     headers = "GET_AUTH_HEADER"
     data_location = os.environ.get("MOH_DATA_LOCATION")
