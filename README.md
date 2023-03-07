@@ -93,87 +93,7 @@ python htsget_s3_ingest.py --sample <sample>|--samplefile <samplefile> --dataset
 
 ## Ingest clinical data
 
-### Transform raw data into mcodepacket format
-
-You'll need to generate a mapping file using the clinical_ETL tool to translate your raw clinical data into an mcodepacket-compatible format. Instructions about use of the clinical_ETL tool can be found at <https://github.com/CanDIG/clinical_ETL>.
-
-In order to connect genomic sample IDs to clinical sample IDs, you'll need to include a mapping function for the mcodepacket's genomics_reports schema:
-
-```yml
-"genomics_report.extra_properties", {mcode.connect_variant("your_genomic_id")}
-```
-
-```python
-def connect_variant(mapping):
-    genomic_id = mappings.single_val({"GenomicID": mapping["your_genomic_id"]})
-    genomic_file_ids = [
-        genomic_id, # if there's a genomic_id.vcf.gz
-        f"{genomic_id}.mutect2", # if there is a mutect analysis
-        f"{genomic_id}_other_analysis"
-    ]
-    if genomic_id is None:
-        return None
-    return {
-        "genomic_id": genomic_id, 
-        "genomic_file_ids": genomic_file_ids
-    }
-```
-
-Once you've written your mapper, map your data to mcodepackets:
-
-```bash
-python clinical_ETL/CSVConvert.py --input <directory of clinical csv files> --mapping <mapping manifest file>
-```
-
-### Ingest clinical data into katsu, CanDIG's clinical data server
-
-Copy it to the katsu server, so that it is locally accessible:
-
-```bash
-docker cp input.json candigv2_chord-metadata_1:input.json
-```
-
-Then run the ingest tool:
-
-```bash
-python katsu_ingest.py --dataset $(DATASET) --input /input.json
-```
-
-As a quick sanity check, there is a simple little `katsu_status.py` script that will tell you how many
-projects, datasets, and individuals are in the katsu at `$CANDIG_URL`.
-
-After installation, you should be able to access the synthetic dataset:
-
-* Get a user token, where the values for the data parameters are found in the files in tmp/secrets:
-
-```bash
-curl -X "POST" "http://auth.docker.localhost:8080/auth/realms/candig/protocol/openid-connect/token" \
-     -H 'Content-Type: application/x-www-form-urlencoded; charset=utf-8' \
-     --data-urlencode "client_id=local_candig" \
-     --data-urlencode "client_secret=<value in $CANDIG_HOME/tmp/secrets/keycloak-client-local_candig-secret>" \
-     --data-urlencode "grant_type=password" \
-     --data-urlencode "username=<value in $CANDIG_HOME/tmp/secrets/keycloak-test-user>" \
-     --data-urlencode "password=<value in $CANDIG_HOME/tmp/secrets/keycloak-test-user-password>" \
-     --data-urlencode "scope=openid"
-```
-
-* You should see the dataset "mcode-synthetic" as part of the response for:
-
-```bash
-curl "http://docker.localhost:5080/katsu/api/datasets" \
-     -H 'Authorization: Bearer <token>
-```
-
-* You should also be able to access all of the samples in the mcode-synthetic dataset via htsget if you're logged in as that user. If you're logged in as a different user (for example, the user specified in `$CANDIG_HOME/tmp/secrets/keycloak-test-user2`), you should get 403s. If you're not logged in at all, you'll get 401s.
-
-```bash
-curl "http://docker.localhost:3333/htsget/v1/variants/NA20787" \
-     -H 'Authorization: Bearer <access_token>'
-```
-
-## Ingest clinical data into katsu MoH
-
-Before you can ingest the clinical data, you need to obtain the data from the [clinical_ETL](https://github.com/CanDIG/clinical_ETL_data) and put it in the `data` folder, then set the environment variable `MOH_DATA_LOCATION`:
+Before you can ingest the clinical data, you need to format your data into the json ingest format using the [clinical_ETL](https://github.com/CanDIG/clinical_ETL_data) and put it in the katsu `data` folder, then set the environment variable `MOH_DATA_LOCATION`:
 
 NOTE: if you just want to use the [synthetic data](https://github.com/CanDIG/katsu/tree/develop/chord_metadata_service/mohpackets/data/small_dataset/synthetic_data), you can skip this step.
 
@@ -181,7 +101,7 @@ NOTE: if you just want to use the [synthetic data](https://github.com/CanDIG/kat
 export MOH_DATA_LOCATION=path/to/moh/data/
 ```
 
-Run moh_ingest.py. This will represent severals options:
+Run katsu's moh_ingest.py script. This will represent severals options:
 
 1. Run check: check if the you are ready to ingest the data.
 2. Ingest data: import the data into katsu
