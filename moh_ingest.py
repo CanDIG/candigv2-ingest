@@ -80,7 +80,7 @@ def clean_data(katsu_server_url, headers):
     response = input("Are you sure you want to delete the database? (yes/no): ")
 
     if response == "yes":
-        delete_url = "/api/v1/delete/all"
+        delete_url = "/moh/v1/delete/all"
         url = katsu_server_url + delete_url
 
         if headers == "GET_AUTH_HEADER":
@@ -121,7 +121,7 @@ def ingest_data(katsu_server_url, data_location, headers):
     )
     ingest_finished = False
     for api_name, file_name in file_mapping.items():
-        ingest_str = f"/api/v1/ingest/{api_name}"
+        ingest_str = f"/moh/v1/ingest/{api_name}"
         ingest_url = katsu_server_url + ingest_str
 
         print(f"Loading {file_name}...")
@@ -183,7 +183,7 @@ def run_check(katsu_server_url, env_str, data_location, headers, ingest_version)
             exit()
 
     # check if Katsu server is running correct version
-    version_check_url = katsu_server_url + "/api/v1/version_check"
+    version_check_url = katsu_server_url + "/moh/v1/version_check"
     try:
         response = requests.get(version_check_url, headers=headers)
         if response.status_code == HTTPStatus.OK:
@@ -204,12 +204,6 @@ def run_check(katsu_server_url, env_str, data_location, headers, ingest_version)
 
 
 def main():
-    # NOTE: FOR DEVELOPMENT ONLY: if you have a local Katsu running and
-    # doesn't want to use auth stack, uncomment the lines below and
-    # comment out the lines after that
-    # katsu_server_url = "http://127.0.0.1:8000"
-    # headers = {"Content-Type": "application/json"}
-    # data_location = "https://raw.githubusercontent.com/CanDIG/katsu/develop/chord_metadata_service/mohpackets/data/small_dataset/synthetic_data/"
     katsu_server_url = os.environ.get("CANDIG_URL") + "/katsu"
     headers = "GET_AUTH_HEADER"
     data_location = os.environ.get("MOH_DATA_LOCATION")
