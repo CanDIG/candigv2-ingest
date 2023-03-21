@@ -209,7 +209,7 @@ def main():
     data_location = os.environ.get("MOH_DATA_LOCATION")
 
     env_str = "env.sh"
-    ingest_version = "0.9.0"
+    ingest_version = "1.0.0"
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
