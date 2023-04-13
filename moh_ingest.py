@@ -204,12 +204,16 @@ def run_check(katsu_server_url, env_str, data_location, headers, ingest_version)
 
 
 def main():
+    # check if os.environ.get("CANDIG_URL") is set
+    if os.environ.get("CANDIG_URL") is None:
+        print("ERROR: ENV is not set. Did you forget to run 'source env.sh'?")
+        exit()
     katsu_server_url = os.environ.get("CANDIG_URL") + "/katsu"
     headers = "GET_AUTH_HEADER"
     data_location = os.environ.get("MOH_DATA_LOCATION")
 
     env_str = "env.sh"
-    ingest_version = "0.9.0"
+    ingest_version = "1.1.0"
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
