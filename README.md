@@ -111,7 +111,7 @@ Reload the environment variables:
 source env.sh
 ```
 
-Run katsu's moh_ingest.py script. This will represent severals options:
+Run katsu_ingest.py script. This will represent severals options:
 
 1. Run check: check if ingest is possible
 2. Ingest data: import the data into katsu
