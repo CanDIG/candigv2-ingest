@@ -117,6 +117,7 @@ def ingest_data(katsu_server_url, data_location, headers):
             ("follow_ups", "FollowUp.json"),
             ("biomarkers", "Biomarker.json"),
             ("comorbidities", "Comorbidity.json"),
+            ("exposures", "Exposure.json"),
         ]
     )
     ingest_finished = False
@@ -183,7 +184,7 @@ def run_check(katsu_server_url, env_str, data_location, headers, ingest_version)
             exit()
 
     # check if Katsu server is running correct version
-    version_check_url = katsu_server_url + "/moh/v1/version_check"
+    version_check_url = katsu_server_url + "/moh/v2/version_check"
     try:
         response = requests.get(version_check_url, headers=headers)
         if response.status_code == HTTPStatus.OK:
