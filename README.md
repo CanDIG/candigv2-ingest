@@ -120,5 +120,5 @@ Run katsu_ingest.py script. This will represent severals options:
 You can also run the script with the `-choice` to skip the menu and go straight to the choice you want.
 
 ```bash
-python moh_ingest.py -choice 2
+python katsu_ingest.py -choice 2
 ```
