@@ -93,16 +93,16 @@ python htsget_s3_ingest.py --sample <sample>|--samplefile <samplefile> --dataset
 
 ## Ingest clinical data
 
-Before you can ingest the clinical data, you need to format your data into the json ingest format using the [clinical_ETL](https://github.com/CanDIG/clinical_ETL_data) and put it in the katsu `data` folder, then set the environment variable `MOH_DATA_LOCATION`:
+Before you can ingest the clinical data, you need to format your data into the json ingest format using the [clinical_ETL](https://github.com/CanDIG/clinical_ETL_data) and put it in the katsu `data` folder, then set the environment variable `CLINICAL_DATA_LOCATION`:
 
 ```bash
-export MOH_DATA_LOCATION=path/to/moh/data/
+export CLINICAL_DATA_LOCATION=path/to/clinical/data/
 ```
 
 NOTE: if you want to skip ETL process and use ready-made [synthetic data](https://github.com/CanDIG/katsu/tree/develop/chord_metadata_service/mohpackets/data/small_dataset/synthetic_data), set the path to:
 
 ```bash
-export MOH_DATA_LOCATION=https://raw.githubusercontent.com/CanDIG/katsu/develop/chord_metadata_service/mohpackets/data/small_dataset/synthetic_data/
+export CLINICAL_DATA_LOCATION=https://raw.githubusercontent.com/CanDIG/katsu/develop/chord_metadata_service/mohpackets/data/small_dataset/synthetic_data/
 ```
 
 Reload the environment variables:
