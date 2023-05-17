@@ -80,7 +80,7 @@ def clean_data(katsu_server_url, headers):
     response = input("Are you sure you want to delete the database? (yes/no): ")
 
     if response == "yes":
-        delete_url = "/katsu/v2/delete/all"
+        delete_url = "/v2/delete/all"
         url = katsu_server_url + delete_url
 
         if headers == "GET_AUTH_HEADER":
@@ -122,7 +122,7 @@ def ingest_data(katsu_server_url, data_location, headers):
     )
     ingest_finished = False
     for api_name, file_name in file_mapping.items():
-        ingest_str = f"/katsu/v2/ingest/{api_name}"
+        ingest_str = f"/v2/ingest/{api_name}"
         ingest_url = katsu_server_url + ingest_str
 
         print(f"Loading {file_name}...")
@@ -184,7 +184,7 @@ def run_check(katsu_server_url, env_str, data_location, headers, ingest_version)
             exit()
 
     # check if Katsu server is running correct version
-    version_check_url = katsu_server_url + "/katsu/v2/version_check"
+    version_check_url = katsu_server_url + "/v2/version_check"
     try:
         response = requests.get(version_check_url, headers=headers)
         if response.status_code == HTTPStatus.OK:
