@@ -17,7 +17,7 @@ def headers_non_admin():
 
 @pytest.fixture(autouse=True)
 def setup_ingest(headers_admin):
-    data_location = "tests/small_dataset/synthetic_data/"
+    data_location = "https://raw.githubusercontent.com/CanDIG/katsu/develop/chord_metadata_service/mohpackets/data/small_dataset/synthetic_data/"
     katsu_ingest.clean_data(KATSU_URL, headers_admin)
     katsu_ingest.ingest_data(KATSU_URL, data_location, headers_admin)
 
