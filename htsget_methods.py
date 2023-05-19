@@ -75,6 +75,7 @@ def post_objects(genomic_id, genomic_objs_to_create, token, clinical_id=None, re
         response = requests.post(url, json=obj, headers=headers)
         if response.status_code > 200:
             print(response.text)
+        genomic_drs_obj = response.json()['self_uri']
 
         # file object:
         access_method = {}
@@ -125,6 +126,27 @@ def post_objects(genomic_id, genomic_objs_to_create, token, clinical_id=None, re
         response = requests.post(url, json=obj, headers=headers)
         if response.status_code > 200:
             print(response.text)
+
+        # add this genomic_id to the sample drs object, if available
+        genomic_content = {
+            "drs_uri": [
+                genomic_drs_obj
+            ],
+            "name": genomic_id,
+            "id": "genomic"
+        }
+
+        obj = {
+            "id": clinical_id,
+            "contents": [genomic_content],
+            "version": "v1"
+        }
+
+        response = requests.get(f"{url}/{clinical_id}", headers=headers)
+        if response.status_code == 200:
+            obj = response.json()
+            obj['contents'].append(genomic_content)
+        response = requests.post(url, json=obj, headers=headers)
 
         # index for search:
         url = f"{HTSGET_URL}/htsget/v1/variants/{s['id']}/index"
