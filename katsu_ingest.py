@@ -1,205 +1,261 @@
-import sys
 import argparse
 import json
-import requests
-import auth
 import os
+from collections import OrderedDict
+from http import HTTPStatus
 
-"""
-An ingest script that automates the initial data ingest for katsu service.
+import requests
+from requests.exceptions import ConnectionError
 
-You should run the script in an active virtualenv that has `requests` installed. You may also use Katsu's virtualenv for this purpose, if that's more convenient.
+import auth
 
-Please note that the data_file you supply must be available for Katsu to read. In other words, it should be located on the same server or within the same container as the Katsu instance.
-"""
 
-def create_project(katsu_server_url, project_title):
+def check_api_version(ingest_version, katsu_version):
     """
-    Create a new Katsu project.
+    Return True if the major and minor versions of the ingest and katsu are the same.
+    The patch version of the ingest can be lower than katsu.
 
-    Return the uuid of the newly-created project.
+    Parameters:
+    - ingest_version (str): in the format "major.minor.patch".
+    - katsu_version (str): in the format "major.minor.patch".
+
+    Returns:
+    - bool
+    """
+    ingest_version_parts = ingest_version.split(".")
+    ingest_major, ingest_minor, ingest_patch = map(int, ingest_version_parts)
+    katsu_version_parts = katsu_version.split(".")
+    katsu_major, katsu_minor, katsu_patch = map(int, katsu_version_parts)
+
+    if ingest_major == katsu_major:
+        if ingest_minor == katsu_minor:
+            if ingest_patch <= katsu_patch:
+                return True
+    return False
+
+
+def read_json(file_path):
+    """Read data from either a URL or a local file in JSON format.
+
+    Parameters
+    ----------
+    file_path : str
+        The URL or the local file path from which the data should be read.
+
+    Returns
+    -------
+    data : dict or None
+        A dictionary containing the data read from the URL or local file,
+        or `None` if the data could not be retrieved or the file does not exist.
+
+    Examples
+    --------
+    >>> read_json("https://example.com/remote_file.json")
+    >>> read_json("data/local_file.json")
     """
 
-    project_request = {
-        "title": project_title,
-        "description": "A new project."
-    }
-    headers = auth.get_auth_header()
+    if file_path.startswith("http"):
+        try:
+            response = requests.get(file_path)
+            response.raise_for_status()
+            data = response.json()
+            return data
+        except requests.exceptions.RequestException as e:
+            print("Failed to retrieve data. Error:", e)
+            return None
+    else:
+        try:
+            with open(file_path, "r") as f:
+                data = json.load(f)
+                return data
+        except FileNotFoundError as e:
+            print("File not found. Error:", e)
+            return None
 
-    r = requests.post(katsu_server_url + "/api/projects", json=project_request, headers=headers)
-    print(katsu_server_url)
-    if r.status_code == 201:
-        project_uuid = r.json()["identifier"]
-        print(
-            "Project {} with uuid {} has been created!".format(
-                project_title, project_uuid
+
+def clean_data(katsu_server_url, headers):
+    """
+    Sends a DELETE request to the Katsu server to delete all data.
+    """
+    response = input("Are you sure you want to delete the database? (yes/no): ")
+
+    if response == "yes":
+        delete_url = "/v2/delete/all"
+        url = katsu_server_url + delete_url
+
+        if headers == "GET_AUTH_HEADER":
+            headers = auth.get_auth_header()
+        res = requests.delete(url, headers=headers)
+        if res.status_code == HTTPStatus.NO_CONTENT:
+            print(f"Delete successful with status code {res.status_code}")
+        else:
+            print(
+                f"Delete failed with status code {res.status_code} and message: {res.text}"
             )
-        )
-        return project_uuid
-    elif r.status_code == 400:
-        results = requests.get(katsu_server_url + "/api/projects", headers=headers)
-        for r in results.json()["results"]:
-            if r["title"] == project_title:
-                print(f"Project {project_title} already exists")
-                return r["identifier"]
     else:
-        print(f"Problem creating project {project_title}")
-        print(r.text)
-        sys.exit()
+        print("Delete cancelled")
+        exit()
 
 
-def create_dataset(katsu_server_url, project_uuid, dataset_title):
+def ingest_data(katsu_server_url, data_location, headers):
     """
-    Create a new dataset.
-
-    Return the uuid of newly-created dataset.
+    Send POST requests to the Katsu server to ingest data.
     """
-    dataset_request = {
-        "project": project_uuid,
-        "title": dataset_title,
-        "data_use": {
-            "consent_code": {
-                "primary_category": {"code": "GRU"},
-                "secondary_categories": [{"code": "GSO"}],
-            },
-            "data_use_requirements": [{"code": "COL"}, {"code": "PUB"}],
-        },
-    }
-    headers = auth.get_auth_header()
-
-    r2 = requests.post(katsu_server_url + "/api/datasets", json=dataset_request, headers=headers)
-
-    if r2.status_code == 201:
-        dataset_uuid = r2.json()["identifier"]
-        print(
-            "Dataset {} with uuid {} has been created!".format(
-                dataset_title, dataset_uuid
-            )
-        )
-        return dataset_uuid
-    elif r2.status_code == 400:
-        results = requests.get(katsu_server_url + "/api/datasets", headers=headers)
-        for r in results.json()["results"]:
-            if r["title"] == dataset_title:
-                print(f"Dataset {dataset_title} already exists")
-                return r["identifier"]
-    else:
-        print(r2.json())
-        sys.exit()
-
-
-def create_table(katsu_server_url, dataset_uuid, table_name, data_type):
-    """
-    Create a new katsu table.
-
-    Return the uuid of the newly-created table.
-    """
-
-    table_request = {
-        "name": table_name,
-        "data_type": data_type,
-        "dataset": dataset_uuid
-    }
-    headers = auth.get_auth_header()
-
-    r3 = requests.post(katsu_server_url + "/tables", json=table_request, headers=headers)
-
-    if r3.status_code == 200 or r3.status_code == 201:
-        table_id = r3.json()["id"]
-        print("Table {} with uuid {} has been created!".format(table_name, table_id))
-        return table_id
-    elif r3.status_code == 500:
-        results = requests.get(katsu_server_url + "/api/tables", headers=headers)
-        for r in results.json()["results"]:
-            if r["name"] == table_name:
-                return r["identifier"]
-    else:
-        print(r3.json())
-        sys.exit()
-
-
-def ingest_data(katsu_server_url, table_id, data_file, data_type):
-    """
-    Ingest the data file.
-    """
-
-    workflow_info = {
-        "phenopacket": {
-            "id": "phenopackets_json",
-            "params": "phenopackets_json.json_document",
-        },
-        "mcodepacket": {
-            "id": "mcode_json",
-            "params": "mcode.json_document"
-        }
-    }
-    
-    workflow_params = {}
-    workflow_params[workflow_info[data_type]["params"]] = data_file
-
-    private_ingest_request = {
-        "table_id": table_id,
-        "workflow_id": workflow_info[data_type]['id'],
-        "workflow_params": workflow_params,
-        "workflow_outputs": {"json_document": data_file},
-    }
-
-    print("Ingesting {} data, this may take a while...".format(data_type))
-    headers = auth.get_auth_header()
-
-    r5 = requests.post(
-        katsu_server_url + "/private/ingest", json=private_ingest_request, headers=headers
+    file_mapping = OrderedDict(
+        [
+            ("programs", "Program.json"),
+            ("donors", "Donor.json"),
+            ("primary_diagnoses", "PrimaryDiagnosis.json"),
+            ("specimens", "Specimen.json"),
+            ("sample_registrations", "SampleRegistration.json"),
+            ("treatments", "Treatment.json"),
+            ("chemotherapies", "Chemotherapy.json"),
+            ("hormone_therapies", "HormoneTherapy.json"),
+            ("radiations", "Radiation.json"),
+            ("immunotherapies", "Immunotherapy.json"),
+            ("surgeries", "Surgery.json"),
+            ("follow_ups", "FollowUp.json"),
+            ("biomarkers", "Biomarker.json"),
+            ("comorbidities", "Comorbidity.json"),
+            ("exposures", "Exposure.json"),
+        ]
     )
+    ingest_finished = False
+    for api_name, file_name in file_mapping.items():
+        ingest_str = f"/v2/ingest/{api_name}"
+        ingest_url = katsu_server_url + ingest_str
 
-    if r5.status_code == 200 or r5.status_code == 201 or r5.status_code == 204:
-        print("{} Data have been ingested from source at {}".format(data_type, data_file))
-        print(f"Status code {r5.status_code}")
-    elif r5.status_code == 400:
-        print(r5.text)
-        sys.exit()
+        print(f"Loading {file_name}...")
+        payload = read_json(data_location + file_name)
+        if payload is not None:
+            if headers == "GET_AUTH_HEADER":
+                headers = auth.get_auth_header()
+            headers["Content-Type"] = "application/json"
+            response = requests.post(
+                ingest_url, headers=headers, data=json.dumps(payload)
+            )
+
+            if response.status_code == HTTPStatus.CREATED:
+                print(f"INGEST OK 201! \nRETURN MESSAGE: {response.text}\n")
+            elif response.status_code == HTTPStatus.NOT_FOUND:
+                print(f"ERROR 404: {ingest_url} was not found! Please check the URL.")
+                break
+            else:
+                print(
+                    f"\nREQUEST STATUS CODE: {response.status_code} \nRETURN MESSAGE: {response.text}\n"
+                )
+                break
     else:
-        print(
-            "Something else went wrong when ingesting data, possibly due to duplications."
-        )
-        print(
-            "Check you are using the absolute path of data_file, and make sure you aren't ingesting \
-                duplicated data. Exception messages from Katsu printed below."
-        )
-        print(r5.text)
-        sys.exit()
+        ingest_finished = True
+
+    if ingest_finished:
+        print("All files have been processed.")
+    else:
+        print("Aborting processing due to an error.")
+
+
+def run_check(katsu_server_url, env_str, data_location, headers, ingest_version):
+    """
+    Run a series of checks to ensure that the ingest is ready to run.
+        - Check if the environment file exists
+        - Check if the environment variable is set
+        - Check if the Katsu server is running the correct version
+        - Check header authentication
+    """
+    # Check if environment file exists
+    if os.path.exists(env_str):
+        print("PASS: The environment file exists.")
+    else:
+        print("ERROR ENV CHECK: The environment file does not exist.")
+
+    # Check if environment variable is set
+    if data_location:
+        print("PASS: Data location is set.")
+    else:
+        print("ERROR LOCATION CHECK: data location is not set.")
+
+    # check authorization
+    if headers == "GET_AUTH_HEADER":
+        try:
+            headers = auth.get_auth_header()
+            print("PASS: Auth header is set.")
+        except Exception as e:
+            print(f"ERROR AUTH CHECK: {e}")
+            exit()
+
+    # check if Katsu server is running correct version
+    version_check_url = katsu_server_url + "/v2/version_check"
+    try:
+        response = requests.get(version_check_url, headers=headers)
+        if response.status_code == HTTPStatus.OK:
+            katsu_version = response.json()["version"]
+            if check_api_version(
+                ingest_version=ingest_version, katsu_version=katsu_version
+            ):
+                print(f"PASS: Katsu server is running on a compatible version.")
+            else:
+                print(
+                    f"ERROR: Katsu server is running on {katsu_version}. Required version {ingest_version} or greater."
+                )
+        else:
+            print(f"ERROR VERSION CHECK {response.status_code}: {response.text}")
+    except ConnectionError as e:
+        print(f"ERROR VERSION CHECK: {e}")
+        return
 
 
 def main():
-    parser = argparse.ArgumentParser(description="A script that facilitates initial data ingestion of Katsu service.")
+    # check if os.environ.get("CANDIG_URL") is set
+    if os.environ.get("CANDIG_URL") is None:
+        print("ERROR: ENV is not set. Did you forget to run 'source env.sh'?")
+        exit()
+    katsu_server_url = os.environ.get("CANDIG_URL") + "/katsu"
+    headers = "GET_AUTH_HEADER"
+    data_location = os.environ.get("CLINICAL_DATA_LOCATION")
 
-    parser.add_argument("--dataset", help="Dataset name.", required=True)
-    parser.add_argument("--input", help="The absolute path to the local data file, readable by Katsu.", required=True)
-    parser.add_argument('--no_auth', action="store_true", help="Do not use authentication.")
-    parser.add_argument('--katsu_url', help="Direct URL for katsu.", required=False)
+    env_str = "env.sh"
+    ingest_version = "2.0.0"
 
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-choice",
+        type=int,
+        choices=range(1, 4),
+        help="Select an option: 1=Run check, 2=Ingest data, 3=Clean data",
+    )
     args = parser.parse_args()
-    dataset_title = args.dataset
-    project_title = dataset_title 
-    table_name = dataset_title
-    data_file = args.input
-    data_type = "mcodepacket"
-    if args.no_auth:
-        auth.AUTH = False
-    else:
-        auth.AUTH = True
 
-    if args.katsu_url is None:
-        if os.environ.get("CANDIG_URL") is None:
-            raise Exception("Either CANDIG_URL must be set or a katsu_url argument must be provided")
-        else:
-            katsu_server_url = os.environ.get("CANDIG_URL") + "/katsu"
+    if args.choice is not None:
+        choice = args.choice
     else:
-        katsu_server_url = args.katsu_url
+        print("Select an option:")
+        print("1. Run check")
+        print("2. Ingest data")
+        print("3. Clean data")
+        print("4. Exit")
+        choice = int(input("Enter your choice [1-4]: "))
 
-    project_uuid = create_project(katsu_server_url, project_title)
-    dataset_uuid = create_dataset(katsu_server_url, project_uuid, dataset_title)
-    table_uuid = create_table(katsu_server_url, dataset_uuid, table_name, data_type)
-    ingest_data(katsu_server_url, table_uuid, data_file, data_type)
+    if choice == 1:
+        run_check(
+            katsu_server_url=katsu_server_url,
+            env_str=env_str,
+            data_location=data_location,
+            headers=headers,
+            ingest_version=ingest_version,
+        )
+    elif choice == 2:
+        ingest_data(
+            katsu_server_url=katsu_server_url,
+            data_location=data_location,
+            headers=headers,
+        )
+    elif choice == 3:
+        clean_data(katsu_server_url, headers)
+    elif choice == 4:
+        exit()
+    else:
+        print("Invalid option. Please try again.")
+
 
 if __name__ == "__main__":
     main()
