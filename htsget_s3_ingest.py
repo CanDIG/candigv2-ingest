@@ -1,16 +1,10 @@
 import argparse
-import requests
 import auth
 import os
 import re
 import json
-from urllib.parse import urlparse
-import time
+from htsget_methods import post_to_dataset, get_dataset_objects, post_objects
 
-CANDIG_URL = os.getenv("CANDIG_URL", "")
-HTSGET_URL = CANDIG_URL + "/genomics"
-VAULT_URL = CANDIG_URL + "/vault"
-HOSTNAME = CANDIG_URL.replace(f"{urlparse(CANDIG_URL).scheme}://","")
 
 def collect_samples_for_genomic_id(genomic_id, client, prefix=""):
     # first, find all files that are related to this sample at the endpoint:
@@ -39,125 +33,20 @@ def collect_samples_for_genomic_id(genomic_id, client, prefix=""):
                         "id": id_parse.group(1),
                         "file": file,
                         "index": index,
-                        "type": type
+                        "type": type,
+                        "file_access": f"{client['endpoint']}/{client['bucket']}/{prefix}{file}",
+                        "index_access": f"{client['endpoint']}/{client['bucket']}/{prefix}{index}"
                     }
                 )
     return samples
 
 
-def post_objects(genomic_id, samples_to_create, client, token, prefix="", ref_genome="hg38", force=False):
-    endpoint = client["endpoint"]
-    bucket = client["bucket"]
-    headers = {"Authorization": f"Bearer {token}"}
-    response = None
-    for s in samples_to_create:
-        print(f"working on {s['id']}")
-        url = f"{HTSGET_URL}/ga4gh/drs/v1/objects"
-        # master object:
-        obj = {
-            "contents": [
-              {
-                "drs_uri": [
-                  f"drs://{HOSTNAME}/{s['file']}"
-                ],
-                "name": s["file"],
-                "id": s["type"]
-              },
-              {
-                "drs_uri": [
-                  f"drs://{HOSTNAME}/{s['index']}"
-                ],
-                "name": s['index'],
-                "id": "index"
-              }
-            ],
-            "id": s['id'],
-            "name": s['id'],
-            "self_uri": f"drs://{HOSTNAME}/{s['id']}",
-            "version": "v1"
-        }
-        response = requests.post(url, json=obj, headers=headers)
-        if response.status_code > 200:
-            print(response.text)
-
-        # file object:
-        obj = {
-            "access_methods": [
-                {
-                    "access_id": f"{endpoint}/{bucket}/{prefix}{s['file']}",
-                    "type": "s3"
-                }
-            ],
-            "id": s['file'],
-            "name": s['file'],
-            "self_uri": f"drs://{HOSTNAME}/{s['file']}",
-            "version": "v1"
-        }
-        response = requests.post(url, json=obj, headers=headers)
-        if response.status_code > 200:
-            print(response.text)
-
-        # index object:
-        obj = {
-            "access_methods": [
-                {
-                    "access_id": f"{endpoint}/{bucket}/{prefix}{s['index']}",
-                    "type": "s3"
-                }
-            ],
-            "id": s['index'],
-            "name": s['index'],
-            "self_uri": f"drs://{HOSTNAME}/{s['index']}",
-            "version": "v1"
-        }
-        response = requests.post(url, json=obj, headers=headers)
-        if response.status_code > 200:
-            print(response.text)
-        
-        # index for search:
-        url = f"{HTSGET_URL}/htsget/v1/variants/{s['id']}/index"
-        response = requests.get(url, params={"genome": ref_genome, "force": force, "genomic_id": genomic_id}, headers=headers)
-        if response.status_code > 200:
-            print(response.text)
-    return response
-
-
-def post_to_dataset(sample_ids, dataset, token):
-    headers = {"Authorization": f"Bearer {token}"}
-    drsobjects = map(lambda s : f"drs://{HOSTNAME}/{s}", sample_ids)
-    obj = {
-        "id": dataset,
-        "drsobjects": list(drsobjects)
-    }
-    url = f"{HTSGET_URL}/ga4gh/drs/v1/datasets"
-    response = requests.post(url, json=obj, headers=headers)
-
-
-def get_dataset_objects(dataset, token):
-    headers = {"Authorization": f"Bearer {token}"}
-    url = f"{HTSGET_URL}/ga4gh/drs/v1/datasets/{dataset}"
-    response = requests.get(url, headers=headers)
-    if response.status_code == 200:
-        objects = []
-        drs_objs = response.json()["drsobjects"]
-        while len(drs_objs) > 0:
-            obj = drs_objs.pop(0)
-            url = f"{HTSGET_URL}/ga4gh/drs/v1/objects{urlparse(obj).path}"
-            response = requests.get(url, headers=headers)
-            if response.status_code == 200:
-                objects.append(response.json())
-                if "contents" in response.json():
-                    for item in response.json()["contents"]:
-                        drs_objs.insert(0, item["drs_uri"][0])
-        return objects
-    return response.json()
-
-
 def main():
     parser = argparse.ArgumentParser(description="A script that ingests a sample vcf and its index into htsget.")
 
-    parser.add_argument("--sample", help="sample id", required=False)
-    parser.add_argument("--samplefile", help="file with list of sample ids", required=False)
+    parser.add_argument("--genomic_id", help="genomic sample id", required=False)
+    parser.add_argument("--clinical_id", help="clinical sample registration id", required=False)
+    parser.add_argument("--samplefile", help="file with list of genomic sample ids, optionally tab-delimited with clinical sample ids", required=False)
     parser.add_argument("--endpoint", help="s3 endpoint")
     parser.add_argument("--bucket", help="s3 bucket name")
     parser.add_argument("--dataset", help="dataset name")
@@ -171,24 +60,25 @@ def main():
 
     args = parser.parse_args()
 
-    samples = []
-    blobs = []
+    genomic_samples = []
+    clinical_samples = []
     if args.samplefile is not None:
         with open(args.samplefile) as f:
             lines = f.readlines()
             for line in lines:
-                if '\t' in line:
-                    s, b = line.strip().split('\t')
-                    samples.append(s)
-                    blobs.append(b)
-                else:
-                    samples.append(line.strip())
-    elif args.sample is not None:
-        samples.append(args.sample)
+                parts = line.strip().split()
+                genomic_samples.append(parts[0])
+                if len(parts) > 1:
+                    clinical_samples.append(parts[1])
+    elif args.genomic_id is not None:
+        genomic_samples = [args.sample]
     else:
         raise Exception("Either a sample name or a file of samples is required.")
 
-    if CANDIG_URL == "":
+    if args.clinical_id is not None:
+        clinical_samples = [args.clinical_id]
+
+    if os.getenv("CANDIG_URL") == "":
         raise Exception("CANDIG_URL environment variable is not set")
 
     token = auth.get_site_admin_token()
@@ -211,12 +101,14 @@ def main():
     if status_code != 200:
         raise Exception(f"Failed to add AWS credential to vault: {result}")
     created = []
-    for i in range(0, len(samples)):
+    for i in range(0, len(genomic_samples)):
         token = auth.get_site_admin_token()
         # first, find all of the s3 objects related to this sample:
-        objects_to_create = collect_samples_for_genomic_id(samples[i], client, prefix=args.prefix)
-        print(objects_to_create)
-        post_objects(samples[i], objects_to_create, client, token, prefix=args.prefix, ref_genome=args.reference, force=args.indexing)
+        objects_to_create = collect_samples_for_genomic_id(genomic_samples[i], client, prefix=args.prefix)
+        clinical_id = None
+        if len(clinical_samples) == len(genomic_samples):
+            clinical_id = clinical_samples[i]
+        post_objects(genomic_samples[i], objects_to_create, token, clinical_id=clinical_id, ref_genome=args.reference, force=args.indexing)
         created.extend(map(lambda s : s['id'], objects_to_create))
     post_to_dataset(created, args.dataset, token)
     print(created)
