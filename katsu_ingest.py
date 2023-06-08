@@ -6,9 +6,11 @@ from http import HTTPStatus
 
 import requests
 from requests.exceptions import ConnectionError
+from flask import Blueprint, request
 
 import auth
 
+ingest_blueprint = Blueprint("ingest_donor", __name__)
 
 def check_api_version(ingest_version, katsu_version):
     """
@@ -164,6 +166,125 @@ def ingest_data(katsu_server_url, data_location):
     else:
         print("Aborting processing due to an error.")
 
+def traverse_clinical_field(field: dict, ctype, parents, types, id_names, katsu_server_url, headers, errors):
+    """
+    Helper function for ingest_donor_with_clinical. Parses and ingests clinical fields from a DonorWithClinicalData
+    object.
+    Args:
+        field: The (sub)field of a DonorWithClinicalData object, potentially nested
+        ctype: The type of the field being ingested (e.g. "donors")
+        parents: A dictionary mapping of the parents of this object, e.g.
+            {   "donors": "DONOR_1",
+                "primary_diagnoses": "submitter_primary_diagnosis_id",
+            }
+        types: A list of possible field types
+        id_names: A mapping of field names to what their ID key is (e.g. {"donors": "submitter_donor_id"})
+        errors: A list of strings containing the errors encountered so far
+    """
+    no_ids = ["comorbidities", "exposures"] # fields that do not have an ID associated with them
+
+    data = {}
+    if ctype in id_names:
+        id_key = id_names[ctype]
+    else:
+        id_key = "id"
+    if ctype not in no_ids:
+        data[id_key] = field.pop(id_key)
+
+    attributes = list(field.keys())
+    for attribute in attributes:
+        if attribute not in types:
+            data[attribute] = field.pop(attribute)
+
+    for parent in parents:
+        parent_key = id_names[parent]
+        data[parent_key] = parents[parent]
+
+    ingest_str = f"/katsu/v2/ingest/{ctype}/"
+    ingest_url = katsu_server_url + ingest_str
+
+    response = requests.post(
+        ingest_url, headers=headers, data=json.dumps(data)
+    )
+
+    if response.status_code == HTTPStatus.CREATED:
+        print(f"INGEST OK 201! \nRETURN MESSAGE: {response.text}\n")
+    elif response.status_code == HTTPStatus.NOT_FOUND:
+        message = f"ERROR 404: {ingest_url} was not found! Please check the URL."
+        errors.append(message)
+        return
+    else:
+        message = f"\nREQUEST STATUS CODE: {response.status_code} \nRETURN MESSAGE: {response.text}\n"
+        print(message)
+        errors.append(message)
+        return
+
+    if ctype not in no_ids:
+        parents[ctype] = data[id_key]
+    subfields = field.keys()
+    for subfield in subfields:
+        print(f"Loading {subfield} for {data[id_key]}...")
+        for elem in field[subfield]:
+            traverse_clinical_field(elem, subfield, parents, types, id_names, katsu_server_url, headers, errors)
+    if ctype not in no_ids:
+        parents.pop(ctype)
+    return errors
+
+def ingest_donor_with_clinical(katsu_server_url="", data_location="", headers=""):
+    """A single file ingest which loads an MOH donor_with_clinical_data object from JSON.
+    JSON format:
+    [
+        {
+            "submitter_donor_id": ...,
+            "program_id": ...,
+            ...
+            primary_site: {...},
+            primary_diagnoses: {...},
+            ...
+        }
+        ...
+    ]
+    (Fully outlined in MOH Schema)
+    """
+    print("Beginning ingest from %s" % data_location)
+    dataset = read_json(data_location)
+
+    types = ["programs",
+            "donors",
+            "primary_diagnoses",
+            "specimens",
+            "sample_registrations",
+            "treatments",
+            "chemotherapies",
+            "hormone_therapies",
+            "radiations",
+            "immunotherapies",
+            "surgeries",
+            "follow_ups",
+            "biomarkers",
+            "comorbidities",
+            "exposures"]
+    id_names = {"programs": "program_id", "donors": "submitter_donor_id",
+                "primary_diagnoses": "submitter_primary_diagnosis_id", "sample_registrations": "submitter_sample_id",
+                "treatments": "submitter_treatment_id", "specimens": "submitter_specimen_id"}
+
+    if headers == "GET_AUTH_HEADER":
+        headers = auth.get_auth_header()
+    headers["Content-Type"] = "application/json"
+
+    errors = []
+    for donor in dataset:
+        program_id = donor.pop("program_id")
+        requests.post(katsu_server_url + f"/katsu/v2/ingest/programs/" , headers=headers,
+                                 data=json.dumps({"program_id": program_id})
+        )
+        parents = {"programs": program_id}
+        print(f"Loading donor {donor['submitter_donor_id']}...")
+        traverse_clinical_field(donor, "donors", parents, types, id_names, katsu_server_url, headers, errors)
+    if not errors:
+        return len(dataset)
+    else:
+        return errors
 
 def run_check(katsu_server_url, env_str, data_location, ingest_version):
     """
@@ -213,6 +334,17 @@ def run_check(katsu_server_url, env_str, data_location, ingest_version):
         print(f"ERROR VERSION CHECK: {e}")
         return
 
+@ingest_blueprint.route('/ingest', methods=["POST"])
+def ingest_donor_endpoint():
+    katsu_server_url = os.environ.get("CANDIG_URL")
+    headers = "GET_AUTH_HEADER"
+    data_location = request.args.get('data_location')
+    response = ingest_donor_with_clinical(katsu_server_url, data_location, headers)
+    if type(response) == int:
+        return "Ingested %d donors.\n" % response, 200
+    else:
+        error_string = '\n'.join(response)
+        return "Ingest encountered the following errors: %s" % error_string, 500
 
 def main():
     # check if os.environ.get("CANDIG_URL") is set

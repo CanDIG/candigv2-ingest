@@ -5,3 +5,5 @@ jsoncomparison~=1.1.0
 candigv2-authx@git+https://github.com/CanDIG/candigv2-authx.git@main
 awscli==1.26.5
 python-dotenv==0.14.0
+Flask==2.2.2
+connexion==2.14.1

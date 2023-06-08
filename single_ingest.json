@@ -1,0 +1,3115 @@
+[
+		{
+			"submitter_donor_id": "DONOR_1",
+			"program_id": "SYNTHETIC-1",
+			"lost_to_followup_after_clinical_event_identifier": "",
+			"lost_to_followup_reason": "Not applicable",
+			"date_alive_after_lost_to_followup": "2022-02",
+			"is_deceased": true,
+			"cause_of_death": "Unknown",
+			"date_of_birth": "1961-07",
+			"date_of_death": "2009-07",
+			"gender": "Woman",
+			"sex_at_birth": "Unknown",
+			"primary_site": [
+				"Corpus uteri",
+				"Anus and anal canal"
+			],
+			"primary_diagnoses": [
+				{
+					"submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1",
+					"date_of_diagnosis": "2019-06",
+					"cancer_type_code": "C02.1",
+					"basis_of_diagnosis": "Histology of a metastasis",
+					"lymph_nodes_examined_status": "No lymph nodes found in resected specimen",
+					"lymph_nodes_examined_method": "Lymph node dissection/pathological exam",
+					"number_lymph_nodes_positive": 10,
+					"clinical_tumour_staging_system": "FIGO staging system",
+					"clinical_t_category": "TX",
+					"clinical_n_category": "N1mi",
+					"clinical_m_category": "M1a",
+					"clinical_stage_group": "Stage IIIAES",
+					"laterality": "Unilateral, side not specified",
+					"specimens": [
+						{
+							"submitter_specimen_id": "SPECIMEN_1",
+							"pathological_tumour_staging_system": "International Neuroblastoma Risk Group Staging System",
+							"pathological_t_category": "T4a",
+							"pathological_n_category": "N1",
+							"pathological_m_category": "MX",
+							"pathological_stage_group": "Stage IIAE",
+							"specimen_collection_date": "2021-06-01",
+							"specimen_storage": "Frozen in liquid nitrogen",
+							"tumour_histological_type": "8820/3",
+							"specimen_anatomic_location": "C67.6",
+							"reference_pathology_confirmed_diagnosis": "Not done",
+							"reference_pathology_confirmed_tumour_presence": "Unknown",
+							"tumour_grading_system": "Grading system for GISTs",
+							"tumour_grade": "Grade 3",
+							"percent_tumour_cells_range": "0-19%",
+							"percent_tumour_cells_measurement_method": "Pathology estimate by percent nuclei",
+							"specimen_processing": "Cryopreservation in liquid nitrogen (dead tissue)",
+							"specimen_laterality": "Right",
+							"sample_registrations": [
+								{
+									"submitter_sample_id": "SAMPLE_REGISTRATION_1",
+									"specimen_tissue_source": "Pleural fluid",
+									"tumour_normal_designation": "Tumour",
+									"specimen_type": "Cell line - derived from normal",
+									"sample_type": "Other DNA enrichments"
+								},
+								{
+									"submitter_sample_id": "SAMPLE_REGISTRATION_2",
+									"specimen_tissue_source": "Seminal fluid",
+									"tumour_normal_designation": "Tumour",
+									"specimen_type": "Xenograft - derived from metastatic tumour",
+									"sample_type": "rRNA-depleted RNA"
+								},
+								{
+									"submitter_sample_id": "SAMPLE_REGISTRATION_3",
+									"specimen_tissue_source": "Seminal fluid",
+									"tumour_normal_designation": "Tumour",
+									"specimen_type": "Primary tumour",
+									"sample_type": "Protein"
+								}
+							],
+							"biomarkers": [
+								{
+									"id": "7c1d1cea-b53d-4a1f-8853-d16f8846654a",
+									"test_interval": 7,
+									"psa_level": 343,
+									"ca125": 58,
+									"cea": 9,
+									"er_status": "Cannot be determined",
+									"er_percent_positive": 19.1,
+									"her2_ish_status": "Unknown",
+									"her2_ihc_status": "Equivocal",
+									"pr_status": "Not applicable",
+									"pr_percent_positive": 17.9,
+									"hpv_ihc_status": "Not applicable",
+									"hpv_pcr_status": "Unknown",
+									"hpv_strain": [
+										"HPV68"
+									]
+								},
+								{
+									"id": "dadfcf52-6bf2-45d5-9776-79447fddd187",
+									"test_interval": 6,
+									"psa_level": 399,
+									"ca125": 73,
+									"cea": 8,
+									"er_status": "Unknown",
+									"er_percent_positive": 45.5,
+									"her2_ish_status": "Positive",
+									"her2_ihc_status": "Equivocal",
+									"pr_status": "Not applicable",
+									"pr_percent_positive": 52.5,
+									"hpv_ihc_status": "Not applicable",
+									"hpv_pcr_status": "Negative",
+									"hpv_strain": [
+										"HPV18"
+									]
+								}
+							]
+						},
+						{
+							"submitter_specimen_id": "SPECIMEN_2",
+							"pathological_tumour_staging_system": "AJCC 7th edition",
+							"pathological_t_category": "T4a",
+							"pathological_n_category": "N2a",
+							"pathological_m_category": "M1d",
+							"pathological_stage_group": "Stage IIIC2",
+							"specimen_collection_date": "2020-06-30",
+							"specimen_storage": "Not Applicable",
+							"tumour_histological_type": "8980/2",
+							"specimen_anatomic_location": "C43.9",
+							"reference_pathology_confirmed_diagnosis": "No",
+							"reference_pathology_confirmed_tumour_presence": "Unknown",
+							"tumour_grading_system": "IASLC grading system",
+							"tumour_grade": "Grade Group 5",
+							"percent_tumour_cells_range": "20-50%",
+							"percent_tumour_cells_measurement_method": "Unknown",
+							"specimen_processing": "Fresh",
+							"specimen_laterality": "Not applicable",
+							"sample_registrations": [
+								{
+									"submitter_sample_id": "SAMPLE_REGISTRATION_4",
+									"specimen_tissue_source": "Hydrocele fluid",
+									"tumour_normal_designation": "Tumour",
+									"specimen_type": "Normal",
+									"sample_type": "Other DNA enrichments"
+								},
+								{
+									"submitter_sample_id": "SAMPLE_REGISTRATION_5",
+									"specimen_tissue_source": "Sputum",
+									"tumour_normal_designation": "Tumour",
+									"specimen_type": "Normal",
+									"sample_type": "Total RNA"
+								},
+								{
+									"submitter_sample_id": "SAMPLE_REGISTRATION_6",
+									"specimen_tissue_source": "Cervical mucus",
+									"tumour_normal_designation": "Tumour",
+									"specimen_type": "Recurrent tumour",
+									"sample_type": "Total DNA"
+								}
+							],
+							"biomarkers": []
+						},
+						{
+							"submitter_specimen_id": "SPECIMEN_3",
+							"pathological_tumour_staging_system": "AJCC 7th edition",
+							"pathological_t_category": "T1a2",
+							"pathological_n_category": "N2c",
+							"pathological_m_category": "M1a(1)",
+							"pathological_stage_group": "Stage IIBE",
+							"specimen_collection_date": "2020-10-26",
+							"specimen_storage": "Frozen in vapour phase",
+							"tumour_histological_type": "8209/3",
+							"specimen_anatomic_location": "C43.9",
+							"reference_pathology_confirmed_diagnosis": "Not done",
+							"reference_pathology_confirmed_tumour_presence": "Yes",
+							"tumour_grading_system": "Nuclear grading system for DCIS",
+							"tumour_grade": "G3",
+							"percent_tumour_cells_range": "51-100%",
+							"percent_tumour_cells_measurement_method": "Image analysis",
+							"specimen_processing": "Formalin fixed - unbuffered",
+							"specimen_laterality": "Left",
+							"sample_registrations": [
+								{
+									"submitter_sample_id": "SAMPLE_REGISTRATION_7",
+									"specimen_tissue_source": "Vitreous fluid",
+									"tumour_normal_designation": "Tumour",
+									"specimen_type": "Metastatic tumour - metastasis to distant location",
+									"sample_type": "polyA+ RNA"
+								},
+								{
+									"submitter_sample_id": "SAMPLE_REGISTRATION_8",
+									"specimen_tissue_source": "Seminal fluid",
+									"tumour_normal_designation": "Normal",
+									"specimen_type": "Normal - tissue adjacent to primary tumour",
+									"sample_type": "Total DNA"
+								}
+							],
+							"biomarkers": []
+						}
+					],
+					"treatments": [
+						{
+							"submitter_treatment_id": "TREATMENT_1",
+							"is_primary_treatment": "Unknown",
+							"treatment_start_date": "2021-01",
+							"treatment_end_date": "2022-08",
+							"treatment_setting": "Mobilization",
+							"treatment_intent": "Screening",
+							"days_per_cycle": 4,
+							"number_of_cycles": 5,
+							"line_of_treatment": 5,
+							"status_of_treatment": "Other",
+							"treatment_type": [
+								"Bone marrow transplant",
+								"Photodynamic therapy"
+							],
+							"response_to_treatment": "Complete response",
+							"response_to_treatment_criteria_method": "Response Assessment in Neuro-Oncology (RANO)",
+							"chemotherapies": [
+								{
+									"id": "8f80ee9c-2025-476c-913d-81936c8ca89d",
+									"chemotherapy_drug_dose_units": "ug/m2",
+									"drug_reference_database": "PubChem",
+									"drug_name": "FLUOROURACIL",
+									"drug_reference_identifier": "87354",
+									"prescribed_cumulative_drug_dose": 150,
+									"actual_cumulative_drug_dose": 94
+								},
+								{
+									"id": "c6cdd49d-0e07-4626-baf7-c9abc4dce58f",
+									"chemotherapy_drug_dose_units": "ug/m2",
+									"drug_reference_database": "NCI Thesaurus",
+									"drug_name": "LEUCOVORIN",
+									"drug_reference_identifier": "876459",
+									"prescribed_cumulative_drug_dose": 4600,
+									"actual_cumulative_drug_dose": 66
+								},
+								{
+									"id": "f7afa472-2e94-4631-a16b-ea57611c5504",
+									"chemotherapy_drug_dose_units": "mg/m2",
+									"drug_reference_database": "PubChem",
+									"drug_name": "LIPOSOMAL IRINOTECAN",
+									"drug_reference_identifier": "7365837",
+									"prescribed_cumulative_drug_dose": 320,
+									"actual_cumulative_drug_dose": 60
+								}
+							],
+							"hormone_therapies": [],
+							"immunotherapies": [],
+							"radiation": null,
+							"surgery": null,
+							"followups": [
+								{
+									"date_of_followup": "2022-09",
+									"disease_status_at_followup": "Partial remission",
+									"relapse_type": "Progression (liquid tumours)",
+									"date_of_relapse": "2022-09",
+									"method_of_progression_status": "Imaging (procedure)",
+									"anatomic_site_progression_or_recurrence": "C10",
+									"recurrence_tumour_staging_system": [
+										"St Jude staging system",
+										"AJCC 6th edition",
+										"AJCC 7th edition"
+									],
+									"recurrence_t_category": "TX",
+									"recurrence_n_category": "N1a",
+									"recurrence_m_category": "M1b(0)",
+									"recurrence_stage_group": "Stage 1B",
+									"biomarkers": [
+										{
+											"id": "2e26ac90-42bc-4d2a-9420-7f495d6528ea",
+											"test_interval": 4,
+											"psa_level": 379,
+											"ca125": 106,
+											"cea": 4,
+											"er_status": "Cannot be determined",
+											"er_percent_positive": 18.3,
+											"her2_ish_status": "Negative",
+											"her2_ihc_status": "Equivocal",
+											"pr_status": "Unknown",
+											"pr_percent_positive": 65.2,
+											"hpv_ihc_status": "Not applicable",
+											"hpv_pcr_status": "Negative",
+											"hpv_strain": [
+												"HPV35"
+											]
+										},
+										{
+											"id": "94e08c6a-07ff-4764-975b-8e43e1bc1d9d",
+											"test_interval": 5,
+											"psa_level": 318,
+											"ca125": 78,
+											"cea": 13,
+											"er_status": "Negative",
+											"er_percent_positive": 12.4,
+											"her2_ish_status": "Equivocal",
+											"her2_ihc_status": "Negative",
+											"pr_status": "Unknown",
+											"pr_percent_positive": 11.0,
+											"hpv_ihc_status": "Negative",
+											"hpv_pcr_status": "Positive",
+											"hpv_strain": [
+												"HPV31",
+												"HPV68"
+											]
+										},
+										{
+											"id": "f9ea7806-5773-4f0f-a52f-0cad9406f981",
+											"test_interval": 8,
+											"psa_level": 328,
+											"ca125": 104,
+											"cea": 13,
+											"er_status": "Cannot be determined",
+											"er_percent_positive": 21.0,
+											"her2_ish_status": "Cannot be determined",
+											"her2_ihc_status": "Not applicable",
+											"pr_status": "Not applicable",
+											"pr_percent_positive": 32.7,
+											"hpv_ihc_status": "Cannot be determined",
+											"hpv_pcr_status": "Unknown",
+											"hpv_strain": [
+												"HPV18"
+											]
+										}
+									]
+								},
+								{
+									"date_of_followup": "2022-08",
+									"disease_status_at_followup": "Loco-regional progression",
+									"relapse_type": "Local recurrence and distant metastasis",
+									"date_of_relapse": "2022-06",
+									"method_of_progression_status": "Histopathology test (procedure)",
+									"anatomic_site_progression_or_recurrence": "C20",
+									"recurrence_tumour_staging_system": [
+										"AJCC 6th edition",
+										"AJCC 8th edition",
+										"Ann Arbor staging system"
+									],
+									"recurrence_t_category": "TX",
+									"recurrence_n_category": "N2mi",
+									"recurrence_m_category": "M1e",
+									"recurrence_stage_group": "Stage IIIC2",
+									"biomarkers": [
+										{
+											"id": "1a37b749-eecf-4be0-88cc-7e247e51a67f",
+											"test_interval": 5,
+											"psa_level": 351,
+											"ca125": 81,
+											"cea": 7,
+											"er_status": "Positive",
+											"er_percent_positive": 97.8,
+											"her2_ish_status": "Equivocal",
+											"her2_ihc_status": "Not applicable",
+											"pr_status": "Positive",
+											"pr_percent_positive": 32.9,
+											"hpv_ihc_status": "Unknown",
+											"hpv_pcr_status": "Not applicable",
+											"hpv_strain": [
+												"HPV73"
+											]
+										},
+										{
+											"id": "4e4c445f-5139-436b-979a-2d1fe377be80",
+											"test_interval": 8,
+											"psa_level": 326,
+											"ca125": 96,
+											"cea": 11,
+											"er_status": "Not applicable",
+											"er_percent_positive": 13.7,
+											"her2_ish_status": "Unknown",
+											"her2_ihc_status": "Positive",
+											"pr_status": "Cannot be determined",
+											"pr_percent_positive": 85.4,
+											"hpv_ihc_status": "Cannot be determined",
+											"hpv_pcr_status": "Positive",
+											"hpv_strain": [
+												"HPV68"
+											]
+										},
+										{
+											"id": "8a0af986-dc6d-4779-8f26-6988259614ae",
+											"test_interval": 7,
+											"psa_level": 212,
+											"ca125": 54,
+											"cea": 8,
+											"er_status": "Unknown",
+											"er_percent_positive": 5.3,
+											"her2_ish_status": "Unknown",
+											"her2_ihc_status": "Equivocal",
+											"pr_status": "Not applicable",
+											"pr_percent_positive": 74.3,
+											"hpv_ihc_status": "Negative",
+											"hpv_pcr_status": "Unknown",
+											"hpv_strain": [
+												"HPV68",
+												"HPV18"
+											]
+										}
+									]
+								},
+								{
+									"date_of_followup": "2022-09",
+									"disease_status_at_followup": "No evidence of disease",
+									"relapse_type": "Progression (liquid tumours)",
+									"date_of_relapse": "2022-05",
+									"method_of_progression_status": "Physical examination procedure (procedure)",
+									"anatomic_site_progression_or_recurrence": "C14",
+									"recurrence_tumour_staging_system": [
+										"International Neuroblastoma Staging System"
+									],
+									"recurrence_t_category": "T1b(m)",
+									"recurrence_n_category": "N4",
+									"recurrence_m_category": "M1",
+									"recurrence_stage_group": "Stage IIAS",
+									"biomarkers": []
+								}
+							],
+							"biomarkers": [
+								{
+									"id": "7c1d1cea-b53d-4a1f-8853-d16f8846654a",
+									"test_interval": 7,
+									"psa_level": 343,
+									"ca125": 58,
+									"cea": 9,
+									"er_status": "Cannot be determined",
+									"er_percent_positive": 19.1,
+									"her2_ish_status": "Unknown",
+									"her2_ihc_status": "Equivocal",
+									"pr_status": "Not applicable",
+									"pr_percent_positive": 17.9,
+									"hpv_ihc_status": "Not applicable",
+									"hpv_pcr_status": "Unknown",
+									"hpv_strain": [
+										"HPV68"
+									]
+								},
+								{
+									"id": "dadfcf52-6bf2-45d5-9776-79447fddd187",
+									"test_interval": 6,
+									"psa_level": 399,
+									"ca125": 73,
+									"cea": 8,
+									"er_status": "Unknown",
+									"er_percent_positive": 45.5,
+									"her2_ish_status": "Positive",
+									"her2_ihc_status": "Equivocal",
+									"pr_status": "Not applicable",
+									"pr_percent_positive": 52.5,
+									"hpv_ihc_status": "Not applicable",
+									"hpv_pcr_status": "Negative",
+									"hpv_strain": [
+										"HPV18"
+									]
+								}
+							]
+						},
+						{
+							"submitter_treatment_id": "TREATMENT_2",
+							"is_primary_treatment": "Yes",
+							"treatment_start_date": "2021-12",
+							"treatment_end_date": "2022-10",
+							"treatment_setting": "Conditioning",
+							"treatment_intent": "Palliative",
+							"days_per_cycle": 4,
+							"number_of_cycles": 3,
+							"line_of_treatment": 3,
+							"status_of_treatment": "Treatment stopped due to acute toxicity",
+							"treatment_type": [
+								"Radiation therapy",
+								"Other targeting molecular therapy",
+								"Hormonal therapy"
+							],
+							"response_to_treatment": "Major response",
+							"response_to_treatment_criteria_method": "Cheson CLL 2012 Oncology Response Criteria",
+							"chemotherapies": [
+								{
+									"id": "2549f292-8299-44f5-8e05-05776c4bf6e2",
+									"chemotherapy_drug_dose_units": "mg/m2",
+									"drug_reference_database": "NCI Thesaurus",
+									"drug_name": "FLUOROURACIL",
+									"drug_reference_identifier": "836754",
+									"prescribed_cumulative_drug_dose": 4600,
+									"actual_cumulative_drug_dose": 90
+								},
+								{
+									"id": "6014dcbf-2455-4767-b88a-5743f132206c",
+									"chemotherapy_drug_dose_units": "IU/kg",
+									"drug_reference_database": "PubChem",
+									"drug_name": "NIVOLUMAB",
+									"drug_reference_identifier": "7365837",
+									"prescribed_cumulative_drug_dose": 150,
+									"actual_cumulative_drug_dose": 111
+								}
+							],
+							"hormone_therapies": [],
+							"immunotherapies": [],
+							"radiation": null,
+							"surgery": null,
+							"followups": [
+								{
+									"date_of_followup": "2022-09",
+									"disease_status_at_followup": "Distant progression",
+									"relapse_type": "Biochemical progression",
+									"date_of_relapse": "2022-02",
+									"method_of_progression_status": "Imaging (procedure)",
+									"anatomic_site_progression_or_recurrence": "C18",
+									"recurrence_tumour_staging_system": [
+										"Ann Arbor staging system",
+										"SEER staging system"
+									],
+									"recurrence_t_category": "T3(m)",
+									"recurrence_n_category": "N1a(sn)",
+									"recurrence_m_category": "M1d",
+									"recurrence_stage_group": "Stage 1",
+									"biomarkers": []
+								},
+								{
+									"date_of_followup": "2022-09",
+									"disease_status_at_followup": "Relapse or recurrence",
+									"relapse_type": "Local recurrence and distant metastasis",
+									"date_of_relapse": "2022-11",
+									"method_of_progression_status": "Tumor marker measurement (procedure)",
+									"anatomic_site_progression_or_recurrence": "C13",
+									"recurrence_tumour_staging_system": [
+										"St Jude staging system"
+									],
+									"recurrence_t_category": "Tis(Paget)",
+									"recurrence_n_category": "N2",
+									"recurrence_m_category": "M1b",
+									"recurrence_stage_group": "Stage IIIBS",
+									"biomarkers": []
+								},
+								{
+									"date_of_followup": "2022-08",
+									"disease_status_at_followup": "Distant progression",
+									"relapse_type": "Local recurrence",
+									"date_of_relapse": "2022-02",
+									"method_of_progression_status": "Imaging (procedure)",
+									"anatomic_site_progression_or_recurrence": "C14",
+									"recurrence_tumour_staging_system": [
+										"St Jude staging system",
+										"AJCC 6th edition"
+									],
+									"recurrence_t_category": "T1b(m)",
+									"recurrence_n_category": "N0b (no biopsy)",
+									"recurrence_m_category": "M1d",
+									"recurrence_stage_group": "Stage IBES",
+									"biomarkers": []
+								}
+							],
+							"biomarkers": [
+								{
+									"id": "6a88626d-8499-4b1f-8211-dc4e63f6ef0e",
+									"test_interval": 7,
+									"psa_level": 207,
+									"ca125": 112,
+									"cea": 9,
+									"er_status": "Positive",
+									"er_percent_positive": 73.5,
+									"her2_ish_status": "Not applicable",
+									"her2_ihc_status": "Cannot be determined",
+									"pr_status": "Unknown",
+									"pr_percent_positive": 72.8,
+									"hpv_ihc_status": "Not applicable",
+									"hpv_pcr_status": "Negative",
+									"hpv_strain": [
+										"HPV51"
+									]
+								},
+								{
+									"id": "fff1ea1f-6af8-4741-a723-05ce29162e4e",
+									"test_interval": 7,
+									"psa_level": 327,
+									"ca125": 103,
+									"cea": 8,
+									"er_status": "Positive",
+									"er_percent_positive": 65.8,
+									"her2_ish_status": "Equivocal",
+									"her2_ihc_status": "Unknown",
+									"pr_status": "Not applicable",
+									"pr_percent_positive": 23.6,
+									"hpv_ihc_status": "Not applicable",
+									"hpv_pcr_status": "Cannot be determined",
+									"hpv_strain": [
+										"HPV33"
+									]
+								}
+							]
+						},
+						{
+							"submitter_treatment_id": "TREATMENT_3",
+							"is_primary_treatment": "Yes",
+							"treatment_start_date": "2021-09",
+							"treatment_end_date": "2022-10",
+							"treatment_setting": "Maintenance",
+							"treatment_intent": "Palliative",
+							"days_per_cycle": 4,
+							"number_of_cycles": 4,
+							"line_of_treatment": 3,
+							"status_of_treatment": "Physician decision (stopped or interrupted treatment)",
+							"treatment_type": [
+								"Bone marrow transplant",
+								"Other targeting molecular therapy",
+								"Radiation therapy"
+							],
+							"response_to_treatment": "Morphologic leukemia-free state",
+							"response_to_treatment_criteria_method": "iRECIST",
+							"chemotherapies": [
+								{
+									"id": "ea777f0a-32e7-43ea-b086-6faf59f04714",
+									"chemotherapy_drug_dose_units": "mg/m2",
+									"drug_reference_database": "PubChem",
+									"drug_name": "GEMCITABINE",
+									"drug_reference_identifier": "836754",
+									"prescribed_cumulative_drug_dose": 780,
+									"actual_cumulative_drug_dose": 78
+								}
+							],
+							"hormone_therapies": [],
+							"immunotherapies": [],
+							"radiation": null,
+							"surgery": null,
+							"followups": [
+								{
+									"date_of_followup": "2022-09",
+									"disease_status_at_followup": "Partial remission",
+									"relapse_type": "Local recurrence and distant metastasis",
+									"date_of_relapse": "2022-11",
+									"method_of_progression_status": "Histopathology test (procedure)",
+									"anatomic_site_progression_or_recurrence": "C19",
+									"recurrence_tumour_staging_system": [
+										"Rai staging system",
+										"AJCC 6th edition"
+									],
+									"recurrence_t_category": "Tis(DCIS)",
+									"recurrence_n_category": "N2mi",
+									"recurrence_m_category": "M1c(1)",
+									"recurrence_stage_group": "Stage IIAE",
+									"biomarkers": []
+								},
+								{
+									"date_of_followup": "2022-08",
+									"disease_status_at_followup": "Distant progression",
+									"relapse_type": "Local recurrence and distant metastasis",
+									"date_of_relapse": "2022-10",
+									"method_of_progression_status": "Laboratory data interpretation (procedure)",
+									"anatomic_site_progression_or_recurrence": "C10",
+									"recurrence_tumour_staging_system": [
+										"AJCC 6th edition",
+										"Lugano staging system",
+										"AJCC 7th edition"
+									],
+									"recurrence_t_category": "Tis(DCIS)",
+									"recurrence_n_category": "N1",
+									"recurrence_m_category": "M1a(1)",
+									"recurrence_stage_group": "Stage IEA",
+									"biomarkers": []
+								}
+							],
+							"biomarkers": []
+						}
+					],
+					"biomarkers": []
+				},
+				{
+					"submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_2",
+					"date_of_diagnosis": "2019-03",
+					"cancer_type_code": "C02.2",
+					"basis_of_diagnosis": "Clinical investigation",
+					"lymph_nodes_examined_status": "Not applicable",
+					"lymph_nodes_examined_method": "Physical palpation of patient",
+					"number_lymph_nodes_positive": 5,
+					"clinical_tumour_staging_system": "International Neuroblastoma Staging System",
+					"clinical_t_category": "T1b",
+					"clinical_n_category": "N2",
+					"clinical_m_category": "M1d(1)",
+					"clinical_stage_group": "Stage Ms",
+					"laterality": "Left",
+					"specimens": [
+						{
+							"submitter_specimen_id": "SPECIMEN_4",
+							"pathological_tumour_staging_system": "SEER staging system",
+							"pathological_t_category": "T2a2",
+							"pathological_n_category": "N0(i+)",
+							"pathological_m_category": "M1b",
+							"pathological_stage_group": "Stage IAS",
+							"specimen_collection_date": "2021-05-10",
+							"specimen_storage": "Unknown",
+							"tumour_histological_type": "8980/9",
+							"specimen_anatomic_location": "C43.9",
+							"reference_pathology_confirmed_diagnosis": "Yes",
+							"reference_pathology_confirmed_tumour_presence": "Not done",
+							"tumour_grading_system": "Grading system for GISTs",
+							"tumour_grade": "Low",
+							"percent_tumour_cells_range": "0-19%",
+							"percent_tumour_cells_measurement_method": "Unknown",
+							"specimen_processing": "Cryopreservation of live cells in liquid nitrogen",
+							"specimen_laterality": "Right",
+							"sample_registrations": [
+								{
+									"submitter_sample_id": "SAMPLE_REGISTRATION_10",
+									"specimen_tissue_source": "Pleural fluid",
+									"tumour_normal_designation": "Normal",
+									"specimen_type": "Metastatic tumour - metastasis local to lymph node",
+									"sample_type": "Total DNA"
+								},
+								{
+									"submitter_sample_id": "SAMPLE_REGISTRATION_9",
+									"specimen_tissue_source": "Buffy coat",
+									"tumour_normal_designation": "Normal",
+									"specimen_type": "Metastatic tumour - metastasis to distant location",
+									"sample_type": "rRNA-depleted RNA"
+								}
+							],
+							"biomarkers": []
+						},
+						{
+							"submitter_specimen_id": "SPECIMEN_5",
+							"pathological_tumour_staging_system": "AJCC 6th edition",
+							"pathological_t_category": "Tis(DCIS)",
+							"pathological_n_category": "N0a",
+							"pathological_m_category": "M1c",
+							"pathological_stage_group": "Stage II bulky",
+							"specimen_collection_date": "2021-02-13",
+							"specimen_storage": "Unknown",
+							"tumour_histological_type": "8620/9",
+							"specimen_anatomic_location": "C34.9",
+							"reference_pathology_confirmed_diagnosis": "No",
+							"reference_pathology_confirmed_tumour_presence": "Yes",
+							"tumour_grading_system": "Gleason grade group system",
+							"tumour_grade": "Grade Group 5",
+							"percent_tumour_cells_range": "20-50%",
+							"percent_tumour_cells_measurement_method": "Image analysis",
+							"specimen_processing": "Cryopreservation in dry ice (dead tissue)",
+							"specimen_laterality": "Not applicable",
+							"sample_registrations": [
+								{
+									"submitter_sample_id": "SAMPLE_REGISTRATION_11",
+									"specimen_tissue_source": "Buffy coat",
+									"tumour_normal_designation": "Tumour",
+									"specimen_type": "Normal - tissue adjacent to primary tumour",
+									"sample_type": "polyA+ RNA"
+								}
+							],
+							"biomarkers": []
+						},
+						{
+							"submitter_specimen_id": "SPECIMEN_6",
+							"pathological_tumour_staging_system": "AJCC 7th edition",
+							"pathological_t_category": "T3e",
+							"pathological_n_category": "N3a",
+							"pathological_m_category": "M1",
+							"pathological_stage_group": "Stage IVAS",
+							"specimen_collection_date": "2020-10-18",
+							"specimen_storage": "RNA later frozen",
+							"tumour_histological_type": "8620/9",
+							"specimen_anatomic_location": "C67.6",
+							"reference_pathology_confirmed_diagnosis": "Yes",
+							"reference_pathology_confirmed_tumour_presence": "No",
+							"tumour_grading_system": "Four-tier grading system",
+							"tumour_grade": "Grade 4",
+							"percent_tumour_cells_range": "51-100%",
+							"percent_tumour_cells_measurement_method": "Pathology estimate by percent nuclei",
+							"specimen_processing": "Cryopreservation in dry ice (dead tissue)",
+							"specimen_laterality": "Unknown",
+							"sample_registrations": [
+								{
+									"submitter_sample_id": "SAMPLE_REGISTRATION_12",
+									"specimen_tissue_source": "Amniotic fluid",
+									"tumour_normal_designation": "Tumour",
+									"specimen_type": "Primary tumour - additional new primary",
+									"sample_type": "Protein"
+								}
+							],
+							"biomarkers": []
+						}
+					],
+					"treatments": [
+						{
+							"submitter_treatment_id": "TREATMENT_4",
+							"is_primary_treatment": "No",
+							"treatment_start_date": "2021-09",
+							"treatment_end_date": "2022-09",
+							"treatment_setting": "Radiosensitization",
+							"treatment_intent": "Guidance",
+							"days_per_cycle": 4,
+							"number_of_cycles": 5,
+							"line_of_treatment": 5,
+							"status_of_treatment": "Physician decision (stopped or interrupted treatment)",
+							"treatment_type": [
+								"Surgery",
+								"Radiation therapy"
+							],
+							"response_to_treatment": "Physician assessed partial response",
+							"response_to_treatment_criteria_method": "Response Assessment in Neuro-Oncology (RANO)",
+							"chemotherapies": [
+								{
+									"id": "0295a92b-a97e-4821-91d0-808284ee6ba8",
+									"chemotherapy_drug_dose_units": "mg/m2",
+									"drug_reference_database": "PubChem",
+									"drug_name": "NIVOLUMAB",
+									"drug_reference_identifier": "87354",
+									"prescribed_cumulative_drug_dose": 150,
+									"actual_cumulative_drug_dose": 111
+								}
+							],
+							"hormone_therapies": [],
+							"immunotherapies": [],
+							"radiation": null,
+							"surgery": null,
+							"followups": [
+								{
+									"date_of_followup": "2022-09",
+									"disease_status_at_followup": "Loco-regional progression",
+									"relapse_type": "Local recurrence",
+									"date_of_relapse": "2022-05",
+									"method_of_progression_status": "Assessment of symptom control (procedure)",
+									"anatomic_site_progression_or_recurrence": "C12",
+									"recurrence_tumour_staging_system": [
+										"Revised International staging system (RISS)"
+									],
+									"recurrence_t_category": "T2a",
+									"recurrence_n_category": "NX",
+									"recurrence_m_category": "M1b",
+									"recurrence_stage_group": "Stage IVES",
+									"biomarkers": []
+								},
+								{
+									"date_of_followup": "2022-10",
+									"disease_status_at_followup": "Progression not otherwise specified",
+									"relapse_type": "Local recurrence and distant metastasis",
+									"date_of_relapse": "2022-10",
+									"method_of_progression_status": "Imaging (procedure)",
+									"anatomic_site_progression_or_recurrence": "C17",
+									"recurrence_tumour_staging_system": [
+										"International Neuroblastoma Risk Group Staging System",
+										"AJCC 7th edition"
+									],
+									"recurrence_t_category": "Tis(LCIS)",
+									"recurrence_n_category": "N0(i+)",
+									"recurrence_m_category": "M1e",
+									"recurrence_stage_group": "Stage 3",
+									"biomarkers": []
+								}
+							],
+							"biomarkers": []
+						},
+						{
+							"submitter_treatment_id": "TREATMENT_5",
+							"is_primary_treatment": "No",
+							"treatment_start_date": "2021-05",
+							"treatment_end_date": "2022-05",
+							"treatment_setting": "Conditioning",
+							"treatment_intent": "Curative",
+							"days_per_cycle": 5,
+							"number_of_cycles": 5,
+							"line_of_treatment": 1,
+							"status_of_treatment": "Treatment stopped due to acute toxicity",
+							"treatment_type": [
+								"Surgery",
+								"Radiation therapy"
+							],
+							"response_to_treatment": "Stable disease",
+							"response_to_treatment_criteria_method": "Response Assessment in Neuro-Oncology (RANO)",
+							"chemotherapies": [],
+							"hormone_therapies": [
+								{
+									"id": "647f637f-b4d5-48cc-b1ac-f0a5972294c5",
+									"hormone_drug_dose_units": "ug/m2",
+									"drug_reference_database": "PubChem",
+									"drug_name": "degarelix",
+									"drug_reference_identifier": "46475",
+									"prescribed_cumulative_drug_dose": 179,
+									"actual_cumulative_drug_dose": 97
+								},
+								{
+									"id": "96c318fd-1756-4fd9-bf78-20fc51b97600",
+									"hormone_drug_dose_units": "IU/kg",
+									"drug_reference_database": "RxNorm",
+									"drug_name": "leuprolide",
+									"drug_reference_identifier": "258494",
+									"prescribed_cumulative_drug_dose": 160,
+									"actual_cumulative_drug_dose": 73
+								},
+								{
+									"id": "e155a0e5-f6f7-4866-8ecb-353f9e04c444",
+									"hormone_drug_dose_units": "mg/m2",
+									"drug_reference_database": "PubChem",
+									"drug_name": "degarelix",
+									"drug_reference_identifier": "258494",
+									"prescribed_cumulative_drug_dose": 106,
+									"actual_cumulative_drug_dose": 114
+								}
+							],
+							"immunotherapies": [],
+							"radiation": null,
+							"surgery": null,
+							"followups": [
+								{
+									"date_of_followup": "2022-08",
+									"disease_status_at_followup": "Partial remission",
+									"relapse_type": "Distant recurrence/metastasis",
+									"date_of_relapse": "2021-12",
+									"method_of_progression_status": "Laboratory data interpretation (procedure)",
+									"anatomic_site_progression_or_recurrence": "C15",
+									"recurrence_tumour_staging_system": [
+										"Durie-Salmon staging system",
+										"Rai staging system",
+										"Lugano staging system"
+									],
+									"recurrence_t_category": "Tis(Paget's)",
+									"recurrence_n_category": "N0a",
+									"recurrence_m_category": "MX",
+									"recurrence_stage_group": "Stage IBES",
+									"biomarkers": []
+								}
+							],
+							"biomarkers": []
+						},
+						{
+							"submitter_treatment_id": "TREATMENT_6",
+							"is_primary_treatment": "Unknown",
+							"treatment_start_date": "2021-04",
+							"treatment_end_date": "2022-10",
+							"treatment_setting": "Neoadjuvant",
+							"treatment_intent": "Guidance",
+							"days_per_cycle": 3,
+							"number_of_cycles": 3,
+							"line_of_treatment": 1,
+							"status_of_treatment": "Unknown",
+							"treatment_type": [
+								"Radiation therapy",
+								"Surgery"
+							],
+							"response_to_treatment": "Immune partial response (iPR)",
+							"response_to_treatment_criteria_method": "Response Assessment in Neuro-Oncology (RANO)",
+							"chemotherapies": [],
+							"hormone_therapies": [
+								{
+									"id": "713ce998-d0af-4346-a121-da90cf80f319",
+									"hormone_drug_dose_units": "g/m2",
+									"drug_reference_database": "NCI Thesaurus",
+									"drug_name": "triptorelin",
+									"drug_reference_identifier": "258494",
+									"prescribed_cumulative_drug_dose": 76,
+									"actual_cumulative_drug_dose": 156
+								},
+								{
+									"id": "cf5ff763-2110-4ab0-8fcb-3aa25206c7f3",
+									"hormone_drug_dose_units": "IU/m2",
+									"drug_reference_database": "PubChem",
+									"drug_name": "leuprolide",
+									"drug_reference_identifier": "258494",
+									"prescribed_cumulative_drug_dose": 71,
+									"actual_cumulative_drug_dose": 92
+								}
+							],
+							"immunotherapies": [],
+							"radiation": null,
+							"surgery": null,
+							"followups": [
+								{
+									"date_of_followup": "2022-09",
+									"disease_status_at_followup": "Progression not otherwise specified",
+									"relapse_type": "Local recurrence and distant metastasis",
+									"date_of_relapse": "2022-09",
+									"method_of_progression_status": "Physical examination procedure (procedure)",
+									"anatomic_site_progression_or_recurrence": "C08",
+									"recurrence_tumour_staging_system": [
+										"St Jude staging system",
+										"Lugano staging system"
+									],
+									"recurrence_t_category": "T1b(s)",
+									"recurrence_n_category": "N0(mol+)",
+									"recurrence_m_category": "M1c",
+									"recurrence_stage_group": "Stage 1A",
+									"biomarkers": []
+								}
+							],
+							"biomarkers": []
+						}
+					],
+					"biomarkers": []
+				},
+				{
+					"submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_3",
+					"date_of_diagnosis": "2019-09",
+					"cancer_type_code": "C64.9",
+					"basis_of_diagnosis": "Clinical investigation",
+					"lymph_nodes_examined_status": "No lymph nodes found in resected specimen",
+					"lymph_nodes_examined_method": "Lymph node dissection/pathological exam",
+					"number_lymph_nodes_positive": 9,
+					"clinical_tumour_staging_system": "FIGO staging system",
+					"clinical_t_category": "T1d",
+					"clinical_n_category": "N1a(sn)",
+					"clinical_m_category": "M0(i+)",
+					"clinical_stage_group": "Stage IIE",
+					"laterality": "Left",
+					"specimens": [
+						{
+							"submitter_specimen_id": "SPECIMEN_7",
+							"pathological_tumour_staging_system": "AJCC 6th edition",
+							"pathological_t_category": "Tis(LCIS)",
+							"pathological_n_category": "N2b",
+							"pathological_m_category": "M1a(0)",
+							"pathological_stage_group": "Stage L1",
+							"specimen_collection_date": "2020-10-19",
+							"specimen_storage": "Frozen in -70 freezer",
+							"tumour_histological_type": "8830/6",
+							"specimen_anatomic_location": "C50.9",
+							"reference_pathology_confirmed_diagnosis": "Unknown",
+							"reference_pathology_confirmed_tumour_presence": "Not done",
+							"tumour_grading_system": "Four-tier grading system",
+							"tumour_grade": "G4",
+							"percent_tumour_cells_range": "0-19%",
+							"percent_tumour_cells_measurement_method": "Pathology estimate by percent nuclei",
+							"specimen_processing": "Cryopreservation of live cells in liquid nitrogen",
+							"specimen_laterality": "Unknown",
+							"sample_registrations": [
+								{
+									"submitter_sample_id": "SAMPLE_REGISTRATION_13",
+									"specimen_tissue_source": "Saliva",
+									"tumour_normal_designation": "Normal",
+									"specimen_type": "Recurrent tumour",
+									"sample_type": "ctDNA"
+								}
+							],
+							"biomarkers": []
+						},
+						{
+							"submitter_specimen_id": "SPECIMEN_8",
+							"pathological_tumour_staging_system": "Lugano staging system",
+							"pathological_t_category": "T4e",
+							"pathological_n_category": "N1b",
+							"pathological_m_category": "M1d",
+							"pathological_stage_group": "Stage IS",
+							"specimen_collection_date": "2020-02-29",
+							"specimen_storage": "Cut slide",
+							"tumour_histological_type": "8962/1",
+							"specimen_anatomic_location": "C43.1",
+							"reference_pathology_confirmed_diagnosis": "Not done",
+							"reference_pathology_confirmed_tumour_presence": "Not done",
+							"tumour_grading_system": "Grading system for GISTs",
+							"tumour_grade": "GX",
+							"percent_tumour_cells_range": "0-19%",
+							"percent_tumour_cells_measurement_method": "Pathology estimate by percent nuclei",
+							"specimen_processing": "Cryopreservation in dry ice (dead tissue)",
+							"specimen_laterality": "Left",
+							"sample_registrations": [
+								{
+									"submitter_sample_id": "SAMPLE_REGISTRATION_14",
+									"specimen_tissue_source": "Urine",
+									"tumour_normal_designation": "Normal",
+									"specimen_type": "Xenograft - derived from metastatic tumour",
+									"sample_type": "Total RNA"
+								}
+							],
+							"biomarkers": []
+						}
+					],
+					"treatments": [
+						{
+							"submitter_treatment_id": "TREATMENT_7",
+							"is_primary_treatment": "No",
+							"treatment_start_date": "2021-04",
+							"treatment_end_date": "2022-03",
+							"treatment_setting": "Mobilization",
+							"treatment_intent": "Curative",
+							"days_per_cycle": 3,
+							"number_of_cycles": 5,
+							"line_of_treatment": 3,
+							"status_of_treatment": "Other",
+							"treatment_type": [
+								"Chemotherapy",
+								"Hormonal therapy"
+							],
+							"response_to_treatment": "Immune complete response (iCR)",
+							"response_to_treatment_criteria_method": "iRECIST",
+							"chemotherapies": [],
+							"hormone_therapies": [
+								{
+									"id": "5f4d5a8f-489d-4853-960f-f82883940e39",
+									"hormone_drug_dose_units": "g/m2",
+									"drug_reference_database": "PubChem",
+									"drug_name": "goserelin",
+									"drug_reference_identifier": "557845",
+									"prescribed_cumulative_drug_dose": 187,
+									"actual_cumulative_drug_dose": 133
+								}
+							],
+							"immunotherapies": [],
+							"radiation": null,
+							"surgery": null,
+							"followups": [
+								{
+									"date_of_followup": "2022-09",
+									"disease_status_at_followup": "Complete remission",
+									"relapse_type": "Progression (liquid tumours)",
+									"date_of_relapse": "2022-04",
+									"method_of_progression_status": "Tumor marker measurement (procedure)",
+									"anatomic_site_progression_or_recurrence": "C09",
+									"recurrence_tumour_staging_system": [
+										"FIGO staging system",
+										"International Neuroblastoma Staging System",
+										"Rai staging system"
+									],
+									"recurrence_t_category": "T2a",
+									"recurrence_n_category": "N0b (no biopsy)",
+									"recurrence_m_category": "M1e",
+									"recurrence_stage_group": "Stage IIIAE",
+									"biomarkers": []
+								}
+							],
+							"biomarkers": []
+						},
+						{
+							"submitter_treatment_id": "TREATMENT_8",
+							"is_primary_treatment": "Unknown",
+							"treatment_start_date": "2021-08",
+							"treatment_end_date": "2022-01",
+							"treatment_setting": "Induction",
+							"treatment_intent": "Palliative",
+							"days_per_cycle": 3,
+							"number_of_cycles": 5,
+							"line_of_treatment": 1,
+							"status_of_treatment": "Unknown",
+							"treatment_type": [
+								"Hormonal therapy"
+							],
+							"response_to_treatment": "Immune confirmed progressive disease (iCPD)",
+							"response_to_treatment_criteria_method": "RECIST 1.1",
+							"chemotherapies": [],
+							"hormone_therapies": [
+								{
+									"id": "fcc3ea6a-2f16-4d9f-8a5b-e53803e4ba8b",
+									"hormone_drug_dose_units": "IU/m2",
+									"drug_reference_database": "RxNorm",
+									"drug_name": "exemestane",
+									"drug_reference_identifier": "223986",
+									"prescribed_cumulative_drug_dose": 124,
+									"actual_cumulative_drug_dose": 134
+								}
+							],
+							"immunotherapies": [],
+							"radiation": null,
+							"surgery": null,
+							"followups": [
+								{
+									"date_of_followup": "2022-10",
+									"disease_status_at_followup": "Partial remission",
+									"relapse_type": "Local recurrence",
+									"date_of_relapse": "2022-07",
+									"method_of_progression_status": "Tumor marker measurement (procedure)",
+									"anatomic_site_progression_or_recurrence": "C03",
+									"recurrence_tumour_staging_system": [
+										"AJCC 7th edition",
+										"AJCC 8th edition",
+										"FIGO staging system"
+									],
+									"recurrence_t_category": "T2",
+									"recurrence_n_category": "N1",
+									"recurrence_m_category": "M1a(1)",
+									"recurrence_stage_group": "Stage IAS",
+									"biomarkers": []
+								}
+							],
+							"biomarkers": []
+						}
+					],
+					"biomarkers": []
+				}
+			],
+			"comorbidities": [
+				{
+					"prior_malignancy": "Yes",
+					"laterality_of_prior_malignancy": "Right",
+					"age_at_comorbidity_diagnosis": 44,
+					"comorbidity_type_code": "C34.9",
+					"comorbidity_treatment_status": "Unknown",
+					"comorbidity_treatment": "Ablation"
+				},
+				{
+					"prior_malignancy": "Yes",
+					"laterality_of_prior_malignancy": "Unilateral, Side not specified",
+					"age_at_comorbidity_diagnosis": 46,
+					"comorbidity_type_code": "C43.9",
+					"comorbidity_treatment_status": "Yes",
+					"comorbidity_treatment": "Hormonal therapy"
+				},
+				{
+					"prior_malignancy": "No",
+					"laterality_of_prior_malignancy": "Unilateral, Side not specified",
+					"age_at_comorbidity_diagnosis": 40,
+					"comorbidity_type_code": "C02.1",
+					"comorbidity_treatment_status": "Yes",
+					"comorbidity_treatment": "Endoscopic therapy"
+				}
+			],
+			"exposures": [
+				{
+					"tobacco_smoking_status": "Current smoker",
+					"tobacco_type": [
+						"Unknown",
+						"Electronic cigarettes",
+						"Not applicable"
+					],
+					"pack_years_smoked": 280.0
+				},
+				{
+					"tobacco_smoking_status": "Not applicable",
+					"tobacco_type": [
+						"Chewing Tobacco",
+						"Pipe",
+						"Not applicable"
+					],
+					"pack_years_smoked": 138.0
+				},
+				{
+					"tobacco_smoking_status": "Not applicable",
+					"tobacco_type": [
+						"Cigar",
+						"Waterpipe",
+						"Electronic cigarettes"
+					],
+					"pack_years_smoked": 141.0
+				}
+			],
+			"biomarkers": []
+		},
+		{
+			"submitter_donor_id": "DONOR_10",
+			"program_id": "SYNTHETIC-2",
+			"lost_to_followup_after_clinical_event_identifier": "",
+			"lost_to_followup_reason": "Not applicable",
+			"date_alive_after_lost_to_followup": "2022-03",
+			"is_deceased": true,
+			"cause_of_death": "Unknown",
+			"date_of_birth": "1987-09",
+			"date_of_death": "2015-09",
+			"gender": "Woman",
+			"sex_at_birth": "Other",
+			"primary_site": [
+				"Esophagus",
+				"Base of tongue",
+				"Nasal cavity and middle ear"
+			],
+			"primary_diagnoses": [
+				{
+					"submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_16",
+					"date_of_diagnosis": "2019-10",
+					"cancer_type_code": "C43.9",
+					"basis_of_diagnosis": "Histology of a primary tumour",
+					"lymph_nodes_examined_status": "No lymph nodes found in resected specimen",
+					"lymph_nodes_examined_method": "Physical palpation of patient",
+					"number_lymph_nodes_positive": 10,
+					"clinical_tumour_staging_system": "Binet staging system",
+					"clinical_t_category": "T4b",
+					"clinical_n_category": "N0(mol-)",
+					"clinical_m_category": "M1a(1)",
+					"clinical_stage_group": "Stage IBS",
+					"laterality": "Bilateral",
+					"specimens": [
+						{
+							"submitter_specimen_id": "SPECIMEN_22",
+							"pathological_tumour_staging_system": "Durie-Salmon staging system",
+							"pathological_t_category": "T3e",
+							"pathological_n_category": "N0(mol+)",
+							"pathological_m_category": "M0",
+							"pathological_stage_group": "Stage IIBES",
+							"specimen_collection_date": "2021-04-20",
+							"specimen_storage": "Paraffin block",
+							"tumour_histological_type": "8124/9",
+							"specimen_anatomic_location": "C43.9",
+							"reference_pathology_confirmed_diagnosis": "Unknown",
+							"reference_pathology_confirmed_tumour_presence": "Not done",
+							"tumour_grading_system": "Scarff-Bloom-Richardson grading system",
+							"tumour_grade": "Grade Group 3",
+							"percent_tumour_cells_range": "20-50%",
+							"percent_tumour_cells_measurement_method": "Image analysis",
+							"specimen_processing": "Other",
+							"specimen_laterality": "Right",
+							"sample_registrations": [
+								{
+									"submitter_sample_id": "SAMPLE_REGISTRATION_28",
+									"specimen_tissue_source": "Venous blood",
+									"tumour_normal_designation": "Tumour",
+									"specimen_type": "Primary tumour - adjacent to normal",
+									"sample_type": "Total RNA"
+								}
+							],
+							"biomarkers": []
+						}
+					],
+					"treatments": [
+						{
+							"submitter_treatment_id": "TREATMENT_22",
+							"is_primary_treatment": "Yes",
+							"treatment_start_date": "2021-10",
+							"treatment_end_date": "2022-07",
+							"treatment_setting": "Neoadjuvant",
+							"treatment_intent": "Diagnostic",
+							"days_per_cycle": 6,
+							"number_of_cycles": 4,
+							"line_of_treatment": 1,
+							"status_of_treatment": "Treatment incomplete due to technical or organizational problems",
+							"treatment_type": [
+								"Surgery"
+							],
+							"response_to_treatment": "Partial response",
+							"response_to_treatment_criteria_method": "Response Assessment in Neuro-Oncology (RANO)",
+							"chemotherapies": [],
+							"hormone_therapies": [],
+							"immunotherapies": [],
+							"radiation": null,
+							"surgery": {
+								"id": "66c02fc0-08d5-497a-8c40-8be12e9819a9",
+								"surgery_type": "Pneumonectomy",
+								"surgery_site": "C14",
+								"surgery_location": "Primary",
+								"tumour_focality": "Unifocal",
+								"residual_tumour_classification": "R2",
+								"margin_types_involved": [
+									"Unknown"
+								],
+								"margin_types_not_involved": [
+									"Circumferential resection margin"
+								],
+								"margin_types_not_assessed": [
+									"Distal margin",
+									"Proximal margin"
+								],
+								"lymphovascular_invasion": "Unknown",
+								"perineural_invasion": "Unknown",
+								"tumour_length": 3,
+								"tumour_width": 5,
+								"greatest_dimension_tumour": 5,
+								"submitter_specimen_id": null
+							},
+							"followups": [
+								{
+									"date_of_followup": "2022-09",
+									"disease_status_at_followup": "Stable",
+									"relapse_type": "Progression (liquid tumours)",
+									"date_of_relapse": "2021-11",
+									"method_of_progression_status": "Physical examination procedure (procedure)",
+									"anatomic_site_progression_or_recurrence": "C06",
+									"recurrence_tumour_staging_system": [
+										"Rai staging system",
+										"International Neuroblastoma Risk Group Staging System",
+										"AJCC 8th edition"
+									],
+									"recurrence_t_category": "T2a2",
+									"recurrence_n_category": "N0a",
+									"recurrence_m_category": "MX",
+									"recurrence_stage_group": "Stage IAES",
+									"biomarkers": []
+								}
+							],
+							"biomarkers": []
+						}
+					],
+					"biomarkers": []
+				}
+			],
+			"comorbidities": [],
+			"exposures": [],
+			"biomarkers": []
+		},
+		{
+			"submitter_donor_id": "DONOR_2",
+			"program_id": "SYNTHETIC-1",
+			"lost_to_followup_after_clinical_event_identifier": "",
+			"lost_to_followup_reason": "Discharged to palliative care",
+			"date_alive_after_lost_to_followup": "2022-10",
+			"is_deceased": false,
+			"cause_of_death": "Died of other reasons",
+			"date_of_birth": "1994-06",
+			"date_of_death": null,
+			"gender": "Man",
+			"sex_at_birth": "Male",
+			"primary_site": [
+				"Bronchus and lung",
+				"Larynx",
+				"Pancreas"
+			],
+			"primary_diagnoses": [
+				{
+					"submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_4",
+					"date_of_diagnosis": "2019-09",
+					"cancer_type_code": "C04.9",
+					"basis_of_diagnosis": "Clinical investigation",
+					"lymph_nodes_examined_status": "Not applicable",
+					"lymph_nodes_examined_method": "Physical palpation of patient",
+					"number_lymph_nodes_positive": 8,
+					"clinical_tumour_staging_system": "International Neuroblastoma Risk Group Staging System",
+					"clinical_t_category": "T4a",
+					"clinical_n_category": "N0",
+					"clinical_m_category": "M1b(1)",
+					"clinical_stage_group": "Stage IIA1",
+					"laterality": "Unknown",
+					"specimens": [
+						{
+							"submitter_specimen_id": "SPECIMEN_10",
+							"pathological_tumour_staging_system": "Rai staging system",
+							"pathological_t_category": "TX",
+							"pathological_n_category": "N0",
+							"pathological_m_category": "M1d(1)",
+							"pathological_stage_group": "Stage 1",
+							"specimen_collection_date": "2020-12-26",
+							"specimen_storage": "Cut slide",
+							"tumour_histological_type": "8630/9",
+							"specimen_anatomic_location": "C34.9",
+							"reference_pathology_confirmed_diagnosis": "Unknown",
+							"reference_pathology_confirmed_tumour_presence": "Yes",
+							"tumour_grading_system": "Nuclear grading system for DCIS",
+							"tumour_grade": "High grade",
+							"percent_tumour_cells_range": "51-100%",
+							"percent_tumour_cells_measurement_method": "Pathology estimate by percent nuclei",
+							"specimen_processing": "Cryopreservation of live cells in liquid nitrogen",
+							"specimen_laterality": "Right",
+							"sample_registrations": [
+								{
+									"submitter_sample_id": "SAMPLE_REGISTRATION_16",
+									"specimen_tissue_source": "Bile",
+									"tumour_normal_designation": "Normal",
+									"specimen_type": "Metastatic tumour - additional metastatic",
+									"sample_type": "polyA+ RNA"
+								}
+							],
+							"biomarkers": []
+						},
+						{
+							"submitter_specimen_id": "SPECIMEN_9",
+							"pathological_tumour_staging_system": "AJCC 6th edition",
+							"pathological_t_category": "T4b",
+							"pathological_n_category": "N0a (biopsy)",
+							"pathological_m_category": "M1a(0)",
+							"pathological_stage_group": "Stage IIID",
+							"specimen_collection_date": "2021-07-29",
+							"specimen_storage": "RNA later frozen",
+							"tumour_histological_type": "8973/2",
+							"specimen_anatomic_location": "C43.9",
+							"reference_pathology_confirmed_diagnosis": "Unknown",
+							"reference_pathology_confirmed_tumour_presence": "Unknown",
+							"tumour_grading_system": "FNCLCC grading system",
+							"tumour_grade": "Grade 2",
+							"percent_tumour_cells_range": "20-50%",
+							"percent_tumour_cells_measurement_method": "Pathology estimate by percent nuclei",
+							"specimen_processing": "Formalin fixed - unbuffered",
+							"specimen_laterality": "Not applicable",
+							"sample_registrations": [
+								{
+									"submitter_sample_id": "SAMPLE_REGISTRATION_15",
+									"specimen_tissue_source": "Blood derived - peripheral blood",
+									"tumour_normal_designation": "Tumour",
+									"specimen_type": "Recurrent tumour",
+									"sample_type": "Total RNA"
+								}
+							],
+							"biomarkers": []
+						}
+					],
+					"treatments": [
+						{
+							"submitter_treatment_id": "TREATMENT_10",
+							"is_primary_treatment": "Unknown",
+							"treatment_start_date": "2021-08",
+							"treatment_end_date": "2022-10",
+							"treatment_setting": "Salvage",
+							"treatment_intent": "Forensic",
+							"days_per_cycle": 1,
+							"number_of_cycles": 5,
+							"line_of_treatment": 5,
+							"status_of_treatment": "Not applicable",
+							"treatment_type": [
+								"Radiation therapy",
+								"Bone marrow transplant",
+								"No treatment"
+							],
+							"response_to_treatment": "No evidence of disease (NED)",
+							"response_to_treatment_criteria_method": "Physician Assessed Response Criteria",
+							"chemotherapies": [],
+							"hormone_therapies": [],
+							"immunotherapies": [],
+							"radiation": {
+								"id": "428c9f2b-326a-45c0-bad0-762ed66947cd",
+								"radiation_therapy_modality": "Teleradiotherapy protons (procedure)",
+								"radiation_therapy_type": "Internal",
+								"anatomical_site_irradiated": "Finger (Including Thumbs)",
+								"radiation_therapy_fractions": 30,
+								"radiation_therapy_dosage": 66,
+								"radiation_boost": true,
+								"reference_radiation_treatment_id": "REFERENCE_RADIATION_TREATMENT_2"
+							},
+							"surgery": null,
+							"followups": [
+								{
+									"date_of_followup": "2022-08",
+									"disease_status_at_followup": "Relapse or recurrence",
+									"relapse_type": "Progression (liquid tumours)",
+									"date_of_relapse": "2022-11",
+									"method_of_progression_status": "Assessment of symptom control (procedure)",
+									"anatomic_site_progression_or_recurrence": "C07",
+									"recurrence_tumour_staging_system": [
+										"Ann Arbor staging system"
+									],
+									"recurrence_t_category": "T4",
+									"recurrence_n_category": "NX",
+									"recurrence_m_category": "MX",
+									"recurrence_stage_group": "Stage IIEB",
+									"biomarkers": []
+								}
+							],
+							"biomarkers": []
+						},
+						{
+							"submitter_treatment_id": "TREATMENT_9",
+							"is_primary_treatment": "Unknown",
+							"treatment_start_date": "2021-07",
+							"treatment_end_date": "2022-11",
+							"treatment_setting": "Maintenance",
+							"treatment_intent": "Supportive",
+							"days_per_cycle": 7,
+							"number_of_cycles": 5,
+							"line_of_treatment": 4,
+							"status_of_treatment": "Treatment incomplete due to technical or organizational problems",
+							"treatment_type": [
+								"Surgery"
+							],
+							"response_to_treatment": "Immune confirmed progressive disease (iCPD)",
+							"response_to_treatment_criteria_method": "RECIST 1.1",
+							"chemotherapies": [],
+							"hormone_therapies": [],
+							"immunotherapies": [],
+							"radiation": {
+								"id": "5fef0b9d-9a33-4dad-8c1e-5c5ebff36d5e",
+								"radiation_therapy_modality": "Teleradiotherapy neutrons (procedure)",
+								"radiation_therapy_type": "Internal",
+								"anatomical_site_irradiated": "Left Maxilla",
+								"radiation_therapy_fractions": 30,
+								"radiation_therapy_dosage": 66,
+								"radiation_boost": true,
+								"reference_radiation_treatment_id": "REFERENCE_RADIATION_TREATMENT_1"
+							},
+							"surgery": null,
+							"followups": [
+								{
+									"date_of_followup": "2022-08",
+									"disease_status_at_followup": "Complete remission",
+									"relapse_type": "Local recurrence and distant metastasis",
+									"date_of_relapse": "2022-08",
+									"method_of_progression_status": "Laboratory data interpretation (procedure)",
+									"anatomic_site_progression_or_recurrence": "C11",
+									"recurrence_tumour_staging_system": [
+										"Ann Arbor staging system",
+										"AJCC 8th edition",
+										"Revised International staging system (RISS)"
+									],
+									"recurrence_t_category": "T2a1",
+									"recurrence_n_category": "N0",
+									"recurrence_m_category": "M1b(1)",
+									"recurrence_stage_group": "Stage Ms",
+									"biomarkers": []
+								}
+							],
+							"biomarkers": []
+						}
+					],
+					"biomarkers": [
+						{
+							"id": "954474e7-b8a5-4a4a-a839-82ebaa922d1f",
+							"test_interval": 6,
+							"psa_level": 304,
+							"ca125": 111,
+							"cea": 9,
+							"er_status": "Cannot be determined",
+							"er_percent_positive": 1.3,
+							"her2_ish_status": "Not applicable",
+							"her2_ihc_status": "Unknown",
+							"pr_status": "Negative",
+							"pr_percent_positive": 15.1,
+							"hpv_ihc_status": "Not applicable",
+							"hpv_pcr_status": "Positive",
+							"hpv_strain": [
+								"HPV35"
+							]
+						}
+					]
+				},
+				{
+					"submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_5",
+					"date_of_diagnosis": "2019-02",
+					"cancer_type_code": "C02.1",
+					"basis_of_diagnosis": "Clinical",
+					"lymph_nodes_examined_status": "Yes",
+					"lymph_nodes_examined_method": "Physical palpation of patient",
+					"number_lymph_nodes_positive": 15,
+					"clinical_tumour_staging_system": "Ann Arbor staging system",
+					"clinical_t_category": "T4",
+					"clinical_n_category": "N3b",
+					"clinical_m_category": "M1d(1)",
+					"clinical_stage_group": "Stage IAS",
+					"laterality": "Left",
+					"specimens": [
+						{
+							"submitter_specimen_id": "SPECIMEN_11",
+							"pathological_tumour_staging_system": "AJCC 6th edition",
+							"pathological_t_category": "T1b(s)",
+							"pathological_n_category": "N3c",
+							"pathological_m_category": "M1",
+							"pathological_stage_group": "Stage II bulky",
+							"specimen_collection_date": "2021-10-26",
+							"specimen_storage": "Frozen in liquid nitrogen",
+							"tumour_histological_type": "8980/9",
+							"specimen_anatomic_location": "C43.1",
+							"reference_pathology_confirmed_diagnosis": "Not done",
+							"reference_pathology_confirmed_tumour_presence": "Unknown",
+							"tumour_grading_system": "Gleason grade group system",
+							"tumour_grade": "Grade 4",
+							"percent_tumour_cells_range": "0-19%",
+							"percent_tumour_cells_measurement_method": "Pathology estimate by percent nuclei",
+							"specimen_processing": "Fresh",
+							"specimen_laterality": "Not applicable",
+							"sample_registrations": [
+								{
+									"submitter_sample_id": "SAMPLE_REGISTRATION_17",
+									"specimen_tissue_source": "Pancreatic fluid",
+									"tumour_normal_designation": "Normal",
+									"specimen_type": "Metastatic tumour - additional metastatic",
+									"sample_type": "Total DNA"
+								}
+							],
+							"biomarkers": []
+						}
+					],
+					"treatments": [
+						{
+							"submitter_treatment_id": "TREATMENT_11",
+							"is_primary_treatment": "Yes",
+							"treatment_start_date": "2021-11",
+							"treatment_end_date": "2022-06",
+							"treatment_setting": "Induction",
+							"treatment_intent": "Curative",
+							"days_per_cycle": 4,
+							"number_of_cycles": 5,
+							"line_of_treatment": 1,
+							"status_of_treatment": "Treatment stopped due to acute toxicity",
+							"treatment_type": [
+								"Hormonal therapy",
+								"Other targeting molecular therapy",
+								"Surgery"
+							],
+							"response_to_treatment": "Physician assessed stable disease",
+							"response_to_treatment_criteria_method": "RECIST 1.1",
+							"chemotherapies": [],
+							"hormone_therapies": [],
+							"immunotherapies": [],
+							"radiation": {
+								"id": "b1871537-ea64-4f96-9823-2b7b3fd9508a",
+								"radiation_therapy_modality": "Teleradiotherapy neutrons (procedure)",
+								"radiation_therapy_type": "External",
+								"anatomical_site_irradiated": "Left Scapula",
+								"radiation_therapy_fractions": 35,
+								"radiation_therapy_dosage": 70,
+								"radiation_boost": true,
+								"reference_radiation_treatment_id": "REFERENCE_RADIATION_TREATMENT_3"
+							},
+							"surgery": null,
+							"followups": [
+								{
+									"date_of_followup": "2022-11",
+									"disease_status_at_followup": "No evidence of disease",
+									"relapse_type": "Progression (liquid tumours)",
+									"date_of_relapse": "2022-05",
+									"method_of_progression_status": "Assessment of symptom control (procedure)",
+									"anatomic_site_progression_or_recurrence": "C11",
+									"recurrence_tumour_staging_system": [
+										"International Neuroblastoma Staging System",
+										"FIGO staging system"
+									],
+									"recurrence_t_category": "T4b(s)",
+									"recurrence_n_category": "N3",
+									"recurrence_m_category": "M1e",
+									"recurrence_stage_group": "Stage IIIS",
+									"biomarkers": []
+								}
+							],
+							"biomarkers": []
+						}
+					],
+					"biomarkers": []
+				},
+				{
+					"submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_6",
+					"date_of_diagnosis": "2019-10",
+					"cancer_type_code": "C43.1",
+					"basis_of_diagnosis": "Death certificate only",
+					"lymph_nodes_examined_status": "Not applicable",
+					"lymph_nodes_examined_method": "Physical palpation of patient",
+					"number_lymph_nodes_positive": 6,
+					"clinical_tumour_staging_system": "International Neuroblastoma Risk Group Staging System",
+					"clinical_t_category": "T2b",
+					"clinical_n_category": "N0a (biopsy)",
+					"clinical_m_category": "M0(i+)",
+					"clinical_stage_group": "Stage IIIC2",
+					"laterality": "Left",
+					"specimens": [
+						{
+							"submitter_specimen_id": "SPECIMEN_12",
+							"pathological_tumour_staging_system": "FIGO staging system",
+							"pathological_t_category": "Tis pd",
+							"pathological_n_category": "N1b",
+							"pathological_m_category": "M0(i+)",
+							"pathological_stage_group": "Stage IV",
+							"specimen_collection_date": "2020-07-07",
+							"specimen_storage": "Unknown",
+							"tumour_histological_type": "8962/1",
+							"specimen_anatomic_location": "C64.9",
+							"reference_pathology_confirmed_diagnosis": "Not done",
+							"reference_pathology_confirmed_tumour_presence": "No",
+							"tumour_grading_system": "Three-tier grading system",
+							"tumour_grade": "High",
+							"percent_tumour_cells_range": "0-19%",
+							"percent_tumour_cells_measurement_method": "Pathology estimate by percent nuclei",
+							"specimen_processing": "Cryopreservation of live cells in liquid nitrogen",
+							"specimen_laterality": "Left",
+							"sample_registrations": [
+								{
+									"submitter_sample_id": "SAMPLE_REGISTRATION_18",
+									"specimen_tissue_source": "Blood derived - bone marrow",
+									"tumour_normal_designation": "Tumour",
+									"specimen_type": "Cell line - derived from primary tumour",
+									"sample_type": "Other RNA fractions"
+								}
+							],
+							"biomarkers": []
+						}
+					],
+					"treatments": [
+						{
+							"submitter_treatment_id": "TREATMENT_12",
+							"is_primary_treatment": "Unknown",
+							"treatment_start_date": "2021-08",
+							"treatment_end_date": "2022-11",
+							"treatment_setting": "Mobilization",
+							"treatment_intent": "Forensic",
+							"days_per_cycle": 2,
+							"number_of_cycles": 5,
+							"line_of_treatment": 5,
+							"status_of_treatment": "Physician decision (stopped or interrupted treatment)",
+							"treatment_type": [
+								"Other targeting molecular therapy",
+								"Surgery"
+							],
+							"response_to_treatment": "Partial remission",
+							"response_to_treatment_criteria_method": "Physician Assessed Response Criteria",
+							"chemotherapies": [],
+							"hormone_therapies": [],
+							"immunotherapies": [],
+							"radiation": {
+								"id": "aa36ec92-564f-4d90-9781-76b430dd82f6",
+								"radiation_therapy_modality": "Megavoltage radiation therapy using photons (procedure)",
+								"radiation_therapy_type": "Internal",
+								"anatomical_site_irradiated": "Right Adrenal",
+								"radiation_therapy_fractions": 30,
+								"radiation_therapy_dosage": 70,
+								"radiation_boost": false,
+								"reference_radiation_treatment_id": ""
+							},
+							"surgery": null,
+							"followups": [
+								{
+									"date_of_followup": "2022-09",
+									"disease_status_at_followup": "Complete remission",
+									"relapse_type": "Biochemical progression",
+									"date_of_relapse": "2022-09",
+									"method_of_progression_status": "Laboratory data interpretation (procedure)",
+									"anatomic_site_progression_or_recurrence": "C15",
+									"recurrence_tumour_staging_system": [
+										"International Neuroblastoma Staging System"
+									],
+									"recurrence_t_category": "T0",
+									"recurrence_n_category": "N2",
+									"recurrence_m_category": "M1a(1)",
+									"recurrence_stage_group": "Stage IVBE",
+									"biomarkers": []
+								}
+							],
+							"biomarkers": []
+						}
+					],
+					"biomarkers": []
+				}
+			],
+			"comorbidities": [
+				{
+					"prior_malignancy": "Unknown",
+					"laterality_of_prior_malignancy": "Left",
+					"age_at_comorbidity_diagnosis": 57,
+					"comorbidity_type_code": "C04.0",
+					"comorbidity_treatment_status": "Yes",
+					"comorbidity_treatment": "Other targeting molecular therapy"
+				},
+				{
+					"prior_malignancy": "No",
+					"laterality_of_prior_malignancy": "Midline",
+					"age_at_comorbidity_diagnosis": 56,
+					"comorbidity_type_code": "C34.9",
+					"comorbidity_treatment_status": "Unknown",
+					"comorbidity_treatment": "Endoscopic therapy"
+				},
+				{
+					"prior_malignancy": "Yes",
+					"laterality_of_prior_malignancy": "Bilateral",
+					"age_at_comorbidity_diagnosis": 53,
+					"comorbidity_type_code": "C50.9",
+					"comorbidity_treatment_status": "No",
+					"comorbidity_treatment": "Surgery"
+				}
+			],
+			"exposures": [
+				{
+					"tobacco_smoking_status": "Current reformed smoker for > 15 years",
+					"tobacco_type": [
+						"Cigarettes",
+						"Electronic cigarettes"
+					],
+					"pack_years_smoked": 90.0
+				},
+				{
+					"tobacco_smoking_status": "Current smoker",
+					"tobacco_type": [
+						"Cigarettes",
+						"Snuff"
+					],
+					"pack_years_smoked": 266.0
+				}
+			],
+			"biomarkers": []
+		},
+		{
+			"submitter_donor_id": "DONOR_3",
+			"program_id": "SYNTHETIC-1",
+			"lost_to_followup_after_clinical_event_identifier": "",
+			"lost_to_followup_reason": "Discharged to palliative care",
+			"date_alive_after_lost_to_followup": "2022-01",
+			"is_deceased": true,
+			"cause_of_death": "Unknown",
+			"date_of_birth": "2005-08",
+			"date_of_death": "2011-08",
+			"gender": "Non-binary",
+			"sex_at_birth": "Female",
+			"primary_site": [
+				"Penis"
+			],
+			"primary_diagnoses": [
+				{
+					"submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_7",
+					"date_of_diagnosis": "2019-09",
+					"cancer_type_code": "C05.1",
+					"basis_of_diagnosis": "Death certificate only",
+					"lymph_nodes_examined_status": "Yes",
+					"lymph_nodes_examined_method": "Imaging",
+					"number_lymph_nodes_positive": 9,
+					"clinical_tumour_staging_system": "Ann Arbor staging system",
+					"clinical_t_category": "Tis(Paget)",
+					"clinical_n_category": "N3b",
+					"clinical_m_category": "M1a",
+					"clinical_stage_group": "Stage IIIES",
+					"laterality": "Right",
+					"specimens": [
+						{
+							"submitter_specimen_id": "SPECIMEN_13",
+							"pathological_tumour_staging_system": "AJCC 8th edition",
+							"pathological_t_category": "T1a(m)",
+							"pathological_n_category": "N3b",
+							"pathological_m_category": "M1b(0)",
+							"pathological_stage_group": "Stage A",
+							"specimen_collection_date": "2020-05-06",
+							"specimen_storage": "RNA later frozen",
+							"tumour_histological_type": "8124/9",
+							"specimen_anatomic_location": "C64.9",
+							"reference_pathology_confirmed_diagnosis": "Not done",
+							"reference_pathology_confirmed_tumour_presence": "Unknown",
+							"tumour_grading_system": "IASLC grading system",
+							"tumour_grade": "Grade Group 3",
+							"percent_tumour_cells_range": "20-50%",
+							"percent_tumour_cells_measurement_method": "Image analysis",
+							"specimen_processing": "Unknown",
+							"specimen_laterality": "Not applicable",
+							"sample_registrations": [
+								{
+									"submitter_sample_id": "SAMPLE_REGISTRATION_19",
+									"specimen_tissue_source": "Solid tissue",
+									"tumour_normal_designation": "Tumour",
+									"specimen_type": "Metastatic tumour",
+									"sample_type": "Other RNA fractions"
+								}
+							],
+							"biomarkers": []
+						}
+					],
+					"treatments": [
+						{
+							"submitter_treatment_id": "TREATMENT_13",
+							"is_primary_treatment": "No",
+							"treatment_start_date": "2021-03",
+							"treatment_end_date": "2022-09",
+							"treatment_setting": "Mobilization",
+							"treatment_intent": "Guidance",
+							"days_per_cycle": 6,
+							"number_of_cycles": 5,
+							"line_of_treatment": 4,
+							"status_of_treatment": "Treatment incomplete due to technical or organizational problems",
+							"treatment_type": [
+								"Chemotherapy",
+								"Stem cell transplant",
+								"Bone marrow transplant"
+							],
+							"response_to_treatment": "Partial remission",
+							"response_to_treatment_criteria_method": "Physician Assessed Response Criteria",
+							"chemotherapies": [],
+							"hormone_therapies": [],
+							"immunotherapies": [],
+							"radiation": {
+								"id": "5b90e929-7b3e-4156-8546-6059c4edac65",
+								"radiation_therapy_modality": "Brachytherapy (procedure)",
+								"radiation_therapy_type": "External",
+								"anatomical_site_irradiated": "Bilateral Ovary",
+								"radiation_therapy_fractions": 30,
+								"radiation_therapy_dosage": 66,
+								"radiation_boost": false,
+								"reference_radiation_treatment_id": ""
+							},
+							"surgery": null,
+							"followups": [
+								{
+									"date_of_followup": "2022-09",
+									"disease_status_at_followup": "Complete remission",
+									"relapse_type": "Local recurrence",
+									"date_of_relapse": "2022-10",
+									"method_of_progression_status": "Assessment of symptom control (procedure)",
+									"anatomic_site_progression_or_recurrence": "C15",
+									"recurrence_tumour_staging_system": [
+										"Lugano staging system",
+										"Durie-Salmon staging system",
+										"Revised International staging system (RISS)"
+									],
+									"recurrence_t_category": "T4b(s)",
+									"recurrence_n_category": "N0(mol-)",
+									"recurrence_m_category": "M1e",
+									"recurrence_stage_group": "Stage IIC",
+									"biomarkers": []
+								}
+							],
+							"biomarkers": []
+						}
+					],
+					"biomarkers": []
+				},
+				{
+					"submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_8",
+					"date_of_diagnosis": "2019-05",
+					"cancer_type_code": "C43.1",
+					"basis_of_diagnosis": "Clinical investigation",
+					"lymph_nodes_examined_status": "No",
+					"lymph_nodes_examined_method": "Lymph node dissection/pathological exam",
+					"number_lymph_nodes_positive": 7,
+					"clinical_tumour_staging_system": "FIGO staging system",
+					"clinical_t_category": "T3a",
+					"clinical_n_category": "N4",
+					"clinical_m_category": "M0",
+					"clinical_stage_group": "Stage IIS",
+					"laterality": "Bilateral",
+					"specimens": [
+						{
+							"submitter_specimen_id": "SPECIMEN_14",
+							"pathological_tumour_staging_system": "SEER staging system",
+							"pathological_t_category": "T4c",
+							"pathological_n_category": "N1a(sn)",
+							"pathological_m_category": "M1b(0)",
+							"pathological_stage_group": "Stage IAB",
+							"specimen_collection_date": "2021-11-26",
+							"specimen_storage": "Other",
+							"tumour_histological_type": "8289/9",
+							"specimen_anatomic_location": "C43.9",
+							"reference_pathology_confirmed_diagnosis": "Not done",
+							"reference_pathology_confirmed_tumour_presence": "No",
+							"tumour_grading_system": "FNCLCC grading system",
+							"tumour_grade": "High grade",
+							"percent_tumour_cells_range": "51-100%",
+							"percent_tumour_cells_measurement_method": "Unknown",
+							"specimen_processing": "Unknown",
+							"specimen_laterality": "Unknown",
+							"sample_registrations": [
+								{
+									"submitter_sample_id": "SAMPLE_REGISTRATION_20",
+									"specimen_tissue_source": "Sputum",
+									"tumour_normal_designation": "Normal",
+									"specimen_type": "Normal",
+									"sample_type": "Protein"
+								}
+							],
+							"biomarkers": []
+						}
+					],
+					"treatments": [
+						{
+							"submitter_treatment_id": "TREATMENT_14",
+							"is_primary_treatment": "No",
+							"treatment_start_date": "2021-09",
+							"treatment_end_date": "2022-11",
+							"treatment_setting": "Preventative",
+							"treatment_intent": "Palliative",
+							"days_per_cycle": 2,
+							"number_of_cycles": 4,
+							"line_of_treatment": 3,
+							"status_of_treatment": "Treatment stopped due to lack of efficacy (disease progression)",
+							"treatment_type": [
+								"Chemotherapy",
+								"Immunotherapy",
+								"Stem cell transplant"
+							],
+							"response_to_treatment": "Immune complete response (iCR)",
+							"response_to_treatment_criteria_method": "RECIST 1.1",
+							"chemotherapies": [],
+							"hormone_therapies": [],
+							"immunotherapies": [
+								{
+									"id": "70d581a6-6fcf-4f99-a1ba-63c9aa2509f4",
+									"immunotherapy_type": "Monoclonal antibodies other than immune checkpoint inhibitors",
+									"drug_reference_database": "RxNorm",
+									"immunotherapy_drug_dose_units": "cells/kg",
+									"drug_name": "Copanlisib",
+									"drug_reference_identifier": "278936",
+									"prescribed_cumulative_drug_dose": 183,
+									"actual_cumulative_drug_dose": 100
+								},
+								{
+									"id": "eae2806a-979e-4d24-94f9-89f1c935c368",
+									"immunotherapy_type": "Cell-based",
+									"drug_reference_database": "RxNorm",
+									"immunotherapy_drug_dose_units": "IU/kg",
+									"drug_name": "Pembrolizumab",
+									"drug_reference_identifier": "4459876",
+									"prescribed_cumulative_drug_dose": 95,
+									"actual_cumulative_drug_dose": 160
+								},
+								{
+									"id": "fc43da67-e323-4338-8904-3c40733c2c41",
+									"immunotherapy_type": "Other immunomodulatory substances",
+									"drug_reference_database": "PubChem",
+									"immunotherapy_drug_dose_units": "ug/m2",
+									"drug_name": "Pexidartinib",
+									"drug_reference_identifier": "8836851",
+									"prescribed_cumulative_drug_dose": 197,
+									"actual_cumulative_drug_dose": 183
+								}
+							],
+							"radiation": null,
+							"surgery": null,
+							"followups": [
+								{
+									"date_of_followup": "2022-11",
+									"disease_status_at_followup": "Distant progression",
+									"relapse_type": "Biochemical progression",
+									"date_of_relapse": "2022-08",
+									"method_of_progression_status": "Tumor marker measurement (procedure)",
+									"anatomic_site_progression_or_recurrence": "C17",
+									"recurrence_tumour_staging_system": [
+										"Binet staging system",
+										"Lugano staging system"
+									],
+									"recurrence_t_category": "T0",
+									"recurrence_n_category": "N1a",
+									"recurrence_m_category": "M1d(0)",
+									"recurrence_stage_group": "Stage III",
+									"biomarkers": []
+								}
+							],
+							"biomarkers": []
+						}
+					],
+					"biomarkers": []
+				}
+			],
+			"comorbidities": [
+				{
+					"prior_malignancy": "No",
+					"laterality_of_prior_malignancy": "Left",
+					"age_at_comorbidity_diagnosis": 46,
+					"comorbidity_type_code": "C43.9",
+					"comorbidity_treatment_status": "Unknown",
+					"comorbidity_treatment": "Endoscopic therapy"
+				},
+				{
+					"prior_malignancy": "Yes",
+					"laterality_of_prior_malignancy": "Bilateral",
+					"age_at_comorbidity_diagnosis": 41,
+					"comorbidity_type_code": "C67.6",
+					"comorbidity_treatment_status": "Unknown",
+					"comorbidity_treatment": "Ablation"
+				}
+			],
+			"exposures": [
+				{
+					"tobacco_smoking_status": "Current reformed smoker for > 15 years",
+					"tobacco_type": [
+						"Waterpipe",
+						"Unknown"
+					],
+					"pack_years_smoked": 29.0
+				}
+			],
+			"biomarkers": [
+				{
+					"id": "c8d39ca4-50b2-44c0-8a2a-a62e8bff476a",
+					"test_interval": 4,
+					"psa_level": 245,
+					"ca125": 46,
+					"cea": 11,
+					"er_status": "Cannot be determined",
+					"er_percent_positive": 59.9,
+					"her2_ish_status": "Cannot be determined",
+					"her2_ihc_status": "Not applicable",
+					"pr_status": "Unknown",
+					"pr_percent_positive": 39.7,
+					"hpv_ihc_status": "Negative",
+					"hpv_pcr_status": "Cannot be determined",
+					"hpv_strain": [
+						"HPV39",
+						"HPV16"
+					]
+				}
+			]
+		},
+		{
+			"submitter_donor_id": "DONOR_4",
+			"program_id": "SYNTHETIC-1",
+			"lost_to_followup_after_clinical_event_identifier": "",
+			"lost_to_followup_reason": "Withdrew from study",
+			"date_alive_after_lost_to_followup": "2022-04",
+			"is_deceased": false,
+			"cause_of_death": "Died of cancer",
+			"date_of_birth": "1984-10",
+			"date_of_death": null,
+			"gender": "Man",
+			"sex_at_birth": "Male",
+			"primary_site": [
+				"Skin",
+				"Bronchus and lung",
+				"Prostate gland"
+			],
+			"primary_diagnoses": [
+				{
+					"submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_10",
+					"date_of_diagnosis": "2019-05",
+					"cancer_type_code": "C43.9",
+					"basis_of_diagnosis": "Cytology",
+					"lymph_nodes_examined_status": "Cannot be determined",
+					"lymph_nodes_examined_method": "Lymph node dissection/pathological exam",
+					"number_lymph_nodes_positive": 4,
+					"clinical_tumour_staging_system": "International Neuroblastoma Staging System",
+					"clinical_t_category": "Tis(Paget)",
+					"clinical_n_category": "N2a",
+					"clinical_m_category": "M1e",
+					"clinical_stage_group": "Stage Ms",
+					"laterality": "Left",
+					"specimens": [
+						{
+							"submitter_specimen_id": "SPECIMEN_16",
+							"pathological_tumour_staging_system": "Revised International staging system (RISS)",
+							"pathological_t_category": "T2(m)",
+							"pathological_n_category": "N1a(sn)",
+							"pathological_m_category": "M1c",
+							"pathological_stage_group": "Stage IIBE",
+							"specimen_collection_date": "2020-07-14",
+							"specimen_storage": "Frozen in vapour phase",
+							"tumour_histological_type": "8240/1",
+							"specimen_anatomic_location": "C67.6",
+							"reference_pathology_confirmed_diagnosis": "Not done",
+							"reference_pathology_confirmed_tumour_presence": "Not done",
+							"tumour_grading_system": "Scarff-Bloom-Richardson grading system",
+							"tumour_grade": "Grade 2",
+							"percent_tumour_cells_range": "20-50%",
+							"percent_tumour_cells_measurement_method": "Pathology estimate by percent nuclei",
+							"specimen_processing": "Cryopreservation in dry ice (dead tissue)",
+							"specimen_laterality": "Unknown",
+							"sample_registrations": [
+								{
+									"submitter_sample_id": "SAMPLE_REGISTRATION_22",
+									"specimen_tissue_source": "Cervical mucus",
+									"tumour_normal_designation": "Tumour",
+									"specimen_type": "Primary tumour - additional new primary",
+									"sample_type": "ctDNA"
+								}
+							],
+							"biomarkers": []
+						}
+					],
+					"treatments": [
+						{
+							"submitter_treatment_id": "TREATMENT_16",
+							"is_primary_treatment": "Yes",
+							"treatment_start_date": "2021-01",
+							"treatment_end_date": "2022-04",
+							"treatment_setting": "Conditioning",
+							"treatment_intent": "Diagnostic",
+							"days_per_cycle": 2,
+							"number_of_cycles": 4,
+							"line_of_treatment": 5,
+							"status_of_treatment": "Patient choice (stopped or interrupted treatment)",
+							"treatment_type": [
+								"Bone marrow transplant",
+								"Surgery",
+								"Radiation therapy"
+							],
+							"response_to_treatment": "Physician assessed partial response",
+							"response_to_treatment_criteria_method": "iRECIST",
+							"chemotherapies": [],
+							"hormone_therapies": [],
+							"immunotherapies": [
+								{
+									"id": "b0382073-a037-4b05-9fe2-a62224b98592",
+									"immunotherapy_type": "Monoclonal antibodies other than immune checkpoint inhibitors",
+									"drug_reference_database": "RxNorm",
+									"immunotherapy_drug_dose_units": "IU/kg",
+									"drug_name": "Copanlisib",
+									"drug_reference_identifier": "239766",
+									"prescribed_cumulative_drug_dose": 181,
+									"actual_cumulative_drug_dose": 111
+								}
+							],
+							"radiation": null,
+							"surgery": null,
+							"followups": [
+								{
+									"date_of_followup": "2022-09",
+									"disease_status_at_followup": "Complete remission",
+									"relapse_type": "Progression (liquid tumours)",
+									"date_of_relapse": "2021-12",
+									"method_of_progression_status": "Tumor marker measurement (procedure)",
+									"anatomic_site_progression_or_recurrence": "C08",
+									"recurrence_tumour_staging_system": [
+										"AJCC 6th edition",
+										"FIGO staging system"
+									],
+									"recurrence_t_category": "T1a(m)",
+									"recurrence_n_category": "N0(mol+)",
+									"recurrence_m_category": "M1a(0)",
+									"recurrence_stage_group": "Stage IIIAS",
+									"biomarkers": []
+								}
+							],
+							"biomarkers": []
+						}
+					],
+					"biomarkers": []
+				},
+				{
+					"submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_9",
+					"date_of_diagnosis": "2019-06",
+					"cancer_type_code": "C04.9",
+					"basis_of_diagnosis": "Clinical",
+					"lymph_nodes_examined_status": "No lymph nodes found in resected specimen",
+					"lymph_nodes_examined_method": "Imaging",
+					"number_lymph_nodes_positive": 15,
+					"clinical_tumour_staging_system": "AJCC 7th edition",
+					"clinical_t_category": "T1a2",
+					"clinical_n_category": "N2c",
+					"clinical_m_category": "M1a(0)",
+					"clinical_stage_group": "Stage IIIBES",
+					"laterality": "Unilateral, side not specified",
+					"specimens": [
+						{
+							"submitter_specimen_id": "SPECIMEN_15",
+							"pathological_tumour_staging_system": "International Neuroblastoma Risk Group Staging System",
+							"pathological_t_category": "T1b(s)",
+							"pathological_n_category": "N4",
+							"pathological_m_category": "M1c",
+							"pathological_stage_group": "Stage IVB",
+							"specimen_collection_date": "2020-05-31",
+							"specimen_storage": "RNA later frozen",
+							"tumour_histological_type": "8250/3",
+							"specimen_anatomic_location": "C43.9",
+							"reference_pathology_confirmed_diagnosis": "Yes",
+							"reference_pathology_confirmed_tumour_presence": "Not done",
+							"tumour_grading_system": "Grading system for GNETs",
+							"tumour_grade": "High",
+							"percent_tumour_cells_range": "0-19%",
+							"percent_tumour_cells_measurement_method": "Pathology estimate by percent nuclei",
+							"specimen_processing": "Cryopreservation of live cells in liquid nitrogen",
+							"specimen_laterality": "Not applicable",
+							"sample_registrations": [
+								{
+									"submitter_sample_id": "SAMPLE_REGISTRATION_21",
+									"specimen_tissue_source": "Buccal cell",
+									"tumour_normal_designation": "Tumour",
+									"specimen_type": "Recurrent tumour",
+									"sample_type": "Protein"
+								}
+							],
+							"biomarkers": []
+						}
+					],
+					"treatments": [
+						{
+							"submitter_treatment_id": "TREATMENT_15",
+							"is_primary_treatment": "Yes",
+							"treatment_start_date": "2021-12",
+							"treatment_end_date": "2022-07",
+							"treatment_setting": "Locally advanced",
+							"treatment_intent": "Guidance",
+							"days_per_cycle": 5,
+							"number_of_cycles": 3,
+							"line_of_treatment": 2,
+							"status_of_treatment": "Treatment stopped due to lack of efficacy (disease progression)",
+							"treatment_type": [
+								"Stem cell transplant",
+								"Immunotherapy",
+								"Hormonal therapy"
+							],
+							"response_to_treatment": "Complete remission with incomplete hematologic recovery (CRi)",
+							"response_to_treatment_criteria_method": "Response Assessment in Neuro-Oncology (RANO)",
+							"chemotherapies": [],
+							"hormone_therapies": [],
+							"immunotherapies": [
+								{
+									"id": "1a9e98d8-b7bd-4419-b127-0668bc8a9240",
+									"immunotherapy_type": "Immune checkpoint inhibitors",
+									"drug_reference_database": "PubChem",
+									"immunotherapy_drug_dose_units": "g/m2",
+									"drug_name": "Pexidartinib",
+									"drug_reference_identifier": "278936",
+									"prescribed_cumulative_drug_dose": 184,
+									"actual_cumulative_drug_dose": 190
+								},
+								{
+									"id": "35c1f92c-3fe7-4872-818a-4970cc9a41d5",
+									"immunotherapy_type": "Cell-based",
+									"drug_reference_database": "NCI Thesaurus",
+									"immunotherapy_drug_dose_units": "IU/kg",
+									"drug_name": "Necitumumab",
+									"drug_reference_identifier": "278936",
+									"prescribed_cumulative_drug_dose": 138,
+									"actual_cumulative_drug_dose": 167
+								}
+							],
+							"radiation": null,
+							"surgery": null,
+							"followups": [
+								{
+									"date_of_followup": "2022-11",
+									"disease_status_at_followup": "Partial remission",
+									"relapse_type": "Local recurrence and distant metastasis",
+									"date_of_relapse": "2022-10",
+									"method_of_progression_status": "Tumor marker measurement (procedure)",
+									"anatomic_site_progression_or_recurrence": "C03",
+									"recurrence_tumour_staging_system": [
+										"International Neuroblastoma Risk Group Staging System"
+									],
+									"recurrence_t_category": "T4a",
+									"recurrence_n_category": "N0(i+)",
+									"recurrence_m_category": "M1b(0)",
+									"recurrence_stage_group": "Stage 4",
+									"biomarkers": []
+								}
+							],
+							"biomarkers": []
+						}
+					],
+					"biomarkers": []
+				}
+			],
+			"comorbidities": [
+				{
+					"prior_malignancy": "No",
+					"laterality_of_prior_malignancy": "Unknown",
+					"age_at_comorbidity_diagnosis": 47,
+					"comorbidity_type_code": "C67.6",
+					"comorbidity_treatment_status": "Unknown",
+					"comorbidity_treatment": "Radiation therapy"
+				},
+				{
+					"prior_malignancy": "No",
+					"laterality_of_prior_malignancy": "Unknown",
+					"age_at_comorbidity_diagnosis": 35,
+					"comorbidity_type_code": "C02.0",
+					"comorbidity_treatment_status": "No",
+					"comorbidity_treatment": "Photodynamic therapy"
+				}
+			],
+			"exposures": [],
+			"biomarkers": []
+		},
+		{
+			"submitter_donor_id": "DONOR_5",
+			"program_id": "SYNTHETIC-1",
+			"lost_to_followup_after_clinical_event_identifier": "",
+			"lost_to_followup_reason": "Completed study",
+			"date_alive_after_lost_to_followup": "2022-02",
+			"is_deceased": true,
+			"cause_of_death": "Died of other reasons",
+			"date_of_birth": "1998-08",
+			"date_of_death": "2013-08",
+			"gender": "Non-binary",
+			"sex_at_birth": "Other",
+			"primary_site": [
+				"Connective, subcutaneous and other soft tissues",
+				"Penis",
+				"Thyroid gland",
+				"Adrenal gland"
+			],
+			"primary_diagnoses": [
+				{
+					"submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_11",
+					"date_of_diagnosis": "2019-07",
+					"cancer_type_code": "C64.9",
+					"basis_of_diagnosis": "Specific tumour markers",
+					"lymph_nodes_examined_status": "Cannot be determined",
+					"lymph_nodes_examined_method": "Physical palpation of patient",
+					"number_lymph_nodes_positive": 15,
+					"clinical_tumour_staging_system": "Rai staging system",
+					"clinical_t_category": "T4b",
+					"clinical_n_category": "N0(i+)",
+					"clinical_m_category": "M1e",
+					"clinical_stage_group": "Stage IIBES",
+					"laterality": "Bilateral",
+					"specimens": [
+						{
+							"submitter_specimen_id": "SPECIMEN_17",
+							"pathological_tumour_staging_system": "AJCC 8th edition",
+							"pathological_t_category": "T4a(m)",
+							"pathological_n_category": "N0b",
+							"pathological_m_category": "M1c(0)",
+							"pathological_stage_group": "Stage IIIA2",
+							"specimen_collection_date": "2021-03-02",
+							"specimen_storage": "Frozen in -70 freezer",
+							"tumour_histological_type": "8970/3",
+							"specimen_anatomic_location": "C43.9",
+							"reference_pathology_confirmed_diagnosis": "Unknown",
+							"reference_pathology_confirmed_tumour_presence": "Yes",
+							"tumour_grading_system": "Grading system for GISTs",
+							"tumour_grade": "Grade 4",
+							"percent_tumour_cells_range": "0-19%",
+							"percent_tumour_cells_measurement_method": "Image analysis",
+							"specimen_processing": "Unknown",
+							"specimen_laterality": "Not applicable",
+							"sample_registrations": [
+								{
+									"submitter_sample_id": "SAMPLE_REGISTRATION_23",
+									"specimen_tissue_source": "Pleural fluid",
+									"tumour_normal_designation": "Tumour",
+									"specimen_type": "Xenograft - derived from metastatic tumour",
+									"sample_type": "Other RNA fractions"
+								}
+							],
+							"biomarkers": []
+						}
+					],
+					"treatments": [
+						{
+							"submitter_treatment_id": "TREATMENT_17",
+							"is_primary_treatment": "Yes",
+							"treatment_start_date": "2021-02",
+							"treatment_end_date": "2022-06",
+							"treatment_setting": "Conditioning",
+							"treatment_intent": "Forensic",
+							"days_per_cycle": 6,
+							"number_of_cycles": 3,
+							"line_of_treatment": 1,
+							"status_of_treatment": "Treatment incomplete due to technical or organizational problems",
+							"treatment_type": [
+								"Immunotherapy",
+								"Surgery",
+								"No treatment"
+							],
+							"response_to_treatment": "Partial remission",
+							"response_to_treatment_criteria_method": "RECIST 1.1",
+							"chemotherapies": [],
+							"hormone_therapies": [],
+							"immunotherapies": [
+								{
+									"id": "7e0ec683-2960-461e-a9ff-054aaae654dd",
+									"immunotherapy_type": "Monoclonal antibodies other than immune checkpoint inhibitors",
+									"drug_reference_database": "NCI Thesaurus",
+									"immunotherapy_drug_dose_units": "IU/m2",
+									"drug_name": "Gilteritinib",
+									"drug_reference_identifier": "8756456",
+									"prescribed_cumulative_drug_dose": 87,
+									"actual_cumulative_drug_dose": 101
+								}
+							],
+							"radiation": null,
+							"surgery": null,
+							"followups": [
+								{
+									"date_of_followup": "2022-08",
+									"disease_status_at_followup": "Complete remission",
+									"relapse_type": "Biochemical progression",
+									"date_of_relapse": "2022-02",
+									"method_of_progression_status": "Assessment of symptom control (procedure)",
+									"anatomic_site_progression_or_recurrence": "C03",
+									"recurrence_tumour_staging_system": [
+										"Lugano staging system",
+										"International Neuroblastoma Staging System",
+										"Ann Arbor staging system"
+									],
+									"recurrence_t_category": "Tis pu",
+									"recurrence_n_category": "N0(i+)",
+									"recurrence_m_category": "M1",
+									"recurrence_stage_group": "Stage IIAS",
+									"biomarkers": []
+								}
+							],
+							"biomarkers": []
+						}
+					],
+					"biomarkers": []
+				}
+			],
+			"comorbidities": [
+				{
+					"prior_malignancy": "Unknown",
+					"laterality_of_prior_malignancy": "Midline",
+					"age_at_comorbidity_diagnosis": 40,
+					"comorbidity_type_code": "C03.9",
+					"comorbidity_treatment_status": "Yes",
+					"comorbidity_treatment": "Bone marrow transplant"
+				}
+			],
+			"exposures": [],
+			"biomarkers": []
+		},
+		{
+			"submitter_donor_id": "DONOR_6",
+			"program_id": "SYNTHETIC-1",
+			"lost_to_followup_after_clinical_event_identifier": "",
+			"lost_to_followup_reason": "Discharged to palliative care",
+			"date_alive_after_lost_to_followup": "2022-08",
+			"is_deceased": false,
+			"cause_of_death": "Died of other reasons",
+			"date_of_birth": "1972-12",
+			"date_of_death": null,
+			"gender": "Non-binary",
+			"sex_at_birth": "Unknown",
+			"primary_site": [
+				"Hypopharynx",
+				"Nasal cavity and middle ear",
+				"Peripheral nerves and autonomic nervous system"
+			],
+			"primary_diagnoses": [
+				{
+					"submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_12",
+					"date_of_diagnosis": "2019-06",
+					"cancer_type_code": "C64.9",
+					"basis_of_diagnosis": "Unknown",
+					"lymph_nodes_examined_status": "Cannot be determined",
+					"lymph_nodes_examined_method": "Imaging",
+					"number_lymph_nodes_positive": 14,
+					"clinical_tumour_staging_system": "AJCC 7th edition",
+					"clinical_t_category": "T4b(s)",
+					"clinical_n_category": "N1c",
+					"clinical_m_category": "M1a",
+					"clinical_stage_group": "Stage IC",
+					"laterality": "Left",
+					"specimens": [
+						{
+							"submitter_specimen_id": "SPECIMEN_18",
+							"pathological_tumour_staging_system": "Binet staging system",
+							"pathological_t_category": "T1a1",
+							"pathological_n_category": "N3",
+							"pathological_m_category": "M1c(1)",
+							"pathological_stage_group": "In situ",
+							"specimen_collection_date": "2020-01-07",
+							"specimen_storage": "Unknown",
+							"tumour_histological_type": "8620/9",
+							"specimen_anatomic_location": "C43.9",
+							"reference_pathology_confirmed_diagnosis": "Not done",
+							"reference_pathology_confirmed_tumour_presence": "Yes",
+							"tumour_grading_system": "Four-tier grading system",
+							"tumour_grade": "High grade",
+							"percent_tumour_cells_range": "51-100%",
+							"percent_tumour_cells_measurement_method": "Unknown",
+							"specimen_processing": "Cryopreservation - other",
+							"specimen_laterality": "Right",
+							"sample_registrations": [
+								{
+									"submitter_sample_id": "SAMPLE_REGISTRATION_24",
+									"specimen_tissue_source": "Synovial fluid",
+									"tumour_normal_designation": "Normal",
+									"specimen_type": "Cell line - derived from metastatic tumour",
+									"sample_type": "polyA+ RNA"
+								}
+							],
+							"biomarkers": []
+						}
+					],
+					"treatments": [
+						{
+							"submitter_treatment_id": "TREATMENT_18",
+							"is_primary_treatment": "Yes",
+							"treatment_start_date": "2021-09",
+							"treatment_end_date": "2022-05",
+							"treatment_setting": "Induction",
+							"treatment_intent": "Preventive",
+							"days_per_cycle": 5,
+							"number_of_cycles": 4,
+							"line_of_treatment": 3,
+							"status_of_treatment": "Treatment stopped due to acute toxicity",
+							"treatment_type": [
+								"Photodynamic therapy",
+								"No treatment",
+								"Stem cell transplant"
+							],
+							"response_to_treatment": "Primary refractory disease",
+							"response_to_treatment_criteria_method": "Physician Assessed Response Criteria",
+							"chemotherapies": [],
+							"hormone_therapies": [],
+							"immunotherapies": [],
+							"radiation": null,
+							"surgery": {
+								"id": "d4d6bcf3-07c8-4674-be7c-02013fac310f",
+								"surgery_type": "Axillary lymph nodes sampling",
+								"surgery_site": "C14",
+								"surgery_location": "Primary",
+								"tumour_focality": "Unifocal",
+								"residual_tumour_classification": "R2",
+								"margin_types_involved": [
+									"Distal margin",
+									"Circumferential resection margin"
+								],
+								"margin_types_not_involved": [],
+								"margin_types_not_assessed": [
+									"Unknown"
+								],
+								"lymphovascular_invasion": "Absent",
+								"perineural_invasion": "Absent",
+								"tumour_length": 9,
+								"tumour_width": 7,
+								"greatest_dimension_tumour": 5,
+								"submitter_specimen_id": "SPECIMEN_18"
+							},
+							"followups": [
+								{
+									"date_of_followup": "2022-11",
+									"disease_status_at_followup": "No evidence of disease",
+									"relapse_type": "Progression (liquid tumours)",
+									"date_of_relapse": "2022-06",
+									"method_of_progression_status": "Tumor marker measurement (procedure)",
+									"anatomic_site_progression_or_recurrence": "C16",
+									"recurrence_tumour_staging_system": [
+										"Rai staging system",
+										"AJCC 8th edition",
+										"AJCC 7th edition"
+									],
+									"recurrence_t_category": "Ta",
+									"recurrence_n_category": "N1",
+									"recurrence_m_category": "M0",
+									"recurrence_stage_group": "Stage IVAS",
+									"biomarkers": []
+								}
+							],
+							"biomarkers": []
+						}
+					],
+					"biomarkers": []
+				}
+			],
+			"comorbidities": [
+				{
+					"prior_malignancy": "No",
+					"laterality_of_prior_malignancy": "Left",
+					"age_at_comorbidity_diagnosis": 51,
+					"comorbidity_type_code": "C02.1",
+					"comorbidity_treatment_status": "Unknown",
+					"comorbidity_treatment": "Ablation"
+				}
+			],
+			"exposures": [],
+			"biomarkers": []
+		},
+		{
+			"submitter_donor_id": "DONOR_7",
+			"program_id": "SYNTHETIC-2",
+			"lost_to_followup_after_clinical_event_identifier": "",
+			"lost_to_followup_reason": "Lost contact",
+			"date_alive_after_lost_to_followup": "2022-10",
+			"is_deceased": false,
+			"cause_of_death": "Unknown",
+			"date_of_birth": "1961-05",
+			"date_of_death": null,
+			"gender": "Non-binary",
+			"sex_at_birth": "Male",
+			"primary_site": [
+				"Floor of mouth"
+			],
+			"primary_diagnoses": [
+				{
+					"submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_13",
+					"date_of_diagnosis": "2019-10",
+					"cancer_type_code": "C02.2",
+					"basis_of_diagnosis": "Death certificate only",
+					"lymph_nodes_examined_status": "Yes",
+					"lymph_nodes_examined_method": "Physical palpation of patient",
+					"number_lymph_nodes_positive": 10,
+					"clinical_tumour_staging_system": "Revised International staging system (RISS)",
+					"clinical_t_category": "T2a1",
+					"clinical_n_category": "N0b",
+					"clinical_m_category": "M1c",
+					"clinical_stage_group": "Stage IEA",
+					"laterality": "Unilateral, side not specified",
+					"specimens": [
+						{
+							"submitter_specimen_id": "SPECIMEN_19",
+							"pathological_tumour_staging_system": "Rai staging system",
+							"pathological_t_category": "T2a1",
+							"pathological_n_category": "N3c",
+							"pathological_m_category": "M1d(1)",
+							"pathological_stage_group": "Stage IIIA",
+							"specimen_collection_date": "2020-03-02",
+							"specimen_storage": "Unknown",
+							"tumour_histological_type": "8289/9",
+							"specimen_anatomic_location": "C15.9",
+							"reference_pathology_confirmed_diagnosis": "Not done",
+							"reference_pathology_confirmed_tumour_presence": "Unknown",
+							"tumour_grading_system": "FNCLCC grading system",
+							"tumour_grade": "G1",
+							"percent_tumour_cells_range": "0-19%",
+							"percent_tumour_cells_measurement_method": "Genomics",
+							"specimen_processing": "Cryopreservation - other",
+							"specimen_laterality": "Not applicable",
+							"sample_registrations": [
+								{
+									"submitter_sample_id": "SAMPLE_REGISTRATION_25",
+									"specimen_tissue_source": "Pancreatic fluid",
+									"tumour_normal_designation": "Normal",
+									"specimen_type": "Metastatic tumour - metastasis to distant location",
+									"sample_type": "Protein"
+								}
+							],
+							"biomarkers": []
+						}
+					],
+					"treatments": [
+						{
+							"submitter_treatment_id": "TREATMENT_19",
+							"is_primary_treatment": "Yes",
+							"treatment_start_date": "2021-07",
+							"treatment_end_date": "2022-01",
+							"treatment_setting": "Radiosensitization",
+							"treatment_intent": "Diagnostic",
+							"days_per_cycle": 4,
+							"number_of_cycles": 4,
+							"line_of_treatment": 5,
+							"status_of_treatment": "Treatment completed as prescribed",
+							"treatment_type": [
+								"Stem cell transplant"
+							],
+							"response_to_treatment": "Complete remission without measurable residual disease (CR MRD-)",
+							"response_to_treatment_criteria_method": "Cheson CLL 2012 Oncology Response Criteria",
+							"chemotherapies": [],
+							"hormone_therapies": [],
+							"immunotherapies": [],
+							"radiation": null,
+							"surgery": {
+								"id": "23c749c7-d9fc-494a-b1a3-f57a3e1c638b",
+								"surgery_type": "Axillary Clearance",
+								"surgery_site": "C14",
+								"surgery_location": "Local recurrence",
+								"tumour_focality": "Unknown",
+								"residual_tumour_classification": "Unknown",
+								"margin_types_involved": [],
+								"margin_types_not_involved": [],
+								"margin_types_not_assessed": [
+									"Circumferential resection margin",
+									"Proximal margin"
+								],
+								"lymphovascular_invasion": "Venous (large vessel) invasion only",
+								"perineural_invasion": "Unknown",
+								"tumour_length": 5,
+								"tumour_width": 5,
+								"greatest_dimension_tumour": 6,
+								"submitter_specimen_id": null
+							},
+							"followups": [
+								{
+									"date_of_followup": "2022-08",
+									"disease_status_at_followup": "Relapse or recurrence",
+									"relapse_type": "Progression (liquid tumours)",
+									"date_of_relapse": "2022-09",
+									"method_of_progression_status": "Physical examination procedure (procedure)",
+									"anatomic_site_progression_or_recurrence": "C19",
+									"recurrence_tumour_staging_system": [
+										"AJCC 8th edition"
+									],
+									"recurrence_t_category": "T1a",
+									"recurrence_n_category": "N0b (no biopsy)",
+									"recurrence_m_category": "M1a",
+									"recurrence_stage_group": "Stage IIC",
+									"biomarkers": []
+								}
+							],
+							"biomarkers": []
+						}
+					],
+					"biomarkers": []
+				}
+			],
+			"comorbidities": [
+				{
+					"prior_malignancy": "No",
+					"laterality_of_prior_malignancy": "Bilateral",
+					"age_at_comorbidity_diagnosis": 38,
+					"comorbidity_type_code": "C67.6",
+					"comorbidity_treatment_status": "Unknown",
+					"comorbidity_treatment": "Radiation therapy"
+				}
+			],
+			"exposures": [
+				{
+					"tobacco_smoking_status": "Current reformed smoker, duration not specified",
+					"tobacco_type": [
+						"Unknown",
+						"Electronic cigarettes",
+						"Not applicable"
+					],
+					"pack_years_smoked": 104.0
+				}
+			],
+			"biomarkers": []
+		},
+		{
+			"submitter_donor_id": "DONOR_8",
+			"program_id": "SYNTHETIC-2",
+			"lost_to_followup_after_clinical_event_identifier": "",
+			"lost_to_followup_reason": "Discharged to palliative care",
+			"date_alive_after_lost_to_followup": "2022-03",
+			"is_deceased": false,
+			"cause_of_death": "Died of cancer",
+			"date_of_birth": "2003-12",
+			"date_of_death": null,
+			"gender": "Woman",
+			"sex_at_birth": "Unknown",
+			"primary_site": [
+				"Hypopharynx",
+				"Thymus",
+				"Esophagus",
+				"Colon"
+			],
+			"primary_diagnoses": [
+				{
+					"submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_14",
+					"date_of_diagnosis": "2019-07",
+					"cancer_type_code": "C02.1",
+					"basis_of_diagnosis": "Death certificate only",
+					"lymph_nodes_examined_status": "No lymph nodes found in resected specimen",
+					"lymph_nodes_examined_method": "Lymph node dissection/pathological exam",
+					"number_lymph_nodes_positive": 13,
+					"clinical_tumour_staging_system": "AJCC 6th edition",
+					"clinical_t_category": "T2(s)",
+					"clinical_n_category": "N1a",
+					"clinical_m_category": "M0",
+					"clinical_stage_group": "Regionalized",
+					"laterality": "Left",
+					"specimens": [
+						{
+							"submitter_specimen_id": "SPECIMEN_20",
+							"pathological_tumour_staging_system": "Durie-Salmon staging system",
+							"pathological_t_category": "T1b",
+							"pathological_n_category": "N0(mol+)",
+							"pathological_m_category": "M0(i+)",
+							"pathological_stage_group": "Stage IIIB",
+							"specimen_collection_date": "2021-02-23",
+							"specimen_storage": "RNA later frozen",
+							"tumour_histological_type": "8063/1",
+							"specimen_anatomic_location": "C15.9",
+							"reference_pathology_confirmed_diagnosis": "Not done",
+							"reference_pathology_confirmed_tumour_presence": "Not done",
+							"tumour_grading_system": "Grading system for GISTs",
+							"tumour_grade": "Grade IV",
+							"percent_tumour_cells_range": "0-19%",
+							"percent_tumour_cells_measurement_method": "Image analysis",
+							"specimen_processing": "Unknown",
+							"specimen_laterality": "Not applicable",
+							"sample_registrations": [
+								{
+									"submitter_sample_id": "SAMPLE_REGISTRATION_26",
+									"specimen_tissue_source": "Bone marrow fluid",
+									"tumour_normal_designation": "Normal",
+									"specimen_type": "Recurrent tumour",
+									"sample_type": "Total DNA"
+								}
+							],
+							"biomarkers": []
+						}
+					],
+					"treatments": [
+						{
+							"submitter_treatment_id": "TREATMENT_20",
+							"is_primary_treatment": "Yes",
+							"treatment_start_date": "2021-02",
+							"treatment_end_date": "2022-09",
+							"treatment_setting": "Locally advanced",
+							"treatment_intent": "Diagnostic",
+							"days_per_cycle": 4,
+							"number_of_cycles": 5,
+							"line_of_treatment": 1,
+							"status_of_treatment": "Treatment stopped due to lack of efficacy (disease progression)",
+							"treatment_type": [
+								"Other targeting molecular therapy",
+								"Photodynamic therapy",
+								"Chemotherapy"
+							],
+							"response_to_treatment": "Minor response",
+							"response_to_treatment_criteria_method": "Physician Assessed Response Criteria",
+							"chemotherapies": [],
+							"hormone_therapies": [],
+							"immunotherapies": [],
+							"radiation": null,
+							"surgery": {
+								"id": "4f2f3cae-577a-4703-8472-ce8e767bcde0",
+								"surgery_type": "Tumor Debulking",
+								"surgery_site": "C06",
+								"surgery_location": "Primary",
+								"tumour_focality": "Not applicable",
+								"residual_tumour_classification": "RX",
+								"margin_types_involved": [
+									"Unknown",
+									"Distal margin"
+								],
+								"margin_types_not_involved": [],
+								"margin_types_not_assessed": [],
+								"lymphovascular_invasion": "Venous (large vessel) invasion only",
+								"perineural_invasion": "Present",
+								"tumour_length": 3,
+								"tumour_width": 6,
+								"greatest_dimension_tumour": 5,
+								"submitter_specimen_id": null
+							},
+							"followups": [
+								{
+									"date_of_followup": "2022-08",
+									"disease_status_at_followup": "Loco-regional progression",
+									"relapse_type": "Distant recurrence/metastasis",
+									"date_of_relapse": "2021-12",
+									"method_of_progression_status": "Assessment of symptom control (procedure)",
+									"anatomic_site_progression_or_recurrence": "C03",
+									"recurrence_tumour_staging_system": [
+										"Revised International staging system (RISS)",
+										"Lugano staging system"
+									],
+									"recurrence_t_category": "T4a(s)",
+									"recurrence_n_category": "N3",
+									"recurrence_m_category": "M0(i+)",
+									"recurrence_stage_group": "Stage IIES",
+									"biomarkers": []
+								}
+							],
+							"biomarkers": []
+						}
+					],
+					"biomarkers": []
+				}
+			],
+			"comorbidities": [
+				{
+					"prior_malignancy": "Yes",
+					"laterality_of_prior_malignancy": "Unknown",
+					"age_at_comorbidity_diagnosis": 51,
+					"comorbidity_type_code": "C64.9",
+					"comorbidity_treatment_status": "Yes",
+					"comorbidity_treatment": "Surgery"
+				}
+			],
+			"exposures": [
+				{
+					"tobacco_smoking_status": "Current reformed smoker for > 15 years",
+					"tobacco_type": [
+						"Waterpipe",
+						"Unknown"
+					],
+					"pack_years_smoked": 48.0
+				}
+			],
+			"biomarkers": []
+		},
+		{
+			"submitter_donor_id": "DONOR_9",
+			"program_id": "SYNTHETIC-2",
+			"lost_to_followup_after_clinical_event_identifier": "",
+			"lost_to_followup_reason": "Withdrew from study",
+			"date_alive_after_lost_to_followup": "2022-05",
+			"is_deceased": false,
+			"cause_of_death": "Died of other reasons",
+			"date_of_birth": "1993-10",
+			"date_of_death": null,
+			"gender": "Woman",
+			"sex_at_birth": "Female",
+			"primary_site": [
+				"Trachea",
+				"Other and ill-defined digestive organs"
+			],
+			"primary_diagnoses": [
+				{
+					"submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_15",
+					"date_of_diagnosis": "2019-01",
+					"cancer_type_code": "C05.1",
+					"basis_of_diagnosis": "Specific tumour markers",
+					"lymph_nodes_examined_status": "Yes",
+					"lymph_nodes_examined_method": "Physical palpation of patient",
+					"number_lymph_nodes_positive": 15,
+					"clinical_tumour_staging_system": "International Neuroblastoma Staging System",
+					"clinical_t_category": "T3(s)",
+					"clinical_n_category": "N1b",
+					"clinical_m_category": "M1c(0)",
+					"clinical_stage_group": "Stage IIA",
+					"laterality": "Unilateral, side not specified",
+					"specimens": [
+						{
+							"submitter_specimen_id": "SPECIMEN_21",
+							"pathological_tumour_staging_system": "Durie-Salmon staging system",
+							"pathological_t_category": "Tis(DCIS)",
+							"pathological_n_category": "N2",
+							"pathological_m_category": "M1d(0)",
+							"pathological_stage_group": "Stage IIS",
+							"specimen_collection_date": "2020-12-07",
+							"specimen_storage": "Not Applicable",
+							"tumour_histological_type": "8630/9",
+							"specimen_anatomic_location": "C43.9",
+							"reference_pathology_confirmed_diagnosis": "Unknown",
+							"reference_pathology_confirmed_tumour_presence": "Not done",
+							"tumour_grading_system": "Four-tier grading system",
+							"tumour_grade": "High grade",
+							"percent_tumour_cells_range": "51-100%",
+							"percent_tumour_cells_measurement_method": "Unknown",
+							"specimen_processing": "Cryopreservation - other",
+							"specimen_laterality": "Left",
+							"sample_registrations": [
+								{
+									"submitter_sample_id": "SAMPLE_REGISTRATION_27",
+									"specimen_tissue_source": "Blood derived - peripheral blood",
+									"tumour_normal_designation": "Normal",
+									"specimen_type": "Normal",
+									"sample_type": "Protein"
+								}
+							],
+							"biomarkers": []
+						}
+					],
+					"treatments": [
+						{
+							"submitter_treatment_id": "TREATMENT_21",
+							"is_primary_treatment": "Unknown",
+							"treatment_start_date": "2021-03",
+							"treatment_end_date": "2022-10",
+							"treatment_setting": "Locally advanced",
+							"treatment_intent": "Forensic",
+							"days_per_cycle": 3,
+							"number_of_cycles": 3,
+							"line_of_treatment": 4,
+							"status_of_treatment": "Other",
+							"treatment_type": [
+								"Photodynamic therapy"
+							],
+							"response_to_treatment": "Progressive disease",
+							"response_to_treatment_criteria_method": "Response Assessment in Neuro-Oncology (RANO)",
+							"chemotherapies": [],
+							"hormone_therapies": [],
+							"immunotherapies": [],
+							"radiation": null,
+							"surgery": {
+								"id": "ab16c1e5-8521-4fe0-bd8f-94ad08f576eb",
+								"surgery_type": "Pancreaticojejunostomy, side-to-side anastomosis",
+								"surgery_site": "C12",
+								"surgery_location": "Metastatic",
+								"tumour_focality": "Unknown",
+								"residual_tumour_classification": "R0",
+								"margin_types_involved": [],
+								"margin_types_not_involved": [
+									"Unknown"
+								],
+								"margin_types_not_assessed": [],
+								"lymphovascular_invasion": "Venous (large vessel) invasion only",
+								"perineural_invasion": "Present",
+								"tumour_length": 6,
+								"tumour_width": 6,
+								"greatest_dimension_tumour": 6,
+								"submitter_specimen_id": null
+							},
+							"followups": [
+								{
+									"date_of_followup": "2022-11",
+									"disease_status_at_followup": "Progression not otherwise specified",
+									"relapse_type": "Local recurrence and distant metastasis",
+									"date_of_relapse": "2022-10",
+									"method_of_progression_status": "Histopathology test (procedure)",
+									"anatomic_site_progression_or_recurrence": "C15",
+									"recurrence_tumour_staging_system": [
+										"Lugano staging system"
+									],
+									"recurrence_t_category": "T0",
+									"recurrence_n_category": "N2c",
+									"recurrence_m_category": "M1c(1)",
+									"recurrence_stage_group": "Stage IIIA",
+									"biomarkers": []
+								}
+							],
+							"biomarkers": []
+						}
+					],
+					"biomarkers": []
+				}
+			],
+			"comorbidities": [],
+			"exposures": [],
+			"biomarkers": []
+		}
+]
