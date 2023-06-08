@@ -230,7 +230,7 @@ def traverse_clinical_field(field: dict, ctype, parents, types, id_names, katsu_
         parents.pop(ctype)
     return errors
 
-def ingest_donor_with_clinical(katsu_server_url="", data_location="", headers=""):
+def ingest_donor_with_clinical(katsu_server_url, dataset, headers):
     """A single file ingest which loads an MOH donor_with_clinical_data object from JSON.
     JSON format:
     [
@@ -246,8 +246,7 @@ def ingest_donor_with_clinical(katsu_server_url="", data_location="", headers=""
     ]
     (Fully outlined in MOH Schema)
     """
-    print("Beginning ingest from %s" % data_location)
-    dataset = read_json(data_location)
+    print("Beginning ingest")
 
     types = ["programs",
             "donors",
@@ -338,8 +337,8 @@ def run_check(katsu_server_url, env_str, data_location, ingest_version):
 def ingest_donor_endpoint():
     katsu_server_url = os.environ.get("CANDIG_URL")
     headers = "GET_AUTH_HEADER"
-    data_location = request.args.get('data_location')
-    response = ingest_donor_with_clinical(katsu_server_url, data_location, headers)
+    dataset = request.json
+    response = ingest_donor_with_clinical(katsu_server_url, dataset, headers)
     if type(response) == int:
         return "Ingested %d donors.\n" % response, 200
     else:
@@ -372,9 +371,10 @@ def main():
         print("Select an option:")
         print("1. Run check")
         print("2. Ingest data")
-        print("3. Delete data")
-        print("4. Exit")
-        choice = int(input("Enter your choice [1-4]: "))
+        print("3. Clean data")
+        print("4. Ingest DonorWithClincalData")
+        print("5. Exit")
+        choice = int(input("Enter your choice [1-5]: "))
 
     if choice == 1:
         run_check(
@@ -399,6 +399,9 @@ def main():
             print("Delete cancelled")
             exit()
     elif choice == 4:
+        dataset = read_json(data_location)
+        ingest_donor_with_clinical(katsu_server_url, dataset, headers)
+    elif choice == 5:
         exit()
     else:
         print("Invalid option. Please try again.")
