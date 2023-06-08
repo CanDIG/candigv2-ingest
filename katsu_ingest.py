@@ -166,7 +166,8 @@ def ingest_data(katsu_server_url, data_location):
     else:
         print("Aborting processing due to an error.")
 
-def traverse_clinical_field(field: dict, ctype, parents, types, id_names, katsu_server_url, headers, errors):
+def traverse_clinical_field(field: dict, ctype, parents, types, id_names, katsu_server_url, headers, errors,
+                            ingested_ids):
     """
     Helper function for ingest_donor_with_clinical. Parses and ingests clinical fields from a DonorWithClinicalData
     object.
@@ -180,6 +181,7 @@ def traverse_clinical_field(field: dict, ctype, parents, types, id_names, katsu_
         types: A list of possible field types
         id_names: A mapping of field names to what their ID key is (e.g. {"donors": "submitter_donor_id"})
         errors: A list of strings containing the errors encountered so far
+        ingested_ids: A list of IDs that have already been ingested (some fields in DonorWithClinical are duplicates)
     """
     no_ids = ["comorbidities", "exposures"] # fields that do not have an ID associated with them
 
@@ -189,7 +191,12 @@ def traverse_clinical_field(field: dict, ctype, parents, types, id_names, katsu_
     else:
         id_key = "id"
     if ctype not in no_ids:
-        data[id_key] = field.pop(id_key)
+        field_id = field.pop(id_key)
+        if field_id in ingested_ids:
+            print(f"Skipping {field_id} (Already ingested).")
+            return
+        data[id_key] = field_id
+        ingested_ids.append(field_id)
 
     attributes = list(field.keys())
     for attribute in attributes:
@@ -225,7 +232,8 @@ def traverse_clinical_field(field: dict, ctype, parents, types, id_names, katsu_
     for subfield in subfields:
         print(f"Loading {subfield} for {data[id_key]}...")
         for elem in field[subfield]:
-            traverse_clinical_field(elem, subfield, parents, types, id_names, katsu_server_url, headers, errors)
+            traverse_clinical_field(elem, subfield, parents, types, id_names, katsu_server_url, headers, errors,
+                                    ingested_ids)
     if ctype not in no_ids:
         parents.pop(ctype)
     return errors
@@ -279,7 +287,7 @@ def ingest_donor_with_clinical(katsu_server_url, dataset, headers):
         )
         parents = {"programs": program_id}
         print(f"Loading donor {donor['submitter_donor_id']}...")
-        traverse_clinical_field(donor, "donors", parents, types, id_names, katsu_server_url, headers, errors)
+        traverse_clinical_field(donor, "donors", parents, types, id_names, katsu_server_url, headers, errors, [])
     if not errors:
         return len(dataset)
     else:
