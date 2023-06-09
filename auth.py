@@ -2,9 +2,10 @@ import authx.auth
 import os
 import re
 
+import requests
+
 
 AUTH = True
-
 
 def get_auth_header():
     if AUTH:
@@ -57,6 +58,11 @@ def store_aws_credential(token=None, client=None):
     print(client)
     return authx.auth.store_aws_credential(token=token, endpoint=client["endpoint"], bucket=client["bucket"], access=client["access"], secret=client["secret"])
 
+def is_authed(request: requests.Request):
+    if 'Authorization' not in request.headers:
+        return False
+    if (authx.auth.is_permissible(request)): return True
+    return False
 
 if __name__ == "__main__":
     print(get_site_admin_token())

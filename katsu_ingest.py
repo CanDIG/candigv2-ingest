@@ -9,6 +9,7 @@ from requests.exceptions import ConnectionError
 from flask import Blueprint, request
 
 import auth
+from ingest_result import IngestPermissionsException, IngestServerException, IngestResult
 
 ingest_blueprint = Blueprint("ingest_donor", __name__)
 
@@ -136,7 +137,7 @@ def ingest_data(katsu_server_url, data_location):
     )
     ingest_finished = False
     for api_name, file_name in file_mapping.items():
-        ingest_str = f"/v2/ingest/{api_name}"
+        ingest_str = f"/v2/ingest/{api_name}/"
         ingest_url = katsu_server_url + ingest_str
 
         print(f"Loading {file_name}...")
@@ -275,23 +276,21 @@ def ingest_donor_with_clinical(katsu_server_url, dataset, headers):
                 "primary_diagnoses": "submitter_primary_diagnosis_id", "sample_registrations": "submitter_sample_id",
                 "treatments": "submitter_treatment_id", "specimens": "submitter_specimen_id"}
 
-    if headers == "GET_AUTH_HEADER":
-        headers = auth.get_auth_header()
-    headers["Content-Type"] = "application/json"
-
     errors = []
     for donor in dataset:
         program_id = donor.pop("program_id")
-        requests.post(katsu_server_url + f"/katsu/v2/ingest/programs/" , headers=headers,
-                                 data=json.dumps({"program_id": program_id})
-        )
+        request = requests.Request('POST', katsu_server_url + f"/katsu/v2/ingest/programs/", headers=headers,
+                      data={"program_id": program_id})
+        if not auth.is_authed(request):
+            return IngestPermissionsException(program_id)
+        requests.Session().send(request.prepare())
         parents = {"programs": program_id}
         print(f"Loading donor {donor['submitter_donor_id']}...")
         traverse_clinical_field(donor, "donors", parents, types, id_names, katsu_server_url, headers, errors, [])
-    if not errors:
-        return len(dataset)
+    if errors:
+        return IngestServerException(errors)
     else:
-        return errors
+        return IngestResult(len(dataset))
 
 def run_check(katsu_server_url, env_str, data_location, ingest_version):
     """
@@ -344,21 +343,24 @@ def run_check(katsu_server_url, env_str, data_location, ingest_version):
 @ingest_blueprint.route('/ingest', methods=["POST"])
 def ingest_donor_endpoint():
     katsu_server_url = os.environ.get("CANDIG_URL")
-    headers = "GET_AUTH_HEADER"
     dataset = request.json
-    response = ingest_donor_with_clinical(katsu_server_url, dataset, headers)
-    if type(response) == int:
-        return "Ingested %d donors.\n" % response, 200
-    else:
-        error_string = '\n'.join(response)
-        return "Ingest encountered the following errors: %s" % error_string, 500
+    response = ingest_donor_with_clinical(katsu_server_url, dataset, request.headers)
+    if type(response) == IngestResult:
+        return "Ingested %d donors.\n" % response.value, 200
+    elif type(response) == IngestPermissionsException:
+        return "Error: You are not authorized to write to program %s." % response.value, 403
+    elif type(response) == IngestServerException:
+        error_string = '\n'.join(response.value)
+        return "Ingest encountered the following errors: \n%s" % error_string, 500
+    return 500
 
 def main():
     # check if os.environ.get("CANDIG_URL") is set
     if os.environ.get("CANDIG_URL") is None:
         print("ERROR: ENV is not set. Did you forget to run 'source env.sh'?")
         exit()
-    katsu_server_url = os.environ.get("CANDIG_URL") + "/katsu"
+    katsu_server_url = os.environ.get("CANDIG_URL")
+    headers = "GET_AUTH_HEADER"
     data_location = os.environ.get("CLINICAL_DATA_LOCATION")
 
     env_str = "env.sh"
