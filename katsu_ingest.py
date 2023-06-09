@@ -277,13 +277,19 @@ def ingest_donor_with_clinical(katsu_server_url, dataset, headers):
                 "treatments": "submitter_treatment_id", "specimens": "submitter_specimen_id"}
 
     errors = []
+    ingested_datasets = []
     for donor in dataset:
         program_id = donor.pop("program_id")
-        request = requests.Request('POST', katsu_server_url + f"/katsu/v2/ingest/programs/", headers=headers,
-                      data={"program_id": program_id})
-        if not auth.is_authed(request):
-            return IngestPermissionsException(program_id)
-        requests.Session().send(request.prepare())
+        if program_id not in ingested_datasets:
+            request = requests.Request('POST', katsu_server_url + f"/katsu/v2/ingest/programs/", headers=headers,
+                          data=json.dumps({"program_id": program_id}))
+            if not auth.is_authed(request):
+                return IngestPermissionsException(program_id)
+            response = requests.Session().send(request.prepare())
+            if response.status_code != HTTPStatus.CREATED:
+                return IngestServerException([f"\nREQUEST STATUS CODE: {response.status_code}"
+                                              f"\nRETURN MESSAGE: {response.text}\n"])
+            ingested_datasets.append(program_id)
         parents = {"programs": program_id}
         print(f"Loading donor {donor['submitter_donor_id']}...")
         traverse_clinical_field(donor, "donors", parents, types, id_names, katsu_server_url, headers, errors, [])
@@ -346,12 +352,12 @@ def ingest_donor_endpoint():
     dataset = request.json
     response = ingest_donor_with_clinical(katsu_server_url, dataset, request.headers)
     if type(response) == IngestResult:
-        return "Ingested %d donors.\n" % response.value, 200
+        return "Ingested %d donors.<br/>" % response.value, 200
     elif type(response) == IngestPermissionsException:
-        return "Error: You are not authorized to write to program %s." % response.value, 403
+        return "Error: You are not authorized to write to program <br/>." % response.value, 403
     elif type(response) == IngestServerException:
-        error_string = '\n'.join(response.value)
-        return "Ingest encountered the following errors: \n%s" % error_string, 500
+        error_string = '<br/>'.join(response.value)
+        return "Ingest encountered the following errors: <br/>%s" % error_string, 500
     return 500
 
 def main():

@@ -1,7 +1,7 @@
 [
 		{
 			"submitter_donor_id": "DONOR_1",
-			"program_id": "SYNTHETIC-2",
+			"program_id": "SYNTHETIC-1",
 			"lost_to_followup_after_clinical_event_identifier": "",
 			"lost_to_followup_reason": "Not applicable",
 			"date_alive_after_lost_to_followup": "2022-02",
@@ -245,210 +245,8 @@
 							"immunotherapies": [],
 							"radiation": null,
 							"surgery": null,
-							"followups": [
-								{
-									"date_of_followup": "2022-09",
-									"disease_status_at_followup": "Partial remission",
-									"relapse_type": "Progression (liquid tumours)",
-									"date_of_relapse": "2022-09",
-									"method_of_progression_status": "Imaging (procedure)",
-									"anatomic_site_progression_or_recurrence": "C10",
-									"recurrence_tumour_staging_system": [
-										"St Jude staging system",
-										"AJCC 6th edition",
-										"AJCC 7th edition"
-									],
-									"recurrence_t_category": "TX",
-									"recurrence_n_category": "N1a",
-									"recurrence_m_category": "M1b(0)",
-									"recurrence_stage_group": "Stage 1B",
-									"biomarkers": [
-										{
-											"id": "2e26ac90-42bc-4d2a-9420-7f495d6528ea",
-											"test_interval": 4,
-											"psa_level": 379,
-											"ca125": 106,
-											"cea": 4,
-											"er_status": "Cannot be determined",
-											"er_percent_positive": 18.3,
-											"her2_ish_status": "Negative",
-											"her2_ihc_status": "Equivocal",
-											"pr_status": "Unknown",
-											"pr_percent_positive": 65.2,
-											"hpv_ihc_status": "Not applicable",
-											"hpv_pcr_status": "Negative",
-											"hpv_strain": [
-												"HPV35"
-											]
-										},
-										{
-											"id": "94e08c6a-07ff-4764-975b-8e43e1bc1d9d",
-											"test_interval": 5,
-											"psa_level": 318,
-											"ca125": 78,
-											"cea": 13,
-											"er_status": "Negative",
-											"er_percent_positive": 12.4,
-											"her2_ish_status": "Equivocal",
-											"her2_ihc_status": "Negative",
-											"pr_status": "Unknown",
-											"pr_percent_positive": 11.0,
-											"hpv_ihc_status": "Negative",
-											"hpv_pcr_status": "Positive",
-											"hpv_strain": [
-												"HPV31",
-												"HPV68"
-											]
-										},
-										{
-											"id": "f9ea7806-5773-4f0f-a52f-0cad9406f981",
-											"test_interval": 8,
-											"psa_level": 328,
-											"ca125": 104,
-											"cea": 13,
-											"er_status": "Cannot be determined",
-											"er_percent_positive": 21.0,
-											"her2_ish_status": "Cannot be determined",
-											"her2_ihc_status": "Not applicable",
-											"pr_status": "Not applicable",
-											"pr_percent_positive": 32.7,
-											"hpv_ihc_status": "Cannot be determined",
-											"hpv_pcr_status": "Unknown",
-											"hpv_strain": [
-												"HPV18"
-											]
-										}
-									]
-								},
-								{
-									"date_of_followup": "2022-08",
-									"disease_status_at_followup": "Loco-regional progression",
-									"relapse_type": "Local recurrence and distant metastasis",
-									"date_of_relapse": "2022-06",
-									"method_of_progression_status": "Histopathology test (procedure)",
-									"anatomic_site_progression_or_recurrence": "C20",
-									"recurrence_tumour_staging_system": [
-										"AJCC 6th edition",
-										"AJCC 8th edition",
-										"Ann Arbor staging system"
-									],
-									"recurrence_t_category": "TX",
-									"recurrence_n_category": "N2mi",
-									"recurrence_m_category": "M1e",
-									"recurrence_stage_group": "Stage IIIC2",
-									"biomarkers": [
-										{
-											"id": "1a37b749-eecf-4be0-88cc-7e247e51a67f",
-											"test_interval": 5,
-											"psa_level": 351,
-											"ca125": 81,
-											"cea": 7,
-											"er_status": "Positive",
-											"er_percent_positive": 97.8,
-											"her2_ish_status": "Equivocal",
-											"her2_ihc_status": "Not applicable",
-											"pr_status": "Positive",
-											"pr_percent_positive": 32.9,
-											"hpv_ihc_status": "Unknown",
-											"hpv_pcr_status": "Not applicable",
-											"hpv_strain": [
-												"HPV73"
-											]
-										},
-										{
-											"id": "4e4c445f-5139-436b-979a-2d1fe377be80",
-											"test_interval": 8,
-											"psa_level": 326,
-											"ca125": 96,
-											"cea": 11,
-											"er_status": "Not applicable",
-											"er_percent_positive": 13.7,
-											"her2_ish_status": "Unknown",
-											"her2_ihc_status": "Positive",
-											"pr_status": "Cannot be determined",
-											"pr_percent_positive": 85.4,
-											"hpv_ihc_status": "Cannot be determined",
-											"hpv_pcr_status": "Positive",
-											"hpv_strain": [
-												"HPV68"
-											]
-										},
-										{
-											"id": "8a0af986-dc6d-4779-8f26-6988259614ae",
-											"test_interval": 7,
-											"psa_level": 212,
-											"ca125": 54,
-											"cea": 8,
-											"er_status": "Unknown",
-											"er_percent_positive": 5.3,
-											"her2_ish_status": "Unknown",
-											"her2_ihc_status": "Equivocal",
-											"pr_status": "Not applicable",
-											"pr_percent_positive": 74.3,
-											"hpv_ihc_status": "Negative",
-											"hpv_pcr_status": "Unknown",
-											"hpv_strain": [
-												"HPV68",
-												"HPV18"
-											]
-										}
-									]
-								},
-								{
-									"date_of_followup": "2022-09",
-									"disease_status_at_followup": "No evidence of disease",
-									"relapse_type": "Progression (liquid tumours)",
-									"date_of_relapse": "2022-05",
-									"method_of_progression_status": "Physical examination procedure (procedure)",
-									"anatomic_site_progression_or_recurrence": "C14",
-									"recurrence_tumour_staging_system": [
-										"International Neuroblastoma Staging System"
-									],
-									"recurrence_t_category": "T1b(m)",
-									"recurrence_n_category": "N4",
-									"recurrence_m_category": "M1",
-									"recurrence_stage_group": "Stage IIAS",
-									"biomarkers": []
-								}
-							],
-							"biomarkers": [
-								{
-									"id": "7c1d1cea-b53d-4a1f-8853-d16f8846654a",
-									"test_interval": 7,
-									"psa_level": 343,
-									"ca125": 58,
-									"cea": 9,
-									"er_status": "Cannot be determined",
-									"er_percent_positive": 19.1,
-									"her2_ish_status": "Unknown",
-									"her2_ihc_status": "Equivocal",
-									"pr_status": "Not applicable",
-									"pr_percent_positive": 17.9,
-									"hpv_ihc_status": "Not applicable",
-									"hpv_pcr_status": "Unknown",
-									"hpv_strain": [
-										"HPV68"
-									]
-								},
-								{
-									"id": "dadfcf52-6bf2-45d5-9776-79447fddd187",
-									"test_interval": 6,
-									"psa_level": 399,
-									"ca125": 73,
-									"cea": 8,
-									"er_status": "Unknown",
-									"er_percent_positive": 45.5,
-									"her2_ish_status": "Positive",
-									"her2_ihc_status": "Equivocal",
-									"pr_status": "Not applicable",
-									"pr_percent_positive": 52.5,
-									"hpv_ihc_status": "Not applicable",
-									"hpv_pcr_status": "Negative",
-									"hpv_strain": [
-										"HPV18"
-									]
-								}
-							]
+							"followups": [],
+							"biomarkers": []
 						},
 						{
 							"submitter_treatment_id": "TREATMENT_2",
@@ -492,58 +290,7 @@
 							"immunotherapies": [],
 							"radiation": null,
 							"surgery": null,
-							"followups": [
-								{
-									"date_of_followup": "2022-09",
-									"disease_status_at_followup": "Distant progression",
-									"relapse_type": "Biochemical progression",
-									"date_of_relapse": "2022-02",
-									"method_of_progression_status": "Imaging (procedure)",
-									"anatomic_site_progression_or_recurrence": "C18",
-									"recurrence_tumour_staging_system": [
-										"Ann Arbor staging system",
-										"SEER staging system"
-									],
-									"recurrence_t_category": "T3(m)",
-									"recurrence_n_category": "N1a(sn)",
-									"recurrence_m_category": "M1d",
-									"recurrence_stage_group": "Stage 1",
-									"biomarkers": []
-								},
-								{
-									"date_of_followup": "2022-09",
-									"disease_status_at_followup": "Relapse or recurrence",
-									"relapse_type": "Local recurrence and distant metastasis",
-									"date_of_relapse": "2022-11",
-									"method_of_progression_status": "Tumor marker measurement (procedure)",
-									"anatomic_site_progression_or_recurrence": "C13",
-									"recurrence_tumour_staging_system": [
-										"St Jude staging system"
-									],
-									"recurrence_t_category": "Tis(Paget)",
-									"recurrence_n_category": "N2",
-									"recurrence_m_category": "M1b",
-									"recurrence_stage_group": "Stage IIIBS",
-									"biomarkers": []
-								},
-								{
-									"date_of_followup": "2022-08",
-									"disease_status_at_followup": "Distant progression",
-									"relapse_type": "Local recurrence",
-									"date_of_relapse": "2022-02",
-									"method_of_progression_status": "Imaging (procedure)",
-									"anatomic_site_progression_or_recurrence": "C14",
-									"recurrence_tumour_staging_system": [
-										"St Jude staging system",
-										"AJCC 6th edition"
-									],
-									"recurrence_t_category": "T1b(m)",
-									"recurrence_n_category": "N0b (no biopsy)",
-									"recurrence_m_category": "M1d",
-									"recurrence_stage_group": "Stage IBES",
-									"biomarkers": []
-								}
-							],
+							"followups": [],
 							"biomarkers": [
 								{
 									"id": "6a88626d-8499-4b1f-8211-dc4e63f6ef0e",
@@ -616,43 +363,7 @@
 							"immunotherapies": [],
 							"radiation": null,
 							"surgery": null,
-							"followups": [
-								{
-									"date_of_followup": "2022-09",
-									"disease_status_at_followup": "Partial remission",
-									"relapse_type": "Local recurrence and distant metastasis",
-									"date_of_relapse": "2022-11",
-									"method_of_progression_status": "Histopathology test (procedure)",
-									"anatomic_site_progression_or_recurrence": "C19",
-									"recurrence_tumour_staging_system": [
-										"Rai staging system",
-										"AJCC 6th edition"
-									],
-									"recurrence_t_category": "Tis(DCIS)",
-									"recurrence_n_category": "N2mi",
-									"recurrence_m_category": "M1c(1)",
-									"recurrence_stage_group": "Stage IIAE",
-									"biomarkers": []
-								},
-								{
-									"date_of_followup": "2022-08",
-									"disease_status_at_followup": "Distant progression",
-									"relapse_type": "Local recurrence and distant metastasis",
-									"date_of_relapse": "2022-10",
-									"method_of_progression_status": "Laboratory data interpretation (procedure)",
-									"anatomic_site_progression_or_recurrence": "C10",
-									"recurrence_tumour_staging_system": [
-										"AJCC 6th edition",
-										"Lugano staging system",
-										"AJCC 7th edition"
-									],
-									"recurrence_t_category": "Tis(DCIS)",
-									"recurrence_n_category": "N1",
-									"recurrence_m_category": "M1a(1)",
-									"recurrence_stage_group": "Stage IEA",
-									"biomarkers": []
-								}
-							],
+							"followups": [],
 							"biomarkers": []
 						}
 					],
@@ -804,41 +515,7 @@
 							"immunotherapies": [],
 							"radiation": null,
 							"surgery": null,
-							"followups": [
-								{
-									"date_of_followup": "2022-09",
-									"disease_status_at_followup": "Loco-regional progression",
-									"relapse_type": "Local recurrence",
-									"date_of_relapse": "2022-05",
-									"method_of_progression_status": "Assessment of symptom control (procedure)",
-									"anatomic_site_progression_or_recurrence": "C12",
-									"recurrence_tumour_staging_system": [
-										"Revised International staging system (RISS)"
-									],
-									"recurrence_t_category": "T2a",
-									"recurrence_n_category": "NX",
-									"recurrence_m_category": "M1b",
-									"recurrence_stage_group": "Stage IVES",
-									"biomarkers": []
-								},
-								{
-									"date_of_followup": "2022-10",
-									"disease_status_at_followup": "Progression not otherwise specified",
-									"relapse_type": "Local recurrence and distant metastasis",
-									"date_of_relapse": "2022-10",
-									"method_of_progression_status": "Imaging (procedure)",
-									"anatomic_site_progression_or_recurrence": "C17",
-									"recurrence_tumour_staging_system": [
-										"International Neuroblastoma Risk Group Staging System",
-										"AJCC 7th edition"
-									],
-									"recurrence_t_category": "Tis(LCIS)",
-									"recurrence_n_category": "N0(i+)",
-									"recurrence_m_category": "M1e",
-									"recurrence_stage_group": "Stage 3",
-									"biomarkers": []
-								}
-							],
+							"followups": [],
 							"biomarkers": []
 						},
 						{
@@ -891,26 +568,7 @@
 							"immunotherapies": [],
 							"radiation": null,
 							"surgery": null,
-							"followups": [
-								{
-									"date_of_followup": "2022-08",
-									"disease_status_at_followup": "Partial remission",
-									"relapse_type": "Distant recurrence/metastasis",
-									"date_of_relapse": "2021-12",
-									"method_of_progression_status": "Laboratory data interpretation (procedure)",
-									"anatomic_site_progression_or_recurrence": "C15",
-									"recurrence_tumour_staging_system": [
-										"Durie-Salmon staging system",
-										"Rai staging system",
-										"Lugano staging system"
-									],
-									"recurrence_t_category": "Tis(Paget's)",
-									"recurrence_n_category": "N0a",
-									"recurrence_m_category": "MX",
-									"recurrence_stage_group": "Stage IBES",
-									"biomarkers": []
-								}
-							],
+							"followups": [],
 							"biomarkers": []
 						},
 						{
@@ -954,25 +612,7 @@
 							"immunotherapies": [],
 							"radiation": null,
 							"surgery": null,
-							"followups": [
-								{
-									"date_of_followup": "2022-09",
-									"disease_status_at_followup": "Progression not otherwise specified",
-									"relapse_type": "Local recurrence and distant metastasis",
-									"date_of_relapse": "2022-09",
-									"method_of_progression_status": "Physical examination procedure (procedure)",
-									"anatomic_site_progression_or_recurrence": "C08",
-									"recurrence_tumour_staging_system": [
-										"St Jude staging system",
-										"Lugano staging system"
-									],
-									"recurrence_t_category": "T1b(s)",
-									"recurrence_n_category": "N0(mol+)",
-									"recurrence_m_category": "M1c",
-									"recurrence_stage_group": "Stage 1A",
-									"biomarkers": []
-								}
-							],
+							"followups": [],
 							"biomarkers": []
 						}
 					],
@@ -1087,26 +727,7 @@
 							"immunotherapies": [],
 							"radiation": null,
 							"surgery": null,
-							"followups": [
-								{
-									"date_of_followup": "2022-09",
-									"disease_status_at_followup": "Complete remission",
-									"relapse_type": "Progression (liquid tumours)",
-									"date_of_relapse": "2022-04",
-									"method_of_progression_status": "Tumor marker measurement (procedure)",
-									"anatomic_site_progression_or_recurrence": "C09",
-									"recurrence_tumour_staging_system": [
-										"FIGO staging system",
-										"International Neuroblastoma Staging System",
-										"Rai staging system"
-									],
-									"recurrence_t_category": "T2a",
-									"recurrence_n_category": "N0b (no biopsy)",
-									"recurrence_m_category": "M1e",
-									"recurrence_stage_group": "Stage IIIAE",
-									"biomarkers": []
-								}
-							],
+							"followups": [],
 							"biomarkers": []
 						},
 						{
@@ -1140,26 +761,7 @@
 							"immunotherapies": [],
 							"radiation": null,
 							"surgery": null,
-							"followups": [
-								{
-									"date_of_followup": "2022-10",
-									"disease_status_at_followup": "Partial remission",
-									"relapse_type": "Local recurrence",
-									"date_of_relapse": "2022-07",
-									"method_of_progression_status": "Tumor marker measurement (procedure)",
-									"anatomic_site_progression_or_recurrence": "C03",
-									"recurrence_tumour_staging_system": [
-										"AJCC 7th edition",
-										"AJCC 8th edition",
-										"FIGO staging system"
-									],
-									"recurrence_t_category": "T2",
-									"recurrence_n_category": "N1",
-									"recurrence_m_category": "M1a(1)",
-									"recurrence_stage_group": "Stage IAS",
-									"biomarkers": []
-								}
-							],
+							"followups": [],
 							"biomarkers": []
 						}
 					],
@@ -1176,20 +778,20 @@
 					"comorbidity_treatment": "Ablation"
 				},
 				{
-					"prior_malignancy": "Yes",
-					"laterality_of_prior_malignancy": "Unilateral, Side not specified",
-					"age_at_comorbidity_diagnosis": 46,
-					"comorbidity_type_code": "C43.9",
-					"comorbidity_treatment_status": "Yes",
-					"comorbidity_treatment": "Hormonal therapy"
-				},
-				{
 					"prior_malignancy": "No",
 					"laterality_of_prior_malignancy": "Unilateral, Side not specified",
 					"age_at_comorbidity_diagnosis": 40,
 					"comorbidity_type_code": "C02.1",
 					"comorbidity_treatment_status": "Yes",
 					"comorbidity_treatment": "Endoscopic therapy"
+				},
+				{
+					"prior_malignancy": "Yes",
+					"laterality_of_prior_malignancy": "Unilateral, Side not specified",
+					"age_at_comorbidity_diagnosis": 46,
+					"comorbidity_type_code": "C43.9",
+					"comorbidity_treatment_status": "Yes",
+					"comorbidity_treatment": "Hormonal therapy"
 				}
 			],
 			"exposures": [
@@ -1308,50 +910,8 @@
 							"hormone_therapies": [],
 							"immunotherapies": [],
 							"radiation": null,
-							"surgery": {
-								"id": "66c02fc0-08d5-497a-8c40-8be12e9819a9",
-								"surgery_type": "Pneumonectomy",
-								"surgery_site": "C14",
-								"surgery_location": "Primary",
-								"tumour_focality": "Unifocal",
-								"residual_tumour_classification": "R2",
-								"margin_types_involved": [
-									"Unknown"
-								],
-								"margin_types_not_involved": [
-									"Circumferential resection margin"
-								],
-								"margin_types_not_assessed": [
-									"Distal margin",
-									"Proximal margin"
-								],
-								"lymphovascular_invasion": "Unknown",
-								"perineural_invasion": "Unknown",
-								"tumour_length": 3,
-								"tumour_width": 5,
-								"greatest_dimension_tumour": 5,
-								"submitter_specimen_id": null
-							},
-							"followups": [
-								{
-									"date_of_followup": "2022-09",
-									"disease_status_at_followup": "Stable",
-									"relapse_type": "Progression (liquid tumours)",
-									"date_of_relapse": "2021-11",
-									"method_of_progression_status": "Physical examination procedure (procedure)",
-									"anatomic_site_progression_or_recurrence": "C06",
-									"recurrence_tumour_staging_system": [
-										"Rai staging system",
-										"International Neuroblastoma Risk Group Staging System",
-										"AJCC 8th edition"
-									],
-									"recurrence_t_category": "T2a2",
-									"recurrence_n_category": "N0a",
-									"recurrence_m_category": "MX",
-									"recurrence_stage_group": "Stage IAES",
-									"biomarkers": []
-								}
-							],
+							"surgery": null,
+							"followups": [],
 							"biomarkers": []
 						}
 					],
@@ -1478,35 +1038,9 @@
 							"chemotherapies": [],
 							"hormone_therapies": [],
 							"immunotherapies": [],
-							"radiation": {
-								"id": "428c9f2b-326a-45c0-bad0-762ed66947cd",
-								"radiation_therapy_modality": "Teleradiotherapy protons (procedure)",
-								"radiation_therapy_type": "Internal",
-								"anatomical_site_irradiated": "Finger (Including Thumbs)",
-								"radiation_therapy_fractions": 30,
-								"radiation_therapy_dosage": 66,
-								"radiation_boost": true,
-								"reference_radiation_treatment_id": "REFERENCE_RADIATION_TREATMENT_2"
-							},
+							"radiation": null,
 							"surgery": null,
-							"followups": [
-								{
-									"date_of_followup": "2022-08",
-									"disease_status_at_followup": "Relapse or recurrence",
-									"relapse_type": "Progression (liquid tumours)",
-									"date_of_relapse": "2022-11",
-									"method_of_progression_status": "Assessment of symptom control (procedure)",
-									"anatomic_site_progression_or_recurrence": "C07",
-									"recurrence_tumour_staging_system": [
-										"Ann Arbor staging system"
-									],
-									"recurrence_t_category": "T4",
-									"recurrence_n_category": "NX",
-									"recurrence_m_category": "MX",
-									"recurrence_stage_group": "Stage IIEB",
-									"biomarkers": []
-								}
-							],
+							"followups": [],
 							"biomarkers": []
 						},
 						{
@@ -1528,37 +1062,9 @@
 							"chemotherapies": [],
 							"hormone_therapies": [],
 							"immunotherapies": [],
-							"radiation": {
-								"id": "5fef0b9d-9a33-4dad-8c1e-5c5ebff36d5e",
-								"radiation_therapy_modality": "Teleradiotherapy neutrons (procedure)",
-								"radiation_therapy_type": "Internal",
-								"anatomical_site_irradiated": "Left Maxilla",
-								"radiation_therapy_fractions": 30,
-								"radiation_therapy_dosage": 66,
-								"radiation_boost": true,
-								"reference_radiation_treatment_id": "REFERENCE_RADIATION_TREATMENT_1"
-							},
+							"radiation": null,
 							"surgery": null,
-							"followups": [
-								{
-									"date_of_followup": "2022-08",
-									"disease_status_at_followup": "Complete remission",
-									"relapse_type": "Local recurrence and distant metastasis",
-									"date_of_relapse": "2022-08",
-									"method_of_progression_status": "Laboratory data interpretation (procedure)",
-									"anatomic_site_progression_or_recurrence": "C11",
-									"recurrence_tumour_staging_system": [
-										"Ann Arbor staging system",
-										"AJCC 8th edition",
-										"Revised International staging system (RISS)"
-									],
-									"recurrence_t_category": "T2a1",
-									"recurrence_n_category": "N0",
-									"recurrence_m_category": "M1b(1)",
-									"recurrence_stage_group": "Stage Ms",
-									"biomarkers": []
-								}
-							],
+							"followups": [],
 							"biomarkers": []
 						}
 					],
@@ -1651,36 +1157,9 @@
 							"chemotherapies": [],
 							"hormone_therapies": [],
 							"immunotherapies": [],
-							"radiation": {
-								"id": "b1871537-ea64-4f96-9823-2b7b3fd9508a",
-								"radiation_therapy_modality": "Teleradiotherapy neutrons (procedure)",
-								"radiation_therapy_type": "External",
-								"anatomical_site_irradiated": "Left Scapula",
-								"radiation_therapy_fractions": 35,
-								"radiation_therapy_dosage": 70,
-								"radiation_boost": true,
-								"reference_radiation_treatment_id": "REFERENCE_RADIATION_TREATMENT_3"
-							},
+							"radiation": null,
 							"surgery": null,
-							"followups": [
-								{
-									"date_of_followup": "2022-11",
-									"disease_status_at_followup": "No evidence of disease",
-									"relapse_type": "Progression (liquid tumours)",
-									"date_of_relapse": "2022-05",
-									"method_of_progression_status": "Assessment of symptom control (procedure)",
-									"anatomic_site_progression_or_recurrence": "C11",
-									"recurrence_tumour_staging_system": [
-										"International Neuroblastoma Staging System",
-										"FIGO staging system"
-									],
-									"recurrence_t_category": "T4b(s)",
-									"recurrence_n_category": "N3",
-									"recurrence_m_category": "M1e",
-									"recurrence_stage_group": "Stage IIIS",
-									"biomarkers": []
-								}
-							],
+							"followups": [],
 							"biomarkers": []
 						}
 					],
@@ -1753,35 +1232,9 @@
 							"chemotherapies": [],
 							"hormone_therapies": [],
 							"immunotherapies": [],
-							"radiation": {
-								"id": "aa36ec92-564f-4d90-9781-76b430dd82f6",
-								"radiation_therapy_modality": "Megavoltage radiation therapy using photons (procedure)",
-								"radiation_therapy_type": "Internal",
-								"anatomical_site_irradiated": "Right Adrenal",
-								"radiation_therapy_fractions": 30,
-								"radiation_therapy_dosage": 70,
-								"radiation_boost": false,
-								"reference_radiation_treatment_id": ""
-							},
+							"radiation": null,
 							"surgery": null,
-							"followups": [
-								{
-									"date_of_followup": "2022-09",
-									"disease_status_at_followup": "Complete remission",
-									"relapse_type": "Biochemical progression",
-									"date_of_relapse": "2022-09",
-									"method_of_progression_status": "Laboratory data interpretation (procedure)",
-									"anatomic_site_progression_or_recurrence": "C15",
-									"recurrence_tumour_staging_system": [
-										"International Neuroblastoma Staging System"
-									],
-									"recurrence_t_category": "T0",
-									"recurrence_n_category": "N2",
-									"recurrence_m_category": "M1a(1)",
-									"recurrence_stage_group": "Stage IVBE",
-									"biomarkers": []
-								}
-							],
+							"followups": [],
 							"biomarkers": []
 						}
 					],
@@ -1789,6 +1242,14 @@
 				}
 			],
 			"comorbidities": [
+				{
+					"prior_malignancy": "Yes",
+					"laterality_of_prior_malignancy": "Bilateral",
+					"age_at_comorbidity_diagnosis": 53,
+					"comorbidity_type_code": "C50.9",
+					"comorbidity_treatment_status": "No",
+					"comorbidity_treatment": "Surgery"
+				},
 				{
 					"prior_malignancy": "Unknown",
 					"laterality_of_prior_malignancy": "Left",
@@ -1804,14 +1265,6 @@
 					"comorbidity_type_code": "C34.9",
 					"comorbidity_treatment_status": "Unknown",
 					"comorbidity_treatment": "Endoscopic therapy"
-				},
-				{
-					"prior_malignancy": "Yes",
-					"laterality_of_prior_malignancy": "Bilateral",
-					"age_at_comorbidity_diagnosis": 53,
-					"comorbidity_type_code": "C50.9",
-					"comorbidity_treatment_status": "No",
-					"comorbidity_treatment": "Surgery"
 				}
 			],
 			"exposures": [
@@ -1918,37 +1371,9 @@
 							"chemotherapies": [],
 							"hormone_therapies": [],
 							"immunotherapies": [],
-							"radiation": {
-								"id": "5b90e929-7b3e-4156-8546-6059c4edac65",
-								"radiation_therapy_modality": "Brachytherapy (procedure)",
-								"radiation_therapy_type": "External",
-								"anatomical_site_irradiated": "Bilateral Ovary",
-								"radiation_therapy_fractions": 30,
-								"radiation_therapy_dosage": 66,
-								"radiation_boost": false,
-								"reference_radiation_treatment_id": ""
-							},
+							"radiation": null,
 							"surgery": null,
-							"followups": [
-								{
-									"date_of_followup": "2022-09",
-									"disease_status_at_followup": "Complete remission",
-									"relapse_type": "Local recurrence",
-									"date_of_relapse": "2022-10",
-									"method_of_progression_status": "Assessment of symptom control (procedure)",
-									"anatomic_site_progression_or_recurrence": "C15",
-									"recurrence_tumour_staging_system": [
-										"Lugano staging system",
-										"Durie-Salmon staging system",
-										"Revised International staging system (RISS)"
-									],
-									"recurrence_t_category": "T4b(s)",
-									"recurrence_n_category": "N0(mol-)",
-									"recurrence_m_category": "M1e",
-									"recurrence_stage_group": "Stage IIC",
-									"biomarkers": []
-								}
-							],
+							"followups": [],
 							"biomarkers": []
 						}
 					],
@@ -2055,25 +1480,7 @@
 							],
 							"radiation": null,
 							"surgery": null,
-							"followups": [
-								{
-									"date_of_followup": "2022-11",
-									"disease_status_at_followup": "Distant progression",
-									"relapse_type": "Biochemical progression",
-									"date_of_relapse": "2022-08",
-									"method_of_progression_status": "Tumor marker measurement (procedure)",
-									"anatomic_site_progression_or_recurrence": "C17",
-									"recurrence_tumour_staging_system": [
-										"Binet staging system",
-										"Lugano staging system"
-									],
-									"recurrence_t_category": "T0",
-									"recurrence_n_category": "N1a",
-									"recurrence_m_category": "M1d(0)",
-									"recurrence_stage_group": "Stage III",
-									"biomarkers": []
-								}
-							],
+							"followups": [],
 							"biomarkers": []
 						}
 					],
@@ -2229,25 +1636,7 @@
 							],
 							"radiation": null,
 							"surgery": null,
-							"followups": [
-								{
-									"date_of_followup": "2022-09",
-									"disease_status_at_followup": "Complete remission",
-									"relapse_type": "Progression (liquid tumours)",
-									"date_of_relapse": "2021-12",
-									"method_of_progression_status": "Tumor marker measurement (procedure)",
-									"anatomic_site_progression_or_recurrence": "C08",
-									"recurrence_tumour_staging_system": [
-										"AJCC 6th edition",
-										"FIGO staging system"
-									],
-									"recurrence_t_category": "T1a(m)",
-									"recurrence_n_category": "N0(mol+)",
-									"recurrence_m_category": "M1a(0)",
-									"recurrence_stage_group": "Stage IIIAS",
-									"biomarkers": []
-								}
-							],
+							"followups": [],
 							"biomarkers": []
 						}
 					],
@@ -2344,24 +1733,7 @@
 							],
 							"radiation": null,
 							"surgery": null,
-							"followups": [
-								{
-									"date_of_followup": "2022-11",
-									"disease_status_at_followup": "Partial remission",
-									"relapse_type": "Local recurrence and distant metastasis",
-									"date_of_relapse": "2022-10",
-									"method_of_progression_status": "Tumor marker measurement (procedure)",
-									"anatomic_site_progression_or_recurrence": "C03",
-									"recurrence_tumour_staging_system": [
-										"International Neuroblastoma Risk Group Staging System"
-									],
-									"recurrence_t_category": "T4a",
-									"recurrence_n_category": "N0(i+)",
-									"recurrence_m_category": "M1b(0)",
-									"recurrence_stage_group": "Stage 4",
-									"biomarkers": []
-								}
-							],
+							"followups": [],
 							"biomarkers": []
 						}
 					],
@@ -2372,18 +1744,18 @@
 				{
 					"prior_malignancy": "No",
 					"laterality_of_prior_malignancy": "Unknown",
-					"age_at_comorbidity_diagnosis": 47,
-					"comorbidity_type_code": "C67.6",
-					"comorbidity_treatment_status": "Unknown",
-					"comorbidity_treatment": "Radiation therapy"
-				},
-				{
-					"prior_malignancy": "No",
-					"laterality_of_prior_malignancy": "Unknown",
 					"age_at_comorbidity_diagnosis": 35,
 					"comorbidity_type_code": "C02.0",
 					"comorbidity_treatment_status": "No",
 					"comorbidity_treatment": "Photodynamic therapy"
+				},
+				{
+					"prior_malignancy": "No",
+					"laterality_of_prior_malignancy": "Unknown",
+					"age_at_comorbidity_diagnosis": 47,
+					"comorbidity_type_code": "C67.6",
+					"comorbidity_treatment_status": "Unknown",
+					"comorbidity_treatment": "Radiation therapy"
 				}
 			],
 			"exposures": [],
@@ -2489,26 +1861,7 @@
 							],
 							"radiation": null,
 							"surgery": null,
-							"followups": [
-								{
-									"date_of_followup": "2022-08",
-									"disease_status_at_followup": "Complete remission",
-									"relapse_type": "Biochemical progression",
-									"date_of_relapse": "2022-02",
-									"method_of_progression_status": "Assessment of symptom control (procedure)",
-									"anatomic_site_progression_or_recurrence": "C03",
-									"recurrence_tumour_staging_system": [
-										"Lugano staging system",
-										"International Neuroblastoma Staging System",
-										"Ann Arbor staging system"
-									],
-									"recurrence_t_category": "Tis pu",
-									"recurrence_n_category": "N0(i+)",
-									"recurrence_m_category": "M1",
-									"recurrence_stage_group": "Stage IIAS",
-									"biomarkers": []
-								}
-							],
+							"followups": [],
 							"biomarkers": []
 						}
 					],
@@ -2615,48 +1968,8 @@
 							"hormone_therapies": [],
 							"immunotherapies": [],
 							"radiation": null,
-							"surgery": {
-								"id": "d4d6bcf3-07c8-4674-be7c-02013fac310f",
-								"surgery_type": "Axillary lymph nodes sampling",
-								"surgery_site": "C14",
-								"surgery_location": "Primary",
-								"tumour_focality": "Unifocal",
-								"residual_tumour_classification": "R2",
-								"margin_types_involved": [
-									"Distal margin",
-									"Circumferential resection margin"
-								],
-								"margin_types_not_involved": [],
-								"margin_types_not_assessed": [
-									"Unknown"
-								],
-								"lymphovascular_invasion": "Absent",
-								"perineural_invasion": "Absent",
-								"tumour_length": 9,
-								"tumour_width": 7,
-								"greatest_dimension_tumour": 5,
-								"submitter_specimen_id": "SPECIMEN_18"
-							},
-							"followups": [
-								{
-									"date_of_followup": "2022-11",
-									"disease_status_at_followup": "No evidence of disease",
-									"relapse_type": "Progression (liquid tumours)",
-									"date_of_relapse": "2022-06",
-									"method_of_progression_status": "Tumor marker measurement (procedure)",
-									"anatomic_site_progression_or_recurrence": "C16",
-									"recurrence_tumour_staging_system": [
-										"Rai staging system",
-										"AJCC 8th edition",
-										"AJCC 7th edition"
-									],
-									"recurrence_t_category": "Ta",
-									"recurrence_n_category": "N1",
-									"recurrence_m_category": "M0",
-									"recurrence_stage_group": "Stage IVAS",
-									"biomarkers": []
-								}
-							],
+							"surgery": null,
+							"followups": [],
 							"biomarkers": []
 						}
 					],
@@ -2759,44 +2072,8 @@
 							"hormone_therapies": [],
 							"immunotherapies": [],
 							"radiation": null,
-							"surgery": {
-								"id": "23c749c7-d9fc-494a-b1a3-f57a3e1c638b",
-								"surgery_type": "Axillary Clearance",
-								"surgery_site": "C14",
-								"surgery_location": "Local recurrence",
-								"tumour_focality": "Unknown",
-								"residual_tumour_classification": "Unknown",
-								"margin_types_involved": [],
-								"margin_types_not_involved": [],
-								"margin_types_not_assessed": [
-									"Circumferential resection margin",
-									"Proximal margin"
-								],
-								"lymphovascular_invasion": "Venous (large vessel) invasion only",
-								"perineural_invasion": "Unknown",
-								"tumour_length": 5,
-								"tumour_width": 5,
-								"greatest_dimension_tumour": 6,
-								"submitter_specimen_id": null
-							},
-							"followups": [
-								{
-									"date_of_followup": "2022-08",
-									"disease_status_at_followup": "Relapse or recurrence",
-									"relapse_type": "Progression (liquid tumours)",
-									"date_of_relapse": "2022-09",
-									"method_of_progression_status": "Physical examination procedure (procedure)",
-									"anatomic_site_progression_or_recurrence": "C19",
-									"recurrence_tumour_staging_system": [
-										"AJCC 8th edition"
-									],
-									"recurrence_t_category": "T1a",
-									"recurrence_n_category": "N0b (no biopsy)",
-									"recurrence_m_category": "M1a",
-									"recurrence_stage_group": "Stage IIC",
-									"biomarkers": []
-								}
-							],
+							"surgery": null,
+							"followups": [],
 							"biomarkers": []
 						}
 					],
@@ -2914,45 +2191,8 @@
 							"hormone_therapies": [],
 							"immunotherapies": [],
 							"radiation": null,
-							"surgery": {
-								"id": "4f2f3cae-577a-4703-8472-ce8e767bcde0",
-								"surgery_type": "Tumor Debulking",
-								"surgery_site": "C06",
-								"surgery_location": "Primary",
-								"tumour_focality": "Not applicable",
-								"residual_tumour_classification": "RX",
-								"margin_types_involved": [
-									"Unknown",
-									"Distal margin"
-								],
-								"margin_types_not_involved": [],
-								"margin_types_not_assessed": [],
-								"lymphovascular_invasion": "Venous (large vessel) invasion only",
-								"perineural_invasion": "Present",
-								"tumour_length": 3,
-								"tumour_width": 6,
-								"greatest_dimension_tumour": 5,
-								"submitter_specimen_id": null
-							},
-							"followups": [
-								{
-									"date_of_followup": "2022-08",
-									"disease_status_at_followup": "Loco-regional progression",
-									"relapse_type": "Distant recurrence/metastasis",
-									"date_of_relapse": "2021-12",
-									"method_of_progression_status": "Assessment of symptom control (procedure)",
-									"anatomic_site_progression_or_recurrence": "C03",
-									"recurrence_tumour_staging_system": [
-										"Revised International staging system (RISS)",
-										"Lugano staging system"
-									],
-									"recurrence_t_category": "T4a(s)",
-									"recurrence_n_category": "N3",
-									"recurrence_m_category": "M0(i+)",
-									"recurrence_stage_group": "Stage IIES",
-									"biomarkers": []
-								}
-							],
+							"surgery": null,
+							"followups": [],
 							"biomarkers": []
 						}
 					],
@@ -3065,43 +2305,8 @@
 							"hormone_therapies": [],
 							"immunotherapies": [],
 							"radiation": null,
-							"surgery": {
-								"id": "ab16c1e5-8521-4fe0-bd8f-94ad08f576eb",
-								"surgery_type": "Pancreaticojejunostomy, side-to-side anastomosis",
-								"surgery_site": "C12",
-								"surgery_location": "Metastatic",
-								"tumour_focality": "Unknown",
-								"residual_tumour_classification": "R0",
-								"margin_types_involved": [],
-								"margin_types_not_involved": [
-									"Unknown"
-								],
-								"margin_types_not_assessed": [],
-								"lymphovascular_invasion": "Venous (large vessel) invasion only",
-								"perineural_invasion": "Present",
-								"tumour_length": 6,
-								"tumour_width": 6,
-								"greatest_dimension_tumour": 6,
-								"submitter_specimen_id": null
-							},
-							"followups": [
-								{
-									"date_of_followup": "2022-11",
-									"disease_status_at_followup": "Progression not otherwise specified",
-									"relapse_type": "Local recurrence and distant metastasis",
-									"date_of_relapse": "2022-10",
-									"method_of_progression_status": "Histopathology test (procedure)",
-									"anatomic_site_progression_or_recurrence": "C15",
-									"recurrence_tumour_staging_system": [
-										"Lugano staging system"
-									],
-									"recurrence_t_category": "T0",
-									"recurrence_n_category": "N2c",
-									"recurrence_m_category": "M1c(1)",
-									"recurrence_stage_group": "Stage IIIA",
-									"biomarkers": []
-								}
-							],
+							"surgery": null,
+							"followups": [],
 							"biomarkers": []
 						}
 					],
