@@ -1,6 +1,7 @@
 # candigv2-ingest
 
 Ingest data into the CanDIGv2 stack. This repository assumes that you have a functional instance of CanDIGv2.
+This repository can either be run standalone or as a Docker container.
 
 ## What you'll need
 
@@ -122,3 +123,12 @@ You can also run the script with the `-choice` to skip the menu and go straight 
 ```bash
 python katsu_ingest.py -choice 2
 ```
+
+## Run as Docker Container
+Currently, the containerized version supports a single endpoint for ingesting a DonorWithClinicalData object.
+To run, ensure you have docker installed and CanDIGv2 running, then run the following commands:
+```bash
+docker build . --build-arg venv_python=3.10 --build-arg alpine_version=3.14 -t44 ingest_app
+docker run -p 1235:1235 -e CANDIG_URL="$CANDIG_URL" --name candig-ingest --add-host candig.docker.internal:[YOUR LOCAL IP] ingest_app
+```
+This will start a Docker container with a Flask API for the ingest at localhost:1235. You can ingest a DonorWithClincalData object by POSTing JSON to localhost:1235/ingest (an example is given in single_ingest.json, or you can simply copy the "results" key from a Katsu DonorWithClinicalData authorized query). Make sure you include Authorization headers as well.
