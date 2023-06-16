@@ -73,31 +73,7 @@ def read_json(file_path):
             return None
 
 
-def clean_data(katsu_server_url, headers):
-    """
-    Sends a DELETE request to the Katsu server to delete all data.
-    """
-    response = input("Are you sure you want to delete the database? (yes/no): ")
-
-    if response == "yes":
-        delete_url = "/v2/delete/all"
-        url = katsu_server_url + delete_url
-
-        if headers == "GET_AUTH_HEADER":
-            headers = auth.get_auth_header()
-        res = requests.delete(url, headers=headers)
-        if res.status_code == HTTPStatus.NO_CONTENT:
-            print(f"Delete successful with status code {res.status_code}")
-        else:
-            print(
-                f"Delete failed with status code {res.status_code} and message: {res.text}"
-            )
-    else:
-        print("Delete cancelled")
-        exit()
-
-
-def ingest_data(katsu_server_url, data_location, headers):
+def ingest_data(katsu_server_url, data_location):
     """
     Send POST requests to the Katsu server to ingest data.
     """
@@ -128,8 +104,7 @@ def ingest_data(katsu_server_url, data_location, headers):
         print(f"Loading {file_name}...")
         payload = read_json(data_location + file_name)
         if payload is not None:
-            if headers == "GET_AUTH_HEADER":
-                headers = auth.get_auth_header()
+            headers = auth.get_auth_header()
             headers["Content-Type"] = "application/json"
             response = requests.post(
                 ingest_url, headers=headers, data=json.dumps(payload)
@@ -154,7 +129,7 @@ def ingest_data(katsu_server_url, data_location, headers):
         print("Aborting processing due to an error.")
 
 
-def run_check(katsu_server_url, env_str, data_location, headers, ingest_version):
+def run_check(katsu_server_url, env_str, data_location, ingest_version):
     """
     Run a series of checks to ensure that the ingest is ready to run.
         - Check if the environment file exists
@@ -175,13 +150,12 @@ def run_check(katsu_server_url, env_str, data_location, headers, ingest_version)
         print("ERROR LOCATION CHECK: data location is not set.")
 
     # check authorization
-    if headers == "GET_AUTH_HEADER":
-        try:
-            headers = auth.get_auth_header()
-            print("PASS: Auth header is set.")
-        except Exception as e:
-            print(f"ERROR AUTH CHECK: {e}")
-            exit()
+    try:
+        headers = auth.get_auth_header()
+        print("PASS: Auth header is ok.")
+    except Exception as e:
+        print(f"ERROR AUTH CHECK: {e}")
+        exit()
 
     # check if Katsu server is running correct version
     version_check_url = katsu_server_url + "/v2/version_check"
@@ -210,7 +184,6 @@ def main():
         print("ERROR: ENV is not set. Did you forget to run 'source env.sh'?")
         exit()
     katsu_server_url = os.environ.get("CANDIG_URL") + "/katsu"
-    headers = "GET_AUTH_HEADER"
     data_location = os.environ.get("CLINICAL_DATA_LOCATION")
 
     env_str = "env.sh"
@@ -221,7 +194,7 @@ def main():
         "-choice",
         type=int,
         choices=range(1, 4),
-        help="Select an option: 1=Run check, 2=Ingest data, 3=Clean data",
+        help="Select an option: 1=Run check, 2=Ingest data, 3=Delete a dataset",
     )
     args = parser.parse_args()
 
@@ -231,7 +204,7 @@ def main():
         print("Select an option:")
         print("1. Run check")
         print("2. Ingest data")
-        print("3. Clean data")
+        print("3. Delete a dataset")
         print("4. Exit")
         choice = int(input("Enter your choice [1-4]: "))
 
@@ -240,17 +213,15 @@ def main():
             katsu_server_url=katsu_server_url,
             env_str=env_str,
             data_location=data_location,
-            headers=headers,
             ingest_version=ingest_version,
         )
     elif choice == 2:
         ingest_data(
             katsu_server_url=katsu_server_url,
             data_location=data_location,
-            headers=headers,
         )
     elif choice == 3:
-        clean_data(katsu_server_url, headers)
+        print(f"To be implemented later")
     elif choice == 4:
         exit()
     else:
