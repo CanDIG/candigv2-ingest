@@ -4,6 +4,13 @@ import os
 import re
 import json
 from htsget_methods import post_to_dataset, get_dataset_objects, post_objects
+from ingest_result import IngestPermissionsException, IngestServerException, IngestUserException, IngestResult
+import traceback
+
+
+from flask import Blueprint, request
+
+ingest_blueprint = Blueprint("ingest_genomic", __name__)
 
 
 def collect_samples_for_genomic_id(genomic_id, client, prefix=""):
@@ -40,6 +47,115 @@ def collect_samples_for_genomic_id(genomic_id, client, prefix=""):
                 )
     return samples
 
+def htsget_ingest_from_s3(endpoint, bucket, dataset, token, genomic_id=None, clinical_id=None,
+                          samples=[], awsfile=None, access=None, secret=None, prefix="", reference="hg38", sample="", indexing=False):
+    genomic_samples = []
+    clinical_samples = []
+    if samples:
+        for line in samples:
+            parts = line.strip().split()
+            genomic_samples.append(parts[0])
+            if len(parts) > 1:
+                clinical_samples.append(parts[1])
+    elif (genomic_id and sample):
+        genomic_samples = [sample]
+    else:
+        return IngestUserException("Either a sample name or a file of samples is required.")
+
+    if clinical_id:
+        clinical_samples = [clinical_id]
+
+    if os.getenv("CANDIG_URL") == "":
+        raise Exception("CANDIG_URL environment variable is not set")
+
+    if awsfile:
+        # parse the awsfile:
+        result = auth.parse_aws_credential(awsfile)
+        access_key = result["access"]
+        secret_key = result["secret"]
+        if "error" in result:
+            return IngestServerException(f"Failed to parse awsfile: {result['error']}")
+    elif access and secret:
+        access_key = access
+        secret_key = secret
+    else:
+        return IngestUserException("Either awsfile or access/secret need to be provided.")
+
+    client = auth.get_minio_client(token, endpoint, bucket, access_key=access_key, secret_key=secret_key)
+    result, status_code = auth.store_aws_credential(token=token, client=client)
+    if status_code != 200:
+        return IngestUserException(f"Failed to add AWS credential to vault: {result}")
+    created = []
+    for i in range(0, len(genomic_samples)):
+        # first, find all of the s3 objects related to this sample:
+        objects_to_create = collect_samples_for_genomic_id(genomic_samples[i], client, prefix=prefix)
+        clinical_id = None
+        if len(clinical_samples) == len(genomic_samples):
+            clinical_id = clinical_samples[i]
+        response = post_objects(genomic_samples[i], objects_to_create, token, clinical_id=clinical_id, ref_genome=reference,
+                     force=indexing)
+        if (response.status_code > 200):
+            print(response.text)
+            if response.status_code < 500:
+                return IngestUserException(response.text)
+            else:
+                return IngestServerException(response.text)
+        created.extend(map(lambda s: s['id'], objects_to_create))
+    response = post_to_dataset(created, dataset, token)
+    if response.status_code > 300:
+        print(response.text)
+        if response.status_code < 500:
+            return IngestUserException(response.text)
+        else:
+            return IngestServerException(response.text)
+    return IngestResult(str(created))
+
+@ingest_blueprint.route('/ingest_genomic', methods=["POST"])
+def genomic_ingest_endpoint():
+    token = request.headers["Authorization"]
+    if token.startswith("Bearer "):
+        token = token.split("Bearer ")[1]
+
+    req_values = {
+        "endpoint": "required",
+        "bucket": "required",
+        "dataset": "required",
+        "genomic_id": None,
+        "samples": [],
+        "awsfile": None,
+        "access": None,
+        "secret": None,
+        "prefix": "",
+        "reference": "hg38",
+        "sample": "",
+        "indexing": False
+    }
+
+    for arg in req_values:
+        try:
+            req_values[arg] = request.json[arg]
+        except KeyError:
+            if req_values[arg] == "required":
+                return "Parameter %s is required" % arg, 400
+    req_values["token"] = token
+
+    try:
+        response = htsget_ingest_from_s3(**req_values)
+    except Exception as e:
+        traceback.print_exc()
+        return "Unknown error: %s" % str(e), 500
+
+    if type(response) == IngestResult:
+        return "Ingested genomic samples: <br/>%s" % response.value, 200
+    elif type(response) == IngestUserException:
+        return "Data error: %s" % response.value, 400
+    elif type(response) == IngestPermissionsException:
+        return "Error: You are not authorized to write to program <br/>." % response.value, 403
+    elif type(response) == IngestServerException:
+        error_string = '<br/>'.join(response.value)
+        return "Ingest encountered the following errors: <br/>%s" % error_string, 500
+    return 500
+
 
 def main():
     parser = argparse.ArgumentParser(description="A script that ingests a sample vcf and its index into htsget.")
@@ -57,64 +173,22 @@ def main():
     parser.add_argument("--prefix", help="optional: s3 prefix", required=False, default="")
     parser.add_argument("--reference", help="optional: reference genome, either hg37 or hg38", required=False, default="hg38")
     parser.add_argument('--indexing', action="store_true", help="optional: force re-indexing")
+    parser.add_argument('--sample', action="store_true", help="optional: name of sample if genomic id is provided")
 
     args = parser.parse_args()
 
-    genomic_samples = []
-    clinical_samples = []
-    if args.samplefile is not None:
+    if args.samplefile:
         with open(args.samplefile) as f:
-            lines = f.readlines()
-            for line in lines:
-                parts = line.strip().split()
-                genomic_samples.append(parts[0])
-                if len(parts) > 1:
-                    clinical_samples.append(parts[1])
-    elif args.genomic_id is not None:
-        genomic_samples = [args.sample]
+            samples = f.readlines()
     else:
-        raise Exception("Either a sample name or a file of samples is required.")
+        samples = None
 
-    if args.clinical_id is not None:
-        clinical_samples = [args.clinical_id]
-
-    if os.getenv("CANDIG_URL") == "":
-        raise Exception("CANDIG_URL environment variable is not set")
-
-    token = auth.get_site_admin_token()
-
-    if args.awsfile:
-        # parse the awsfile:
-        result = auth.parse_aws_credential(args.awsfile)
-        access_key = result["access"]
-        secret_key = result["secret"]
-        if "error" in result:
-            raise Exception(f"Failed to parse awsfile: {result['error']}")
-    elif args.access and args.secret:
-        access_key = args.access
-        secret_key = args.secret
-    else:
-        raise Exception("Either awsfile or access/secret need to be provided.")
-
-    client = auth.get_minio_client(args.endpoint, args.bucket, access_key=access_key, secret_key=secret_key)
-    result, status_code = auth.store_aws_credential(token=token, client=client)
-    if status_code != 200:
-        raise Exception(f"Failed to add AWS credential to vault: {result}")
-    created = []
-    for i in range(0, len(genomic_samples)):
-        token = auth.get_site_admin_token()
-        # first, find all of the s3 objects related to this sample:
-        objects_to_create = collect_samples_for_genomic_id(genomic_samples[i], client, prefix=args.prefix)
-        clinical_id = None
-        if len(clinical_samples) == len(genomic_samples):
-            clinical_id = clinical_samples[i]
-        post_objects(genomic_samples[i], objects_to_create, token, clinical_id=clinical_id, ref_genome=args.reference, force=args.indexing)
-        created.extend(map(lambda s : s['id'], objects_to_create))
-    post_to_dataset(created, args.dataset, token)
-    print(created)
-    # response = get_dataset_objects(args.dataset, token)
-    # print(json.dumps(response, indent=4))
-
+    result = htsget_ingest_from_s3(args.endpoint, args.bucket, args.dataset, auth.get_site_admin_token(),
+                                     args.genomic_id, args.clinical_id, samples, args.awsfile,
+                                     args.access, args.secret, args.prefix, args.reference, args.sample,
+                                     args.indexing)
+    if result.value:
+      print(result.value)
 
 if __name__ == "__main__":
     main()

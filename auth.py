@@ -25,8 +25,8 @@ def get_site_admin_token():
     )
 
 
-def get_minio_client(s3_endpoint, bucket, access_key=None, secret_key=None, region=None, secure=True):
-    return authx.auth.get_minio_client(token=get_site_admin_token(), s3_endpoint=s3_endpoint, bucket=bucket, access_key=access_key, secret_key=secret_key, region=region, secure=secure)
+def get_minio_client(token, s3_endpoint, bucket, access_key=None, secret_key=None, region=None, secure=True):
+    return authx.auth.get_minio_client(token=token, s3_endpoint=s3_endpoint, bucket=bucket, access_key=access_key, secret_key=secret_key, region=region, secure=secure)
 
 
 def parse_aws_credential(awsfile):
@@ -61,7 +61,13 @@ def store_aws_credential(token=None, client=None):
 def is_authed(request: requests.Request):
     if 'Authorization' not in request.headers:
         return False
-    if (authx.auth.is_permissible(request)): return True
+    request_object = {
+        "url": request.url,
+        "method": request.method,
+        "headers": request.headers,
+        "data": request.data
+    }
+    if (authx.auth.is_permissible(request_object)): return True
     return False
 
 if __name__ == "__main__":

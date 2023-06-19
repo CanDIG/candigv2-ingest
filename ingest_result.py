@@ -7,3 +7,6 @@ class IngestPermissionsException(IngestResult):
 
 class IngestServerException(IngestResult):
     pass
+
+class IngestUserException(IngestResult):
+    pass
