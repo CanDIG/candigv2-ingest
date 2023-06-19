@@ -135,7 +135,7 @@ docker run -p 1235:1235 -e CANDIG_URL="$CANDIG_URL" VAULT_URL="$VAULT_URL" OPA_U
 if so, set it to candig.docker.internal:8200.)
 
 
-This will start a Docker container with a REST API for the ingest at localhost:1235. You can ingest a DonorWithClincalData object by POSTing JSON to localhost:1235/ingest (an example is given in single_ingest.json, or you can simply copy the "results" key from a Katsu DonorWithClinicalData authorized query). 
+This will start a Docker container with a REST API for the ingest at localhost:1235. You can ingest a DonorWithClincalData object by POSTing JSON to localhost:1235/ingest_donor (an example is given in single_ingest.json, or you can simply copy the "results" key from a Katsu DonorWithClinicalData authorized query). 
 Genomic data can be ingested from an S3 bucket at the /ingest_genomic endpoint, with the following JSON format:
 ```json
 "dataset": "[dataset name]",

@@ -24,6 +24,11 @@ def get_site_admin_token():
     password=os.getenv('CANDIG_SITE_ADMIN_PASSWORD')
     )
 
+def get_bearer_from_refresh(refresh_token):
+    return authx.auth.get_access_token(keycloak_url=os.getenv('KEYCLOAK_PUBLIC_URL'),
+                                       client_id=os.getenv("CANDIG_CLIENT_ID"),
+                                       refresh_token=refresh_token)
+
 
 def get_minio_client(token, s3_endpoint, bucket, access_key=None, secret_key=None, region=None, secure=True):
     return authx.auth.get_minio_client(token=token, s3_endpoint=s3_endpoint, bucket=bucket, access_key=access_key, secret_key=secret_key, region=region, secure=secure)

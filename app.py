@@ -1,10 +1,10 @@
-import connexion
-from flask import Flask
+from connexion import FlaskApp
 import katsu_ingest
 import htsget_s3_ingest
 
 def create_app():
-    app = Flask(__name__)
+    connexionApp = FlaskApp(__name__)
+    app = connexionApp.app
     app.register_blueprint(katsu_ingest.ingest_blueprint)
     app.register_blueprint(htsget_s3_ingest.ingest_blueprint)
     return app

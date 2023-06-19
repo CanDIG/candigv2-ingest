@@ -1,6 +1,7 @@
 import argparse
 import json
 import os
+import traceback
 from collections import OrderedDict
 from http import HTTPStatus
 
@@ -90,7 +91,6 @@ def delete_data(katsu_server_url, data_location):
     # Delete datasets for each program ID
     for program_id in program_id_list:
         delete_url = f"{katsu_server_url}/v2/authorized/programs/{program_id}/"
-
         print(f"Deleting dataset {program_id}...")
 
         try:
@@ -137,7 +137,7 @@ def ingest_data(katsu_server_url, data_location):
     )
     ingest_finished = False
     for api_name, file_name in file_mapping.items():
-        ingest_str = f"/v2/ingest/{api_name}/"
+        ingest_str = f"/katsu/v2/ingest/{api_name}/"
         ingest_url = katsu_server_url + ingest_str
 
         print(f"Loading {file_name}...")
@@ -145,9 +145,10 @@ def ingest_data(katsu_server_url, data_location):
         if payload is not None:
             headers = auth.get_auth_header()
             headers["Content-Type"] = "application/json"
-            response = requests.post(
-                ingest_url, headers=headers, data=json.dumps(payload)
-            )
+            for elem in payload:
+                response = requests.post(
+                    ingest_url, headers=headers, data=json.dumps(elem)
+                )
 
             if response.status_code == HTTPStatus.CREATED:
                 print(f"INGEST OK 201! \nRETURN MESSAGE: {response.text}\n")
@@ -211,6 +212,7 @@ def traverse_clinical_field(field: dict, ctype, parents, types, id_names, katsu_
     ingest_str = f"/katsu/v2/ingest/{ctype}/"
     ingest_url = katsu_server_url + ingest_str
 
+    headers["Authorization"] = "Bearer %s" % auth.get_bearer_from_refresh(headers["refresh_token"])
     response = requests.post(
         ingest_url, headers=headers, data=json.dumps(data)
     )
@@ -281,6 +283,7 @@ def ingest_donor_with_clinical(katsu_server_url, dataset, headers):
     for donor in dataset:
         program_id = donor.pop("program_id")
         if program_id not in ingested_datasets:
+            headers["Authorization"] = "Bearer %s" % auth.get_bearer_from_refresh(headers["refresh_token"])
             request = requests.Request('POST', katsu_server_url + f"/katsu/v2/ingest/programs/", headers=headers,
                           data=json.dumps({"program_id": program_id}))
             if not auth.is_authed(request):
@@ -346,11 +349,19 @@ def run_check(katsu_server_url, env_str, data_location, ingest_version):
         print(f"ERROR VERSION CHECK: {e}")
         return
 
-@ingest_blueprint.route('/ingest', methods=["POST"])
+@ingest_blueprint.route('/ingest_donor', methods=["POST"])
 def ingest_donor_endpoint():
     katsu_server_url = os.environ.get("CANDIG_URL")
     dataset = request.json
-    response = ingest_donor_with_clinical(katsu_server_url, dataset, request.headers)
+    headers = {}
+    try:
+        headers["Authorization"] = "Bearer %s" % auth.get_bearer_from_refresh(request.headers["refresh_token"])
+    except Exception as e:
+        if "Invalid refresh token" in str(e):
+            return "Refresh token invalid or unauthorized", 403
+    headers["refresh_token"] = request.headers["refresh_token"]
+    headers["Content-Type"] = "application/json"
+    response = ingest_donor_with_clinical(katsu_server_url, dataset, headers)
     if type(response) == IngestResult:
         return "Ingested %d donors.<br/>" % response.value, 200
     elif type(response) == IngestPermissionsException:
