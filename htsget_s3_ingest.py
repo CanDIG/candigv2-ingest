@@ -84,7 +84,7 @@ def htsget_ingest_from_s3(endpoint, bucket, dataset, token, genomic_id=None, cli
     client = auth.get_minio_client(token, endpoint, bucket, access_key=access_key, secret_key=secret_key)
     result, status_code = auth.store_aws_credential(token=token, client=client)
     if status_code != 200:
-        return IngestUserException(f"Failed to add AWS credential to vault: {result}")
+        return IngestServerException(f"Failed to add AWS credential to vault: {result}")
     created = []
     for i in range(0, len(genomic_samples)):
         # first, find all of the s3 objects related to this sample:
