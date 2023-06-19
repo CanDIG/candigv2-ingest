@@ -80,7 +80,6 @@ def delete_data(katsu_server_url, data_location):
     This function retrieves the list of program IDs from the 'Program.json' file
     and sends delete requests to delete each program along with all related data.
     """
-
     # Read the program IDs from the 'Program.json' file
     data = read_json(data_location + "Program.json")
     program_id_list = [item["program_id"] for item in data]
@@ -258,10 +257,15 @@ def main():
             data_location=data_location,
         )
     elif choice == 3:
-        delete_data(
-            katsu_server_url=katsu_server_url,
-            data_location=data_location,
-        )
+        response = input("Are you sure you want to delete? (yes/no): ")
+        if response == "yes":
+            delete_data(
+                katsu_server_url=katsu_server_url,
+                data_location=data_location,
+            )
+        else:
+            print("Delete cancelled")
+            exit()
     elif choice == 4:
         exit()
     else:
