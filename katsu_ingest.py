@@ -73,6 +73,42 @@ def read_json(file_path):
             return None
 
 
+def delete_data(katsu_server_url, data_location):
+    """
+    Delete all datasets.
+
+    This function retrieves the list of program IDs from the 'Program.json' file
+    and sends delete requests to delete each program along with all related data.
+    """
+    # Read the program IDs from the 'Program.json' file
+    data = read_json(data_location + "Program.json")
+    program_id_list = [item["program_id"] for item in data]
+
+    # Delete datasets for each program ID
+    for program_id in program_id_list:
+        delete_url = f"{katsu_server_url}/v2/authorized/programs/{program_id}/"
+
+        print(f"Deleting dataset {program_id}...")
+
+        try:
+            headers = auth.get_auth_header()
+            headers["Content-Type"] = "application/json"
+            # Send delete request
+            response = requests.delete(delete_url, headers=headers)
+
+            if response.status_code == requests.codes.NO_CONTENT:
+                print(
+                    f"DELETE OK 204! \nProgram {program_id} and all the related data have been deleted.\n"
+                )
+            else:
+                print(
+                    f"\nFAILED TO DELETE {program_id} \nRETURN STATUS CODE: {response.status_code} \nRETURN MESSAGE: {response.text}\n"
+                )
+
+        except requests.RequestException as e:
+            print(f"\nERROR: Failed to delete {program_id}. \nException: {str(e)}\n")
+
+
 def ingest_data(katsu_server_url, data_location):
     """
     Send POST requests to the Katsu server to ingest data.
@@ -187,7 +223,7 @@ def main():
     data_location = os.environ.get("CLINICAL_DATA_LOCATION")
 
     env_str = "env.sh"
-    ingest_version = "2.0.0"
+    ingest_version = "2.1.0"
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -204,7 +240,7 @@ def main():
         print("Select an option:")
         print("1. Run check")
         print("2. Ingest data")
-        print("3. Delete a dataset")
+        print("3. Delete data")
         print("4. Exit")
         choice = int(input("Enter your choice [1-4]: "))
 
@@ -221,7 +257,15 @@ def main():
             data_location=data_location,
         )
     elif choice == 3:
-        print(f"To be implemented later")
+        response = input("Are you sure you want to delete? (yes/no): ")
+        if response == "yes":
+            delete_data(
+                katsu_server_url=katsu_server_url,
+                data_location=data_location,
+            )
+        else:
+            print("Delete cancelled")
+            exit()
     elif choice == 4:
         exit()
     else:
