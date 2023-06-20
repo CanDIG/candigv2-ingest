@@ -90,7 +90,7 @@ def delete_data(katsu_server_url, data_location):
 
     # Delete datasets for each program ID
     for program_id in program_id_list:
-        delete_url = f"{katsu_server_url}/v2/authorized/programs/{program_id}/"
+        delete_url = f"{katsu_server_url}/katsu/v2/authorized/programs/{program_id}/"
         print(f"Deleting dataset {program_id}...")
 
         try:
@@ -212,6 +212,7 @@ def traverse_clinical_field(field: dict, ctype, parents, types, id_names, katsu_
     ingest_str = f"/katsu/v2/ingest/{ctype}/"
     ingest_url = katsu_server_url + ingest_str
 
+    headers["refresh_token"] = auth.get_refresh_token(refresh_token=headers["refresh_token"])
     headers["Authorization"] = "Bearer %s" % auth.get_bearer_from_refresh(headers["refresh_token"])
     response = requests.post(
         ingest_url, headers=headers, data=json.dumps(data)
@@ -283,6 +284,7 @@ def ingest_donor_with_clinical(katsu_server_url, dataset, headers):
     for donor in dataset:
         program_id = donor.pop("program_id")
         if program_id not in ingested_datasets:
+            headers["refresh_token"] = auth.get_refresh_token(refresh_token=headers["refresh_token"])
             headers["Authorization"] = "Bearer %s" % auth.get_bearer_from_refresh(headers["refresh_token"])
             request = requests.Request('POST', katsu_server_url + f"/katsu/v2/ingest/programs/", headers=headers,
                           data=json.dumps({"program_id": program_id}))

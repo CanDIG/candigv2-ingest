@@ -7,27 +7,59 @@ import requests
 
 AUTH = True
 
-def get_auth_header():
+def get_auth_header(refresh_token=None):
     if AUTH:
         import auth
-        token = auth.get_site_admin_token()
-        return {"Authorization": f"Bearer {token}"}
+        if refresh_token:
+            refresh_token = auth.get_refresh_token(refresh_token)
+        else:
+            refresh_token = auth.get_site_admin_token()
+        token = get_bearer_from_refresh(refresh_token)
+        return {"Authorization": f"Bearer {token}", "refresh_token": refresh_token}
     return ""
 
 
-def get_site_admin_token():
-    return authx.auth.get_access_token(
-    keycloak_url=os.getenv('KEYCLOAK_PUBLIC_URL'),
-    client_id=os.getenv('CANDIG_CLIENT_ID'),
-    client_secret=os.getenv('CANDIG_CLIENT_SECRET'),
-    username=os.getenv('CANDIG_SITE_ADMIN_USER'),
-    password=os.getenv('CANDIG_SITE_ADMIN_PASSWORD')
-    )
+def get_site_admin_token(refresh_token=None):
+    if not refresh_token:
+        return authx.auth.get_refresh_token(
+        keycloak_url=os.getenv('KEYCLOAK_PUBLIC_URL'),
+        client_id=os.getenv('CANDIG_CLIENT_ID'),
+        client_secret=os.getenv('CANDIG_CLIENT_SECRET'),
+        username=os.getenv('CANDIG_SITE_ADMIN_USER'),
+        password=os.getenv('CANDIG_SITE_ADMIN_PASSWORD')
+        )
+    else:
+        return authx.auth.get_refresh_token(
+            keycloak_url=os.getenv('KEYCLOAK_PUBLIC_URL'),
+            client_id=os.getenv('CANDIG_CLIENT_ID'),
+            client_secret=os.getenv('CANDIG_CLIENT_SECRET'),
+            refresh_token=refresh_token
+        )
 
 def get_bearer_from_refresh(refresh_token):
     return authx.auth.get_access_token(keycloak_url=os.getenv('KEYCLOAK_PUBLIC_URL'),
                                        client_id=os.getenv("CANDIG_CLIENT_ID"),
+                                       client_secret=os.getenv('CANDIG_CLIENT_SECRET'),
                                        refresh_token=refresh_token)
+
+def get_refresh_token(username=None, password=None, refresh_token=None):
+    if refresh_token:
+        return authx.auth.get_refresh_token(
+            keycloak_url=os.getenv('KEYCLOAK_PUBLIC_URL'),
+            client_id=os.getenv('CANDIG_CLIENT_ID'),
+            client_secret=os.getenv('CANDIG_CLIENT_SECRET'),
+            refresh_token=refresh_token
+        )
+    if (username and password):
+        return authx.auth.get_refresh_token(
+            keycloak_url=os.getenv('KEYCLOAK_PUBLIC_URL'),
+            client_id=os.getenv('CANDIG_CLIENT_ID'),
+            client_secret=os.getenv('CANDIG_CLIENT_SECRET'),
+            username=os.getenv(username),
+            password=os.getenv(password)
+        )
+    else:
+        raise ValueError("Username and password or refresh token required")
 
 
 def get_minio_client(token, s3_endpoint, bucket, access_key=None, secret_key=None, region=None, secure=True):
