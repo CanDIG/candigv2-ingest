@@ -1,6 +1,7 @@
 import authx.auth
 import os
 import re
+import json
 
 import requests
 
@@ -98,12 +99,12 @@ def store_aws_credential(token=None, client=None):
 def is_authed(request: requests.Request):
     if 'Authorization' not in request.headers:
         return False
-    request_object = {
+    request_object = json.dumps({
         "url": request.url,
         "method": request.method,
         "headers": request.headers,
         "data": request.data
-    }
+    })
     if (authx.auth.is_permissible(request_object)): return True
     return False
 

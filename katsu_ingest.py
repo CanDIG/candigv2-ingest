@@ -145,10 +145,9 @@ def ingest_data(katsu_server_url, data_location):
         if payload is not None:
             headers = auth.get_auth_header()
             headers["Content-Type"] = "application/json"
-            for elem in payload:
-                response = requests.post(
-                    ingest_url, headers=headers, data=json.dumps(elem)
-                )
+            response = requests.post(
+                ingest_url, headers=headers, data=json.dumps(payload)
+            )
 
             if response.status_code == HTTPStatus.CREATED:
                 print(f"INGEST OK 201! \nRETURN MESSAGE: {response.text}\n")
@@ -168,8 +167,38 @@ def ingest_data(katsu_server_url, data_location):
     else:
         print("Aborting processing due to an error.")
 
-def traverse_clinical_field(field: dict, ctype, parents, types, id_names, katsu_server_url, headers, errors,
-                            ingested_ids):
+def ingest_fields(fields, katsu_server_url, headers):
+    errors = []
+    name_mappings = {"radiation": "radiations", "surgery": "surgeries", "followups": "follow_ups"}
+    for type in fields:
+        if type in name_mappings:
+            name = name_mappings[type]
+        else:
+            name = type
+        ingest_str = f"/katsu/v2/ingest/{name}/"
+        ingest_url = katsu_server_url + ingest_str
+
+        headers["refresh_token"] = auth.get_refresh_token(refresh_token=headers["refresh_token"])
+        headers["Authorization"] = "Bearer %s" % auth.get_bearer_from_refresh(headers["refresh_token"])
+        response = requests.post(
+            ingest_url, headers=headers, data=json.dumps(fields[type])
+        )
+
+        if response.status_code == HTTPStatus.CREATED:
+            print(f"INGEST OK 201! \nRETURN MESSAGE: {response.text}\n")
+        elif response.status_code == HTTPStatus.NOT_FOUND:
+            message = f"ERROR 404: {ingest_url} was not found! Please check the URL."
+            print(message)
+            errors.append(message)
+            return
+        else:
+            message = f"\nREQUEST STATUS CODE: {response.status_code} \nRETURN MESSAGE: {response.text}\n"
+            print(message)
+            errors.append(message)
+            return
+    return errors
+
+def traverse_clinical_field(fields, field: dict, ctype, parents, types, id_names, ingested_ids):
     """
     Helper function for ingest_donor_with_clinical. Parses and ingests clinical fields from a DonorWithClinicalData
     object.
@@ -209,38 +238,23 @@ def traverse_clinical_field(field: dict, ctype, parents, types, id_names, katsu_
         parent_key = id_names[parent]
         data[parent_key] = parents[parent]
 
-    ingest_str = f"/katsu/v2/ingest/{ctype}/"
-    ingest_url = katsu_server_url + ingest_str
-
-    headers["refresh_token"] = auth.get_refresh_token(refresh_token=headers["refresh_token"])
-    headers["Authorization"] = "Bearer %s" % auth.get_bearer_from_refresh(headers["refresh_token"])
-    response = requests.post(
-        ingest_url, headers=headers, data=json.dumps(data)
-    )
-
-    if response.status_code == HTTPStatus.CREATED:
-        print(f"INGEST OK 201! \nRETURN MESSAGE: {response.text}\n")
-    elif response.status_code == HTTPStatus.NOT_FOUND:
-        message = f"ERROR 404: {ingest_url} was not found! Please check the URL."
-        errors.append(message)
-        return
-    else:
-        message = f"\nREQUEST STATUS CODE: {response.status_code} \nRETURN MESSAGE: {response.text}\n"
-        print(message)
-        errors.append(message)
-        return
+    fields[ctype].append(data)
 
     if ctype not in no_ids:
         parents[ctype] = data[id_key]
     subfields = field.keys()
     for subfield in subfields:
-        print(f"Loading {subfield} for {data[id_key]}...")
-        for elem in field[subfield]:
-            traverse_clinical_field(elem, subfield, parents, types, id_names, katsu_server_url, headers, errors,
-                                    ingested_ids)
+        if ctype not in no_ids:
+            print(f"Loading {subfield} for {data[id_key]}...")
+        else:
+            print(f"Loading {subfield}...")
+        if type(field[subfield]) == list:
+            for elem in field[subfield]:
+                traverse_clinical_field(fields, elem, subfield, parents, types, id_names, ingested_ids)
+        elif type(field[subfield]) == dict:
+            traverse_clinical_field(fields, field[subfield], subfield, parents, types, id_names, ingested_ids)
     if ctype not in no_ids:
         parents.pop(ctype)
-    return errors
 
 def ingest_donor_with_clinical(katsu_server_url, dataset, headers):
     """A single file ingest which loads an MOH donor_with_clinical_data object from JSON.
@@ -268,18 +282,19 @@ def ingest_donor_with_clinical(katsu_server_url, dataset, headers):
             "treatments",
             "chemotherapies",
             "hormone_therapies",
-            "radiations",
+            "radiation",
             "immunotherapies",
-            "surgeries",
-            "follow_ups",
+            "surgery",
+            "followups",
             "biomarkers",
             "comorbidities",
             "exposures"]
+    fields = {type: [] for type in types}
     id_names = {"programs": "program_id", "donors": "submitter_donor_id",
                 "primary_diagnoses": "submitter_primary_diagnosis_id", "sample_registrations": "submitter_sample_id",
-                "treatments": "submitter_treatment_id", "specimens": "submitter_specimen_id"}
+                "treatments": "submitter_treatment_id", "specimens": "submitter_specimen_id",
+                "followups": "submitter_follow_up_id"}
 
-    errors = []
     ingested_datasets = []
     for donor in dataset:
         program_id = donor.pop("program_id")
@@ -287,7 +302,7 @@ def ingest_donor_with_clinical(katsu_server_url, dataset, headers):
             headers["refresh_token"] = auth.get_refresh_token(refresh_token=headers["refresh_token"])
             headers["Authorization"] = "Bearer %s" % auth.get_bearer_from_refresh(headers["refresh_token"])
             request = requests.Request('POST', katsu_server_url + f"/katsu/v2/ingest/programs/", headers=headers,
-                          data=json.dumps({"program_id": program_id}))
+                          data=json.dumps([{"program_id": program_id}]))
             if not auth.is_authed(request):
                 return IngestPermissionsException(program_id)
             response = requests.Session().send(request.prepare())
@@ -297,7 +312,9 @@ def ingest_donor_with_clinical(katsu_server_url, dataset, headers):
             ingested_datasets.append(program_id)
         parents = {"programs": program_id}
         print(f"Loading donor {donor['submitter_donor_id']}...")
-        traverse_clinical_field(donor, "donors", parents, types, id_names, katsu_server_url, headers, errors, [])
+        traverse_clinical_field(fields, donor, "donors", parents, types, id_names, [])
+    fields.pop("programs")
+    errors = ingest_fields(fields, katsu_server_url, headers)
     if errors:
         return IngestServerException(errors)
     else:
@@ -379,7 +396,7 @@ def main():
         print("ERROR: ENV is not set. Did you forget to run 'source env.sh'?")
         exit()
     katsu_server_url = os.environ.get("CANDIG_URL")
-    headers = "GET_AUTH_HEADER"
+    headers = auth.get_auth_header()
     data_location = os.environ.get("CLINICAL_DATA_LOCATION")
 
     env_str = "env.sh"
@@ -429,7 +446,8 @@ def main():
             exit()
     elif choice == 4:
         dataset = read_json(data_location)
-        ingest_donor_with_clinical(katsu_server_url, dataset, headers)
+        headers["Content-Type"] = "application/json"
+        print(ingest_donor_with_clinical(katsu_server_url, dataset, headers).value)
     elif choice == 5:
         exit()
     else:
