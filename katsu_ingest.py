@@ -10,7 +10,7 @@ from requests.exceptions import ConnectionError
 from flask import Blueprint, request
 
 import auth
-from ingest_result import IngestPermissionsException, IngestServerException, IngestResult
+from ingest_result import IngestPermissionsException, IngestServerException, IngestUserException, IngestResult
 
 ingest_blueprint = Blueprint("ingest_donor", __name__)
 
@@ -312,7 +312,10 @@ def ingest_donor_with_clinical(katsu_server_url, dataset, headers):
             ingested_datasets.append(program_id)
         parents = {"programs": program_id}
         print(f"Loading donor {donor['submitter_donor_id']}...")
-        traverse_clinical_field(fields, donor, "donors", parents, types, id_names, [])
+        try:
+            traverse_clinical_field(fields, donor, "donors", parents, types, id_names, [])
+        except Exception as e:
+            return IngestUserException(str(e))
     fields.pop("programs")
     errors = ingest_fields(fields, katsu_server_url, headers)
     if errors:
@@ -377,18 +380,20 @@ def ingest_donor_endpoint():
         headers["Authorization"] = "Bearer %s" % auth.get_bearer_from_refresh(request.headers["refresh_token"])
     except Exception as e:
         if "Invalid refresh token" in str(e):
-            return "Refresh token invalid or unauthorized", 403
+            return {"result": "Refresh token invalid or unauthorized"}, 403
     headers["refresh_token"] = request.headers["refresh_token"]
     headers["Content-Type"] = "application/json"
     response = ingest_donor_with_clinical(katsu_server_url, dataset, headers)
     if type(response) == IngestResult:
-        return "Ingested %d donors.<br/>" % response.value, 200
+        return {"result": "Ingested %d donors." % response.value}, 200
     elif type(response) == IngestPermissionsException:
-        return "Error: You are not authorized to write to program <br/>." % response.value, 403
+        return {"result": "Error: You are not authorized to write to program." % response.value}, 403
     elif type(response) == IngestServerException:
         error_string = '<br/>'.join(response.value)
-        return "Ingest encountered the following errors: <br/>%s" % error_string, 500
-    return 500
+        return {"result": "Ingest encountered the following errors: %s" % error_string}, 500
+    elif type(response) == IngestUserException:
+        return {"result": "Data error: %s" % response.value}, 400
+    return "Unknown error", 500
 
 def main():
     # check if os.environ.get("CANDIG_URL") is set
