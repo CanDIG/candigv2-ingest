@@ -77,7 +77,6 @@ def post_objects(genomic_id, genomic_objs_to_create, token, clinical_id=None, re
             "version": "v1"
         }
         response = requests.post(url, json=obj, headers=headers)
-        print(response.text)
         if response.status_code > 200:
             return response
         genomic_drs_obj = response.json()['self_uri']
@@ -104,7 +103,6 @@ def post_objects(genomic_id, genomic_objs_to_create, token, clinical_id=None, re
             "version": "v1"
         }
         response = requests.post(url, json=obj, headers=headers)
-        print(response.text)
         if response.status_code > 200:
             return response
 
@@ -130,7 +128,6 @@ def post_objects(genomic_id, genomic_objs_to_create, token, clinical_id=None, re
             "version": "v1"
         }
         response = requests.post(url, json=obj, headers=headers)
-        print(response.text)
         if response.status_code > 200:
             return response
 
@@ -154,10 +151,9 @@ def post_objects(genomic_id, genomic_objs_to_create, token, clinical_id=None, re
             obj = response.json()
             obj['contents'].append(genomic_content)
 
-        response = requests.post(url, json=obj, headers=headers)
+        requests.post(url, json=obj, headers=headers)
 
         # index for search:
         url = f"{HTSGET_URL}/htsget/v1/variants/{s['id']}/index"
         response = requests.get(url, params={"genome": ref_genome, "force": force, "genomic_id": genomic_id}, headers=headers)
-        print(response.text)
         return response

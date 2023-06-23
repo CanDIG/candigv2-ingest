@@ -25,9 +25,11 @@ RUN apk add --no-cache \
 
 RUN mkdir /ingest_app
 WORKDIR /ingest_app
-COPY . /ingest_app
 
-RUN pip install --no-cache-dir -r /ingest_app/requirements.txt
+ADD ./requirements.txt /ingest_app/requirements.txt
+RUN pip install -r requirements.txt
+
+COPY . /ingest_app
 
 ENTRYPOINT ["bash", "./run.sh"]
 EXPOSE 1235

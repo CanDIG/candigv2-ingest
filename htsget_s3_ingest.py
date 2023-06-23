@@ -1,4 +1,5 @@
 import argparse
+
 import auth
 import os
 import re
@@ -92,6 +93,8 @@ def htsget_ingest_from_s3(endpoint, bucket, dataset, token, genomic_id=None, cli
         clinical_id = None
         if len(clinical_samples) == len(genomic_samples):
             clinical_id = clinical_samples[i]
+        if len(objects_to_create) == 0:
+            return IngestUserException("S3 bucket or sample list must not be empty")
         response = post_objects(genomic_samples[i], objects_to_create, token, clinical_id=clinical_id, ref_genome=reference,
                      force=indexing)
         if (response.status_code > 200):
@@ -136,7 +139,7 @@ def genomic_ingest_endpoint():
             req_values[arg] = request.json[arg]
         except KeyError:
             if req_values[arg] == "required":
-                return "Parameter %s is required" % arg, 400
+                return {"result": "Parameter %s is required" % arg}, 400
     req_values["token"] = token
 
     try:
@@ -146,14 +149,13 @@ def genomic_ingest_endpoint():
         return "Unknown error: %s" % str(e), 500
 
     if type(response) == IngestResult:
-        return "Ingested genomic samples: <br/>%s" % response.value, 200
+        return {"result": "Ingested genomic samples: %s" % response.value}, 200
     elif type(response) == IngestUserException:
-        return "Data error: %s" % response.value, 400
+        return {"result": "Data error: %s" % response.value}, 400
     elif type(response) == IngestPermissionsException:
-        return "Error: You are not authorized to write to program <br/>." % response.value, 403
+        return {"result": "Error: You are not authorized to write to program." % response.value}, 403
     elif type(response) == IngestServerException:
-        error_string = '<br/>'.join(response.value)
-        return "Ingest encountered the following errors: <br/>%s" % error_string, 500
+        return {"result": "Ingest encountered the following errors: %s" % response.value}, 500
     return 500
 
 
