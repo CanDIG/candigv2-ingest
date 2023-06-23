@@ -129,13 +129,13 @@ Currently, the containerized version supports a two endpoints for ingesting a Do
 To run, ensure you have docker installed and CanDIGv2 running, then run the following commands:
 ```bash
 docker build . --build-arg venv_python=3.10 --build-arg alpine_version=3.14 -t44 ingest_app
-docker run -p 1235:1235 -e CANDIG_URL="$CANDIG_URL" VAULT_URL="$VAULT_URL" OPA_URL="$OPA_URL" --name candig-ingest --add-host candig.docker.internal:[YOUR LOCAL IP] ingest_app
+docker run -p 1236:1235 -e CANDIG_URL="$CANDIG_URL" -e KEYCLOAK_PUBLIC_URL="$KEYCLOAK_PUBLIC_URL" -e VAULT_URL="http://candig.docker.internal:8200" -e CANDIG_CLIENT_ID="$CANDIG_CLIENT_ID" -e CANDIG_CLIENT_SECRET="$CANDIG_CLIENT_SECRET" --name candig-ingest-dev --add-host candig.docker.internal:[YOUR LOCAL IP] ingest_app
 ```
 (Note that VAULT_URL's host is often set as 0.0.0.0, which the container may not be able to access;
 if so, set it to candig.docker.internal:8200.)
 
 
-This will start a Docker container with a REST API for the ingest at localhost:1235. You can ingest a DonorWithClincalData object by POSTing JSON to localhost:1235/ingest_donor (an example is given in single_ingest.json, or you can simply copy the "results" key from a Katsu DonorWithClinicalData authorized query). 
+This will start a Docker container with a REST API for the ingest at localhost:1235. You can ingest a DonorWithClincalData object by POSTing JSON to localhost:1236/ingest_donor (an example is given in single_ingest.json, or you can simply copy the "results" key from a Katsu DonorWithClinicalData authorized query). 
 Genomic data can be ingested from an S3 bucket at the /ingest_genomic endpoint, with the following JSON format:
 ```json
 "dataset": "[dataset name]",
@@ -146,3 +146,6 @@ Genomic data can be ingested from an S3 bucket at the /ingest_genomic endpoint, 
 "samples": ["[sample name 1]", "[sample name 2]", ...] 
 ```
 Make sure you include Authorization headers as well.
+
+(Note: on the CanDIGv2 repo, the service runs on port 1235; it can be run as 1236 locally to ensure there is no
+interference while testing.)
