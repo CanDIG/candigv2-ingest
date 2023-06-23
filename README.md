@@ -150,7 +150,7 @@ Genomic data can be ingested from an S3 bucket at the /ingest_genomic endpoint, 
     "indexing": "[Force reindexing (true/false), optional]"
 }
 ```
-Make sure you include Authorization headers as well. Both endpoints take refresh tokens, as a header with the key refresh_token.
+Make sure you include Authorization headers as well. Both endpoints take refresh tokens, as a header with the key `{"Authorization": "Bearer [refresh token]"}`.
 
 (Note: on the CanDIGv2 repo, the service runs on port 1235; it can be run as 1236 locally to ensure there is no
 interference while testing.)

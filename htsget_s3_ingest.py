@@ -115,11 +115,19 @@ def htsget_ingest_from_s3(endpoint, bucket, dataset, token, genomic_id=None, cli
 
 @ingest_blueprint.route('/ingest_genomic', methods=["POST"])
 def genomic_ingest_endpoint():
-    refresh_token = request.headers["refresh_token"]
+    if "Authorization" not in request.headers:
+        return {"result": "Refresh token required"}, 401
+    try:
+        refresh_token = request.headers["Authorization"].split("Bearer ")[1]
+    except Exception as e:
+        if "Invalid refresh token" in str(e):
+            return {"result": "Refresh token invalid or unauthorized"}, 401
+        return {"result": "Unknown error during authorization"}, 401
     try:
         token = auth.get_bearer_from_refresh(refresh_token)
     except Exception as e:
-        return {"result": "Error validating token: %s" % str(e)}, 403
+        return {"result": "Error validating token: %s" % str(e)}, 401
+
 
     req_values = {
         "endpoint": "required",

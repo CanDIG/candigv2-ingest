@@ -376,12 +376,17 @@ def ingest_donor_endpoint():
     katsu_server_url = os.environ.get("CANDIG_URL")
     dataset = request.json
     headers = {}
+    if "Authorization" not in request.headers:
+        return {"result": "Refresh token required"}, 401
     try:
-        headers["Authorization"] = "Bearer %s" % auth.get_bearer_from_refresh(request.headers["refresh_token"])
+        refresh_token = request.headers["Authorization"].split("Bearer ")[1]
+        token = auth.get_bearer_from_refresh(refresh_token)
+        headers["Authorization"] = "Bearer %s" % token
     except Exception as e:
         if "Invalid refresh token" in str(e):
-            return {"result": "Refresh token invalid or unauthorized"}, 403
-    headers["refresh_token"] = request.headers["refresh_token"]
+            return {"result": "Refresh token invalid or unauthorized"}, 401
+        return {"result": "Unknown error during authorization"}, 401
+    headers["refresh_token"] = refresh_token
     headers["Content-Type"] = "application/json"
     response = ingest_donor_with_clinical(katsu_server_url, dataset, headers)
     if type(response) == IngestResult:
