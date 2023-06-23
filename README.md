@@ -138,14 +138,19 @@ if so, set it to candig.docker.internal:8200.)
 This will start a Docker container with a REST API for the ingest at localhost:1235. You can ingest a DonorWithClincalData object by POSTing JSON to localhost:1236/ingest_donor (an example is given in single_ingest.json, or you can simply copy the "results" key from a Katsu DonorWithClinicalData authorized query). 
 Genomic data can be ingested from an S3 bucket at the /ingest_genomic endpoint, with the following JSON format:
 ```json
-"dataset": "[dataset name]",
-"endpoint": "[S3 URL]",
-"bucket": "[S3 bucket name]",
-"access": "[S3 bucket access username]",
-"secret": "[S3 bucket access password]",
-"samples": ["[sample name 1]", "[sample name 2]", ...] 
+{
+    "dataset": "[dataset name]",
+    "endpoint": "[S3 URL]",
+    "bucket": "[S3 bucket name]",
+    "access": "[S3 bucket access username]",
+    "secret": "[S3 bucket access password]",
+    "samples": ["[sample name 1]", "[sample name 2]", ...],
+    "prefix": "[S3 prefix, optional]",
+    "reference": "[Reference genome, either hg37 or hg38, optional]",
+    "indexing": "[Force reindexing (true/false), optional]"
+}
 ```
-Make sure you include Authorization headers as well.
+Make sure you include Authorization headers as well. Both endpoints take refresh tokens, as a header with the key refresh_token.
 
 (Note: on the CanDIGv2 repo, the service runs on port 1235; it can be run as 1236 locally to ensure there is no
 interference while testing.)

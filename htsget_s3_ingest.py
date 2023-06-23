@@ -125,13 +125,11 @@ def genomic_ingest_endpoint():
         "endpoint": "required",
         "bucket": "required",
         "dataset": "required",
-        "genomic_id": None,
         "samples": [],
         "access": "required",
         "secret": "required",
         "prefix": "",
         "reference": "hg38",
-        "sample": "",
         "indexing": False
     }
 
