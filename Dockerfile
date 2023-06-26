@@ -21,6 +21,7 @@ RUN apk add --no-cache \
 	xz-dev \
 	linux-headers \
 	pcre-dev \
+    libffi-dev \
 	git
 
 RUN mkdir /ingest_app
