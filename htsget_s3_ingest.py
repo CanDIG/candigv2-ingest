@@ -192,7 +192,8 @@ def main():
     else:
         samples = None
 
-    result = htsget_ingest_from_s3(args.endpoint, args.bucket, args.dataset, auth.get_site_admin_token(),
+    result = htsget_ingest_from_s3(args.endpoint, args.bucket, args.dataset,
+                                    auth.get_bearer_from_refresh(auth.get_site_admin_token()),
                                      args.genomic_id, args.clinical_id, samples, args.awsfile,
                                      args.access, args.secret, args.prefix, args.reference, args.sample,
                                      args.indexing)
