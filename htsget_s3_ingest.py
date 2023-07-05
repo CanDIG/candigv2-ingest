@@ -48,7 +48,7 @@ def collect_samples_for_genomic_id(genomic_id, client, prefix=""):
                 )
     return samples
 
-def htsget_ingest_from_s3(endpoint, bucket, dataset, token, genomic_id=None, clinical_id=None,
+def htsget_ingest_from_bucket(endpoint, bucket, dataset, token, genomic_id=None, clinical_id=None,
                           samples=[], awsfile=None, access=None, secret=None, prefix="", reference="hg38", sample="", indexing=False):
     genomic_samples = []
     clinical_samples = []
@@ -150,7 +150,7 @@ def genomic_ingest_endpoint():
     req_values["token"] = token
 
     try:
-        response = htsget_ingest_from_s3(**req_values)
+        response = htsget_ingest_from_bucket(**req_values)
     except Exception as e:
         traceback.print_exc()
         return "Unknown error: %s" % str(e), 500
@@ -192,7 +192,7 @@ def main():
     else:
         samples = None
 
-    result = htsget_ingest_from_s3(args.endpoint, args.bucket, args.dataset,
+    result = htsget_ingest_from_bucket(args.endpoint, args.bucket, args.dataset,
                                     auth.get_bearer_from_refresh(auth.get_site_admin_token()),
                                      args.genomic_id, args.clinical_id, samples, args.awsfile,
                                      args.access, args.secret, args.prefix, args.reference, args.sample,
