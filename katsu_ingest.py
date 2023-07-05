@@ -14,6 +14,12 @@ from ingest_result import IngestPermissionsException, IngestServerException, Ing
 
 ingest_blueprint = Blueprint("ingest_donor", __name__)
 
+KATSU_TRAILING_SLASH = False
+
+def setTrailingSlash(trailing_slash):
+    global KATSU_TRAILING_SLASH
+    KATSU_TRAILING_SLASH = trailing_slash
+
 def check_api_version(ingest_version, katsu_version):
     """
     Return True if the major and minor versions of the ingest and katsu are the same.
@@ -90,7 +96,10 @@ def delete_data(katsu_server_url, data_location):
 
     # Delete datasets for each program ID
     for program_id in program_id_list:
-        delete_url = f"{katsu_server_url}/katsu/v2/authorized/programs/{program_id}/"
+        if KATSU_TRAILING_SLASH:
+            delete_url = f"{katsu_server_url}/katsu/v2/authorized/programs/{program_id}/"
+        else:
+            delete_url = f"{katsu_server_url}/katsu/v2/authorized/programs/{program_id}"
         print(f"Deleting dataset {program_id}...")
 
         try:
@@ -137,7 +146,10 @@ def ingest_data(katsu_server_url, data_location):
     )
     ingest_finished = False
     for api_name, file_name in file_mapping.items():
-        ingest_str = f"/katsu/v2/ingest/{api_name}/"
+        if KATSU_TRAILING_SLASH:
+            ingest_str = f"/katsu/v2/ingest/{api_name}/"
+        else:
+            ingest_str = f"/katsu/v2/ingest/{api_name}"
         ingest_url = katsu_server_url + ingest_str
 
         print(f"Loading {file_name}...")
@@ -175,7 +187,10 @@ def ingest_fields(fields, katsu_server_url, headers):
             name = name_mappings[type]
         else:
             name = type
-        ingest_str = f"/katsu/v2/ingest/{name}/"
+        if KATSU_TRAILING_SLASH:
+            ingest_str = f"/katsu/v2/ingest/{name}/"
+        else:
+            ingest_str = f"/katsu/v2/ingest/{name}"
         ingest_url = katsu_server_url + ingest_str
 
         headers["refresh_token"] = auth.get_refresh_token(refresh_token=headers["refresh_token"])
@@ -301,7 +316,11 @@ def ingest_donor_with_clinical(katsu_server_url, dataset, headers):
         if program_id not in ingested_datasets:
             headers["refresh_token"] = auth.get_refresh_token(refresh_token=headers["refresh_token"])
             headers["Authorization"] = "Bearer %s" % auth.get_bearer_from_refresh(headers["refresh_token"])
-            request = requests.Request('POST', katsu_server_url + f"/katsu/v2/ingest/programs/", headers=headers,
+            if KATSU_TRAILING_SLASH:
+                program_endpoint = "/katsu/v2/ingest/programs/"
+            else:
+                program_endpoint = "/katsu/v2/ingest/programs"
+            request = requests.Request('POST', katsu_server_url + program_endpoint, headers=headers,
                           data=json.dumps([{"program_id": program_id}]))
             if not auth.is_authed(request):
                 return IngestPermissionsException(program_id)
@@ -373,6 +392,8 @@ def run_check(katsu_server_url, env_str, data_location, ingest_version):
 
 @ingest_blueprint.route('/ingest_donor', methods=["POST"])
 def ingest_donor_endpoint():
+    if os.environ.get("KATSU_TRAILING_SLASH") == "TRUE":
+        setTrailingSlash(True)
     katsu_server_url = os.environ.get("CANDIG_URL")
     dataset = request.json
     headers = {}
@@ -394,7 +415,7 @@ def ingest_donor_endpoint():
     elif type(response) == IngestPermissionsException:
         return {"result": "Error: You are not authorized to write to program." % response.value}, 403
     elif type(response) == IngestServerException:
-        error_string = '<br/>'.join(response.value)
+        error_string = ','.join(response.value)
         return {"result": "Ingest encountered the following errors: %s" % error_string}, 500
     elif type(response) == IngestUserException:
         return {"result": "Data error: %s" % response.value}, 400
@@ -419,7 +440,12 @@ def main():
         choices=range(1, 4),
         help="Select an option: 1=Run check, 2=Ingest data, 3=Delete a dataset",
     )
+    parser.add_argument("--katsu_trailing_slash", type=bool, dest="katsu_trailing_slash",
+                        help="Set if Katsu uses a trailing slash")
     args = parser.parse_args()
+
+    if args.katsu_trailing_slash:
+        setTrailingSlash(args.katsu_trailing_slash)
 
     if args.choice is not None:
         choice = args.choice

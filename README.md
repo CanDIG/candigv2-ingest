@@ -125,14 +125,16 @@ python katsu_ingest.py -choice 2
 ```
 
 ## Run as Docker Container
-Currently, the containerized version supports a two endpoints for ingesting a DonorWithClinicalData object and genomic data.
+Currently, the containerized version supports two endpoints for ingesting a DonorWithClinicalData object and genomic data.
 To run, ensure you have docker installed and CanDIGv2 running, then run the following commands:
 ```bash
-docker build . --build-arg venv_python=3.10 --build-arg alpine_version=3.14 -t44 ingest_app
+docker build . --build-arg venv_python=3.10 --build-arg alpine_version=3.14 -t ingest_app
 docker run -p 1236:1235 -e CANDIG_URL="$CANDIG_URL" -e KEYCLOAK_PUBLIC_URL="$KEYCLOAK_PUBLIC_URL" -e VAULT_URL="http://candig.docker.internal:8200" -e CANDIG_CLIENT_ID="$CANDIG_CLIENT_ID" -e CANDIG_CLIENT_SECRET="$CANDIG_CLIENT_SECRET" --name candig-ingest-dev --add-host candig.docker.internal:[YOUR LOCAL IP] ingest_app
 ```
-(Note that VAULT_URL's host is often set as 0.0.0.0, which the container may not be able to access;
-if so, set it to candig.docker.internal:8200.)
+If your Katsu install uses trailing slashes at the end of endpoints (e.g. `/katsu/v2/ingest/programs/`), append `--build-arg katsu_trailing_slash=TRUE` to the `docker build` command above. This is stored in the environment variable KATSU_TRAILING_SLASH so if you are running locally just set that environment variable.
+
+Also, Note that VAULT_URL's host is often set as 0.0.0.0, which the container may not be able to access;
+if so, set it to candig.docker.internal:8200 (or whatever your vault port is).
 
 
 This will start a Docker container with a REST API for the ingest at localhost:1235. You can ingest a DonorWithClincalData object by POSTing JSON to localhost:1236/ingest_donor (an example is given in single_ingest.json, or you can simply copy the "results" key from a Katsu DonorWithClinicalData authorized query). 
@@ -152,5 +154,5 @@ Genomic data can be ingested from an S3 bucket at the /ingest_genomic endpoint, 
 ```
 Make sure you include Authorization headers as well. Both endpoints take refresh tokens, as a header with the key `{"Authorization": "Bearer [refresh token]"}`.
 
-(Note: on the CanDIGv2 repo, the service runs on port 1235; it can be run as 1236 locally to ensure there is no
+(Note: on the CanDIGv2 repo, the service runs on port 1235; it is run as 1236 locally in these instructions to ensure there is no
 interference while testing.)
