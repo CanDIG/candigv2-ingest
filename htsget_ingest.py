@@ -95,12 +95,10 @@ def htsget_ingest_from_file(dataset, token, samples, reference="hg38", indexing=
 
     created = []
     for sample in samples:
-        if ((type(sample) != dict) or ("genomic_id" not in sample)):
+        if ((type(sample) != dict) or ("genomic_id" not in sample) or ("clinical_id" not in sample)):
             return IngestUserException("Invalid sample data provided - see candigv2-ingest README.md")
         if "files" not in sample:
             sample["files"] = None
-        if "clinical_id" not in sample:
-            sample["clinical_id"] = None
         objects_to_create = collect_samples_for_genomic_id_local(sample)
         if isinstance(objects_to_create, IngestResult):
             return objects_to_create # An error occurred

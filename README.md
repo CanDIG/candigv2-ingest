@@ -85,16 +85,16 @@ If necessary, genomic samples can be loaded directly from the htsget container's
 
 ### Ingest into Htsget
 
-Genomic samples should be specified in a JSON list of dictionaries, providing their genomic ID and optionally associated clinical IDs and filenames.
+Genomic samples should be specified in a JSON list of dictionaries, providing their genomic ID, clinical IDs and optionally filenames.
 The respective keys for these attributes are genomic_id, clinical_id, and files; if filenames are specified, the files key
 should be another dictionary with the keys "index" and "sample", which specify the genomic index file and variation file respectively.
 For example:
 
 ```json
 [
-  {"genomic_id": "HG00096", "clinical_id": null, "files": null}, 
-  {"genomic_id": "HG00097", "clinical_id": "DONOR_1", "files": {"sample": "HG97_SAMPLE.vcf.gz", "index": "HG97_SAMPLE.vcf.gz.tbi"}}
-  {"genomic_id": "HG00099", "clinical_id": null, "files": null}
+  {"genomic_id": "HG00096", "clinical_id": "DONOR_1", "files": null}, 
+  {"genomic_id": "HG00097", "clinical_id": "DONOR_2", "files": {"sample": "HG97_SAMPLE.vcf.gz", "index": "HG97_SAMPLE.vcf.gz.tbi"}}
+  {"genomic_id": "HG00099", "clinical_id": "DONOR_3", "files": null}
 ]
 ```
 If files are stored in an S3 Bucket, the location of the files should be provided using the prefix argument in htsget_ingest, and only filenames should be given in the JSON.
