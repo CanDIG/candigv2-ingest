@@ -16,6 +16,13 @@ ingest_blueprint = Blueprint("ingest_donor", __name__)
 
 KATSU_TRAILING_SLASH = False
 
+def update_headers(headers):
+    refresh_token = headers["refresh_token"]
+    bearer = auth.get_bearer_from_refresh(refresh_token)
+    new_refresh = auth.get_refresh_token(refresh_token=refresh_token)
+    headers["refresh_token"] = new_refresh
+    headers["Authorization"] = f"Bearer {bearer}"
+
 def setTrailingSlash(trailing_slash):
     global KATSU_TRAILING_SLASH
     KATSU_TRAILING_SLASH = trailing_slash
@@ -193,8 +200,8 @@ def ingest_fields(fields, katsu_server_url, headers):
             ingest_str = f"/katsu/v2/ingest/{name}"
         ingest_url = katsu_server_url + ingest_str
 
-        headers["refresh_token"] = auth.get_refresh_token(refresh_token=headers["refresh_token"])
-        headers["Authorization"] = "Bearer %s" % auth.get_bearer_from_refresh(headers["refresh_token"])
+        update_headers(headers)
+        print(headers)
         response = requests.post(
             ingest_url, headers=headers, data=json.dumps(fields[type])
         )
@@ -213,30 +220,35 @@ def ingest_fields(fields, katsu_server_url, headers):
             return
     return errors
 
-def traverse_clinical_field(fields, field: dict, ctype, parents, types, id_names, ingested_ids):
+def traverse_clinical_field(fields, field: dict, ctype, parents, types, ingested_ids):
     """
     Helper function for ingest_donor_with_clinical. Parses and ingests clinical fields from a DonorWithClinicalData
     object.
     Args:
         field: The (sub)field of a DonorWithClinicalData object, potentially nested
         ctype: The type of the field being ingested (e.g. "donors")
-        parents: A dictionary mapping of the parents of this object, e.g.
-            {   "donors": "DONOR_1",
-                "primary_diagnoses": "submitter_primary_diagnosis_id",
-            }
+        parents: A list of tuple mappings of the parents of this object, e.g.
+            [
+                ("donors", "DONOR_1"),
+                ("primary_diagnoses", "PRIMARY_DIAGNOSIS_1")
+            ]
         types: A list of possible field types
         id_names: A mapping of field names to what their ID key is (e.g. {"donors": "submitter_donor_id"})
         errors: A list of strings containing the errors encountered so far
         ingested_ids: A list of IDs that have already been ingested (some fields in DonorWithClinical are duplicates)
     """
-    no_ids = ["comorbidities", "exposures"] # fields that do not have an ID associated with them
+
+    id_names = {"programs": "program_id", "donors": "submitter_donor_id",
+                "primary_diagnoses": "submitter_primary_diagnosis_id", "sample_registrations": "submitter_sample_id",
+                "treatments": "submitter_treatment_id", "specimens": "submitter_specimen_id",
+                "followups": "submitter_follow_up_id"}
 
     data = {}
     if ctype in id_names:
         id_key = id_names[ctype]
     else:
-        id_key = "id"
-    if ctype not in no_ids:
+        id_key = None
+    if id_key:
         field_id = field.pop(id_key)
         if field_id in ingested_ids:
             print(f"Skipping {field_id} (Already ingested).")
@@ -249,27 +261,33 @@ def traverse_clinical_field(fields, field: dict, ctype, parents, types, id_names
         if attribute not in types:
             data[attribute] = field.pop(attribute)
 
-    for parent in parents:
-        parent_key = id_names[parent]
-        data[parent_key] = parents[parent]
+    if len(parents) >= 2: # Program & donor have been added (must be the first 2 fields)
+        foreign_keys = [parents[0], parents[1]]
+        if len(parents) > 2:
+            foreign_keys.append(parents[-1])
+    else:
+        foreign_keys = [parents[0]] # Just program
+    for parent in foreign_keys:
+        parent_key = id_names[parent[0]]
+        data[parent_key] = parent[1]
 
     fields[ctype].append(data)
 
-    if ctype not in no_ids:
-        parents[ctype] = data[id_key]
+    if id_key:
+        parents.append((ctype, data[id_key]))
     subfields = field.keys()
     for subfield in subfields:
-        if ctype not in no_ids:
+        if id_key:
             print(f"Loading {subfield} for {data[id_key]}...")
         else:
             print(f"Loading {subfield}...")
         if type(field[subfield]) == list:
             for elem in field[subfield]:
-                traverse_clinical_field(fields, elem, subfield, parents, types, id_names, ingested_ids)
+                traverse_clinical_field(fields, elem, subfield, parents, types, ingested_ids)
         elif type(field[subfield]) == dict:
-            traverse_clinical_field(fields, field[subfield], subfield, parents, types, id_names, ingested_ids)
-    if ctype not in no_ids:
-        parents.pop(ctype)
+            traverse_clinical_field(fields, field[subfield], subfield, parents, types, ingested_ids)
+    if id_key:
+        parents.pop(-1)
 
 def ingest_donor_with_clinical(katsu_server_url, dataset, headers):
     """A single file ingest which loads an MOH donor_with_clinical_data object from JSON.
@@ -305,17 +323,13 @@ def ingest_donor_with_clinical(katsu_server_url, dataset, headers):
             "comorbidities",
             "exposures"]
     fields = {type: [] for type in types}
-    id_names = {"programs": "program_id", "donors": "submitter_donor_id",
-                "primary_diagnoses": "submitter_primary_diagnosis_id", "sample_registrations": "submitter_sample_id",
-                "treatments": "submitter_treatment_id", "specimens": "submitter_specimen_id",
-                "followups": "submitter_follow_up_id"}
 
     ingested_datasets = []
     for donor in dataset:
         program_id = donor.pop("program_id")
         if program_id not in ingested_datasets:
-            headers["refresh_token"] = auth.get_refresh_token(refresh_token=headers["refresh_token"])
-            headers["Authorization"] = "Bearer %s" % auth.get_bearer_from_refresh(headers["refresh_token"])
+            update_headers(headers)
+            print(headers)
             if KATSU_TRAILING_SLASH:
                 program_endpoint = "/katsu/v2/ingest/programs/"
             else:
@@ -329,10 +343,10 @@ def ingest_donor_with_clinical(katsu_server_url, dataset, headers):
                 return IngestServerException([f"\nREQUEST STATUS CODE: {response.status_code}"
                                               f"\nRETURN MESSAGE: {response.text}\n"])
             ingested_datasets.append(program_id)
-        parents = {"programs": program_id}
+        parents = [("programs", program_id)]
         print(f"Loading donor {donor['submitter_donor_id']}...")
         try:
-            traverse_clinical_field(fields, donor, "donors", parents, types, id_names, [])
+            traverse_clinical_field(fields, donor, "donors", parents, types, [])
         except Exception as e:
             return IngestUserException(str(e))
     fields.pop("programs")
@@ -438,10 +452,10 @@ def main():
         "-choice",
         type=int,
         choices=range(1, 4),
-        help="Select an option: 1=Run check, 2=Ingest data, 3=Delete a dataset",
+        help="Select an option: 1=Run check, 2=Ingest data, 3=Delete a dataset, 4=Ingest DonorWithClinicalData",
     )
     parser.add_argument("--katsu_trailing_slash", type=bool, dest="katsu_trailing_slash",
-                        help="Set if Katsu uses a trailing slash")
+                        help="Set if Katsu uses a trailing slash after its endpoints")
     args = parser.parse_args()
 
     if args.katsu_trailing_slash:
@@ -466,6 +480,8 @@ def main():
             ingest_version=ingest_version,
         )
     elif choice == 2:
+        if not data_location.endswith('/'):
+            data_location += '/'
         ingest_data(
             katsu_server_url=katsu_server_url,
             data_location=data_location,

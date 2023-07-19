@@ -134,11 +134,12 @@ Reload the environment variables:
 source env.sh
 ```
 
-Run katsu_ingest.py script. This will represent severals options:
+Run katsu_ingest.py script. This will represent several options:
 
 1. Run check: check if ingest is possible
 2. Ingest data: import the data into katsu
-3. Clean data: reset the database to the clean state. Use this if you want to start over. WARNING: be careful in production environment, as it irreversibe.
+3. Clean data: reset the database to the clean state. Use this if you want to start over. WARNING: be careful in production environment, as it irreversible.
+4. Ingest DonorWithClinicalData: Ingest a DonorWithClinicalData object into Katsu - CLINICAL_DATA_LOCATION should be a single JSON file
 
 You can also run the script with the `-choice` to skip the menu and go straight to the choice you want.
 
