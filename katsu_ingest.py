@@ -210,13 +210,11 @@ def ingest_fields(fields, katsu_server_url, headers):
         elif response.status_code == HTTPStatus.NOT_FOUND:
             message = f"ERROR 404: {ingest_url} was not found! Please check the URL."
             print(message)
-            errors.append(message)
-            return
+            errors.append(response.text)
         else:
             message = f"\nREQUEST STATUS CODE: {response.status_code} \nRETURN MESSAGE: {response.text}\n"
             print(message)
-            errors.append(message)
-            return
+            errors.append(response.text)
     return errors
 
 def traverse_clinical_field(fields, field: dict, ctype, parents, types, ingested_ids):
@@ -248,7 +246,10 @@ def traverse_clinical_field(fields, field: dict, ctype, parents, types, ingested
     else:
         id_key = None
     if id_key:
-        field_id = field.pop(id_key)
+        try:
+            field_id = field.pop(id_key)
+        except KeyError:
+            raise ValueError(f"Missing required foreign key: {id_key} for {ctype} under {parents[-1][1]}")
         if field_id in ingested_ids:
             print(f"Skipping {field_id} (Already ingested).")
             return
@@ -325,7 +326,10 @@ def ingest_donor_with_clinical(katsu_server_url, dataset, headers):
 
     ingested_datasets = []
     for donor in dataset:
-        program_id = donor.pop("program_id")
+        try:
+            program_id = donor.pop("program_id")
+        except KeyError:
+            return IngestUserException("Program ID missing from a donor.")
         if program_id not in ingested_datasets:
             update_headers(headers)
             if KATSU_TRAILING_SLASH:
@@ -338,8 +342,12 @@ def ingest_donor_with_clinical(katsu_server_url, dataset, headers):
                 return IngestPermissionsException(program_id)
             response = requests.Session().send(request.prepare())
             if response.status_code != HTTPStatus.CREATED:
-                return IngestServerException([f"\nREQUEST STATUS CODE: {response.status_code}"
-                                              f"\nRETURN MESSAGE: {response.text}\n"])
+                    if 'unique' in response.text:
+                        return IngestUserException(f"Program {program_id} has already been ingested into Katsu. "
+                                                   "Please delete and try again.")
+                    else:
+                        return IngestServerException([f"\nREQUEST STATUS CODE: {response.status_code}"
+                                                      f"\nRETURN MESSAGE: {response.text}\n"])
             ingested_datasets.append(program_id)
         parents = [("programs", program_id)]
         print(f"Loading donor {donor['submitter_donor_id']}...")
@@ -425,10 +433,13 @@ def ingest_donor_endpoint():
     if type(response) == IngestResult:
         return {"result": "Ingested %d donors." % response.value}, 200
     elif type(response) == IngestPermissionsException:
-        return {"result": "Error: You are not authorized to write to program." % response.value}, 403
+        return {"result": "Error: You are not authorized to write to program." % response.value, "note": "Data may be \
+partially ingested. You may need to delete the relevant programs in Katsu."}, 403
     elif type(response) == IngestServerException:
         error_string = ','.join(response.value)
-        return {"result": "Ingest encountered the following errors: %s" % error_string}, 500
+        return {"result": "Ingest encountered the following errors: %s" % error_string, "note": "Data may be partially \
+ingested. You may need to delete the relevant programs in Katsu. This was an internal error, so you may want to report \
+this issue to a CanDIG developer."}, 500
     elif type(response) == IngestUserException:
         return {"result": "Data error: %s" % response.value}, 400
     return "Unknown error", 500
