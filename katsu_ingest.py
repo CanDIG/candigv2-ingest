@@ -5,33 +5,8 @@ from collections import OrderedDict
 from http import HTTPStatus
 
 import requests
-from requests.exceptions import ConnectionError
 
 import auth
-
-
-def check_api_version(ingest_version, katsu_version):
-    """
-    Return True if the major and minor versions of the ingest and katsu are the same.
-    The patch version of the ingest can be lower than katsu.
-
-    Parameters:
-    - ingest_version (str): in the format "major.minor.patch".
-    - katsu_version (str): in the format "major.minor.patch".
-
-    Returns:
-    - bool
-    """
-    ingest_version_parts = ingest_version.split(".")
-    ingest_major, ingest_minor, ingest_patch = map(int, ingest_version_parts)
-    katsu_version_parts = katsu_version.split(".")
-    katsu_major, katsu_minor, katsu_patch = map(int, katsu_version_parts)
-
-    if ingest_major == katsu_major:
-        if ingest_minor == katsu_minor:
-            if ingest_patch <= katsu_patch:
-                return True
-    return False
 
 
 def read_json(file_path):
@@ -165,12 +140,11 @@ def ingest_data(katsu_server_url, data_location):
         print("Aborting processing due to an error.")
 
 
-def run_check(katsu_server_url, env_str, data_location, ingest_version):
+def run_check(katsu_server_url, env_str, data_location):
     """
     Run a series of checks to ensure that the ingest is ready to run.
         - Check if the environment file exists
         - Check if the environment variable is set
-        - Check if the Katsu server is running the correct version
         - Check header authentication
     """
     # Check if environment file exists
@@ -193,26 +167,6 @@ def run_check(katsu_server_url, env_str, data_location, ingest_version):
         print(f"ERROR AUTH CHECK: {e}")
         exit()
 
-    # check if Katsu server is running correct version
-    version_check_url = katsu_server_url + "/v2/version_check"
-    try:
-        response = requests.get(version_check_url, headers=headers)
-        if response.status_code == HTTPStatus.OK:
-            katsu_version = response.json()["version"]
-            if check_api_version(
-                ingest_version=ingest_version, katsu_version=katsu_version
-            ):
-                print(f"PASS: Katsu server is running on a compatible version.")
-            else:
-                print(
-                    f"ERROR: Katsu server is running on {katsu_version}. Required version {ingest_version} or greater."
-                )
-        else:
-            print(f"ERROR VERSION CHECK {response.status_code}: {response.text}")
-    except ConnectionError as e:
-        print(f"ERROR VERSION CHECK: {e}")
-        return
-
 
 def main():
     # check if os.environ.get("CANDIG_URL") is set
@@ -223,7 +177,6 @@ def main():
     data_location = os.environ.get("CLINICAL_DATA_LOCATION")
 
     env_str = "env.sh"
-    ingest_version = "2.1.0"
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -249,7 +202,6 @@ def main():
             katsu_server_url=katsu_server_url,
             env_str=env_str,
             data_location=data_location,
-            ingest_version=ingest_version,
         )
     elif choice == 2:
         ingest_data(
