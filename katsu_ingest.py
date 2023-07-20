@@ -201,7 +201,6 @@ def ingest_fields(fields, katsu_server_url, headers):
         ingest_url = katsu_server_url + ingest_str
 
         update_headers(headers)
-        print(headers)
         response = requests.post(
             ingest_url, headers=headers, data=json.dumps(fields[type])
         )
@@ -329,7 +328,6 @@ def ingest_donor_with_clinical(katsu_server_url, dataset, headers):
         program_id = donor.pop("program_id")
         if program_id not in ingested_datasets:
             update_headers(headers)
-            print(headers)
             if KATSU_TRAILING_SLASH:
                 program_endpoint = "/katsu/v2/ingest/programs/"
             else:
