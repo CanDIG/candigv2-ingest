@@ -495,7 +495,7 @@
 								},
 								{
 									"submitter_follow_up_id": "FOLLOW_UP_5",
-									"date_of_followup": null,
+									"date_of_followup": "2022-11",
 									"disease_status_at_followup": "Distant progression",
 									"relapse_type": "Progression (liquid tumours)",
 									"date_of_relapse": "2022-05",
