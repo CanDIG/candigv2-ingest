@@ -263,7 +263,7 @@ def genomic_ingest_endpoint():
 def main():
     parser = argparse.ArgumentParser(description="A script that ingests a sample vcf and its index into htsget.")
 
-    parser.add_argument("-local", help="Ingest from local directory", action='store_true', required=False)
+    parser.add_argument("--local", help="Ingest from local directory", action='store_true', required=False)
     parser.add_argument("--samplefile", help="A file specifying genomic/clinical IDs to ingest and optionally their filenames")
     parser.add_argument("--endpoint", help="s3 endpoint", required=False)
     parser.add_argument("--bucket", help="s3 bucket name", required=False)
