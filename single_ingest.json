@@ -2520,27 +2520,6 @@
 							"percent_tumour_cells_measurement_method": "Unknown",
 							"specimen_processing": "Cryopreservation - other",
 							"specimen_laterality": "Right",
-							"surgery": {
-								"surgery_type": "Axillary lymph nodes sampling",
-								"surgery_site": "C14",
-								"surgery_location": "Primary",
-								"tumour_focality": "Unifocal",
-								"residual_tumour_classification": "R2",
-								"margin_types_involved": [
-									"Distal margin",
-									"Circumferential resection margin"
-								],
-								"margin_types_not_involved": [],
-								"margin_types_not_assessed": [
-									"Unknown"
-								],
-								"lymphovascular_invasion": "Absent",
-								"perineural_invasion": "Absent",
-								"tumour_length": 9,
-								"tumour_width": 7,
-								"greatest_dimension_tumour": 5,
-								"submitter_specimen_id": "SPECIMEN_18"
-							},
 							"sample_registrations": [
 								{
 									"submitter_sample_id": "SAMPLE_REGISTRATION_24",
