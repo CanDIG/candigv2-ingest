@@ -70,7 +70,14 @@
 									"specimen_tissue_source": "Seminal fluid",
 									"tumour_normal_designation": "Tumour",
 									"specimen_type": "Primary tumour",
-									"sample_type": "Protein"
+									"sample_type": "Total DNA"
+								},
+								{
+									"submitter_sample_id": "SAMPLE_REGISTRATION_4",
+									"specimen_tissue_source": "Seminal fluid",
+									"tumour_normal_designation": "Normal",
+									"specimen_type": "Normal - tissue adjacent to primary tumour",
+									"sample_type": "Total DNA"
 								}
 							],
 							"biomarkers": [
