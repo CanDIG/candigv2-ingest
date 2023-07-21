@@ -35,7 +35,8 @@ We also need to know what sample_registrations represent the tumour and normal s
     ]
 }
 ```
-The ingest program should take this file as input.
+The ingest program should take this file as input. When ingesting, we need to be sure that the sample IDs are unique in DRS, so we need to concatenate the program_id and the submitter_sample_id, using a `~` as a delimiter.
+
 Adding the S3 credentials to Vault should happen in a separate step.
 
 The final shape of the DrsObjects that represent this:
