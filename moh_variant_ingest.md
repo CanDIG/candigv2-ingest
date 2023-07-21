@@ -66,11 +66,11 @@ The final shape of the DrsObjects that represent this:
         "version": "v1"
     },
     {
-        "id": f"{input['program_id']}_{input['sample'][0]['sample_registration_id']},
+        "id": f"{input['program_id']}~{input['sample'][0]['sample_registration_id']},
         "contents": [
             {
                 "drs_uri": [
-                    f"{drs_url}/f"{input['genomic_id']}""
+                    f"{drs_url}/{input['genomic_id']}"
                 ],
                 "name": input['sample'][0]['sample_name_in_file'],
                 "id": f"{input['genomic_id']}"
@@ -79,11 +79,11 @@ The final shape of the DrsObjects that represent this:
         "version": "v1"
     },
     {
-        "id": f"{input['program_id']}_{input['sample'][1]['sample_registration_id']},
+        "id": f"{input['program_id']}~{input['sample'][1]['sample_registration_id']},
         "contents": [
             {
                 "drs_uri": [
-                    f"{drs_url}/f"{input['genomic_id']}""
+                    f"{drs_url}/{input['genomic_id']}"
                 ],
                 "name": input['sample'][1]['sample_name_in_file'],
                 "id": f"{input['genomic_id']}"
@@ -112,16 +112,16 @@ The final shape of the DrsObjects that represent this:
             },
             {
                 "drs_uri": [
-                    f"{drs_url}/{input['program_id']}_{input['sample'][0]['sample_registration_id']}"
+                    f"{drs_url}/{input['program_id']}~{input['sample'][0]['sample_registration_id']}"
                 ],
-                "name": {input['program_id']}_{input['sample'][0]['sample_registration_id']},
+                "name": {input['program_id']}~{input['sample'][0]['sample_registration_id']},
                 "id": f"{input['sample'][0]['sample_name_in_file']}"
             },
             {
                 "drs_uri": [
-                    f"{drs_url}/{input['program_id']}_{input['sample'][1]['sample_registration_id']}"
+                    f"{drs_url}/{input['program_id']}~{input['sample'][1]['sample_registration_id']}"
                 ],
-                "name": {input['program_id']}_{input['sample'][1]['sample_registration_id']},
+                "name": {input['program_id']}~{input['sample'][1]['sample_registration_id']},
                 "id": f"{input['sample'][1]['sample_name_in_file']}"
             }
         ],
