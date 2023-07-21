@@ -50,7 +50,6 @@
 							"percent_tumour_cells_measurement_method": "Pathology estimate by percent nuclei",
 							"specimen_processing": "Cryopreservation in liquid nitrogen (dead tissue)",
 							"specimen_laterality": "Right",
-							"surgery": null,
 							"sample_registrations": [
 								{
 									"submitter_sample_id": "SAMPLE_REGISTRATION_1",
@@ -130,7 +129,6 @@
 							"percent_tumour_cells_measurement_method": "Unknown",
 							"specimen_processing": "Fresh",
 							"specimen_laterality": "Not applicable",
-							"surgery": null,
 							"sample_registrations": [
 								{
 									"submitter_sample_id": "SAMPLE_REGISTRATION_4",
@@ -175,7 +173,6 @@
 							"percent_tumour_cells_measurement_method": "Image analysis",
 							"specimen_processing": "Formalin fixed - unbuffered",
 							"specimen_laterality": "Left",
-							"surgery": null,
 							"sample_registrations": [
 								{
 									"submitter_sample_id": "SAMPLE_REGISTRATION_7",
@@ -241,8 +238,7 @@
 							],
 							"hormone_therapies": [],
 							"immunotherapies": [],
-							"radiation": null,
-							"surgery": null,
+
 							"followups": [
 								{
 									"submitter_follow_up_id": "FOLLOW_UP_1",
@@ -477,8 +473,7 @@
 							],
 							"hormone_therapies": [],
 							"immunotherapies": [],
-							"radiation": null,
-							"surgery": null,
+
 							"followups": [
 								{
 									"submitter_follow_up_id": "FOLLOW_UP_4",
@@ -500,7 +495,7 @@
 								},
 								{
 									"submitter_follow_up_id": "FOLLOW_UP_5",
-									"date_of_followup": null,
+									"date_of_followup": "2022-11",
 									"disease_status_at_followup": "Distant progression",
 									"relapse_type": "Progression (liquid tumours)",
 									"date_of_relapse": "2022-05",
@@ -596,8 +591,7 @@
 							],
 							"hormone_therapies": [],
 							"immunotherapies": [],
-							"radiation": null,
-							"surgery": null,
+
 							"followups": [
 								{
 									"submitter_follow_up_id": "FOLLOW_UP_7",
@@ -672,7 +666,6 @@
 							"percent_tumour_cells_measurement_method": "Unknown",
 							"specimen_processing": "Cryopreservation of live cells in liquid nitrogen",
 							"specimen_laterality": "Right",
-							"surgery": null,
 							"sample_registrations": [
 								{
 									"submitter_sample_id": "SAMPLE_REGISTRATION_10",
@@ -710,7 +703,6 @@
 							"percent_tumour_cells_measurement_method": "Image analysis",
 							"specimen_processing": "Cryopreservation in dry ice (dead tissue)",
 							"specimen_laterality": "Not applicable",
-							"surgery": null,
 							"sample_registrations": [
 								{
 									"submitter_sample_id": "SAMPLE_REGISTRATION_11",
@@ -741,7 +733,6 @@
 							"percent_tumour_cells_measurement_method": "Pathology estimate by percent nuclei",
 							"specimen_processing": "Cryopreservation in dry ice (dead tissue)",
 							"specimen_laterality": "Unknown",
-							"surgery": null,
 							"sample_registrations": [
 								{
 									"submitter_sample_id": "SAMPLE_REGISTRATION_12",
@@ -784,8 +775,7 @@
 							],
 							"hormone_therapies": [],
 							"immunotherapies": [],
-							"radiation": null,
-							"surgery": null,
+
 							"followups": [
 								{
 									"submitter_follow_up_id": "FOLLOW_UP_10",
@@ -865,8 +855,7 @@
 								}
 							],
 							"immunotherapies": [],
-							"radiation": null,
-							"surgery": null,
+
 							"followups": [
 								{
 									"submitter_follow_up_id": "FOLLOW_UP_11",
@@ -923,8 +912,7 @@
 								}
 							],
 							"immunotherapies": [],
-							"radiation": null,
-							"surgery": null,
+
 							"followups": [
 								{
 									"submitter_follow_up_id": "FOLLOW_UP_12",
@@ -984,7 +972,6 @@
 							"percent_tumour_cells_measurement_method": "Pathology estimate by percent nuclei",
 							"specimen_processing": "Cryopreservation of live cells in liquid nitrogen",
 							"specimen_laterality": "Unknown",
-							"surgery": null,
 							"sample_registrations": [
 								{
 									"submitter_sample_id": "SAMPLE_REGISTRATION_13",
@@ -1015,7 +1002,6 @@
 							"percent_tumour_cells_measurement_method": "Pathology estimate by percent nuclei",
 							"specimen_processing": "Cryopreservation in dry ice (dead tissue)",
 							"specimen_laterality": "Left",
-							"surgery": null,
 							"sample_registrations": [
 								{
 									"submitter_sample_id": "SAMPLE_REGISTRATION_14",
@@ -1058,8 +1044,7 @@
 								}
 							],
 							"immunotherapies": [],
-							"radiation": null,
-							"surgery": null,
+
 							"followups": [
 								{
 									"submitter_follow_up_id": "FOLLOW_UP_13",
@@ -1107,8 +1092,7 @@
 								}
 							],
 							"immunotherapies": [],
-							"radiation": null,
-							"surgery": null,
+
 							"followups": [
 								{
 									"submitter_follow_up_id": "FOLLOW_UP_14",
@@ -1245,7 +1229,6 @@
 							"percent_tumour_cells_measurement_method": "Image analysis",
 							"specimen_processing": "Other",
 							"specimen_laterality": "Right",
-							"surgery": null,
 							"sample_registrations": [
 								{
 									"submitter_sample_id": "SAMPLE_REGISTRATION_28",
@@ -1278,7 +1261,6 @@
 							"chemotherapies": [],
 							"hormone_therapies": [],
 							"immunotherapies": [],
-							"radiation": null,
 							"surgery": {
 								"surgery_type": "Pneumonectomy",
 								"surgery_site": "C14",
@@ -1386,7 +1368,6 @@
 							"percent_tumour_cells_measurement_method": "Pathology estimate by percent nuclei",
 							"specimen_processing": "Cryopreservation of live cells in liquid nitrogen",
 							"specimen_laterality": "Right",
-							"surgery": null,
 							"sample_registrations": [
 								{
 									"submitter_sample_id": "SAMPLE_REGISTRATION_16",
@@ -1417,7 +1398,6 @@
 							"percent_tumour_cells_measurement_method": "Pathology estimate by percent nuclei",
 							"specimen_processing": "Formalin fixed - unbuffered",
 							"specimen_laterality": "Not applicable",
-							"surgery": null,
 							"sample_registrations": [
 								{
 									"submitter_sample_id": "SAMPLE_REGISTRATION_15",
@@ -1461,7 +1441,7 @@
 								"radiation_boost": true,
 								"reference_radiation_treatment_id": "REFERENCE_RADIATION_TREATMENT_2"
 							},
-							"surgery": null,
+
 							"followups": [
 								{
 									"submitter_follow_up_id": "FOLLOW_UP_16",
@@ -1512,7 +1492,7 @@
 								"radiation_boost": true,
 								"reference_radiation_treatment_id": "REFERENCE_RADIATION_TREATMENT_1"
 							},
-							"surgery": null,
+
 							"followups": [
 								{
 									"submitter_follow_up_id": "FOLLOW_UP_15",
@@ -1588,7 +1568,6 @@
 							"percent_tumour_cells_measurement_method": "Pathology estimate by percent nuclei",
 							"specimen_processing": "Fresh",
 							"specimen_laterality": "Not applicable",
-							"surgery": null,
 							"sample_registrations": [
 								{
 									"submitter_sample_id": "SAMPLE_REGISTRATION_17",
@@ -1632,7 +1611,7 @@
 								"radiation_boost": true,
 								"reference_radiation_treatment_id": "REFERENCE_RADIATION_TREATMENT_3"
 							},
-							"surgery": null,
+
 							"followups": [
 								{
 									"submitter_follow_up_id": "FOLLOW_UP_17",
@@ -1690,7 +1669,6 @@
 							"percent_tumour_cells_measurement_method": "Pathology estimate by percent nuclei",
 							"specimen_processing": "Cryopreservation of live cells in liquid nitrogen",
 							"specimen_laterality": "Left",
-							"surgery": null,
 							"sample_registrations": [
 								{
 									"submitter_sample_id": "SAMPLE_REGISTRATION_18",
@@ -1733,7 +1711,6 @@
 								"radiation_boost": false,
 								"reference_radiation_treatment_id": ""
 							},
-							"surgery": null,
 							"followups": [
 								{
 									"submitter_follow_up_id": "FOLLOW_UP_18",
@@ -1858,7 +1835,6 @@
 							"percent_tumour_cells_measurement_method": "Image analysis",
 							"specimen_processing": "Unknown",
 							"specimen_laterality": "Not applicable",
-							"surgery": null,
 							"sample_registrations": [
 								{
 									"submitter_sample_id": "SAMPLE_REGISTRATION_19",
@@ -1902,7 +1878,7 @@
 								"radiation_boost": false,
 								"reference_radiation_treatment_id": ""
 							},
-							"surgery": null,
+
 							"followups": [
 								{
 									"submitter_follow_up_id": "FOLLOW_UP_19",
@@ -1963,7 +1939,6 @@
 							"percent_tumour_cells_measurement_method": "Unknown",
 							"specimen_processing": "Unknown",
 							"specimen_laterality": "Unknown",
-							"surgery": null,
 							"sample_registrations": [
 								{
 									"submitter_sample_id": "SAMPLE_REGISTRATION_20",
@@ -2026,8 +2001,7 @@
 									"actual_cumulative_drug_dose": 100
 								}
 							],
-							"radiation": null,
-							"surgery": null,
+
 							"followups": [
 								{
 									"submitter_follow_up_id": "FOLLOW_UP_20",
@@ -2154,7 +2128,6 @@
 							"percent_tumour_cells_measurement_method": "Pathology estimate by percent nuclei",
 							"specimen_processing": "Cryopreservation in dry ice (dead tissue)",
 							"specimen_laterality": "Unknown",
-							"surgery": null,
 							"sample_registrations": [
 								{
 									"submitter_sample_id": "SAMPLE_REGISTRATION_22",
@@ -2199,8 +2172,7 @@
 									"actual_cumulative_drug_dose": 111
 								}
 							],
-							"radiation": null,
-							"surgery": null,
+
 							"followups": [
 								{
 									"submitter_follow_up_id": "FOLLOW_UP_22",
@@ -2261,7 +2233,6 @@
 							"percent_tumour_cells_measurement_method": "Pathology estimate by percent nuclei",
 							"specimen_processing": "Cryopreservation of live cells in liquid nitrogen",
 							"specimen_laterality": "Not applicable",
-							"surgery": null,
 							"sample_registrations": [
 								{
 									"submitter_sample_id": "SAMPLE_REGISTRATION_21",
@@ -2315,12 +2286,10 @@
 									"actual_cumulative_drug_dose": 190
 								}
 							],
-							"radiation": null,
-							"surgery": null,
+
 							"followups": [
 								{
 									"submitter_follow_up_id": "FOLLOW_UP_21",
-									"date_of_followup": null,
 									"disease_status_at_followup": "Loco-regional progression",
 									"relapse_type": "Progression (liquid tumours)",
 									"date_of_relapse": "2021-12",
@@ -2416,7 +2385,6 @@
 							"percent_tumour_cells_measurement_method": "Image analysis",
 							"specimen_processing": "Unknown",
 							"specimen_laterality": "Not applicable",
-							"surgery": null,
 							"sample_registrations": [
 								{
 									"submitter_sample_id": "SAMPLE_REGISTRATION_23",
@@ -2461,8 +2429,7 @@
 									"actual_cumulative_drug_dose": 101
 								}
 							],
-							"radiation": null,
-							"surgery": null,
+
 							"followups": [
 								{
 									"submitter_follow_up_id": "FOLLOW_UP_23",
@@ -2553,27 +2520,6 @@
 							"percent_tumour_cells_measurement_method": "Unknown",
 							"specimen_processing": "Cryopreservation - other",
 							"specimen_laterality": "Right",
-							"surgery": {
-								"surgery_type": "Axillary lymph nodes sampling",
-								"surgery_site": "C14",
-								"surgery_location": "Primary",
-								"tumour_focality": "Unifocal",
-								"residual_tumour_classification": "R2",
-								"margin_types_involved": [
-									"Distal margin",
-									"Circumferential resection margin"
-								],
-								"margin_types_not_involved": [],
-								"margin_types_not_assessed": [
-									"Unknown"
-								],
-								"lymphovascular_invasion": "Absent",
-								"perineural_invasion": "Absent",
-								"tumour_length": 9,
-								"tumour_width": 7,
-								"greatest_dimension_tumour": 5,
-								"submitter_specimen_id": "SPECIMEN_18"
-							},
 							"sample_registrations": [
 								{
 									"submitter_sample_id": "SAMPLE_REGISTRATION_24",
@@ -2608,7 +2554,6 @@
 							"chemotherapies": [],
 							"hormone_therapies": [],
 							"immunotherapies": [],
-							"radiation": null,
 							"surgery": {
 								"surgery_type": "Axillary lymph nodes sampling",
 								"surgery_site": "C14",
@@ -2720,7 +2665,6 @@
 							"percent_tumour_cells_measurement_method": "Genomics",
 							"specimen_processing": "Cryopreservation - other",
 							"specimen_laterality": "Not applicable",
-							"surgery": null,
 							"sample_registrations": [
 								{
 									"submitter_sample_id": "SAMPLE_REGISTRATION_25",
@@ -2753,7 +2697,6 @@
 							"chemotherapies": [],
 							"hormone_therapies": [],
 							"immunotherapies": [],
-							"radiation": null,
 							"surgery": {
 								"surgery_type": "Axillary Clearance",
 								"surgery_site": "C14",
@@ -2876,7 +2819,6 @@
 							"percent_tumour_cells_measurement_method": "Image analysis",
 							"specimen_processing": "Unknown",
 							"specimen_laterality": "Not applicable",
-							"surgery": null,
 							"sample_registrations": [
 								{
 									"submitter_sample_id": "SAMPLE_REGISTRATION_26",
@@ -2911,7 +2853,6 @@
 							"chemotherapies": [],
 							"hormone_therapies": [],
 							"immunotherapies": [],
-							"radiation": null,
 							"surgery": {
 								"surgery_type": "Tumor Debulking",
 								"surgery_site": "C06",
@@ -3032,7 +2973,6 @@
 							"percent_tumour_cells_measurement_method": "Unknown",
 							"specimen_processing": "Cryopreservation - other",
 							"specimen_laterality": "Left",
-							"surgery": null,
 							"sample_registrations": [
 								{
 									"submitter_sample_id": "SAMPLE_REGISTRATION_27",
@@ -3065,7 +3005,6 @@
 							"chemotherapies": [],
 							"hormone_therapies": [],
 							"immunotherapies": [],
-							"radiation": null,
 							"surgery": {
 								"surgery_type": "Pancreaticojejunostomy, side-to-side anastomosis",
 								"surgery_site": "C12",
