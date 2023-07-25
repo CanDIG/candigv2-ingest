@@ -147,7 +147,7 @@ def ingest_data(katsu_server_url, data_location):
                 ingest_finished = False
                 break
         except requests.exceptions.Timeout:
-            check_response = check_ingest_status(api_name, headers)
+            check_response = check_ingest_status(api_name, auth.get_auth_header())
             if any(len(value) == 0 for value in json.loads(check_response.text).values()):
                 print(f"ERROR: Ingest did not finish in time. You can try one of the following: increase timeout, restart katsu, make smaller request, or use katsu fixtures")
                 ingest_finished = False
