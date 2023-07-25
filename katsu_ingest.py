@@ -88,51 +88,79 @@ def ingest_data(katsu_server_url, data_location):
     """
     Send POST requests to the Katsu server to ingest data.
     """
-    file_mapping = OrderedDict(
-        [
-            ("programs", "Program.json"),
-            ("donors", "Donor.json"),
-            ("primary_diagnoses", "PrimaryDiagnosis.json"),
-            ("specimens", "Specimen.json"),
-            ("sample_registrations", "SampleRegistration.json"),
-            ("treatments", "Treatment.json"),
-            ("chemotherapies", "Chemotherapy.json"),
-            ("hormone_therapies", "HormoneTherapy.json"),
-            ("radiations", "Radiation.json"),
-            ("immunotherapies", "Immunotherapy.json"),
-            ("surgeries", "Surgery.json"),
-            ("follow_ups", "FollowUp.json"),
-            ("biomarkers", "Biomarker.json"),
-            ("comorbidities", "Comorbidity.json"),
-            ("exposures", "Exposure.json"),
-        ]
-    )
-    ingest_finished = False
+    def check_ingest_status(api_name, headers):
+        """
+        Helper function to check discovery endpoint
+        """
+        ingest_str = f"/v2/discovery/{api_name}"
+        ingest_url = katsu_server_url + ingest_str
+        check_response = requests.get(ingest_url, headers=headers, timeout=10)
+        return check_response
+
+    file_mapping = OrderedDict([
+        ("programs", "Program.json"),
+        ("donors", "Donor.json"),
+        ("primary_diagnoses", "PrimaryDiagnosis.json"),
+        ("specimens", "Specimen.json"),
+        ("sample_registrations", "SampleRegistration.json"),
+        ("treatments", "Treatment.json"),
+        ("chemotherapies", "Chemotherapy.json"),
+        ("hormone_therapies", "HormoneTherapy.json"),
+        ("radiations", "Radiation.json"),
+        ("immunotherapies", "Immunotherapy.json"),
+        ("surgeries", "Surgery.json"),
+        ("follow_ups", "FollowUp.json"),
+        ("biomarkers", "Biomarker.json"),
+        ("comorbidities", "Comorbidity.json"),
+        ("exposures", "Exposure.json"),
+    ])
+    
+    ingest_finished = True
+    headers = auth.get_auth_header()
+    headers["Content-Type"] = "application/json"
+
     for api_name, file_name in file_mapping.items():
         ingest_str = f"/v2/ingest/{api_name}"
         ingest_url = katsu_server_url + ingest_str
 
         print(f"Loading {file_name}...")
         payload = read_json(data_location + file_name)
-        if payload is not None:
-            headers = auth.get_auth_header()
-            headers["Content-Type"] = "application/json"
-            response = requests.post(
-                ingest_url, headers=headers, data=json.dumps(payload)
-            )
+        if payload is None:
+            print(f"ERROR: Unable to read {file_name}.")
+            ingest_finished = False
+            break
 
+        try:
+            response = requests.post(
+                ingest_url, 
+                headers=headers, 
+                data=json.dumps(payload), 
+                timeout=1000
+            )
+            response.raise_for_status()
             if response.status_code == HTTPStatus.CREATED:
                 print(f"INGEST OK 201! \nRETURN MESSAGE: {response.text}\n")
-            elif response.status_code == HTTPStatus.NOT_FOUND:
-                print(f"ERROR 404: {ingest_url} was not found! Please check the URL.")
-                break
             else:
                 print(
-                    f"\nREQUEST STATUS CODE: {response.status_code} \nRETURN MESSAGE: {response.text}\n"
+                    f"ERROR: Ingest failed with status code {response.status_code}. \nRETURN MESSAGE: {response.text}\n"
                 )
+                ingest_finished = False
                 break
-    else:
-        ingest_finished = True
+        except requests.exceptions.Timeout:
+            check_response = check_ingest_status(api_name, headers)
+            if any(len(value) == 0 for value in json.loads(check_response.text).values()):
+                print(f"ERROR: Ingest did not finish in time. You can try one of the following: increase timeout, restart katsu, make smaller request, or use katsu fixtures")
+                ingest_finished = False
+                break
+            else:
+                print(f"INGEST OK with content {check_response.text}")
+        except requests.exceptions.RequestException as e:
+            print("An error occurred:", e)
+            print(
+                f"\nREQUEST STATUS CODE: {response.status_code} \nRETURN MESSAGE: {response.text}\n"
+            )
+            ingest_finished = False
+            break
 
     if ingest_finished:
         print("All files have been processed.")
@@ -140,7 +168,7 @@ def ingest_data(katsu_server_url, data_location):
         print("Aborting processing due to an error.")
 
 
-def run_check(katsu_server_url, env_str, data_location):
+def run_check(env_str, data_location):
     """
     Run a series of checks to ensure that the ingest is ready to run.
         - Check if the environment file exists
@@ -199,7 +227,6 @@ def main():
 
     if choice == 1:
         run_check(
-            katsu_server_url=katsu_server_url,
             env_str=env_str,
             data_location=data_location,
         )
