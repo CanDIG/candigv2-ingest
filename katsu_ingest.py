@@ -17,11 +17,15 @@ ingest_blueprint = Blueprint("ingest_donor", __name__)
 KATSU_TRAILING_SLASH = False
 
 def update_headers(headers):
+    """
+    For new auth model
     refresh_token = headers["refresh_token"]
     bearer = auth.get_bearer_from_refresh(refresh_token)
     new_refresh = auth.get_refresh_token(refresh_token=refresh_token)
     headers["refresh_token"] = new_refresh
     headers["Authorization"] = f"Bearer {bearer}"
+    """
+    pass
 
 def setTrailingSlash(trailing_slash):
     global KATSU_TRAILING_SLASH
@@ -339,7 +343,7 @@ def ingest_donor_with_clinical(katsu_server_url, dataset, headers):
             request = requests.Request('POST', katsu_server_url + program_endpoint, headers=headers,
                           data=json.dumps([{"program_id": program_id}]))
             if not auth.is_authed(request):
-                return IngestPermissionsException(program_id)
+                return IngestPermissionsException(f"Not authorized to write to {program_id}")
             response = requests.Session().send(request.prepare())
             if response.status_code != HTTPStatus.CREATED:
                     if 'unique' in response.text:
@@ -354,6 +358,7 @@ def ingest_donor_with_clinical(katsu_server_url, dataset, headers):
         try:
             traverse_clinical_field(fields, donor, "donors", parents, types, [])
         except Exception as e:
+            print(traceback.format_exc())
             return IngestUserException(str(e))
     fields.pop("programs")
     errors = ingest_fields(fields, katsu_server_url, headers)
@@ -418,22 +423,23 @@ def ingest_donor_endpoint():
     dataset = request.json
     headers = {}
     if "Authorization" not in request.headers:
-        return {"result": "Refresh token required"}, 401
+        return {"result": "Bearer token required"}, 401
     try:
-        refresh_token = request.headers["Authorization"].split("Bearer ")[1]
-        token = auth.get_bearer_from_refresh(refresh_token)
+        # New auth model
+        # refresh_token = request.headers["Authorization"].split("Bearer ")[1]
+        # token = auth.get_bearer_from_refresh(refresh_token)
+        token = request.headers["Authorization"].split("Bearer ")[1]
         headers["Authorization"] = "Bearer %s" % token
     except Exception as e:
-        if "Invalid refresh token" in str(e):
-            return {"result": "Refresh token invalid or unauthorized"}, 401
+        if "Invalid bearer token" in str(e):
+            return {"result": "Bearer token invalid or unauthorized"}, 401
         return {"result": "Unknown error during authorization"}, 401
-    headers["refresh_token"] = refresh_token
     headers["Content-Type"] = "application/json"
     response = ingest_donor_with_clinical(katsu_server_url, dataset, headers)
     if type(response) == IngestResult:
         return {"result": "Ingested %d donors." % response.value}, 200
     elif type(response) == IngestPermissionsException:
-        return {"result": "Error: You are not authorized to write to program." % response.value, "note": "Data may be \
+        return {"result": "Permissions error: %s" % response.value, "note": "Data may be \
 partially ingested. You may need to delete the relevant programs in Katsu."}, 403
     elif type(response) == IngestServerException:
         error_string = ','.join(response.value)

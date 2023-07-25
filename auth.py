@@ -8,24 +8,19 @@ import requests
 
 AUTH = True
 
-def get_auth_header(refresh_token=None):
+def get_auth_header():
     if AUTH:
-        import auth
-        if refresh_token:
-            refresh_token = auth.get_refresh_token(refresh_token)
-        else:
-            refresh_token = auth.get_site_admin_token()
-        token = get_bearer_from_refresh(refresh_token)
-        return {"Authorization": f"Bearer {token}", "refresh_token": refresh_token}
+        token = get_site_admin_token()
+        return {"Authorization": f"Bearer {token}"}
     return ""
 
 
 def get_site_admin_token():
     '''
-    Returns a Keycoak *refresh* token for the site admin.
-    This can be transformed into a bearer token through get_bearer_from_refresh.
+    Returns a Keycoak bearer token for the site admin.
     '''
-    return authx.auth.get_refresh_token(
+    # New auth model: return refresh. Current: return bearer
+    return authx.auth.get_access_token(
     keycloak_url=os.getenv('KEYCLOAK_PUBLIC_URL'),
     client_id=os.getenv('CANDIG_CLIENT_ID'),
     client_secret=os.getenv('CANDIG_CLIENT_SECRET'),
@@ -33,6 +28,8 @@ def get_site_admin_token():
     password=os.getenv('CANDIG_SITE_ADMIN_PASSWORD')
     )
 
+"""
+For new auth model
 def get_bearer_from_refresh(refresh_token):
     '''
     Transforms a refresh token into a usable bearer token through keycloak.
@@ -44,7 +41,10 @@ def get_bearer_from_refresh(refresh_token):
                                        client_id=os.getenv("CANDIG_CLIENT_ID"),
                                        client_secret=os.getenv('CANDIG_CLIENT_SECRET'),
                                        refresh_token=refresh_token)
+"""
 
+"""
+For new auth model
 def get_refresh_token(username=None, password=None, refresh_token=None):
     '''
     Returns a fresh Keycloak refresh token from either a username/password or existing refresh token.
@@ -73,7 +73,7 @@ def get_refresh_token(username=None, password=None, refresh_token=None):
         )
     else:
         raise ValueError("Username and password or refresh token required")
-
+"""
 
 def get_minio_client(token, s3_endpoint, bucket, access_key=None, secret_key=None, region=None, secure=True):
     return authx.auth.get_minio_client(token=token, s3_endpoint=s3_endpoint, bucket=bucket, access_key=access_key, secret_key=secret_key, region=region, secure=secure)
@@ -111,13 +111,22 @@ def store_aws_credential(token=None, client=None):
 def is_authed(request: requests.Request):
     if 'Authorization' not in request.headers:
         return False
+
+    """
+    New auth model
     request_object = json.dumps({
         "url": request.url,
         "method": request.method,
         "headers": request.headers,
         "data": request.data
     })
-    if (authx.auth.is_permissible(request_object)): return True
+    """
+    request.path = request.url # Compatibility with old auth model
+
+    # New auth model:
+    # if (authx.auth.is_permissible(request_object)): return True
+    if (authx.auth.is_site_admin(request)):
+        return True
     return False
 
 if __name__ == "__main__":
