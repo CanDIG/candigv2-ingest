@@ -6,7 +6,6 @@ from collections import OrderedDict
 from http import HTTPStatus
 
 import requests
-from requests.exceptions import ConnectionError
 from flask import Blueprint, request
 
 import auth
@@ -30,30 +29,6 @@ def update_headers(headers):
 def setTrailingSlash(trailing_slash):
     global KATSU_TRAILING_SLASH
     KATSU_TRAILING_SLASH = trailing_slash
-
-def check_api_version(ingest_version, katsu_version):
-    """
-    Return True if the major and minor versions of the ingest and katsu are the same.
-    The patch version of the ingest can be lower than katsu.
-
-    Parameters:
-    - ingest_version (str): in the format "major.minor.patch".
-    - katsu_version (str): in the format "major.minor.patch".
-
-    Returns:
-    - bool
-    """
-    ingest_version_parts = ingest_version.split(".")
-    ingest_major, ingest_minor, ingest_patch = map(int, ingest_version_parts)
-    katsu_version_parts = katsu_version.split(".")
-    katsu_major, katsu_minor, katsu_patch = map(int, katsu_version_parts)
-
-    if ingest_major == katsu_major:
-        if ingest_minor == katsu_minor:
-            if ingest_patch <= katsu_patch:
-                return True
-    return False
-
 
 def read_json(file_path):
     """Read data from either a URL or a local file in JSON format.
@@ -367,7 +342,7 @@ def ingest_donor_with_clinical(katsu_server_url, dataset, headers):
     else:
         return IngestResult(len(dataset))
 
-def run_check(katsu_server_url, env_str, data_location, ingest_version):
+def run_check(katsu_server_url, env_str, data_location):
     """
     Run a series of checks to ensure that the ingest is ready to run.
         - Check if the environment file exists
@@ -394,26 +369,6 @@ def run_check(katsu_server_url, env_str, data_location, ingest_version):
     except Exception as e:
         print(f"ERROR AUTH CHECK: {e}")
         exit()
-
-    # check if Katsu server is running correct version
-    version_check_url = katsu_server_url + "/v2/version_check"
-    try:
-        response = requests.get(version_check_url, headers=headers)
-        if response.status_code == HTTPStatus.OK:
-            katsu_version = response.json()["version"]
-            if check_api_version(
-                ingest_version=ingest_version, katsu_version=katsu_version
-            ):
-                print(f"PASS: Katsu server is running on a compatible version.")
-            else:
-                print(
-                    f"ERROR: Katsu server is running on {katsu_version}. Required version {ingest_version} or greater."
-                )
-        else:
-            print(f"ERROR VERSION CHECK {response.status_code}: {response.text}")
-    except ConnectionError as e:
-        print(f"ERROR VERSION CHECK: {e}")
-        return
 
 @ingest_blueprint.route('/ingest_donor', methods=["POST"])
 def ingest_donor_endpoint():
@@ -491,8 +446,7 @@ def main():
         run_check(
             katsu_server_url=katsu_server_url,
             env_str=env_str,
-            data_location=data_location,
-            ingest_version=ingest_version,
+            data_location=data_location
         )
     elif choice == 2:
         if not data_location.endswith('/'):
