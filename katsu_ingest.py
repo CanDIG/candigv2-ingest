@@ -116,10 +116,10 @@ def ingest_data(katsu_server_url, data_location):
     ])
     
     ingest_finished = True
-    headers = auth.get_auth_header()
-    headers["Content-Type"] = "application/json"
 
     for api_name, file_name in file_mapping.items():
+        headers = auth.get_auth_header()
+        headers["Content-Type"] = "application/json"
         ingest_str = f"/v2/ingest/{api_name}"
         ingest_url = katsu_server_url + ingest_str
 
