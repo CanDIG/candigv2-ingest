@@ -4,6 +4,8 @@ import os
 import re
 from urllib.parse import urlparse
 
+from ingest_result import IngestPermissionsException
+
 CANDIG_URL = os.getenv("CANDIG_URL", "")
 HTSGET_URL = CANDIG_URL + "/genomics"
 VAULT_URL = CANDIG_URL + "/vault"
@@ -18,9 +20,11 @@ def post_to_dataset(sample_ids, dataset, token):
     }
     print(obj)
     url = f"{HTSGET_URL}/ga4gh/drs/v1/datasets"
-    response = requests.post(url, json=obj, headers=headers)
-    if response.status_code > 300:
-        print(response.text)
+    request = requests.Request(method="POST", url=url, json=obj, headers=headers)
+    if not auth.is_authed(request):
+        return IngestPermissionsException(dataset)
+    response = requests.Session().send(request.prepare())
+    return response
 
 
 def get_dataset_objects(dataset, token):
@@ -74,7 +78,7 @@ def post_objects(genomic_id, genomic_objs_to_create, token, clinical_id=None, re
         }
         response = requests.post(url, json=obj, headers=headers)
         if response.status_code > 200:
-            print(response.text)
+            return response
         genomic_drs_obj = response.json()['self_uri']
 
         # file object:
@@ -100,7 +104,7 @@ def post_objects(genomic_id, genomic_objs_to_create, token, clinical_id=None, re
         }
         response = requests.post(url, json=obj, headers=headers)
         if response.status_code > 200:
-            print(response.text)
+            return response
 
         # index object:
         access_method = {}
@@ -125,7 +129,7 @@ def post_objects(genomic_id, genomic_objs_to_create, token, clinical_id=None, re
         }
         response = requests.post(url, json=obj, headers=headers)
         if response.status_code > 200:
-            print(response.text)
+            return response
 
         # add this genomic_id to the sample drs object, if available
         genomic_content = {
@@ -146,10 +150,10 @@ def post_objects(genomic_id, genomic_objs_to_create, token, clinical_id=None, re
         if response.status_code == 200:
             obj = response.json()
             obj['contents'].append(genomic_content)
-        response = requests.post(url, json=obj, headers=headers)
+
+        requests.post(url, json=obj, headers=headers)
 
         # index for search:
         url = f"{HTSGET_URL}/htsget/v1/variants/{s['id']}/index"
         response = requests.get(url, params={"genome": ref_genome, "force": force, "genomic_id": genomic_id}, headers=headers)
-        if response.status_code > 200:
-            print(response.text)
+        return response

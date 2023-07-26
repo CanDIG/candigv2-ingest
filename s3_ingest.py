@@ -50,7 +50,7 @@ def main():
     else:
         raise Exception("Either awsfile or access/secret need to be provided.")
 
-    client = auth.get_minio_client(args.endpoint, args.bucket, access_key=access_key, secret_key=secret_key)
+    client = auth.get_minio_client(auth.get_site_admin_token(), args.endpoint, args.bucket, access_key=access_key, secret_key=secret_key)
 
     for sample in samples:
         file = Path(sample)

@@ -1,20 +1,25 @@
 import authx.auth
 import os
 import re
+import json
+
+import requests
 
 
 AUTH = True
 
-
 def get_auth_header():
     if AUTH:
-        import auth
-        token = auth.get_site_admin_token()
+        token = get_site_admin_token()
         return {"Authorization": f"Bearer {token}"}
     return ""
 
 
 def get_site_admin_token():
+    '''
+    Returns a Keycoak bearer token for the site admin.
+    '''
+    # New auth model: return refresh. Current: return bearer
     return authx.auth.get_access_token(
     keycloak_url=os.getenv('KEYCLOAK_PUBLIC_URL'),
     client_id=os.getenv('CANDIG_CLIENT_ID'),
@@ -23,9 +28,55 @@ def get_site_admin_token():
     password=os.getenv('CANDIG_SITE_ADMIN_PASSWORD')
     )
 
+"""
+For new auth model
+def get_bearer_from_refresh(refresh_token):
+    '''
+    Transforms a refresh token into a usable bearer token through keycloak.
+    Args:
+        refresh_token: A Keycloak refresh token.
+    Returns: A keycloak bearer token.
+    '''
+    return authx.auth.get_access_token(keycloak_url=os.getenv('KEYCLOAK_PUBLIC_URL'),
+                                       client_id=os.getenv("CANDIG_CLIENT_ID"),
+                                       client_secret=os.getenv('CANDIG_CLIENT_SECRET'),
+                                       refresh_token=refresh_token)
+"""
 
-def get_minio_client(s3_endpoint, bucket, access_key=None, secret_key=None, region=None, secure=True):
-    return authx.auth.get_minio_client(token=get_site_admin_token(), s3_endpoint=s3_endpoint, bucket=bucket, access_key=access_key, secret_key=secret_key, region=region, secure=secure)
+"""
+For new auth model
+def get_refresh_token(username=None, password=None, refresh_token=None):
+    '''
+    Returns a fresh Keycloak refresh token from either a username/password or existing refresh token.
+    Args:
+        username: If refresh token is not provided, a Keycloak username.
+        password: If refresh token is not provided, a Keycloak password.
+        refresh_token: If username/password are not provided, a Keycloak refresh token.
+
+    Returns: A new Keycloak refresh token.
+
+    '''
+    if refresh_token:
+        return authx.auth.get_refresh_token(
+            keycloak_url=os.getenv('KEYCLOAK_PUBLIC_URL'),
+            client_id=os.getenv('CANDIG_CLIENT_ID'),
+            client_secret=os.getenv('CANDIG_CLIENT_SECRET'),
+            refresh_token=refresh_token
+        )
+    if (username and password):
+        return authx.auth.get_refresh_token(
+            keycloak_url=os.getenv('KEYCLOAK_PUBLIC_URL'),
+            client_id=os.getenv('CANDIG_CLIENT_ID'),
+            client_secret=os.getenv('CANDIG_CLIENT_SECRET'),
+            username=os.getenv(username),
+            password=os.getenv(password)
+        )
+    else:
+        raise ValueError("Username and password or refresh token required")
+"""
+
+def get_minio_client(token, s3_endpoint, bucket, access_key=None, secret_key=None, region=None, secure=True):
+    return authx.auth.get_minio_client(token=token, s3_endpoint=s3_endpoint, bucket=bucket, access_key=access_key, secret_key=secret_key, region=region, secure=secure)
 
 
 def parse_aws_credential(awsfile):
@@ -57,6 +108,26 @@ def store_aws_credential(token=None, client=None):
     print(client)
     return authx.auth.store_aws_credential(token=token, endpoint=client["endpoint"], bucket=client["bucket"], access=client["access"], secret=client["secret"])
 
+def is_authed(request: requests.Request):
+    if 'Authorization' not in request.headers:
+        return False
+
+    """
+    New auth model
+    request_object = json.dumps({
+        "url": request.url,
+        "method": request.method,
+        "headers": request.headers,
+        "data": request.data
+    })
+    """
+    request.path = request.url # Compatibility with old auth model
+
+    # New auth model:
+    # if (authx.auth.is_permissible(request_object)): return True
+    if (authx.auth.is_site_admin(request)):
+        return True
+    return False
 
 if __name__ == "__main__":
     print(get_site_admin_token())
