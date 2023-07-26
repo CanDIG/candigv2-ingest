@@ -13,7 +13,6 @@ from ingest_result import IngestPermissionsException, IngestServerException, Ing
 
 ingest_blueprint = Blueprint("ingest_donor", __name__)
 
-KATSU_TRAILING_SLASH = False
 
 def update_headers(headers):
     """
@@ -29,7 +28,7 @@ def update_headers(headers):
 def setTrailingSlash(trailing_slash):
     global KATSU_TRAILING_SLASH
     KATSU_TRAILING_SLASH = trailing_slash
-
+    
 def read_json(file_path):
     """Read data from either a URL or a local file in JSON format.
 
@@ -347,7 +346,6 @@ def run_check(katsu_server_url, env_str, data_location):
     Run a series of checks to ensure that the ingest is ready to run.
         - Check if the environment file exists
         - Check if the environment variable is set
-        - Check if the Katsu server is running the correct version
         - Check header authentication
     """
     # Check if environment file exists
@@ -415,7 +413,6 @@ def main():
     data_location = os.environ.get("CLINICAL_DATA_LOCATION")
 
     env_str = "env.sh"
-    ingest_version = "2.1.0"
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
