@@ -13,6 +13,7 @@ from ingest_result import IngestPermissionsException, IngestServerException, Ing
 
 ingest_blueprint = Blueprint("ingest_donor", __name__)
 
+KATSU_TRAILING_SLASH = False
 
 def update_headers(headers):
     """
