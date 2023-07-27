@@ -2,18 +2,13 @@ from connexion import FlaskApp
 import katsu_ingest
 import htsget_ingest
 
-VERSION = "2.0.0"
+VERSION = "2.0.0-alpha"
 
 def get_service_info():
     return {
-        "id": "org.candig.drs",
-        "name": "CanDIG baby DRS service",
-        "type": {
-            "group": "org.ga4gh",
-            "artifact": "drs",
-            "version": "v1.2.0"
-        },
-        "description": "A DRS-compliant server for CanDIG genomic data",
+        "id": "org.candig.ingest",
+        "name": "CanDIG Ingest Passthrough Service",
+        "description": "A microservice used as a processing intermediary for ingesting data into Katsu and htsget",
         "organization": {
             "name": "CanDIG",
             "url": "https://www.distributedgenomics.ca"
