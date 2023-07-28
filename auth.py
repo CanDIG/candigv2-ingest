@@ -11,7 +11,7 @@ AUTH = True
 def get_auth_header():
     if AUTH:
         token = get_site_admin_token()
-        return {"Authorization": f"Bearer {token}"}
+        return {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
     return ""
 
 
