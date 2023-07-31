@@ -160,7 +160,7 @@ Also, Note that VAULT_URL's host is often set as 0.0.0.0, which the container ma
 if so, set it to candig.docker.internal:8200 (or whatever your vault port is).
 
 
-This will start a Docker container with a REST API for the ingest at localhost:1235. You can ingest a DonorWithClincalData object by POSTing JSON to localhost:1236/ingest_donor (an example is given in single_ingest.json, or you can simply copy the "results" key from a Katsu DonorWithClinicalData authorized query). 
+This will start a Docker container with a REST API for the ingest at localhost:1235. You can ingest a DonorWithClincalData object by POSTing JSON to localhost:1236/ingest/clinical_donors (an example is given in single_ingest.json, or you can simply copy the "results" key from a Katsu DonorWithClinicalData authorized query). 
 Genomic data can be ingested from an S3 bucket at the /ingest_genomic endpoint, with the following JSON format:
 ```json
 {

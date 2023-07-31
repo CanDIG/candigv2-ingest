@@ -28,7 +28,7 @@ paths:
               application/json:
                 schema:
                   type: object
-  /ingest/{program_id}/moh_variants:
+  /ingest/moh_variants/{program_id}:
     post:
       description: Add a genomic file that corresponds to a SampleRegistration in an MoH Program schema.
       operationId: ingest_operations.add_moh_variant
