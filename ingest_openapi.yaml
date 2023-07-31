@@ -15,34 +15,34 @@ paths:
             application/json:
               schema:
                 type: object
-  /add-s3-credential:
-    post:
-      description: Add credentials for an S3 bucket
-      operationId: ingest_operations.add_s3_credential
-      requestBody:
-        $ref: '#/components/requestBodies/S3CredentialRequest'
-      responses:
-          200:
-            description: Success
-            content:
-              application/json:
-                schema:
-                  type: object
-  /ingest/{program_id}/moh_variants:
-    post:
-      description: Add a genomic file that corresponds to a SampleRegistration in an MoH Program schema.
-      operationId: ingest_operations.add_moh_variant
-      parameters:
-        - $ref: "#/components/parameters/ProgramId"
-      requestBody:
-        $ref: '#/components/requestBodies/MoHVariantRequest'
-      responses:
-          200:
-            description: Success
-            content:
-              application/json:
-                schema:
-                  type: object
+ # /add-s3-credential:
+  #  post:
+ #     description: Add credentials for an S3 bucket
+  #    operationId: ingest_operations.add_s3_credential
+ #     requestBody:
+ #       $ref: '#/components/requestBodies/S3CredentialRequest'
+ #     responses:
+ #         200:
+ #           description: Success
+ #           content:
+ #             application/json:
+ #               schema:
+ #                 type: object
+ # /ingest/{program_id}/moh_variants:
+ #   post:
+ #     description: Add a genomic file that corresponds to a SampleRegistration in an MoH Program schema.
+ #     operationId: ingest_operations.add_moh_variant
+#      parameters:
+ #       - $ref: "#/components/parameters/ProgramId"
+ #     requestBody:
+ #       $ref: '#/components/requestBodies/MoHVariantRequest'
+ #     responses:
+ #         200:
+ #           description: Success
+ #           content:
+  #            application/json:
+ #               schema:
+ #                 type: object
 components:
   parameters:
     ProgramId:
