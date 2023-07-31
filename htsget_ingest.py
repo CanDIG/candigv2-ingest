@@ -183,15 +183,18 @@ def genomic_ingest_endpoint():
     if "Authorization" not in request.headers:
         return {"result": "Refresh token required"}, 401
     try:
-        refresh_token = request.headers["Authorization"].split("Bearer ")[1]
+        token = request.headers["Authorization"].split("Bearer ")[1]
     except Exception as e:
-        if "Invalid refresh token" in str(e):
-            return {"result": "Refresh token invalid or unauthorized"}, 401
+        if ("Invalid bearer token" in str(e)) or (not request.headers["Authorization"].startswith("Bearer ")):
+            return {"result": "Bearer token invalid or unauthorized"}, 401
         return {"result": "Unknown error during authorization"}, 401
+    """
+    (For new auth model)
     try:
-        token = auth.get_bearer_from_refresh(refresh_token)
+        token = auth.get_bearer_from_refresh(token)
     except Exception as e:
         return {"result": "Error validating token: %s" % str(e)}, 401
+    """
 
 
     req_values_s3 = {
@@ -283,11 +286,11 @@ def main():
             genomic_samples = json.loads(f.read())
 
     if args.local:
-        result = htsget_ingest_from_file(args.dataset, auth.get_bearer_from_refresh(auth.get_site_admin_token()),
+        result = htsget_ingest_from_file(args.dataset, auth.get_site_admin_token(),
                                          genomic_samples, args.reference, args.indexing)
     else:
         result = htsget_ingest_from_bucket(args.endpoint, args.bucket, args.dataset,
-                                        auth.get_bearer_from_refresh(auth.get_site_admin_token()),
+                                        auth.get_site_admin_token(),
                                         genomic_samples, args.awsfile,
                                         args.access, args.secret, args.prefix, args.reference,
                                         args.indexing)

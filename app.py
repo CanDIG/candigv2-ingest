@@ -1,8 +1,11 @@
 from connexion import FlaskApp
+from flask import url_for, redirect
 
 import katsu_ingest
 import htsget_ingest
 
+def root():
+    return redirect(url_for('ingest_operations_get_service_info'))
 
 def create_app():
     connexionApp = FlaskApp(__name__, specification_dir='./')
@@ -10,6 +13,7 @@ def create_app():
     app = connexionApp.app
     app.register_blueprint(katsu_ingest.ingest_blueprint)
     app.register_blueprint(htsget_ingest.ingest_blueprint)
+    app.add_url_rule('/', 'root', root)
     return app
 
 if __name__ == '__main__':
