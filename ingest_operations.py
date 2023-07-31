@@ -1,7 +1,5 @@
 import connexion
 from flask import request, Flask
-import re
-from markupsafe import escape
 
 import config
 
@@ -20,3 +18,10 @@ def get_service_info():
         },
         "version": config.VERSION
     }
+
+def add_s3_credential():
+    return None, 501
+
+def add_moh_variant(program_id):
+    print(connexion.request.json)
+    return None, 501

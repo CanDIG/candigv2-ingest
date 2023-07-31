@@ -13,7 +13,7 @@ def create_app():
     app = connexionApp.app
     app.register_blueprint(katsu_ingest.ingest_blueprint)
     app.register_blueprint(htsget_ingest.ingest_blueprint)
-    app.add_url_rule('/', 'root', root)
+    #app.add_url_rule('/', 'root', root)
     return app
 
 if __name__ == '__main__':
