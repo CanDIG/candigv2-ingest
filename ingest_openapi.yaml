@@ -1,0 +1,127 @@
+openapi: 3.0.0
+info:
+  version: v1.0.0
+  title: ''
+  description: ''
+paths:
+  /service-info:
+    get:
+      description: Returns information about the ingest service
+      operationId: ingest_operations.get_service_info
+      responses:
+        200:
+          description: Retrieve info about the ingest service
+          content:
+            application/json:
+              schema:
+                type: object
+  /add-s3-credential:
+    post:
+      description: Add credentials for an S3 bucket
+      operationId: ingest_operations.add_s3_credential
+      requestBody:
+        $ref: '#/components/requestBodies/S3CredentialRequest'
+      responses:
+          200:
+            description: Success
+            content:
+              application/json:
+                schema:
+                  type: object
+  /ingest/{program_id}/moh_variants:
+    post:
+      description: Add a genomic file that corresponds to a SampleRegistration in an MoH Program schema.
+      operationId: ingest_operations.add_moh_variant
+      parameters:
+        - $ref: "#/components/parameters/ProgramId"
+      requestBody:
+        $ref: '#/components/requestBodies/MoHVariantRequest'
+      responses:
+          200:
+            description: Success
+            content:
+              application/json:
+                schema:
+                  type: object
+components:
+  parameters:
+    ProgramId:
+      in: path
+      name: program_id
+      required: true
+      description: name of an MoH program to ingest this genomic file into
+      schema:
+        type: string
+  requestBodies:
+    S3CredentialRequest:
+      content:
+        'application/json':
+          schema:
+            type: object
+            properties:
+              endpoint:
+                type: string
+                description: URL to the endpoint
+                example: http://candig.docker.internal:9000
+              bucket:
+                type: string
+                description: name of the bucket
+              access_key:
+                type: string
+                description: access key for the bucket
+              secret_key:
+                type: string
+                description: secret key for the bucket
+            required:
+              - endpoint
+              - bucket
+              - access_key
+              - secret_key
+    MoHVariantRequest:
+      content:
+        'application/json':
+          schema:
+            type: object
+            properties:
+              genomic_id:
+                type: string
+                description: the name of the VCF file, including gz, if present
+                example: "HG00096.vcf.gz"
+              access_method:
+                type: string
+                anyOf:
+                  - $ref: "#/components/schemas/S3Access"
+                  - $ref: "#/components/schemas/FileAccess"
+              samples:
+                type: array
+                items:
+                  $ref: "#/components/schemas/VCFSample"
+            required:
+              - genomic_id
+              - access_method
+              - samples
+  schemas:
+    S3Access:
+      type: string
+      description: a specification for an S3 bucket
+      pattern: s3:\/\/(.+)\/(.+)
+      example: s3://http://candig.docker.internal:9000/mohccn-data
+    FileAccess:
+      type: string
+      description: a file path to a directory on the HTSGet server itself
+      pattern: file:\/\/\/(.+)
+      example: file://data/samples/
+    VCFSample:
+      type: object
+      properties:
+        sample_registration_id:
+          type: string
+          description: a SampleRegistrationId in the MoH program
+          example: sample_registration_id_1
+        sample_name_in_file:
+          type: string
+          description: the name of the sample in the VCF file
+          example: TUMOUR/NORMAL/PROGRAM_SAMPLE_REGISTRATION_ID_1/...
+      required:
+        - sample_registration_id
+        - sample_name_in_file
