@@ -25,3 +25,7 @@ def add_s3_credential():
 def add_moh_variant(program_id):
     print(connexion.request.json)
     return None, 501
+
+def add_clinical_donors():
+    print(connexion.request.json)
+    return None, 501
