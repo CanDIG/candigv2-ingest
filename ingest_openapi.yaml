@@ -21,6 +21,12 @@ paths:
       operationId: ingest_operations.add_s3_credential
       requestBody:
         $ref: '#/components/requestBodies/S3CredentialRequest'
+      parameters:
+        - in: header
+          name: Authorization
+          schema:
+            $ref: '#/components/schemas/BearerToken'
+          required: true
       responses:
           200:
             description: Success
@@ -190,3 +196,7 @@ components:
       required:
         - sample_registration_id
         - sample_name_in_file
+    BearerToken:
+      type: string
+      description: An Authorization BearerToken header
+      pattern: Bearer .+

@@ -2,6 +2,7 @@ import connexion
 from flask import request, Flask
 import os
 
+import auth
 from ingest_result import *
 from katsu_ingest import ingest_donor_with_clinical, setTrailingSlash
 import config
@@ -23,7 +24,9 @@ def get_service_info():
     }
 
 def add_s3_credential():
-    return None, 501
+    data = connexion.request.json
+    token = connexion.request.headers['Authorization'].split("Bearer ")[1]
+    return auth.store_aws_credential(data["endpoint"], data["bucket"], data["access_key"], data["secret_key"], token)
 
 def add_moh_variant(program_id):
     print(connexion.request.json)

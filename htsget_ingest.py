@@ -143,7 +143,8 @@ def htsget_ingest_from_bucket(endpoint, bucket, dataset, token,
         return IngestUserException("Either awsfile or access/secret need to be provided.")
 
     client = auth.get_minio_client(token, endpoint, bucket, access_key=access_key, secret_key=secret_key)
-    result, status_code = auth.store_aws_credential(token=token, client=client)
+    result, status_code = auth.store_aws_credential(token=token, endpoint=client["endpoint"], bucket=client["bucket"],
+                                                    access=client["access"], secret=client["secret"])
     if status_code != 200:
         return IngestServerException(f"Failed to add AWS credential to vault: {result}")
     created = []
