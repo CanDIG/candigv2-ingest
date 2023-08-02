@@ -104,8 +104,12 @@ components:
             properties:
               genomic_id:
                 type: string
-                description: the name of the VCF file, including gz, if present
+                description: The name of the VCF file, including gz, if present
                 example: "HG00096.vcf.gz"
+              index:
+                type: string
+                description: The extension of the index file without the dot (tbi, crai...)
+                example: "tbi"
               access_method:
                 type: string
                 anyOf:
@@ -119,6 +123,7 @@ components:
               - genomic_id
               - access_method
               - samples
+              - index
     ClinicalDonorRequest:
       content:
         'application/json':

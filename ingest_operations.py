@@ -1,10 +1,12 @@
 import connexion
 from flask import request, Flask
 import os
+import traceback
 
 import auth
 from ingest_result import *
 from katsu_ingest import ingest_donor_with_clinical, setTrailingSlash
+from htsget_ingest import htsget_ingest
 import config
 
 app = Flask(__name__)
@@ -25,12 +27,35 @@ def get_service_info():
 
 def add_s3_credential():
     data = connexion.request.json
-    token = connexion.request.headers['Authorization'].split("Bearer ")[1]
+    token = request.headers['Authorization'].split("Bearer ")[1]
     return auth.store_aws_credential(data["endpoint"], data["bucket"], data["access_key"], data["secret_key"], token)
 
 def add_moh_variant(program_id):
-    print(connexion.request.json)
-    return None, 501
+    token = request.headers["Authorization"].split("Bearer ")[1]
+    data = connexion.request.json
+    """
+    (For new auth model)
+    try:
+        token = auth.get_bearer_from_refresh(token)
+    except Exception as e:
+        return {"result": "Error validating token: %s" % str(e)}, 401
+    """
+
+    try:
+        response = htsget_ingest(token, program_id, data)
+    except Exception as e:
+        traceback.print_exc()
+        return {"result": "Unknown error (You may want to report this to a CanDIG developer): %s" % str(e)}, 500
+
+    if type(response) == IngestResult:
+        return {"result": "Ingested genomic sample: %s" % response.value}, 200
+    elif type(response) == IngestUserException:
+        return {"result": "Data error: %s" % response.value}, 400
+    elif type(response) == IngestPermissionsException:
+        return {"result": "Error: You are not authorized to write to program %s." % response.value}, 403
+    elif type(response) == IngestServerException:
+        return {"result": "Ingest encountered the following errors: %s" % response.value}, 500
+    return 500
 
 def add_clinical_donors():
     if os.environ.get("KATSU_TRAILING_SLASH") == "TRUE":
