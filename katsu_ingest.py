@@ -425,7 +425,7 @@ def main():
             print("Delete cancelled")
             exit()
     elif choice == 4:
-        dataset = read_json(data_location)
+        dataset = read_json(data_location)["donors"]
         headers["Content-Type"] = "application/json"
         print(ingest_donor_with_clinical(katsu_server_url, dataset, headers).value)
     elif choice == 5:

@@ -61,7 +61,7 @@ def add_clinical_donors():
     if os.environ.get("KATSU_TRAILING_SLASH") == "TRUE":
         setTrailingSlash(True)
     katsu_server_url = os.environ.get("CANDIG_URL")
-    dataset = connexion.request.json
+    dataset = connexion.request.json["donors"]
     headers = {}
     if "Authorization" not in request.headers:
         return {"result": "Bearer token required"}, 401

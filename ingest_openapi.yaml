@@ -128,7 +128,12 @@ components:
       content:
         'application/json':
           schema:
-            $ref: "#/components/schemas/DonorWithClinicalDataField"
+            type: object
+            properties:
+              donors:
+                $ref: "#/components/schemas/DonorWithClinicalDataField"
+            required:
+              - donors
   schemas:
     S3Access:
       type: string
@@ -139,6 +144,7 @@ components:
       type: array
       description: A DonorWithClinicalData Field (e.g. Donor, Biomarker, etc)
       items:
+        type: object
         properties:
           primary_diagnoses:
             $ref: '#/components/schemas/DonorWithClinicalDataField'
