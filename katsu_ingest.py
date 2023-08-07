@@ -384,10 +384,9 @@ def main():
         choices=range(1, 4),
         help="Select an option: 1=Run check, 2=Ingest data, 3=Delete a dataset, 4=Ingest DonorWithClinicalData",
     )
-    parser.add_argument("--katsu_trailing_slash", type=bool, dest="katsu_trailing_slash",
-                        help="Set if Katsu uses a trailing slash after its endpoints")
+    parser.add_argument("--katsu_trailing_slash", dest="katsu_trailing_slash",
+                        help="Set if Katsu uses a trailing slash after its endpoints", action='store_true')
     args = parser.parse_args()
-
     if args.katsu_trailing_slash:
         setTrailingSlash(args.katsu_trailing_slash)
 
