@@ -87,6 +87,9 @@ partially ingested. You may need to delete the relevant programs in Katsu."}, 40
         return {"result": "Ingest encountered the following errors: %s" % error_string, "note": "Data may be partially \
 ingested. You may need to delete the relevant programs in Katsu. This was an internal error, so you may want to report \
 this issue to a CanDIG developer."}, 500
-    elif type(response) == IngestUserException:
-        return {"result": "Data error: %s" % response.value}, 400
+    elif isinstance(response, IngestUserException):
+        result = {"result": "Data error: %s" % response.value}
+        if type(response) == IngestValidationException:
+            result["validation_errors"] = response.validation_errors
+        return result, 400
     return "Unknown error", 500

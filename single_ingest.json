@@ -3,9 +3,6 @@
 			{
 				"submitter_donor_id": "DONOR_1",
 				"program_id": "SYNTHETIC-2",
-				"lost_to_followup_after_clinical_event_identifier": "",
-				"lost_to_followup_reason": "Not applicable",
-				"date_alive_after_lost_to_followup": "2022-02",
 				"is_deceased": true,
 				"cause_of_death": "Unknown",
 				"date_of_birth": "1961-07",
@@ -1139,7 +1136,6 @@
 					},
 					{
 						"prior_malignancy": "No",
-						"laterality_of_prior_malignancy": "Unilateral, Side not specified",
 						"comorbidity_type_code": "C02.1",
 						"comorbidity_treatment_status": "Yes",
 						"comorbidity_treatment": "Endoscopic therapy",
@@ -1157,22 +1153,10 @@
 						"pack_years_smoked": 280.0
 					},
 					{
-						"tobacco_smoking_status": "Not applicable",
-						"tobacco_type": [
-							"Chewing Tobacco",
-							"Pipe",
-							"Not applicable"
-						],
-						"pack_years_smoked": 138.0
+						"tobacco_smoking_status": "Not applicable"
 					},
 					{
-						"tobacco_smoking_status": "Not applicable",
-						"tobacco_type": [
-							"Cigar",
-							"Waterpipe",
-							"Electronic cigarettes"
-						],
-						"pack_years_smoked": 141.0
+						"tobacco_smoking_status": "Not applicable"
 					}
 				],
 				"biomarkers": [],
@@ -1181,7 +1165,6 @@
 			{
 				"submitter_donor_id": "DONOR_10",
 				"program_id": "SYNTHETIC-2",
-				"lost_to_followup_after_clinical_event_identifier": "",
 				"lost_to_followup_reason": "Not applicable",
 				"date_alive_after_lost_to_followup": "2022-03",
 				"is_deceased": true,
@@ -1320,8 +1303,8 @@
 			{
 				"submitter_donor_id": "DONOR_2",
 				"program_id": "SYNTHETIC-2",
-				"lost_to_followup_after_clinical_event_identifier": "",
 				"lost_to_followup_reason": "Discharged to palliative care",
+				"lost_to_followup_after_clinical_event_identifier": "",
 				"date_alive_after_lost_to_followup": "2022-10",
 				"is_deceased": false,
 				"cause_of_death": "Died of other reasons",
@@ -1654,6 +1637,7 @@
 							{
 								"submitter_specimen_id": "SPECIMEN_12",
 								"pathological_tumour_staging_system": "FIGO staging system",
+								"clinical_stage_group": "Stage IIS",
 								"pathological_t_category": "Tis pd",
 								"pathological_n_category": "N1b",
 								"pathological_m_category": "M0(i+)",
@@ -1742,7 +1726,6 @@
 				"comorbidities": [
 					{
 						"prior_malignancy": "Unknown",
-						"laterality_of_prior_malignancy": "Left",
 						"comorbidity_type_code": "C04.0",
 						"comorbidity_treatment_status": "Yes",
 						"comorbidity_treatment": "Other targeting molecular therapy",
@@ -1750,7 +1733,6 @@
 					},
 					{
 						"prior_malignancy": "No",
-						"laterality_of_prior_malignancy": "Midline",
 						"comorbidity_type_code": "C34.9",
 						"comorbidity_treatment_status": "Unknown",
 						"comorbidity_treatment": "Endoscopic therapy",
@@ -1789,8 +1771,8 @@
 			{
 				"submitter_donor_id": "DONOR_3",
 				"program_id": "SYNTHETIC-2",
-				"lost_to_followup_after_clinical_event_identifier": "",
 				"lost_to_followup_reason": "Discharged to palliative care",
+				"lost_to_followup_after_clinical_event_identifier": "",
 				"date_alive_after_lost_to_followup": "2022-01",
 				"is_deceased": true,
 				"cause_of_death": "Unknown",
@@ -2038,7 +2020,6 @@
 					},
 					{
 						"prior_malignancy": "No",
-						"laterality_of_prior_malignancy": "Left",
 						"comorbidity_type_code": "C43.9",
 						"comorbidity_treatment_status": "Unknown",
 						"comorbidity_treatment": "Endoscopic therapy",
@@ -2314,7 +2295,6 @@
 				"comorbidities": [
 					{
 						"prior_malignancy": "No",
-						"laterality_of_prior_malignancy": "Unknown",
 						"comorbidity_type_code": "C67.6",
 						"comorbidity_treatment_status": "Unknown",
 						"comorbidity_treatment": "Radiation therapy",
@@ -2322,7 +2302,6 @@
 					},
 					{
 						"prior_malignancy": "No",
-						"laterality_of_prior_malignancy": "Unknown",
 						"comorbidity_type_code": "C02.0",
 						"comorbidity_treatment_status": "No",
 						"comorbidity_treatment": "Photodynamic therapy",
@@ -2336,8 +2315,8 @@
 			{
 				"submitter_donor_id": "DONOR_5",
 				"program_id": "SYNTHETIC-2",
-				"lost_to_followup_after_clinical_event_identifier": "",
 				"lost_to_followup_reason": "Completed study",
+				"lost_to_followup_after_clinical_event_identifier": "",
 				"date_alive_after_lost_to_followup": "2022-02",
 				"is_deceased": true,
 				"cause_of_death": "Died of other reasons",
@@ -2458,7 +2437,6 @@
 				"comorbidities": [
 					{
 						"prior_malignancy": "Unknown",
-						"laterality_of_prior_malignancy": "Midline",
 						"comorbidity_type_code": "C03.9",
 						"comorbidity_treatment_status": "Yes",
 						"comorbidity_treatment": "Bone marrow transplant",
@@ -2605,7 +2583,6 @@
 				"comorbidities": [
 					{
 						"prior_malignancy": "No",
-						"laterality_of_prior_malignancy": "Left",
 						"comorbidity_type_code": "C02.1",
 						"comorbidity_treatment_status": "Unknown",
 						"comorbidity_treatment": "Ablation",
@@ -2746,7 +2723,6 @@
 				"comorbidities": [
 					{
 						"prior_malignancy": "No",
-						"laterality_of_prior_malignancy": "Bilateral",
 						"comorbidity_type_code": "C67.6",
 						"comorbidity_treatment_status": "Unknown",
 						"comorbidity_treatment": "Radiation therapy",
