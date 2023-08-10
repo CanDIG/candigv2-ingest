@@ -100,13 +100,11 @@ def parse_aws_credential(awsfile):
     return {"access": access, "secret": secret}
 
 
-def store_aws_credential(token=None, client=None):
+def store_aws_credential(endpoint, bucket, access, secret, token=None):
     if token is None:
         token = get_site_admin_token()
-    if client is None:
-        return {"error": "No client provided"}, 500
-    print(client)
-    return authx.auth.store_aws_credential(token=token, endpoint=client["endpoint"], bucket=client["bucket"], access=client["access"], secret=client["secret"])
+    return authx.auth.store_aws_credential(token=token, endpoint=endpoint, bucket=bucket,
+                                           access=access, secret=secret)
 
 def is_authed(request: requests.Request):
     if 'Authorization' not in request.headers:

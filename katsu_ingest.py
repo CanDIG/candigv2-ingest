@@ -6,12 +6,9 @@ from collections import OrderedDict
 from http import HTTPStatus
 
 import requests
-from flask import Blueprint, request
 
 import auth
 from ingest_result import IngestPermissionsException, IngestServerException, IngestUserException, IngestResult
-
-ingest_blueprint = Blueprint("ingest_donor", __name__)
 
 KATSU_TRAILING_SLASH = False
 
@@ -369,41 +366,6 @@ def run_check(katsu_server_url, env_str, data_location):
         print(f"ERROR AUTH CHECK: {e}")
         exit()
 
-@ingest_blueprint.route('/ingest_donor', methods=["POST"])
-def ingest_donor_endpoint():
-    if os.environ.get("KATSU_TRAILING_SLASH") == "TRUE":
-        setTrailingSlash(True)
-    katsu_server_url = os.environ.get("CANDIG_URL")
-    dataset = request.json
-    headers = {}
-    if "Authorization" not in request.headers:
-        return {"result": "Bearer token required"}, 401
-    try:
-        # New auth model
-        # refresh_token = request.headers["Authorization"].split("Bearer ")[1]
-        # token = auth.get_bearer_from_refresh(refresh_token)
-        token = request.headers["Authorization"].split("Bearer ")[1]
-        headers["Authorization"] = "Bearer %s" % token
-    except Exception as e:
-        if "Invalid bearer token" in str(e):
-            return {"result": "Bearer token invalid or unauthorized"}, 401
-        return {"result": "Unknown error during authorization"}, 401
-    headers["Content-Type"] = "application/json"
-    response = ingest_donor_with_clinical(katsu_server_url, dataset, headers)
-    if type(response) == IngestResult:
-        return {"result": "Ingested %d donors." % response.value}, 200
-    elif type(response) == IngestPermissionsException:
-        return {"result": "Permissions error: %s" % response.value, "note": "Data may be \
-partially ingested. You may need to delete the relevant programs in Katsu."}, 403
-    elif type(response) == IngestServerException:
-        error_string = ','.join(response.value)
-        return {"result": "Ingest encountered the following errors: %s" % error_string, "note": "Data may be partially \
-ingested. You may need to delete the relevant programs in Katsu. This was an internal error, so you may want to report \
-this issue to a CanDIG developer."}, 500
-    elif type(response) == IngestUserException:
-        return {"result": "Data error: %s" % response.value}, 400
-    return "Unknown error", 500
-
 def main():
     # check if os.environ.get("CANDIG_URL") is set
     if os.environ.get("CANDIG_URL") is None:
@@ -422,10 +384,9 @@ def main():
         choices=range(1, 4),
         help="Select an option: 1=Run check, 2=Ingest data, 3=Delete a dataset, 4=Ingest DonorWithClinicalData",
     )
-    parser.add_argument("--katsu_trailing_slash", type=bool, dest="katsu_trailing_slash",
-                        help="Set if Katsu uses a trailing slash after its endpoints")
+    parser.add_argument("--katsu_trailing_slash", dest="katsu_trailing_slash",
+                        help="Set if Katsu uses a trailing slash after its endpoints", action='store_true')
     args = parser.parse_args()
-
     if args.katsu_trailing_slash:
         setTrailingSlash(args.katsu_trailing_slash)
 
@@ -464,7 +425,7 @@ def main():
             print("Delete cancelled")
             exit()
     elif choice == 4:
-        dataset = read_json(data_location)
+        dataset = read_json(data_location)["donors"]
         headers["Content-Type"] = "application/json"
         print(ingest_donor_with_clinical(katsu_server_url, dataset, headers).value)
     elif choice == 5:
