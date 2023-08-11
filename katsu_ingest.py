@@ -1,14 +1,20 @@
 import argparse
 import json
 import os
+import sys
 import traceback
 from collections import OrderedDict
 from http import HTTPStatus
 
 import requests
+import jsonschema
 
 import auth
-from ingest_result import IngestPermissionsException, IngestServerException, IngestUserException, IngestResult
+from ingest_result import (IngestPermissionsException, IngestServerException, IngestUserException,
+                           IngestResult, IngestValidationException)
+
+sys.path.append('clinical_ETL_code')
+from clinical_ETL_code import validate_coverage
 
 KATSU_TRAILING_SLASH = False
 
@@ -266,7 +272,7 @@ def traverse_clinical_field(fields, field: dict, ctype, parents, types, ingested
         parents.pop(-1)
 
 def ingest_donor_with_clinical(katsu_server_url, dataset, headers):
-    """A single file ingest which loads an MOH donor_with_clinical_data object from JSON.
+    """A single file ingest which validates and loads an MOH donor_with_clinical_data object from JSON.
     JSON format:
     [
         {
@@ -281,6 +287,17 @@ def ingest_donor_with_clinical(katsu_server_url, dataset, headers):
     ]
     (Fully outlined in MOH Schema)
     """
+    print("Validating input")
+    try:
+        result = validate_coverage.validate_coverage(dataset, "katsu_manifest.yml")
+    except jsonschema.exceptions.ValidationError as e:
+        return IngestValidationException("ETL JSONSCHEMA VALIDATION FAILED. Run through clinical ETL validation to "
+                                        "repair these issues.", [str(e)])
+    if len(result) != 0:
+        return IngestValidationException("ETL VALIDATION FAILED. Run through clinical ETL validation to "
+                                        "repair these issues.", [str(line) for line in result])
+    print("Validation success.")
+
     print("Beginning ingest")
 
     types = ["programs",
@@ -427,7 +444,10 @@ def main():
     elif choice == 4:
         dataset = read_json(data_location)["donors"]
         headers["Content-Type"] = "application/json"
-        print(ingest_donor_with_clinical(katsu_server_url, dataset, headers).value)
+        result = ingest_donor_with_clinical(katsu_server_url, dataset, headers)
+        print(result.value)
+        if type(result) == IngestValidationException:
+            [print(error) for error in result.validation_errors]
     elif choice == 5:
         exit()
     else:
