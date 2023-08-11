@@ -14,7 +14,14 @@ This repository can either be run standalone or as a Docker container.
 * Reference genome used for the variant files.
 * Manifest and mappings for clinical_ETL conversion.
 
-## Set environment variables
+## Setup
+Run the following:
+```bash
+pip install -r requirements.txt
+git submodule update --init --recursive
+```
+
+### Set environment variables
 
 * CANDIG_URL (same as TYK_LOGIN_TARGET_URL, if you're using CanDIGv2's example.env)
 * KEYCLOAK_PUBLIC_URL
