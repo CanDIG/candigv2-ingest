@@ -61,7 +61,31 @@ paths:
           content:
             application/json:
               schema:
-                type: object
+                $ref: "#/components/schemas/IngestResponse"
+        422:
+          description: User error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IngestResponse"
+        401:
+          description: Authorization error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IngestResponse"
+        403:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IngestResponse"
+        500:
+          description: Internal error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IngestResponse"
 components:
   parameters:
     ProgramId:
@@ -211,3 +235,15 @@ components:
       type: string
       description: An Authorization BearerToken header
       pattern: Bearer .+
+    IngestResponse:
+      type: object
+      properties:
+        result:
+          type: string
+          example: "Ingested 10 Donors"
+        response_code:
+          type: integer
+          example: 0
+        response_code_readable:
+          type: string
+          example: "Success"
