@@ -51,7 +51,15 @@ paths:
                   type: object
   /ingest/clinical_donors:
     post:
-      description: Add a list of donors with clinical data produced by the clinical ETL.
+      description: |
+        Add a list of donors with clinical data produced by the clinical ETL. \
+        Response codes: \
+        0: Success \
+        1: Unauthorized \
+        2: Validation error (response body will be list of errors) \
+        3: Cohort exists \
+        4: Internal CanDIG error (timeout, problem with Katsu, problem with htsget...) \
+        5: Authorization error (same as previous but specifically for auth - vault, keycloak...)
       operationId: ingest_operations.add_clinical_donors
       requestBody:
         $ref: "#/components/requestBodies/ClinicalDonorRequest"
