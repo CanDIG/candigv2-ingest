@@ -388,6 +388,9 @@ def main():
     katsu_server_url = os.environ.get("CANDIG_URL")
     headers = auth.get_auth_header()
     data_location = os.environ.get("CLINICAL_DATA_LOCATION")
+    if not data_location:
+        print("ERROR: Data location is not assigned. Please set the environment variable CLINICAL_DATA_LOCATION.")
+        exit()
 
     env_str = "env.sh"
 
