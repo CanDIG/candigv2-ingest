@@ -10,7 +10,7 @@ import requests
 import jsonschema
 
 import auth
-from ingest_result import (IngestPermissionsException, IngestServerException, IngestUserException,
+from ingest_result import (IngestPermissionsException, IngestServerException, IngestCohortException,
                            IngestResult, IngestValidationException)
 
 sys.path.append('clinical_ETL_code')
@@ -319,10 +319,7 @@ def ingest_donor_with_clinical(katsu_server_url, dataset, headers):
 
     ingested_datasets = []
     for donor in dataset:
-        try:
-            program_id = donor.pop("program_id")
-        except KeyError:
-            return IngestUserException("Program ID missing from a donor.")
+        program_id = donor.pop("program_id")
         if program_id not in ingested_datasets:
             update_headers(headers)
             if KATSU_TRAILING_SLASH:
@@ -336,7 +333,7 @@ def ingest_donor_with_clinical(katsu_server_url, dataset, headers):
             response = requests.Session().send(request.prepare())
             if response.status_code != HTTPStatus.CREATED:
                     if 'unique' in response.text:
-                        return IngestUserException(f"Program {program_id} has already been ingested into Katsu. "
+                        return IngestCohortException(f"Program {program_id} has already been ingested into Katsu. "
                                                    "Please delete and try again.")
                     else:
                         return IngestServerException([f"\nREQUEST STATUS CODE: {response.status_code}"
@@ -348,7 +345,7 @@ def ingest_donor_with_clinical(katsu_server_url, dataset, headers):
             traverse_clinical_field(fields, donor, "donors", parents, types, [])
         except Exception as e:
             print(traceback.format_exc())
-            return IngestUserException(str(e))
+            return IngestServerException(str(e))
     fields.pop("programs")
     errors = ingest_fields(fields, katsu_server_url, headers)
     if errors:
@@ -391,6 +388,9 @@ def main():
     katsu_server_url = os.environ.get("CANDIG_URL")
     headers = auth.get_auth_header()
     data_location = os.environ.get("CLINICAL_DATA_LOCATION")
+    if not data_location:
+        print("ERROR: Data location is not assigned. Please set the environment variable CLINICAL_DATA_LOCATION.")
+        exit()
 
     env_str = "env.sh"
 

@@ -11,6 +11,26 @@ import config
 
 app = Flask(__name__)
 
+ERROR_CODES = {
+    "SUCCESS": 0,
+    "UNAUTHORIZED": 1,
+    "VALIDATION": 2,
+    "COHORTEXISTS": 3,
+    "INTERNAL": 4,
+    "AUTHORIZATIONERR": 5
+}
+
+def generateResponse(result, response_code):
+    response_mapping = {
+        0: ("Success", 200),
+        1: ("Unauthorized", 403),
+        2: ("Validation error", 422),
+        3: ("Cohort exists", 422),
+        4: ("Internal CanDIG error", 500),
+        5: ("Authorization error", 401)
+    }
+    return {"result": result, "response_code": response_code,
+            "response_message": response_mapping[response_code][0]}, response_mapping[response_code][1]
 
 # API endpoints
 def get_service_info():
@@ -64,32 +84,35 @@ def add_clinical_donors():
     dataset = connexion.request.json["donors"]
     headers = {}
     if "Authorization" not in request.headers:
-        return {"result": "Bearer token required"}, 401
+        return generateResponse("Bearer token required", ERROR_CODES["UNAUTHORIZED"])
     try:
         # New auth model
         # refresh_token = request.headers["Authorization"].split("Bearer ")[1]
         # token = auth.get_bearer_from_refresh(refresh_token)
+        if not request.headers["Authorization"].startswith("Bearer "):
+            return generateResponse("Invalid bearer token", ERROR_CODES["UNAUTHORIZED"])
         token = request.headers["Authorization"].split("Bearer ")[1]
         headers["Authorization"] = "Bearer %s" % token
     except Exception as e:
         if "Invalid bearer token" in str(e):
-            return {"result": "Bearer token invalid or unauthorized"}, 401
-        return {"result": "Unknown error during authorization"}, 401
+            return generateResponse("Bearer token invalid or unauthorized", ERROR_CODES["UNAUTHORIZED"])
+        return generateResponse("Unknown error during authorization", ERROR_CODES["AUTHORIZATIONERR"])
     headers["Content-Type"] = "application/json"
     response = ingest_donor_with_clinical(katsu_server_url, dataset, headers)
     if type(response) == IngestResult:
-        return {"result": "Ingested %d donors." % response.value}, 200
+        return generateResponse("Ingested %d donors." % response.value, ERROR_CODES["SUCCESS"])
     elif type(response) == IngestPermissionsException:
-        return {"result": "Permissions error: %s" % response.value, "note": "Data may be \
-partially ingested. You may need to delete the relevant programs in Katsu."}, 403
+        return generateResponse(f"Permission error: {response.value} Data may be "
+                                "partially ingested. You may need to delete the relevant programs in Katsu.",
+                                ERROR_CODES["UNAUTHORIZED"])
     elif type(response) == IngestServerException:
         error_string = ','.join(response.value)
-        return {"result": "Ingest encountered the following errors: %s" % error_string, "note": "Data may be partially \
-ingested. You may need to delete the relevant programs in Katsu. This was an internal error, so you may want to report \
-this issue to a CanDIG developer."}, 500
-    elif isinstance(response, IngestUserException):
-        result = {"result": "Data error: %s" % response.value}
-        if type(response) == IngestValidationException:
-            result["validation_errors"] = response.validation_errors
-        return result, 400
-    return "Unknown error", 500
+        return generateResponse(f"Ingest encountered the following errors: {error_string} "
+                "Data may be partially ingested. You may need to delete the relevant programs in Katsu. "
+                "This was an internal error, so you may want to report this issue to a CanDIG developer.",
+                                ERROR_CODES["INTERNAL"])
+    elif type(response) == IngestValidationException:
+        return {"result": response.value, "validation_errors": response.validation_errors,
+                "response_code": 2, "response_message": "Validation error"}
+    elif type(response) == IngestCohortException:
+        return generateResponse(response.value, 3)
