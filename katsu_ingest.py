@@ -16,8 +16,6 @@ from ingest_result import (IngestPermissionsException, IngestServerException, In
 sys.path.append('clinical_ETL_code')
 from clinical_ETL_code import validate_coverage
 
-KATSU_TRAILING_SLASH = False
-
 def update_headers(headers):
     """
     For new auth model
@@ -28,10 +26,6 @@ def update_headers(headers):
     headers["Authorization"] = f"Bearer {bearer}"
     """
     pass
-
-def setTrailingSlash(trailing_slash):
-    global KATSU_TRAILING_SLASH
-    KATSU_TRAILING_SLASH = trailing_slash
     
 def read_json(file_path):
     """Read data from either a URL or a local file in JSON format.
@@ -85,10 +79,7 @@ def delete_data(katsu_server_url, data_location):
 
     # Delete datasets for each program ID
     for program_id in program_id_list:
-        if KATSU_TRAILING_SLASH:
-            delete_url = f"{katsu_server_url}/katsu/v2/authorized/programs/{program_id}/"
-        else:
-            delete_url = f"{katsu_server_url}/katsu/v2/authorized/programs/{program_id}"
+        delete_url = f"{katsu_server_url}/katsu/v2/authorized/programs/{program_id}/"
         print(f"Deleting dataset {program_id}...")
 
         try:
@@ -135,10 +126,7 @@ def ingest_data(katsu_server_url, data_location):
     )
     ingest_finished = False
     for api_name, file_name in file_mapping.items():
-        if KATSU_TRAILING_SLASH:
-            ingest_str = f"/katsu/v2/ingest/{api_name}/"
-        else:
-            ingest_str = f"/katsu/v2/ingest/{api_name}"
+        ingest_str = f"/katsu/v2/ingest/{api_name}/"
         ingest_url = katsu_server_url + ingest_str
 
         print(f"Loading {file_name}...")
@@ -176,10 +164,7 @@ def ingest_fields(fields, katsu_server_url, headers):
             name = name_mappings[type]
         else:
             name = type
-        if KATSU_TRAILING_SLASH:
-            ingest_str = f"/katsu/v2/ingest/{name}/"
-        else:
-            ingest_str = f"/katsu/v2/ingest/{name}"
+        ingest_str = f"/katsu/v2/ingest/{name}/"
         ingest_url = katsu_server_url + ingest_str
 
         update_headers(headers)
@@ -322,10 +307,7 @@ def ingest_donor_with_clinical(katsu_server_url, dataset, headers):
         program_id = donor.pop("program_id")
         if program_id not in ingested_datasets:
             update_headers(headers)
-            if KATSU_TRAILING_SLASH:
-                program_endpoint = "/katsu/v2/ingest/programs/"
-            else:
-                program_endpoint = "/katsu/v2/ingest/programs"
+            program_endpoint = "/katsu/v2/ingest/programs/"
             request = requests.Request('POST', katsu_server_url + program_endpoint, headers=headers,
                           data=json.dumps([{"program_id": program_id}]))
             if not auth.is_authed(request):
@@ -401,11 +383,7 @@ def main():
         choices=range(1, 4),
         help="Select an option: 1=Run check, 2=Ingest data, 3=Delete a dataset, 4=Ingest DonorWithClinicalData",
     )
-    parser.add_argument("--katsu_trailing_slash", dest="katsu_trailing_slash",
-                        help="Set if Katsu uses a trailing slash after its endpoints", action='store_true')
     args = parser.parse_args()
-    if args.katsu_trailing_slash:
-        setTrailingSlash(args.katsu_trailing_slash)
 
     if args.choice is not None:
         choice = args.choice

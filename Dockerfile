@@ -34,11 +34,8 @@ RUN pip install -r requirements.txt
 
 COPY . /ingest_app
 
-ARG katsu_trailing_slash=FALSE
-ENV KATSU_TRAILING_SLASH=${katsu_trailing_slash}
-
 RUN chmod +x ./run.sh
-ENTRYPOINT ./run.sh "$KATSU_TRAILING_SLASH"
+ENTRYPOINT ./run.sh
 EXPOSE 1235
 
 
