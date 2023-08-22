@@ -166,7 +166,6 @@ To run, ensure you have docker installed and CanDIGv2 running, then run the foll
 docker build . --build-arg venv_python=3.10 --build-arg alpine_version=3.14 -t ingest_app
 docker run -p 1236:1235 -e CANDIG_URL="$CANDIG_URL" -e KEYCLOAK_PUBLIC_URL="$KEYCLOAK_PUBLIC_URL" -e VAULT_URL="http://candig.docker.internal:8200" -e CANDIG_CLIENT_ID="$CANDIG_CLIENT_ID" -e CANDIG_CLIENT_SECRET="$CANDIG_CLIENT_SECRET" --name candig-ingest-dev --add-host candig.docker.internal:[YOUR LOCAL IP] ingest_app
 ```
-If your Katsu install uses trailing slashes at the end of endpoints (e.g. `/katsu/v2/ingest/programs/`), append `--build-arg katsu_trailing_slash=TRUE` to the `docker build` command above. This is stored in the environment variable KATSU_TRAILING_SLASH so if you are running locally just set that environment variable.
 
 Also, Note that VAULT_URL's host is often set as 0.0.0.0, which the container may not be able to access;
 if so, set it to candig.docker.internal:8200 (or whatever your vault port is).

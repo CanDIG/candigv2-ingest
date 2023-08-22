@@ -5,7 +5,7 @@ import traceback
 
 import auth
 from ingest_result import *
-from katsu_ingest import ingest_donor_with_clinical, setTrailingSlash
+from katsu_ingest import ingest_donor_with_clinical
 from htsget_ingest import htsget_ingest
 import config
 
@@ -58,8 +58,6 @@ def add_moh_variant(program_id):
     return 500
 
 def add_clinical_donors():
-    if os.environ.get("KATSU_TRAILING_SLASH") == "TRUE":
-        setTrailingSlash(True)
     katsu_server_url = os.environ.get("CANDIG_URL")
     dataset = connexion.request.json["donors"]
     headers = {}
