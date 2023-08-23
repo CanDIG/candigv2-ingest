@@ -38,8 +38,12 @@ python settings.py
 source env.sh
 ```
 
-## Authorizing users for the new dataset
+## How to use the ingest
+candigv2-ingest can be used as either a command-line tool, a local API server or a docker container. To ingest from a UI, see the [CanDIG Data Portal](https://github.com/CanDIG/candig-data-portal). To run the command line scripts, set your environment variables and follow the command line instructions in the sections below. To use the local API, set your environment variables, run `python app.py`, and follow the API instructions in the sections below. The API will be available at localhost:1236. A swagger UI is also available at /ui. Docker instructions can be found at the bottom of the README. To authorize yourself for these endpoints, you will need to set the Authorization header to a keycloak bearer token (in the format "Bearer ..." without the quotes).
 
+
+## Authorizing users for the new dataset
+### NOTE: OPA ingest is currently not functional, so these instructions will not work.
 Create a new access.json file:
 
 ```bash
@@ -60,74 +64,10 @@ docker cp access.json candigv2_opa_1:/app/permissions_engine/access.json
 
 Restart the OPA container to take effect
 
-## Ingest genomic files
-
-### Genomic file preparation
-
-Files need to be in vcf or vcf.gz format.
-
-* If .tbi files do not exist, create them.
-
-### Store in S3-compatible system
-
-* Save the S3 credentials to a file in the format of `more ~/.aws/credentials` (please list only one credential in the file; the ingest will only process the first credential it finds.).
-
-```bash
-[default]
-aws_access_key_id = xxxxx
-aws_secret_access_key = xxxxx
-```
-
-<blockquote><details><summary>How do I move files into an S3-type bucket?</summary>
-Ingest files into S3-compatible stores one endpoint/bucket at a time.
-
-```bash
-python s3_ingest.py --sample <sample>|--samplefile <samplefile> --endpoint <S3 endpoint> --bucket <S3 bucket> --awsfile <aws credentials>
-```
-
-</details></blockquote>
-
-## Add S3 credentials to vault
-This can be done through the /add-s3-credential API endpoint. Simply provide the endpoint, bucket name, access key and secret key as the JSON body:
-{
-	"endpoint": "candig.docker.internal:9000",
-	"bucket": "mohccndata",
-	"access_key": "admin",
-	"secret_key": "BsjbFTCQ8TpKVRj9euQEsQ"
-}
-Your bucket will now be usable for htsget ingest.
-
-### Store locally in htsget
-If necessary, genomic samples can be loaded directly from the htsget container's internal storage. Simply `docker cp` the sample files somewhere into the container and prefix your access_method with file:// instead of s3:// (see below).
-
-### Ingest into Htsget
-
-Genomic samples should be specified in a JSON dictionary:
-```json
-{
-	"access_method": "s3://candig.docker.internal:9000/dir",
-	"genomic_id": "HG00096.vcf.gz",
-	"index": "tbi",
-  "samples": [
-    {
-      "sample_name_in_file": "TUMOR",
-      "sample_registration_id": "SAMPLE_REGISTRATION_1"
-    }
-  ]
-}
-```
-“genomic_id” is the filename of the variation file (e.g. HG00096.vcf.gz, HG00096.bam). Access methods can either be of the format s3://[endpoint]/[bucket name] or file://[directory relative to root on htsget container]. sample_registration_id(s) are the (mandatory) links to clinical sample_registrations.
-"index" is the file extension of the index file for the variation; for instance, "tbi" or "crai".
-If an S3 bucket access method is provided, assuming you have properly added the S3 credentials to vault (see above), the service will scan the S3 bucket to ensure the relevant files are present.
-This will not occur for files local/mounted to htsget, so ensure they are present beforehand.
-
-To ingest using an S3 container, once the files have been added, you can run the htsget_ingest.py script:
-```bash
-python htsget_ingest.py --samplefile [JSON-formatted sample data as specified] --dataset <dataset> --reference <reference genome, either hg37 or hg38> --indexing <optional, force re-index>
-```
-
 ## Ingest clinical data
+Note: To upload a DonorWithClinicalData object, you should produce one using the [CanDIG ETL](https://github.com/CanDIG/clinical_ETL_code), then store its result in a JSON file under the key "donors". See single_ingest.json for an example.
 
+### Command line
 Before you can ingest the clinical data, you need to format your data into the json ingest format using the [clinical_ETL](https://github.com/CanDIG/clinical_ETL_data) and put it in the katsu `data` folder, then set the environment variable `CLINICAL_DATA_LOCATION`:
 
 ```bash
@@ -159,6 +99,75 @@ You can also run the script with the `-choice` to skip the menu and go straight 
 python katsu_ingest.py -choice 2
 ```
 
+### API
+The clinical ingest API runs at /ingest/clinical_donors. Simply send a request with an authorized bearer token and a JSON body with your DonorWithClinicalData object. See the swagger UI/schema for the response format.
+
+
+## Ingest genomic files
+
+### Genomic file preparation
+
+Files need to be in vcf or vcf.gz format.
+
+* If .tbi files do not exist, create them.
+
+### Store in S3-compatible system
+
+<blockquote><details><summary>How do I move files into an S3-type bucket?</summary>
+Ingest files into S3-compatible stores one endpoint/bucket at a time.
+
+```bash
+python s3_ingest.py --sample <sample>|--samplefile <samplefile> --endpoint <S3 endpoint> --bucket <S3 bucket> --awsfile <aws credentials>
+```
+
+</details></blockquote>
+
+
+#### Add S3 credentials to vault
+This can be done through the /add-s3-credential API endpoint. Simply provide the endpoint, bucket name, access key and secret key as the JSON body:
+```json
+{
+	"endpoint": "candig.docker.internal:9000",
+	"bucket": "mohccndata",
+	"access_key": "admin",
+	"secret_key": "BsjbFTCQ8TpKVRj9euQEsQ"
+}
+```
+Your bucket will now be usable for htsget ingest.
+
+### Store locally in htsget
+If necessary, genomic samples can be loaded directly from the htsget container's internal storage. Simply `docker cp` the sample files somewhere into the container and prefix your access_method with file:// instead of s3:// (see below).
+
+### Ingest into Htsget
+
+Genomic samples should be specified in a JSON dictionary:
+```json
+{
+	"access_method": "s3://candig.docker.internal:9000/dir",
+	"genomic_id": "HG00096.vcf.gz",
+	"index": "tbi",
+  "samples": [
+    {
+      "sample_name_in_file": "TUMOR",
+      "sample_registration_id": "SAMPLE_REGISTRATION_1"
+    }
+  ]
+}
+```
+“genomic_id” is the filename of the variation file (e.g. HG00096.vcf.gz, HG00096.bam). Access methods can either be of the format s3://[endpoint]/[bucket name] or file://[directory relative to root on htsget container]. sample_registration_id(s) are the (mandatory) links to clinical sample_registrations.
+"index" is the file extension of the index file for the variation; for instance, "tbi" or "crai".
+If an S3 bucket access method is provided, assuming you have properly added the S3 credentials to vault (see above), the service will scan the S3 bucket to ensure the relevant files are present.
+This will not occur for files local/mounted to htsget, so ensure they are present beforehand.
+
+### Command line
+To ingest using an S3 container, once the files have been added, you can run the htsget_ingest.py script:
+```bash
+python htsget_ingest.py --samplefile [JSON-formatted sample data as specified] --dataset <clinical dataset> --reference <reference genome, either hg37 or hg38> --indexing <optional, force re-index>
+```
+
+### API
+Use the /ingest/moh_variants/[program_id] endpoint with the proper Authorization headers and your genomic JSON as specified above for the body to ingest and link to the clinical dataset program_id.
+
 ## Run as Docker Container
 Currently, the containerized version supports two endpoints for ingesting a DonorWithClinicalData object and genomic data.
 To run, ensure you have docker installed and CanDIGv2 running, then run the following commands:
@@ -171,13 +180,7 @@ Also, Note that VAULT_URL's host is often set as 0.0.0.0, which the container ma
 if so, set it to candig.docker.internal:8200 (or whatever your vault port is).
 
 
-This will start a Docker container with a REST API for the ingest at localhost:1235. You can ingest a DonorWithClincalData object by POSTing JSON to localhost:1236/ingest/clinical_donors (an example is given in single_ingest.json).
-
-Genomic data can be ingested at the /ingest/moh_variants/{program ID} endpoint, where program_id is a cohort ID to add the variant to. This takes the same JSON body as specified in the htsget ingest section above.
-
-Make sure you include Authorization headers as well. Both endpoints take refresh tokens, as a header with the key `{"Authorization": "Bearer [refresh token]"}`.
+This will start a Docker container with a REST API for the ingest at localhost:1236. Then follow the same API instructions above.
 
 (Note: on the CanDIGv2 repo, the service runs on port 1235; it is run as 1236 locally in these instructions to ensure there is no
 interference while testing.)
-
-A swagger UI can be accessed at /ingest/ui.
