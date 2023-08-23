@@ -179,3 +179,5 @@ Make sure you include Authorization headers as well. Both endpoints take refresh
 
 (Note: on the CanDIGv2 repo, the service runs on port 1235; it is run as 1236 locally in these instructions to ensure there is no
 interference while testing.)
+
+A swagger UI can be accessed at /ingest/ui.
