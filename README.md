@@ -171,7 +171,7 @@ python htsget_ingest.py --samplefile [JSON-formatted sample data as specified] -
 Use the /ingest/moh_variants/[program_id] endpoint with the proper Authorization headers and your genomic JSON as specified above for the body to ingest and link to the clinical dataset program_id.
 
 ## Run as Docker Container
-Currently, the containerized version supports two endpoints for ingesting a DonorWithClinicalData object and genomic data.
+The containerized version runs the API as specified above within a Docker container (which is how this repository is used in the CanDIGv2 stack).
 To run, ensure you have docker installed and CanDIGv2 running, then run the following commands:
 ```bash
 docker build . --build-arg venv_python=3.10 --build-arg alpine_version=3.14 -t ingest_app
