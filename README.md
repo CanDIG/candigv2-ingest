@@ -105,6 +105,8 @@ The clinical ingest API runs at /ingest/clinical_donors. Simply send a request w
 
 ## Ingest genomic files
 
+**First**, ensure that the relevant clinical data is ingested, as this must be completed before your genomic data is ingested.
+
 ### Genomic file preparation
 
 Files need to be in vcf or vcf.gz format.
