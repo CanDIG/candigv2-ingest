@@ -147,6 +147,7 @@ def ingest_data(katsu_server_url, data_location):
             batched_payloads = [
                 payload[i : i + batch_size] for i in range(0, len(payload), batch_size)
             ]
+            ingest_counter = 0
 
             for payload_batch in batched_payloads:
                 headers = auth.get_auth_header()
@@ -156,7 +157,10 @@ def ingest_data(katsu_server_url, data_location):
                 )
 
                 if response.status_code == HTTPStatus.CREATED:
-                    print(f"INGEST OK 201! \nRETURN MESSAGE: {response.text}\n")
+                    ingest_counter += len(payload_batch)
+                    print(
+                        f"INGESTED {ingest_counter} of {len(payload)} \nRETURN MESSAGE: {response.text}\n"
+                    )
                 elif response.status_code == HTTPStatus.NOT_FOUND:
                     print(
                         f"ERROR 404: {ingest_url} was not found! Please check the URL."
