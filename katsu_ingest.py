@@ -143,12 +143,12 @@ def ingest_data(katsu_server_url, data_location):
         payload = read_json(data_location + file_name)
 
         if payload is not None:
-            # Break the payload into batches
+            ingest_counter = 0
             num_of_items = len(payload)
+            # Break the payload into batches
             batches = [
                 payload[i : i + batch_size] for i in range(0, num_of_items, batch_size)
             ]
-            ingest_counter = 0
 
             for batch in batches:
                 headers = auth.get_auth_header()
