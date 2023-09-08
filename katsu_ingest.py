@@ -144,22 +144,23 @@ def ingest_data(katsu_server_url, data_location):
 
         if payload is not None:
             # Break the payload into batches
-            batched_payloads = [
-                payload[i : i + batch_size] for i in range(0, len(payload), batch_size)
+            num_of_items = len(payload)
+            batches = [
+                payload[i : i + batch_size] for i in range(0, num_of_items, batch_size)
             ]
             ingest_counter = 0
 
-            for payload_batch in batched_payloads:
+            for batch in batches:
                 headers = auth.get_auth_header()
                 headers["Content-Type"] = "application/json"
                 response = requests.post(
-                    ingest_url, headers=headers, data=json.dumps(payload_batch)
+                    ingest_url, headers=headers, data=json.dumps(batch)
                 )
 
                 if response.status_code == HTTPStatus.CREATED:
-                    ingest_counter += len(payload_batch)
+                    ingest_counter += len(batch)
                     print(
-                        f"INGESTED {ingest_counter} of {len(payload)} \nRETURN MESSAGE: {response.text}\n"
+                        f"INGESTED {ingest_counter} of {num_of_items} \nRETURN MESSAGE: {response.text}\n"
                     )
                 elif response.status_code == HTTPStatus.NOT_FOUND:
                     print(
