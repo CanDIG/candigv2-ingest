@@ -172,7 +172,7 @@ components:
       description: a specification for an S3 bucket
       pattern: s3:\/\/(.+)\/(.+)
       example: s3://http://candig.docker.internal:9000/mohccn-data
-    DonorWithClinicalDataField: # "Sanity check" validation, everyting else happens in ETL validation/katsu
+    DonorWithClinicalDataField: # "Sanity check" validation, everything else happens in ETL validation/katsu
       type: array
       description: A DonorWithClinicalData Field (e.g. Donor, Biomarker, etc)
       items:
@@ -186,8 +186,8 @@ components:
             $ref: '#/components/schemas/DonorWithClinicalDataField'
           exposures:
             $ref: '#/components/schemas/DonorWithClinicalDataField'
-          radiation:
-            type: object
+          radiations:
+            $ref: '#/components/schemas/DonorWithClinicalDataField'
           surgeries:
             $ref: '#/components/schemas/DonorWithClinicalDataField'
           followups:
@@ -204,8 +204,6 @@ components:
             $ref: '#/components/schemas/DonorWithClinicalDataField'
           chemotherapies:
             $ref: '#/components/schemas/DonorWithClinicalDataField'
-          surgery:
-            type: object
         additionalProperties:
           oneOf:
             - type: string
