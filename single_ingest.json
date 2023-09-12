@@ -3,7 +3,7 @@
 	"donors": [
 		{
 			"submitter_donor_id": "DONOR_1",
-			"program_id": "TEST_1",
+			"program_id": "SYNTHETIC-2",
 			"is_deceased": true,
 			"cause_of_death": "Died of cancer",
 			"date_of_birth": "1954-01",
@@ -140,7 +140,7 @@
 		},
 		{
 			"submitter_donor_id": "DONOR_2",
-			"program_id": "TEST_1",
+			"program_id": "SYNTHETIC-2",
 			"is_deceased": true,
 			"cause_of_death": "Died of other reasons",
 			"date_of_birth": "1982-02",
@@ -341,7 +341,7 @@
 		},
 		{
 			"submitter_donor_id": "DONOR_3",
-			"program_id": "TEST_1",
+			"program_id": "SYNTHETIC-2",
 			"lost_to_followup_after_clinical_event_identifier": "PD_3",
 			"lost_to_followup_reason": "Lost contact",
 			"date_alive_after_lost_to_followup": "2022-06",
@@ -399,7 +399,7 @@
 		},
 		{
 			"submitter_donor_id": "DONOR_4",
-			"program_id": "TEST_1",
+			"program_id": "SYNTHETIC-2",
 			"is_deceased": true,
 			"cause_of_death": "Unknown",
 			"date_of_birth": "1984-06",
