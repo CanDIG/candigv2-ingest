@@ -409,7 +409,7 @@ def ingest_donor_with_clinical(katsu_server_url, dataset, headers):
         return IngestResult(len(dataset["donors"]))
 
 
-def run_check(katsu_server_url, env_str, data_location):
+def run_check(env_str, data_location):
     """
     Run a series of checks to ensure that the ingest is ready to run.
         - Check if the environment file exists
