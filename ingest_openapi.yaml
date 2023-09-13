@@ -164,6 +164,8 @@ components:
             properties:
               donors:
                 $ref: "#/components/schemas/DonorWithClinicalDataField"
+              statistics:
+                $ref: "#/components/schemas/Statistics"
             required:
               - donors
   schemas:
@@ -172,7 +174,7 @@ components:
       description: a specification for an S3 bucket
       pattern: s3:\/\/(.+)\/(.+)
       example: s3://http://candig.docker.internal:9000/mohccn-data
-    DonorWithClinicalDataField: # "Sanity check" validation, everyting else happens in ETL validation/katsu
+    DonorWithClinicalDataField: # "Sanity check" validation, everything else happens in ETL validation/katsu
       type: array
       description: A DonorWithClinicalData Field (e.g. Donor, Biomarker, etc)
       items:
@@ -186,8 +188,8 @@ components:
             $ref: '#/components/schemas/DonorWithClinicalDataField'
           exposures:
             $ref: '#/components/schemas/DonorWithClinicalDataField'
-          radiation:
-            type: object
+          radiations:
+            $ref: '#/components/schemas/DonorWithClinicalDataField'
           surgeries:
             $ref: '#/components/schemas/DonorWithClinicalDataField'
           followups:
@@ -204,8 +206,6 @@ components:
             $ref: '#/components/schemas/DonorWithClinicalDataField'
           chemotherapies:
             $ref: '#/components/schemas/DonorWithClinicalDataField'
-          surgery:
-            type: object
         additionalProperties:
           oneOf:
             - type: string
@@ -220,6 +220,35 @@ components:
                   - type: number
                   - type: boolean
                   - type: array
+    Statistics:
+      type: object
+      properties:
+        required_but_missing:
+          type: object
+          description: for each schema, a count of required fields that are present vs missing
+        schemas_used:
+          type: array
+          description: a list of schemas used in this dataset
+          items:
+            type: string
+        cases_missing_data:
+          type: array
+          description: a list of cases that have missing data
+          items:
+            type: string
+        schemas_not_used:
+          type: array
+          description: a list of schemas that are never used in this dataset
+        summary_cases:
+          type: object
+          description: overall completeness counts
+          properties:
+            complete_cases:
+              type: integer
+              description: how many cases have complete data
+            total_cases:
+              type: integer
+              description: how many cases are in this dataset
     FileAccess:
       type: string
       description: a file path to a directory on the HTSGet server itself
