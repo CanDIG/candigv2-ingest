@@ -350,9 +350,9 @@ def ingest_donor_with_clinical(katsu_server_url, dataset, headers):
         "treatments",
         "chemotherapies",
         "hormone_therapies",
-        "radiation",
+        "radiations",
         "immunotherapies",
-        "surgery",
+        "surgeries",
         "followups",
         "biomarkers",
         "comorbidities",
@@ -360,37 +360,40 @@ def ingest_donor_with_clinical(katsu_server_url, dataset, headers):
     ]
     fields = {type: [] for type in types}
 
-    ingested_datasets = []
-    for donor in dataset:
-        program_id = donor.pop("program_id")
-        if program_id not in ingested_datasets:
-            update_headers(headers)
-            program_endpoint = "/katsu/v2/ingest/programs/"
-            request = requests.Request(
-                "POST",
-                katsu_server_url + program_endpoint,
-                headers=headers,
-                data=json.dumps([{"program_id": program_id}]),
+    program_id = ""
+    if len(dataset["donors"]) > 0:
+        program_id = dataset["donors"][0].pop("program_id")
+        update_headers(headers)
+        program_endpoint = "/katsu/v2/ingest/programs/"
+        request = requests.Request(
+            "POST",
+            katsu_server_url + program_endpoint,
+            headers=headers,
+            data=json.dumps(
+                [{"program_id": program_id, "metadata": dataset["statistics"]}]
+            ),
+        )
+        if not auth.is_authed(request):
+            return IngestPermissionsException(
+                f"Not authorized to write to {program_id}"
             )
-            if not auth.is_authed(request):
-                return IngestPermissionsException(
-                    f"Not authorized to write to {program_id}"
+        response = requests.Session().send(request.prepare())
+        if response.status_code != HTTPStatus.CREATED:
+            if "unique" in response.text:
+                return IngestCohortException(
+                    f"Program {program_id} has already been ingested into Katsu. "
+                    "Please delete and try again."
                 )
-            response = requests.Session().send(request.prepare())
-            if response.status_code != HTTPStatus.CREATED:
-                if "unique" in response.text:
-                    return IngestCohortException(
-                        f"Program {program_id} has already been ingested into Katsu. "
-                        "Please delete and try again."
-                    )
-                else:
-                    return IngestServerException(
-                        [
-                            f"\nREQUEST STATUS CODE: {response.status_code}"
-                            f"\nRETURN MESSAGE: {response.text}\n"
-                        ]
-                    )
-            ingested_datasets.append(program_id)
+            else:
+                return IngestServerException(
+                    [
+                        f"\nREQUEST STATUS CODE: {response.status_code}"
+                        f"\nRETURN MESSAGE: {response.text}\n"
+                    ]
+                )
+    else:
+        return IngestCohortException(f"No ingestable donors found in dataset.")
+    for donor in dataset["donors"]:
         parents = [("programs", program_id)]
         print(f"Loading donor {donor['submitter_donor_id']}...")
         try:
@@ -403,7 +406,7 @@ def ingest_donor_with_clinical(katsu_server_url, dataset, headers):
     if errors:
         return IngestServerException(errors)
     else:
-        return IngestResult(len(dataset))
+        return IngestResult(len(dataset["donors"]))
 
 
 def run_check(katsu_server_url, env_str, data_location):
