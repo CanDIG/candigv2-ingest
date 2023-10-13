@@ -180,6 +180,24 @@
 									"sample_type": "Total DNA"
 								}
 							]
+						},
+						{
+							"submitter_specimen_id": "SPECIMEN_6",
+							"pathological_tumour_staging_system": "Durie-Salmon staging system",
+							"pathological_stage_group": "Stage IIS",
+							"specimen_collection_date": "2020-12",
+							"specimen_storage": "Frozen in -70 freezer",
+							"specimen_anatomic_location": "C15.9",
+							"specimen_processing": "Formalin fixed & paraffin embedded",
+							"sample_registrations": [
+								{
+									"submitter_sample_id": "SAMPLE_REGISTRATION_4",
+									"specimen_tissue_source": "Cervical mucus",
+									"tumour_normal_designation": "Tumour",
+									"specimen_type": "Recurrent tumour",
+									"sample_type": "Total DNA"
+								}
+							]
 						}
 					],
 					"treatments": [
