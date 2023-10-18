@@ -108,85 +108,6 @@ def delete_data(katsu_server_url, data_location):
             print(f"\nERROR: Failed to delete {program_id}. \nException: {str(e)}\n")
 
 
-def ingest_data(katsu_server_url, data_location):
-    """
-    Send POST requests to the Katsu server to ingest data.
-    Files are divided into batches of 1000 items to reduce timeouts.
-    """
-    file_mapping = OrderedDict(
-        [
-            ("programs", "Program.json"),
-            ("donors", "Donor.json"),
-            ("primary_diagnoses", "PrimaryDiagnosis.json"),
-            ("specimens", "Specimen.json"),
-            ("sample_registrations", "SampleRegistration.json"),
-            ("treatments", "Treatment.json"),
-            ("chemotherapies", "Chemotherapy.json"),
-            ("hormone_therapies", "HormoneTherapy.json"),
-            ("radiations", "Radiation.json"),
-            ("immunotherapies", "Immunotherapy.json"),
-            ("surgeries", "Surgery.json"),
-            ("follow_ups", "FollowUp.json"),
-            ("biomarkers", "Biomarker.json"),
-            ("comorbidities", "Comorbidity.json"),
-            ("exposures", "Exposure.json"),
-        ]
-    )
-    error_encountered = False
-
-    for api_name, file_name in file_mapping.items():
-        ingest_str = f"/katsu/v2/ingest/{api_name}/"
-        ingest_url = katsu_server_url + ingest_str
-        batch_size = 1000  # limit 1000 items per post
-
-        print(f"Loading {file_name}...")
-        payload = read_json(data_location + file_name)
-
-        if payload is not None:
-            ingest_counter = 0
-            num_of_items = len(payload)
-            # Break the payload into batches
-            batches = [
-                payload[i : i + batch_size] for i in range(0, num_of_items, batch_size)
-            ]
-
-            for batch in batches:
-                headers = auth.get_auth_header()
-                headers["Content-Type"] = "application/json"
-                response = requests.post(
-                    ingest_url, headers=headers, data=json.dumps(batch)
-                )
-
-                if response.status_code == HTTPStatus.CREATED:
-                    ingest_counter += len(batch)
-                    print(
-                        f"INGESTED {ingest_counter} of {num_of_items} \nRETURN MESSAGE: {response.text}\n"
-                    )
-                elif response.status_code == HTTPStatus.NOT_FOUND:
-                    print(
-                        f"ERROR 404: {ingest_url} was not found! Please check the URL."
-                    )
-                    error_encountered = True
-                    break
-                else:
-                    print(
-                        f"\nREQUEST STATUS CODE: {response.status_code} \nRETURN MESSAGE: {response.text}\n"
-                    )
-                    error_encountered = True
-                    break
-
-            if error_encountered:
-                break  # Stop processing if an error occurred
-        else:
-            error_encountered = True
-            break
-
-    if not error_encountered:
-        print("All files have been processed.")
-    else:
-        print("Aborting processing due to an error. Please clean up and try again")
-
-
 def ingest_fields(fields, katsu_server_url, headers):
     errors = []
     name_mappings = {
@@ -409,34 +330,6 @@ def ingest_donor_with_clinical(katsu_server_url, dataset, headers):
         return IngestResult(len(dataset["donors"]))
 
 
-def run_check(env_str, data_location):
-    """
-    Run a series of checks to ensure that the ingest is ready to run.
-        - Check if the environment file exists
-        - Check if the environment variable is set
-        - Check header authentication
-    """
-    # Check if environment file exists
-    if os.path.exists(env_str):
-        print("PASS: The environment file exists.")
-    else:
-        print("ERROR ENV CHECK: The environment file does not exist.")
-
-    # Check if environment variable is set
-    if data_location:
-        print("PASS: Data location is set.")
-    else:
-        print("ERROR LOCATION CHECK: data location is not set.")
-
-    # check authorization
-    try:
-        headers = auth.get_auth_header()
-        print("PASS: Auth header is ok.")
-    except Exception as e:
-        print(f"ERROR AUTH CHECK: {e}")
-        exit()
-
-
 def main():
     # check if os.environ.get("CANDIG_URL") is set
     if os.environ.get("CANDIG_URL") is None:
@@ -466,27 +359,12 @@ def main():
         choice = args.choice
     else:
         print("Select an option:")
-        print("1. Run check")
-        print("2. Ingest data")
         print("3. Clean data")
         print("4. Ingest DonorWithClincalData")
         print("5. Exit")
         choice = int(input("Enter your choice [1-5]: "))
 
-    if choice == 1:
-        run_check(
-            katsu_server_url=katsu_server_url,
-            env_str=env_str,
-            data_location=data_location,
-        )
-    elif choice == 2:
-        if not data_location.endswith("/"):
-            data_location += "/"
-        ingest_data(
-            katsu_server_url=katsu_server_url,
-            data_location=data_location,
-        )
-    elif choice == 3:
+    if choice == 3:
         response = input("Are you sure you want to delete? (yes/no): ")
         if response == "yes":
             delete_data(
