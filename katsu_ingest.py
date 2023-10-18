@@ -73,41 +73,6 @@ def read_json(file_path):
             return None
 
 
-def delete_data(katsu_server_url, data_location):
-    """
-    Delete all datasets.
-
-    This function retrieves the list of program IDs from the 'Program.json' file
-    and sends delete requests to delete each program along with all related data.
-    """
-    # Read the program IDs from the 'Program.json' file
-    data = read_json(data_location + "Program.json")
-    program_id_list = [item["program_id"] for item in data]
-
-    # Delete datasets for each program ID
-    for program_id in program_id_list:
-        delete_url = f"{katsu_server_url}/katsu/v2/authorized/programs/{program_id}/"
-        print(f"Deleting dataset {program_id}...")
-
-        try:
-            headers = auth.get_auth_header()
-            headers["Content-Type"] = "application/json"
-            # Send delete request
-            response = requests.delete(delete_url, headers=headers)
-
-            if response.status_code == requests.codes.NO_CONTENT:
-                print(
-                    f"DELETE OK 204! \nProgram {program_id} and all the related data have been deleted.\n"
-                )
-            else:
-                print(
-                    f"\nFAILED TO DELETE {program_id} \nRETURN STATUS CODE: {response.status_code} \nRETURN MESSAGE: {response.text}\n"
-                )
-
-        except requests.RequestException as e:
-            print(f"\nERROR: Failed to delete {program_id}. \nException: {str(e)}\n")
-
-
 def ingest_fields(fields, katsu_server_url, headers):
     errors = []
     name_mappings = {
@@ -346,45 +311,12 @@ def main():
 
     env_str = "env.sh"
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "-choice",
-        type=int,
-        choices=range(1, 4),
-        help="Select an option: 1=Run check, 2=Ingest data, 3=Delete a dataset, 4=Ingest DonorWithClinicalData",
-    )
-    args = parser.parse_args()
-
-    if args.choice is not None:
-        choice = args.choice
-    else:
-        print("Select an option:")
-        print("3. Clean data")
-        print("4. Ingest DonorWithClincalData")
-        print("5. Exit")
-        choice = int(input("Enter your choice [1-5]: "))
-
-    if choice == 3:
-        response = input("Are you sure you want to delete? (yes/no): ")
-        if response == "yes":
-            delete_data(
-                katsu_server_url=katsu_server_url,
-                data_location=data_location,
-            )
-        else:
-            print("Delete cancelled")
-            exit()
-    elif choice == 4:
-        dataset = read_json(data_location)["donors"]
-        headers["Content-Type"] = "application/json"
-        result = ingest_donor_with_clinical(katsu_server_url, dataset, headers)
-        print(result.value)
-        if type(result) == IngestValidationException:
-            [print(error) for error in result.validation_errors]
-    elif choice == 5:
-        exit()
-    else:
-        print("Invalid option. Please try again.")
+    dataset = read_json(data_location)["donors"]
+    headers["Content-Type"] = "application/json"
+    result = ingest_donor_with_clinical(katsu_server_url, dataset, headers)
+    print(result.value)
+    if type(result) == IngestValidationException:
+        [print(error) for error in result.validation_errors]
 
 
 if __name__ == "__main__":
