@@ -288,6 +288,7 @@ def ingest_donor_with_clinical(katsu_server_url, dataset, headers):
             print(traceback.format_exc())
             return IngestServerException(str(e))
     fields.pop("programs")
+    print(json.dumps(fields, indent=4))
     errors = ingest_fields(fields, katsu_server_url, headers)
     if errors:
         return IngestServerException(errors)
