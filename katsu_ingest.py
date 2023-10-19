@@ -210,7 +210,7 @@ def ingest_donor_with_clinical(katsu_server_url, dataset, headers):
     """
     print("Validating input")
     try:
-        result = validate_coverage.validate_coverage(dataset, "katsu_manifest.yml")
+        result = validate_coverage.validate_coverage(dataset, "clinical_ETL_code/sample_inputs/manifest.yml")
     except jsonschema.exceptions.ValidationError as e:
         return IngestValidationException(
             "ETL JSONSCHEMA VALIDATION FAILED. Run through clinical ETL validation to "

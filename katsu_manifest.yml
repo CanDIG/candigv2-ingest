@@ -1,3 +1,0 @@
-description: Katsu packet schema
-identifier: submitter_donor_id
-schema: https://raw.githubusercontent.com/CanDIG/katsu/develop/chord_metadata_service/mohpackets/docs/schema.yml
