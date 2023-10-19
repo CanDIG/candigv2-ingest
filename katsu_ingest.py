@@ -312,7 +312,7 @@ def main():
 
     env_str = "env.sh"
 
-    dataset = read_json(data_location)["donors"]
+    dataset = read_json(data_location)
     headers["Content-Type"] = "application/json"
     result = ingest_donor_with_clinical(katsu_server_url, dataset, headers)
     print(result.value)
