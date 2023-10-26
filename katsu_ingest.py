@@ -330,7 +330,7 @@ def ingest_donor_with_clinical(katsu_server_url, dataset, headers):
     if len(result["errors"]) > 0:
         return IngestValidationException(
             "VALIDATION FAILED with the following issues",
-            [str(line) for line in result],
+            [str(line) for line in result["errors"]],
         )
     print("Validation success.")
 
