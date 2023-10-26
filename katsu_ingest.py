@@ -326,7 +326,7 @@ def ingest_donor_with_clinical(katsu_server_url, dataset, headers):
     result = validate_coverage.validate_coverage(dataset, "katsu_manifest.yml")
     if len(result["warnings"]) > 0:
         print("Validation returned warnings:")
-        print("\n".join(result["validation_warnings"]))
+        print("\n".join(result["warnings"]))
     if len(result["errors"]) > 0:
         return IngestValidationException(
             "VALIDATION FAILED with the following issues",
