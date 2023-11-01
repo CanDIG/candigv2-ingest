@@ -209,18 +209,13 @@ def ingest_donor_with_clinical(katsu_server_url, dataset, headers):
     (Fully outlined in MOH Schema)
     """
     print("Validating input")
-    try:
-        result = validate_coverage.validate_coverage(dataset, "clinical_ETL_code/sample_inputs/manifest.yml")
-    except jsonschema.exceptions.ValidationError as e:
+    result = validate_coverage.validate_coverage(dataset, "clinical_ETL_code/sample_inputs/manifest.yml")
+    if len(result["warnings"]) > 0:
+        print("Validation returned warnings:")
+        print("\n".join(result["validation_warnings"]))
+    if len(result["errors"]) > 0:
         return IngestValidationException(
-            "ETL JSONSCHEMA VALIDATION FAILED. Run through clinical ETL validation to "
-            "repair these issues.",
-            [str(e)],
-        )
-    if len(result) != 0:
-        return IngestValidationException(
-            "ETL VALIDATION FAILED. Run through clinical ETL validation to "
-            "repair these issues.",
+            "VALIDATION FAILED with the following issues",
             [str(line) for line in result],
         )
     print("Validation success.")
