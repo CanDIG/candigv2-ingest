@@ -146,11 +146,13 @@ def traverse_clinical_field(fields, field: dict, ctype, parents, types, ingested
             raise ValueError(
                 f"Missing required foreign key: {id_key} for {ctype} under {parents[-1][1]}"
             )
-        if field_id in ingested_ids:
-            print(f"Skipping {field_id} (Already ingested).")
+        if id_key not in ingested_ids:
+            ingested_ids[id_key] = []
+        if field_id in ingested_ids[id_key]:
+            print(f"Skipping {field_id} in {id_key} (Already ingested).")
             return
         data[id_key] = field_id
-        ingested_ids.append(field_id)
+        ingested_ids[id_key].append(field_id)
 
     attributes = list(field.keys())
     for attribute in attributes:
@@ -278,7 +280,9 @@ def ingest_donor_with_clinical(katsu_server_url, dataset, headers):
         parents = [("programs", program_id)]
         print(f"Loading donor {donor['submitter_donor_id']}...")
         try:
-            traverse_clinical_field(fields, donor, "donors", parents, types, [])
+            ingested_ids = {}
+            traverse_clinical_field(fields, donor, "donors", parents, types, ingested_ids)
+            # print(json.dumps(ingested_ids, indent=2))
         except Exception as e:
             print(traceback.format_exc())
             return IngestServerException(str(e))

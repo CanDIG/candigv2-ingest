@@ -173,7 +173,7 @@
 							"specimen_processing": "Formalin fixed & paraffin embedded",
 							"sample_registrations": [
 								{
-									"submitter_sample_id": "SAMPLE_REGISTRATION_3",
+									"submitter_sample_id": "SPECIMEN_5",
 									"specimen_tissue_source": "Cervical mucus",
 									"tumour_normal_designation": "Normal",
 									"specimen_type": "Recurrent tumour",
