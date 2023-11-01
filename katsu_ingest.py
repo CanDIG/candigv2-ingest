@@ -73,120 +73,6 @@ def read_json(file_path):
             return None
 
 
-def delete_data(katsu_server_url, data_location):
-    """
-    Delete all datasets.
-
-    This function retrieves the list of program IDs from the 'Program.json' file
-    and sends delete requests to delete each program along with all related data.
-    """
-    # Read the program IDs from the 'Program.json' file
-    data = read_json(data_location + "Program.json")
-    program_id_list = [item["program_id"] for item in data]
-
-    # Delete datasets for each program ID
-    for program_id in program_id_list:
-        delete_url = f"{katsu_server_url}/katsu/v2/authorized/programs/{program_id}/"
-        print(f"Deleting dataset {program_id}...")
-
-        try:
-            headers = auth.get_auth_header()
-            headers["Content-Type"] = "application/json"
-            # Send delete request
-            response = requests.delete(delete_url, headers=headers)
-
-            if response.status_code == requests.codes.NO_CONTENT:
-                print(
-                    f"DELETE OK 204! \nProgram {program_id} and all the related data have been deleted.\n"
-                )
-            else:
-                print(
-                    f"\nFAILED TO DELETE {program_id} \nRETURN STATUS CODE: {response.status_code} \nRETURN MESSAGE: {response.text}\n"
-                )
-
-        except requests.RequestException as e:
-            print(f"\nERROR: Failed to delete {program_id}. \nException: {str(e)}\n")
-
-
-def ingest_data(katsu_server_url, data_location):
-    """
-    Send POST requests to the Katsu server to ingest data.
-    Files are divided into batches of 1000 items to reduce timeouts.
-    """
-    file_mapping = OrderedDict(
-        [
-            ("programs", "Program.json"),
-            ("donors", "Donor.json"),
-            ("primary_diagnoses", "PrimaryDiagnosis.json"),
-            ("specimens", "Specimen.json"),
-            ("sample_registrations", "SampleRegistration.json"),
-            ("treatments", "Treatment.json"),
-            ("chemotherapies", "Chemotherapy.json"),
-            ("hormone_therapies", "HormoneTherapy.json"),
-            ("radiations", "Radiation.json"),
-            ("immunotherapies", "Immunotherapy.json"),
-            ("surgeries", "Surgery.json"),
-            ("follow_ups", "FollowUp.json"),
-            ("biomarkers", "Biomarker.json"),
-            ("comorbidities", "Comorbidity.json"),
-            ("exposures", "Exposure.json"),
-        ]
-    )
-    error_encountered = False
-
-    for api_name, file_name in file_mapping.items():
-        ingest_str = f"/katsu/v2/ingest/{api_name}/"
-        ingest_url = katsu_server_url + ingest_str
-        batch_size = 1000  # limit 1000 items per post
-
-        print(f"Loading {file_name}...")
-        payload = read_json(data_location + file_name)
-
-        if payload is not None:
-            ingest_counter = 0
-            num_of_items = len(payload)
-            # Break the payload into batches
-            batches = [
-                payload[i : i + batch_size] for i in range(0, num_of_items, batch_size)
-            ]
-
-            for batch in batches:
-                headers = auth.get_auth_header()
-                headers["Content-Type"] = "application/json"
-                response = requests.post(
-                    ingest_url, headers=headers, data=json.dumps(batch)
-                )
-
-                if response.status_code == HTTPStatus.CREATED:
-                    ingest_counter += len(batch)
-                    print(
-                        f"INGESTED {ingest_counter} of {num_of_items} \nRETURN MESSAGE: {response.text}\n"
-                    )
-                elif response.status_code == HTTPStatus.NOT_FOUND:
-                    print(
-                        f"ERROR 404: {ingest_url} was not found! Please check the URL."
-                    )
-                    error_encountered = True
-                    break
-                else:
-                    print(
-                        f"\nREQUEST STATUS CODE: {response.status_code} \nRETURN MESSAGE: {response.text}\n"
-                    )
-                    error_encountered = True
-                    break
-
-            if error_encountered:
-                break  # Stop processing if an error occurred
-        else:
-            error_encountered = True
-            break
-
-    if not error_encountered:
-        print("All files have been processed.")
-    else:
-        print("Aborting processing due to an error. Please clean up and try again")
-
-
 def ingest_fields(fields, katsu_server_url, headers):
     errors = []
     name_mappings = {
@@ -323,7 +209,7 @@ def ingest_donor_with_clinical(katsu_server_url, dataset, headers):
     (Fully outlined in MOH Schema)
     """
     print("Validating input")
-    result = validate_coverage.validate_coverage(dataset, "katsu_manifest.yml")
+    result = validate_coverage.validate_coverage(dataset, "clinical_ETL_code/sample_inputs/manifest.yml")
     if len(result["warnings"]) > 0:
         print("Validation returned warnings:")
         print("\n".join(result["warnings"]))
@@ -397,39 +283,12 @@ def ingest_donor_with_clinical(katsu_server_url, dataset, headers):
             print(traceback.format_exc())
             return IngestServerException(str(e))
     fields.pop("programs")
+    print(json.dumps(fields, indent=4))
     errors = ingest_fields(fields, katsu_server_url, headers)
     if errors:
         return IngestServerException(errors)
     else:
         return IngestResult(len(dataset["donors"]))
-
-
-def run_check(env_str, data_location):
-    """
-    Run a series of checks to ensure that the ingest is ready to run.
-        - Check if the environment file exists
-        - Check if the environment variable is set
-        - Check header authentication
-    """
-    # Check if environment file exists
-    if os.path.exists(env_str):
-        print("PASS: The environment file exists.")
-    else:
-        print("ERROR ENV CHECK: The environment file does not exist.")
-
-    # Check if environment variable is set
-    if data_location:
-        print("PASS: Data location is set.")
-    else:
-        print("ERROR LOCATION CHECK: data location is not set.")
-
-    # check authorization
-    try:
-        headers = auth.get_auth_header()
-        print("PASS: Auth header is ok.")
-    except Exception as e:
-        print(f"ERROR AUTH CHECK: {e}")
-        exit()
 
 
 def main():
@@ -448,60 +307,12 @@ def main():
 
     env_str = "env.sh"
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "-choice",
-        type=int,
-        choices=range(1, 4),
-        help="Select an option: 1=Run check, 2=Ingest data, 3=Delete a dataset, 4=Ingest DonorWithClinicalData",
-    )
-    args = parser.parse_args()
-
-    if args.choice is not None:
-        choice = args.choice
-    else:
-        print("Select an option:")
-        print("1. Run check")
-        print("2. Ingest data")
-        print("3. Clean data")
-        print("4. Ingest DonorWithClincalData")
-        print("5. Exit")
-        choice = int(input("Enter your choice [1-5]: "))
-
-    if choice == 1:
-        run_check(
-            katsu_server_url=katsu_server_url,
-            env_str=env_str,
-            data_location=data_location,
-        )
-    elif choice == 2:
-        if not data_location.endswith("/"):
-            data_location += "/"
-        ingest_data(
-            katsu_server_url=katsu_server_url,
-            data_location=data_location,
-        )
-    elif choice == 3:
-        response = input("Are you sure you want to delete? (yes/no): ")
-        if response == "yes":
-            delete_data(
-                katsu_server_url=katsu_server_url,
-                data_location=data_location,
-            )
-        else:
-            print("Delete cancelled")
-            exit()
-    elif choice == 4:
-        dataset = read_json(data_location)["donors"]
-        headers["Content-Type"] = "application/json"
-        result = ingest_donor_with_clinical(katsu_server_url, dataset, headers)
-        print(result.value)
-        if type(result) == IngestValidationException:
-            [print(error) for error in result.validation_errors]
-    elif choice == 5:
-        exit()
-    else:
-        print("Invalid option. Please try again.")
+    dataset = read_json(data_location)
+    headers["Content-Type"] = "application/json"
+    result = ingest_donor_with_clinical(katsu_server_url, dataset, headers)
+    print(result.value)
+    if type(result) == IngestValidationException:
+        [print(error) for error in result.validation_errors]
 
 
 if __name__ == "__main__":
