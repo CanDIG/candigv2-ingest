@@ -5,3 +5,4 @@ __pycache__
 access.json
 temp/
 env.sh
+.venv/
