@@ -4,7 +4,7 @@ import auth
 import os
 import re
 import json
-from htsget_methods import post_to_dataset, post_object
+from htsget_methods import post_object
 from ingest_result import IngestPermissionsException, IngestServerException, IngestUserException, IngestResult
 
 
@@ -70,13 +70,6 @@ def htsget_ingest(token, dataset, sample, reference="hg38", indexing=False):
         return object # An error occurred
     response = post_object(token, object, sample["samples"], dataset, ref_genome=reference, force=indexing)
     if (response.status_code > 200):
-        print(response.text)
-        if response.status_code < 500:
-            return IngestUserException(response.text)
-        else:
-            return IngestServerException(response.text)
-    response = post_to_dataset(object["id"], dataset, token)
-    if response.status_code > 300:
         print(response.text)
         if response.status_code < 500:
             return IngestUserException(response.text)

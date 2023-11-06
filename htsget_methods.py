@@ -11,21 +11,6 @@ HTSGET_URL = CANDIG_URL + "/genomics"
 VAULT_URL = CANDIG_URL + "/vault"
 HOSTNAME = HTSGET_URL.replace(f"{urlparse(CANDIG_URL).scheme}://","")
 
-def post_to_dataset(sample_id, dataset, token):
-    headers = {"Authorization": f"Bearer {token}"}
-    drsobject = f"drs://{HOSTNAME}/{sample_id}"
-    obj = {
-        "id": dataset,
-        "drsobjects": [drsobject]
-    }
-    url = f"{HTSGET_URL}/ga4gh/drs/v1/datasets"
-    request = requests.Request(method="POST", url=url, json=obj, headers=headers)
-    if not auth.is_authed(request):
-        return IngestPermissionsException(dataset)
-    response = requests.Session().send(request.prepare())
-    return response
-
-
 def get_dataset_objects(dataset, token):
     headers = {"Authorization": f"Bearer {token}"}
     url = f"{HTSGET_URL}/ga4gh/drs/v1/datasets/{dataset}"
@@ -71,6 +56,8 @@ def post_object(token, genomic_sample, clinical_samples, dataset, ref_genome="hg
         ],
         "id": genomic_sample["id"],
         "name": genomic_sample["id"],
+        "description": "variant",
+        "cohort": dataset,
         "version": "v1"
     }
     response = requests.post(url, json=obj, headers=headers)
@@ -96,6 +83,8 @@ def post_object(token, genomic_sample, clinical_samples, dataset, ref_genome="hg
         ],
         "id": genomic_sample["index"],
         "name": genomic_sample["index"],
+        "description": "index",
+        "cohort": dataset,
         "version": "v1"
     }
 
@@ -108,8 +97,10 @@ def post_object(token, genomic_sample, clinical_samples, dataset, ref_genome="hg
         genomic_contents = {"drs_uri": [f"{HOSTNAME}/{genomic_sample['id']}"],
                             "name": sample['sample_name_in_file'], "id": genomic_sample['id']}
         obj = {
-            "id": f"{dataset}~{sample['sample_registration_id']}",
+            "id": f"{sample['sample_registration_id']}",
             "contents": [genomic_contents],
+            "cohort": dataset,
+            "description": "sample",
             "version": "v1"
         }
 
@@ -142,12 +133,14 @@ def post_object(token, genomic_sample, clinical_samples, dataset, ref_genome="hg
         ],
         "id": genomic_sample['id'],
         "name": genomic_sample['id'],
+        "description": "wgs",
+        "cohort": dataset,
         "version": "v1"
     }
 
     for sample in clinical_samples:
-        clinical_obj = {"drs_uri": [f"{HOSTNAME}/{dataset}~{sample['sample_registration_id']}"],
-                        "name": f"{dataset}~{sample['sample_registration_id']}",
+        clinical_obj = {"drs_uri": [f"{HOSTNAME}/{sample['sample_registration_id']}"],
+                        "name": f"{sample['sample_registration_id']}",
                        "id": sample['sample_name_in_file'] }
         obj["contents"].append(clinical_obj)
 
