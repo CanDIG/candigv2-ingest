@@ -97,20 +97,4 @@ def add_clinical_donors():
         return generateResponse("Unknown error during authorization", ERROR_CODES["AUTHORIZATIONERR"])
     headers["Content-Type"] = "application/json"
     response = ingest_donor_with_clinical(katsu_server_url, dataset, headers)
-    if type(response) == IngestResult:
-        return generateResponse("Ingested %d donors." % response.value, ERROR_CODES["SUCCESS"])
-    elif type(response) == IngestPermissionsException:
-        return generateResponse(f"Permission error: {response.value} Data may be "
-                                "partially ingested. You may need to delete the relevant programs in Katsu.",
-                                ERROR_CODES["UNAUTHORIZED"])
-    elif type(response) == IngestServerException:
-        error_string = ','.join(response.value)
-        return generateResponse(f"Ingest encountered the following errors: {error_string} "
-                "Data may be partially ingested. You may need to delete the relevant programs in Katsu. "
-                "This was an internal error, so you may want to report this issue to a CanDIG developer.",
-                                ERROR_CODES["INTERNAL"])
-    elif type(response) == IngestValidationException:
-        return {"result": response.value, "validation_errors": response.validation_errors,
-                "response_code": 2, "response_message": "Validation error"}
-    elif type(response) == IngestCohortException:
-        return generateResponse(response.value, 3)
+    return response, 200

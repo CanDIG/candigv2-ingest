@@ -120,7 +120,6 @@ def traverse_clinical_field(fields, field: dict, ctype, parents, types, ingested
             ]
         types: A list of possible field types
         id_names: A mapping of field names to what their ID key is (e.g. {"donors": "submitter_donor_id"})
-        errors: A list of strings containing the errors encountered so far
         ingested_ids: A list of IDs that have already been ingested (some fields in DonorWithClinical are duplicates)
     """
 
@@ -210,20 +209,6 @@ def ingest_donor_with_clinical(katsu_server_url, dataset, headers):
     ]
     (Fully outlined in MOH Schema)
     """
-    print("Validating input")
-    result = validate_coverage.validate_coverage(dataset, "clinical_ETL_code/sample_inputs/manifest.yml")
-    if len(result["warnings"]) > 0:
-        print("Validation returned warnings:")
-        print("\n".join(result["warnings"]))
-    if len(result["errors"]) > 0:
-        return IngestValidationException(
-            "VALIDATION FAILED with the following issues",
-            [str(line) for line in result["errors"]],
-        )
-    print("Validation success.")
-
-    print("Beginning ingest")
-
     types = [
         "programs",
         "donors",
@@ -241,11 +226,45 @@ def ingest_donor_with_clinical(katsu_server_url, dataset, headers):
         "comorbidities",
         "exposures",
     ]
-    fields = {type: [] for type in types}
 
-    program_id = ""
-    if len(dataset["donors"]) > 0:
-        program_id = dataset["donors"][0].pop("program_id")
+    # split ingest by program_id:
+    donors_by_program = {}
+    for donor in dataset["donors"]:
+        if "program_id" not in donor:
+            pass
+        if donor["program_id"] not in donors_by_program:
+            donors_by_program[donor["program_id"]] = {
+                "donors": [],
+                "errors": []
+            }
+        donors_by_program[donor["program_id"]]["donors"].append(donor)
+
+    for program_id in donors_by_program.keys():
+        donors = donors_by_program[program_id].pop("donors")
+        errors = donors_by_program[program_id]["errors"]
+        print(f"Validating input for program {program_id}")
+        result = validate_coverage.validate_coverage(
+            {
+                "donors": donors,
+                "openapi_url": dataset["openapi_url"]
+            },
+            "clinical_ETL_code/sample_inputs/manifest.yml"
+        )
+        if "message" in result:
+            errors.append(result["message"])
+        if len(result["warnings"]) > 0:
+            print("Validation returned warnings:")
+            print("\n".join(result["warnings"]))
+        if len(result["errors"]) > 0:
+            errors.append(
+                "VALIDATION FAILED with the following issues",
+                [str(line) for line in result["errors"]],
+            )
+            continue
+        print("Validation success.")
+
+        print("Beginning ingest")
+
         update_headers(headers)
         program_endpoint = "/katsu/v2/ingest/programs/"
         request = requests.Request(
@@ -253,7 +272,7 @@ def ingest_donor_with_clinical(katsu_server_url, dataset, headers):
             katsu_server_url + program_endpoint,
             headers=headers,
             data=json.dumps(
-                [{"program_id": program_id, "metadata": dataset["statistics"]}]
+                [{"program_id": program_id, "metadata": result["statistics"]}]
             ),
         )
         if not auth.is_authed(request):
@@ -263,37 +282,38 @@ def ingest_donor_with_clinical(katsu_server_url, dataset, headers):
         response = requests.Session().send(request.prepare())
         if response.status_code != HTTPStatus.CREATED:
             if "unique" in response.text:
-                return IngestCohortException(
-                    f"Program {program_id} has already been ingested into Katsu. "
-                    "Please delete and try again."
+                errors.append(
+                    f"Program {program_id} has already been ingested into Katsu. Please delete and try again."
                 )
             else:
-                return IngestServerException(
+                errors.append(
                     [
                         f"\nREQUEST STATUS CODE: {response.status_code}"
                         f"\nRETURN MESSAGE: {response.text}\n"
                     ]
                 )
-    else:
-        return IngestCohortException(f"No ingestable donors found in dataset.")
-    for donor in dataset["donors"]:
-        parents = [("programs", program_id)]
-        print(f"Loading donor {donor['submitter_donor_id']}...")
-        try:
-            ingested_ids = {}
-            traverse_clinical_field(fields, donor, "donors", parents, types, ingested_ids)
-            # print(json.dumps(ingested_ids, indent=2))
-        except Exception as e:
-            print(traceback.format_exc())
-            return IngestServerException(str(e))
-    fields.pop("programs")
-    print(json.dumps(fields, indent=4))
-    errors = ingest_fields(fields, katsu_server_url, headers)
-    if errors:
-        return IngestServerException(errors)
-    else:
-        return IngestResult(len(dataset["donors"]))
+            continue
+        fields = {type: [] for type in types}
 
+        for donor in donors:
+            parents = [("programs", program_id)]
+            print(f"Loading donor {donor['submitter_donor_id']}...")
+            try:
+                ingested_ids = {}
+                traverse_clinical_field(fields, donor, "donors", parents, types, ingested_ids)
+                # print(json.dumps(ingested_ids, indent=2))
+            except Exception as e:
+                print(traceback.format_exc())
+                errors.append(str(e))
+        fields.pop("programs")
+        print(json.dumps(fields, indent=4))
+        error_result = ingest_fields(fields, katsu_server_url, headers)
+        if len(error_result) > 0:
+            errors.append(error_result)
+        else:
+            donors_by_program[program_id]["result"] = f"Ingested {len(donors)} donors"
+
+    return donors_by_program
 
 def main():
     # check if os.environ.get("CANDIG_URL") is set
@@ -314,9 +334,7 @@ def main():
     dataset = read_json(data_location)
     headers["Content-Type"] = "application/json"
     result = ingest_donor_with_clinical(katsu_server_url, dataset, headers)
-    print(result.value)
-    if type(result) == IngestValidationException:
-        [print(error) for error in result.validation_errors]
+    print(json.dumps(result))
 
 
 if __name__ == "__main__":
