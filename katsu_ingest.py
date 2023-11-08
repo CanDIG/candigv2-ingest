@@ -1,22 +1,13 @@
-import argparse
 import json
 import os
 import sys
 import traceback
-from collections import OrderedDict
 from http import HTTPStatus
 
-import jsonschema
 import requests
 
 import auth
-from ingest_result import (
-    IngestCohortException,
-    IngestPermissionsException,
-    IngestResult,
-    IngestServerException,
-    IngestValidationException,
-)
+from ingest_result import IngestPermissionsException
 
 sys.path.append("clinical_ETL_code")
 from clinical_ETL_code import validate_coverage
@@ -328,8 +319,6 @@ def main():
             "ERROR: Data location is not assigned. Please set the environment variable CLINICAL_DATA_LOCATION."
         )
         exit()
-
-    env_str = "env.sh"
 
     dataset = read_json(data_location)
     headers["Content-Type"] = "application/json"
