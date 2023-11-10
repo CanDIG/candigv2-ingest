@@ -66,8 +66,11 @@ def read_json(file_path):
             return None
 
 
-    errors = []
 def ingest_flattened(fields, headers):
+    result = {
+        "errors": [],
+        "results": []
+    }
     name_mappings = {
         "radiation": "radiations",
         "surgery": "surgeries",
@@ -90,13 +93,11 @@ def ingest_flattened(fields, headers):
             print(f"INGEST OK 201! \nRETURN MESSAGE: {response.text}\n")
         elif response.status_code == HTTPStatus.NOT_FOUND:
             message = f"ERROR 404: {ingest_url} was not found! Please check the URL."
-            print(message)
-            errors.append(response.text)
+            result["errors"].append(response.text)
         else:
             message = f"\nREQUEST STATUS CODE: {response.status_code} \nRETURN MESSAGE: {response.text}\n"
-            print(message)
-            errors.append(response.text)
-    return errors
+            result["errors"].append(response.text)
+    return result
 
 
 def traverse_clinical_field(fields, field: dict, ctype, parents, types, ingested_ids):
