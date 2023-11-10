@@ -101,7 +101,7 @@ def ingest_flattened(fields, headers):
 
 def traverse_clinical_field(fields, field: dict, ctype, parents, types, ingested_ids):
     """
-    Helper function for ingest_donor_with_clinical. Parses and ingests clinical fields from a DonorWithClinicalData
+    Helper function for ingest_clinical_data. Parses and ingests clinical fields from a DonorWithClinicalData
     object.
     Args:
         field: The (sub)field of a DonorWithClinicalData object, potentially nested
@@ -151,9 +151,7 @@ def traverse_clinical_field(fields, field: dict, ctype, parents, types, ingested
         if attribute not in types:
             data[attribute] = field.pop(attribute)
 
-    if (
-        len(parents) >= 2
-    ):  # Program & donor have been added (must be the first 2 fields)
+    if len(parents) >= 2:  # Program & donor have been added (must be the first 2 fields)
         foreign_keys = [parents[0], parents[1]]
         if len(parents) > 2:
             foreign_keys.append(parents[-1])
