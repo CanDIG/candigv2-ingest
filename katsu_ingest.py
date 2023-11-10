@@ -321,12 +321,14 @@ def main():
 
     data_location = os.environ.get("CLINICAL_DATA_LOCATION")
     if not data_location:
-    dataset = read_json(data_location)
         data_location = args.input
         if not data_location:
             print("ERROR: Could not find input data. Either --input is required or CLINICAL_DATA_LOCATION must be set.")
             exit()
 
+    ingest_json = read_json(data_location)
+    if "openapi_url" not in ingest_json:
+        ingest_json["openapi_url"] = "https://raw.githubusercontent.com/CanDIG/katsu/develop/chord_metadata_service/mohpackets/docs/schema.yml"
     headers["Content-Type"] = "application/json"
     result = ingest_clinical_data(ingest_json, headers)
     print(json.dumps(result, indent=2))
