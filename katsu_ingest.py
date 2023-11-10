@@ -11,7 +11,7 @@ import auth
 from ingest_result import IngestPermissionsException
 
 sys.path.append("clinical_ETL_code")
-from clinical_ETL_code import validate_coverage
+from clinical_ETL_code.mohschema import MoHSchema
 
 CANDIG_URL = os.environ.get("CANDIG_URL")
 
@@ -202,27 +202,13 @@ def ingest_clinical_data(ingest_json, headers):
     ]
     (Fully outlined in MOH Schema)
     """
-    types = [
-        "programs",
-        "donors",
-        "primary_diagnoses",
-        "specimens",
-        "sample_registrations",
-        "treatments",
-        "chemotherapies",
-        "hormone_therapies",
-        "radiations",
-        "immunotherapies",
-        "surgeries",
-        "followups",
-        "biomarkers",
-        "comorbidities",
-        "exposures",
-    ]
+    schema = MoHSchema(ingest_json["openapi_url"])
+    types = ["programs"]
+    types.extend(schema.validation_schema.keys())
 
     # split ingest by program_id:
     donors_by_program = {}
-    for donor in dataset["donors"]:
+    for donor in ingest_json["donors"]:
         if "program_id" not in donor:
             pass
         if donor["program_id"] not in donors_by_program:
@@ -236,22 +222,15 @@ def ingest_clinical_data(ingest_json, headers):
         donors = donors_by_program[program_id].pop("donors")
         errors = donors_by_program[program_id]["errors"]
         print(f"Validating input for program {program_id}")
-        result = validate_coverage.validate_coverage(
-            {
-                "donors": donors,
-                "openapi_url": dataset["openapi_url"]
-            },
-            "clinical_ETL_code/sample_inputs/manifest.yml"
-        )
-        if "message" in result:
-            errors.append(result["message"])
-        if len(result["warnings"]) > 0:
+        schema.validate_ingest_map(donors_by_program[program_id])
+
+        if len(schema.validation_warnings) > 0:
             print("Validation returned warnings:")
-            print("\n".join(result["warnings"]))
-        if len(result["errors"]) > 0:
+            print("\n".join(schema.validation_warnings))
+        if len(schema.validation_errors) > 0:
             errors.append(
                 "VALIDATION FAILED with the following issues",
-                [str(line) for line in result["errors"]],
+                [str(line) for line in schema.validation_errors],
             )
             continue
         print("Validation success.")
@@ -265,7 +244,7 @@ def ingest_clinical_data(ingest_json, headers):
             CANDIG_URL + program_endpoint,
             headers=headers,
             data=json.dumps(
-                [{"program_id": program_id, "metadata": result["statistics"]}]
+                [{"program_id": program_id, "metadata": schema.statistics}]
             ),
         )
         if not auth.is_authed(request):
