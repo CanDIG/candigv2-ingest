@@ -1,0 +1,3 @@
+[submodule "clinical_ETL_code"]
+	path = clinical_ETL_code
+	url = https://github.com/CanDIG/clinical_ETL_code.git

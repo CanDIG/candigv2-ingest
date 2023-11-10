@@ -7,5 +7,7 @@ candigv2-authx@git+https://github.com/CanDIG/candigv2-authx.git@main
 awscli==1.29.5
 python-dotenv==0.14.0
 Flask==2.2.2
-connexion==2.14.1
+connexion[swagger-ui]==2.14.1
 uwsgi==2.0.21
+dateparser~=1.1.0
+pandas~=1.3.4

@@ -17,13 +17,18 @@ def get_auth_header():
 
 def get_site_admin_token():
     '''
-    Returns a Keycoak bearer token for the site admin.
+    Returns a Keycloak bearer token for the site admin.
     '''
     # New auth model: return refresh. Current: return bearer
+    secret_file = os.getenv('CANDIG_SECRET_FILE')
+    secret = os.getenv('CANDIG_CLIENT_SECRET')
+    if secret_file is not None:
+        with open(secret_file, "r") as f:
+            secret = f.read().strip()
     return authx.auth.get_access_token(
     keycloak_url=os.getenv('KEYCLOAK_PUBLIC_URL'),
     client_id=os.getenv('CANDIG_CLIENT_ID'),
-    client_secret=os.getenv('CANDIG_CLIENT_SECRET'),
+    client_secret=secret,
     username=os.getenv('CANDIG_SITE_ADMIN_USER'),
     password=os.getenv('CANDIG_SITE_ADMIN_PASSWORD')
     )
@@ -100,13 +105,11 @@ def parse_aws_credential(awsfile):
     return {"access": access, "secret": secret}
 
 
-def store_aws_credential(token=None, client=None):
+def store_aws_credential(endpoint, bucket, access, secret, token=None):
     if token is None:
         token = get_site_admin_token()
-    if client is None:
-        return {"error": "No client provided"}, 500
-    print(client)
-    return authx.auth.store_aws_credential(token=token, endpoint=client["endpoint"], bucket=client["bucket"], access=client["access"], secret=client["secret"])
+    return authx.auth.store_aws_credential(token=token, endpoint=endpoint, bucket=bucket,
+                                           access=access, secret=secret)
 
 def is_authed(request: requests.Request):
     if 'Authorization' not in request.headers:
