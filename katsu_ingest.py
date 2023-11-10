@@ -2,6 +2,7 @@ import json
 import os
 import sys
 import traceback
+import argparse
 from http import HTTPStatus
 
 import requests
@@ -313,14 +314,19 @@ def main():
         print("ERROR: $CANDIG_URL is not set. Did you forget to run 'source env.sh'?")
         exit()
     headers = auth.get_auth_header()
+
+    parser = argparse.ArgumentParser(description="A script that ingests clinical data into Katsu")
+    parser.add_argument("--input", help="A file specifying the data to ingest")
+    args = parser.parse_args()
+
     data_location = os.environ.get("CLINICAL_DATA_LOCATION")
     if not data_location:
-        print(
-            "ERROR: Data location is not assigned. Please set the environment variable CLINICAL_DATA_LOCATION."
-        )
-        exit()
-
     dataset = read_json(data_location)
+        data_location = args.input
+        if not data_location:
+            print("ERROR: Could not find input data. Either --input is required or CLINICAL_DATA_LOCATION must be set.")
+            exit()
+
     headers["Content-Type"] = "application/json"
     result = ingest_clinical_data(ingest_json, headers)
     print(json.dumps(result, indent=2))
