@@ -90,7 +90,7 @@ def ingest_flattened(fields, headers):
         )
 
         if response.status_code == HTTPStatus.CREATED:
-            print(f"INGEST OK 201! \nRETURN MESSAGE: {response.text}\n")
+            result["results"].append(f"Of {len(fields[type])} {type}, {response.json()['result']} were created")
         elif response.status_code == HTTPStatus.NOT_FOUND:
             message = f"ERROR 404: {ingest_url} was not found! Please check the URL."
             result["errors"].append(response.text)
