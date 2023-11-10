@@ -8,10 +8,6 @@ from htsget_methods import post_object
 from ingest_result import IngestPermissionsException, IngestServerException, IngestUserException, IngestResult
 
 
-from flask import Blueprint
-
-ingest_blueprint = Blueprint("ingest_genomic", __name__)
-
 def create_s3_sample(genomic_id: str, index: str, client):
     # If genomic_files is provided, it means the filenames do not correspond to the genomic_id names in the bucket
     # And have been provided manually.
