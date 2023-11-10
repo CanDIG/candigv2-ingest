@@ -12,6 +12,7 @@ from ingest_result import IngestPermissionsException
 sys.path.append("clinical_ETL_code")
 from clinical_ETL_code import validate_coverage
 
+CANDIG_URL = os.environ.get("CANDIG_URL")
 
 def update_headers(headers):
     """
@@ -64,8 +65,8 @@ def read_json(file_path):
             return None
 
 
-def ingest_fields(fields, katsu_server_url, headers):
     errors = []
+def ingest_flattened(fields, headers):
     name_mappings = {
         "radiation": "radiations",
         "surgery": "surgeries",
@@ -77,7 +78,7 @@ def ingest_fields(fields, katsu_server_url, headers):
         else:
             name = type
         ingest_str = f"/katsu/v2/ingest/{name}/"
-        ingest_url = katsu_server_url + ingest_str
+        ingest_url = CANDIG_URL + ingest_str
 
         update_headers(headers)
         response = requests.post(
@@ -184,7 +185,7 @@ def traverse_clinical_field(fields, field: dict, ctype, parents, types, ingested
         parents.pop(-1)
 
 
-def ingest_donor_with_clinical(katsu_server_url, dataset, headers):
+def ingest_clinical_data(ingest_json, headers):
     """A single file ingest which validates and loads an MOH donor_with_clinical_data object from JSON.
     JSON format:
     [
@@ -260,7 +261,7 @@ def ingest_donor_with_clinical(katsu_server_url, dataset, headers):
         program_endpoint = "/katsu/v2/ingest/programs/"
         request = requests.Request(
             "POST",
-            katsu_server_url + program_endpoint,
+            CANDIG_URL + program_endpoint,
             headers=headers,
             data=json.dumps(
                 [{"program_id": program_id, "metadata": result["statistics"]}]
@@ -298,20 +299,19 @@ def ingest_donor_with_clinical(katsu_server_url, dataset, headers):
                 errors.append(str(e))
         fields.pop("programs")
         print(json.dumps(fields, indent=4))
-        error_result = ingest_fields(fields, katsu_server_url, headers)
         if len(error_result) > 0:
             errors.append(error_result)
         else:
             donors_by_program[program_id]["result"] = f"Ingested {len(donors)} donors"
+    ingest_results = ingest_flattened(fields, headers)
 
     return donors_by_program
 
 def main():
     # check if os.environ.get("CANDIG_URL") is set
-    if os.environ.get("CANDIG_URL") is None:
-        print("ERROR: ENV is not set. Did you forget to run 'source env.sh'?")
+    if CANDIG_URL is None:
+        print("ERROR: $CANDIG_URL is not set. Did you forget to run 'source env.sh'?")
         exit()
-    katsu_server_url = os.environ.get("CANDIG_URL")
     headers = auth.get_auth_header()
     data_location = os.environ.get("CLINICAL_DATA_LOCATION")
     if not data_location:
@@ -322,8 +322,8 @@ def main():
 
     dataset = read_json(data_location)
     headers["Content-Type"] = "application/json"
-    result = ingest_donor_with_clinical(katsu_server_url, dataset, headers)
-    print(json.dumps(result))
+    result = ingest_clinical_data(ingest_json, headers)
+    print(json.dumps(result, indent=2))
 
 
 if __name__ == "__main__":

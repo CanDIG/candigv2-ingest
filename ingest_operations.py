@@ -78,7 +78,6 @@ def add_moh_variant(program_id):
     return 500
 
 def add_clinical_donors():
-    katsu_server_url = os.environ.get("CANDIG_URL")
     dataset = connexion.request.json
     headers = {}
     if "Authorization" not in request.headers:
@@ -96,5 +95,5 @@ def add_clinical_donors():
             return generateResponse("Bearer token invalid or unauthorized", ERROR_CODES["UNAUTHORIZED"])
         return generateResponse("Unknown error during authorization", ERROR_CODES["AUTHORIZATIONERR"])
     headers["Content-Type"] = "application/json"
-    response = ingest_donor_with_clinical(katsu_server_url, dataset, headers)
+    response = ingest_donor_with_clinical(dataset, headers)
     return response, 200
