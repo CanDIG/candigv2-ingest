@@ -218,9 +218,9 @@ def ingest_clinical_data(ingest_json, headers):
             }
         donors_by_program[donor["program_id"]]["donors"].append(donor)
 
+    result = {}
     for program_id in donors_by_program.keys():
-        donors = donors_by_program[program_id].pop("donors")
-        errors = donors_by_program[program_id]["errors"]
+        errors = []
         print(f"Validating input for program {program_id}")
         schema.validate_ingest_map(donors_by_program[program_id])
 
@@ -236,6 +236,7 @@ def ingest_clinical_data(ingest_json, headers):
         print("Validation success.")
 
         print("Beginning ingest")
+        donors = donors_by_program[program_id].pop("donors")
 
         update_headers(headers)
         program_endpoint = "/katsu/v2/ingest/programs/"
@@ -264,28 +265,38 @@ def ingest_clinical_data(ingest_json, headers):
                         f"\nRETURN MESSAGE: {response.text}\n"
                     ]
                 )
-            continue
-        fields = {type: [] for type in types}
-
-        for donor in donors:
-            parents = [("programs", program_id)]
-            print(f"Loading donor {donor['submitter_donor_id']}...")
-            try:
-                ingested_ids = {}
-                traverse_clinical_field(fields, donor, "donors", parents, types, ingested_ids)
-                # print(json.dumps(ingested_ids, indent=2))
-            except Exception as e:
-                print(traceback.format_exc())
-                errors.append(str(e))
-        fields.pop("programs")
-        print(json.dumps(fields, indent=4))
-        if len(error_result) > 0:
-            errors.append(error_result)
+        if len(errors) > 0:
+            result[program_id] = {"errors": errors}
         else:
-            donors_by_program[program_id]["result"] = f"Ingested {len(donors)} donors"
-    ingest_results = ingest_flattened(fields, headers)
+            result[program_id] = ingest_donors_for_program(donors, program_id, types, headers)
+    return result
 
-    return donors_by_program
+
+def ingest_donors_for_program(donors, program_id, types, headers):
+    errors = []
+    result = ""
+    fields = {type: [] for type in types}
+    print(fields)
+    for donor in donors:
+        parents = [("programs", program_id)]
+        print(f"Loading donor {donor['submitter_donor_id']}...")
+        try:
+            ingested_ids = {}
+            traverse_clinical_field(fields, donor, "donors", parents, types, ingested_ids)
+            # print(json.dumps(ingested_ids, indent=2))
+        except Exception as e:
+            print(traceback.format_exc())
+            errors.append(str(e))
+    fields.pop("programs")
+    # print(json.dumps(fields, indent=4))
+    ingest_results = ingest_flattened(fields, headers)
+    errors.extend(ingest_results["errors"])
+
+    if len(errors) > 0:
+        return {"errors": errors}
+    else:
+        return {"result": ingest_results["results"]}
+
 
 def main():
     # check if os.environ.get("CANDIG_URL") is set
