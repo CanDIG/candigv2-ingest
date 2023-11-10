@@ -66,14 +66,12 @@ def read_json(file_path):
             return None
 
 
-def ingest_flattened(fields, headers):
+def ingest_schemas(fields, headers):
     result = {
         "errors": [],
         "results": []
     }
     name_mappings = {
-        "radiation": "radiations",
-        "surgery": "surgeries",
         "followups": "follow_ups",
     }
     for type in fields:
@@ -93,10 +91,12 @@ def ingest_flattened(fields, headers):
             result["results"].append(f"Of {len(fields[type])} {type}, {response.json()['result']} were created")
         elif response.status_code == HTTPStatus.NOT_FOUND:
             message = f"ERROR 404: {ingest_url} was not found! Please check the URL."
-            result["errors"].append(response.text)
+            result["errors"].append(f"{type}: message")
         else:
             message = f"\nREQUEST STATUS CODE: {response.status_code} \nRETURN MESSAGE: {response.text}\n"
-            result["errors"].append(response.text)
+            result["errors"].append(f"{type}: {response.status_code} {response.json()['error']}")
+            if type == "programs" and "unique" in response.text:
+                return result
     return result
 
 
@@ -185,7 +185,7 @@ def traverse_clinical_field(fields, field: dict, ctype, parents, types, ingested
         parents.pop(-1)
 
 
-def ingest_clinical_data(ingest_json, headers):
+def prepare_clinical_data_for_ingest(ingest_json):
     """A single file ingest which validates and loads an MOH donor_with_clinical_data object from JSON.
     JSON format:
     [
@@ -206,23 +206,21 @@ def ingest_clinical_data(ingest_json, headers):
     types.extend(schema.validation_schema.keys())
 
     # split ingest by program_id:
-    donors_by_program = {}
+    by_program = {}
     for donor in ingest_json["donors"]:
         if "program_id" not in donor:
             pass
-        if donor["program_id"] not in donors_by_program:
-            donors_by_program[donor["program_id"]] = {
+        if donor["program_id"] not in by_program:
+            by_program[donor["program_id"]] = {
                 "donors": [],
                 "errors": []
             }
-        donors_by_program[donor["program_id"]]["donors"].append(donor)
+        by_program[donor["program_id"]]["donors"].append(donor)
 
-    result = {}
-    for program_id in donors_by_program.keys():
-        errors = []
+    for program_id in by_program.keys():
+        errors = by_program[program_id]["errors"]
         print(f"Validating input for program {program_id}")
-        schema.validate_ingest_map(donors_by_program[program_id])
-
+        schema.validate_ingest_map(by_program[program_id])
         if len(schema.validation_warnings) > 0:
             print("Validation returned warnings:")
             print("\n".join(schema.validation_warnings))
@@ -235,63 +233,38 @@ def ingest_clinical_data(ingest_json, headers):
         print("Validation success.")
 
         print("Beginning ingest")
-        donors = donors_by_program[program_id].pop("donors")
+        donors = by_program[program_id].pop("donors")
+        fields = {type: [] for type in types}
+        for donor in donors:
+            parents = [("programs", program_id)]
+            print(f"Loading donor {donor['submitter_donor_id']}...")
+            try:
+                ingested_ids = {}
+                traverse_clinical_field(fields, donor, "donors", parents, types, ingested_ids)
+            except Exception as e:
+                print(traceback.format_exc())
+                errors.append(str(e))
+        by_program[program_id]["schemas"] = fields
+        by_program[program_id]["schemas"]["programs"] = [
+            {
+                "program_id": program_id,
+                "metadata": schema.statistics
+            }
+        ]
+    return by_program
 
-        update_headers(headers)
-        program_endpoint = "/katsu/v2/ingest/programs/"
-        request = requests.Request(
-            "POST",
-            CANDIG_URL + program_endpoint,
-            headers=headers,
-            data=json.dumps(
-                [{"program_id": program_id, "metadata": schema.statistics}]
-            ),
-        )
-        if not auth.is_authed(request):
-            return IngestPermissionsException(
-                f"Not authorized to write to {program_id}"
-            )
-        response = requests.Session().send(request.prepare())
-        if response.status_code != HTTPStatus.CREATED:
-            if "unique" in response.text:
-                errors.append(
-                    f"Program {program_id} has already been ingested into Katsu. Please delete and try again."
-                )
-            else:
-                errors.append(
-                    [
-                        f"\nREQUEST STATUS CODE: {response.status_code}"
-                        f"\nRETURN MESSAGE: {response.text}\n"
-                    ]
-                )
-        if len(errors) > 0:
-            result[program_id] = {"errors": errors}
+
+def ingest_clinical_data(ingest_json, headers):
+    schemas_to_ingest = prepare_clinical_data_for_ingest(ingest_json)
+    headers["Content-Type"] = "application/json"
+    for program in schemas_to_ingest.values():
+        schemas = program.pop("schemas")
+        ingest_results = ingest_schemas(schemas, headers)
+        if len(ingest_results["errors"]) > 0:
+            program["errors"].extend(ingest_results["errors"])
         else:
-            result[program_id] = ingest_donors_for_program(donors, program_id, types, headers)
-    return result
-
-
-def ingest_donors_for_program(donors, program_id, types, headers):
-    errors = []
-    fields = {type: [] for type in types}
-    for donor in donors:
-        parents = [("programs", program_id)]
-        print(f"Loading donor {donor['submitter_donor_id']}...")
-        try:
-            ingested_ids = {}
-            traverse_clinical_field(fields, donor, "donors", parents, types, ingested_ids)
-        except Exception as e:
-            print(traceback.format_exc())
-            errors.append(str(e))
-    fields.pop("programs")
-    # print(json.dumps(fields, indent=4))
-    ingest_results = ingest_flattened(fields, headers)
-    errors.extend(ingest_results["errors"])
-
-    if len(errors) > 0:
-        return {"errors": errors}
-    else:
-        return {"result": ingest_results["results"]}
+            program["results"] = ingest_results["results"]
+    return schemas_to_ingest
 
 
 def main():
@@ -315,7 +288,6 @@ def main():
     ingest_json = read_json(data_location)
     if "openapi_url" not in ingest_json:
         ingest_json["openapi_url"] = "https://raw.githubusercontent.com/CanDIG/katsu/develop/chord_metadata_service/mohpackets/docs/schema.yml"
-    headers["Content-Type"] = "application/json"
     result = ingest_clinical_data(ingest_json, headers)
     print(json.dumps(result, indent=2))
 
