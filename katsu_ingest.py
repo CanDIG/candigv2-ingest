@@ -273,16 +273,13 @@ def ingest_clinical_data(ingest_json, headers):
 
 def ingest_donors_for_program(donors, program_id, types, headers):
     errors = []
-    result = ""
     fields = {type: [] for type in types}
-    print(fields)
     for donor in donors:
         parents = [("programs", program_id)]
         print(f"Loading donor {donor['submitter_donor_id']}...")
         try:
             ingested_ids = {}
             traverse_clinical_field(fields, donor, "donors", parents, types, ingested_ids)
-            # print(json.dumps(ingested_ids, indent=2))
         except Exception as e:
             print(traceback.format_exc())
             errors.append(str(e))
