@@ -100,7 +100,6 @@ def ingest_schemas(fields, headers):
                 break
             else:
                 message = f"\nREQUEST STATUS CODE: {response.status_code} \nRETURN MESSAGE: {response.text}\n"
-                print(message)
                 result["errors"].append(f"{type}: {response.status_code} {response.json()['error']}")
                 if type == "programs" and "unique" in response.text:
                     # this is still okay to return 200:
