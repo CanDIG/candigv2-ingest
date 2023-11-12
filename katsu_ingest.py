@@ -75,29 +75,37 @@ def ingest_schemas(fields, headers):
         "followups": "follow_ups",
     }
     for type in fields:
-        if type in name_mappings:
-            name = name_mappings[type]
-        else:
-            name = type
-        ingest_str = f"/katsu/v2/ingest/{name}/"
-        ingest_url = CANDIG_URL + ingest_str
+        if len(fields[type]) > 0:
+            if type in name_mappings:
+                name = name_mappings[type]
+            else:
+                name = type
+            ingest_str = f"/katsu/v2/ingest/{name}/"
+            ingest_url = CANDIG_URL + ingest_str
 
-        update_headers(headers)
-        response = requests.post(
-            ingest_url, headers=headers, data=json.dumps(fields[type])
-        )
+            update_headers(headers)
+            response = requests.post(
+                ingest_url, headers=headers, data=json.dumps(fields[type])
+            )
 
-        if response.status_code == HTTPStatus.CREATED:
-            result["results"].append(f"Of {len(fields[type])} {type}, {response.json()['result']} were created")
-        elif response.status_code == HTTPStatus.NOT_FOUND:
-            message = f"ERROR 404: {ingest_url} was not found! Please check the URL."
-            result["errors"].append(f"{type}: message")
-        else:
-            message = f"\nREQUEST STATUS CODE: {response.status_code} \nRETURN MESSAGE: {response.text}\n"
-            result["errors"].append(f"{type}: {response.status_code} {response.json()['error']}")
-            if type == "programs" and "unique" in response.text:
-                return result
-    return result
+            if response.status_code == HTTPStatus.CREATED:
+                result["results"].append(f"Of {len(fields[type])} {type}, {response.json()['result']} were created")
+            elif response.status_code == HTTPStatus.NOT_FOUND:
+                message = f"ERROR 404: {ingest_url} was not found! Please check the URL."
+                result["errors"].append(f"{type}: message")
+                break
+            elif response.status_code == HTTPStatus.FORBIDDEN:
+                message = f"ERROR 403: You do not have permission to ingest {type} for {fields[type][0]['program_id']}"
+                result["errors"].append(f"{type}: message")
+                break
+            else:
+                message = f"\nREQUEST STATUS CODE: {response.status_code} \nRETURN MESSAGE: {response.text}\n"
+                print(message)
+                result["errors"].append(f"{type}: {response.status_code} {response.json()['error']}")
+                if type == "programs" and "unique" in response.text:
+                    # this is still okay to return 200:
+                    return result, 200
+    return result, response.status_code
 
 
 def traverse_clinical_field(fields, field: dict, ctype, parents, types, ingested_ids):
@@ -259,12 +267,13 @@ def ingest_clinical_data(ingest_json, headers):
     headers["Content-Type"] = "application/json"
     for program in schemas_to_ingest.values():
         schemas = program.pop("schemas")
-        ingest_results = ingest_schemas(schemas, headers)
+        ingest_results, status_code = ingest_schemas(schemas, headers)
+        print(ingest_results, status_code)
         if len(ingest_results["errors"]) > 0:
             program["errors"].extend(ingest_results["errors"])
         else:
             program["results"] = ingest_results["results"]
-    return schemas_to_ingest
+    return schemas_to_ingest, status_code
 
 
 def main():
@@ -288,7 +297,7 @@ def main():
     ingest_json = read_json(data_location)
     if "openapi_url" not in ingest_json:
         ingest_json["openapi_url"] = "https://raw.githubusercontent.com/CanDIG/katsu/develop/chord_metadata_service/mohpackets/docs/schema.yml"
-    result = ingest_clinical_data(ingest_json, headers)
+    result, status_code = ingest_clinical_data(ingest_json, headers)
     print(json.dumps(result, indent=2))
 
 
