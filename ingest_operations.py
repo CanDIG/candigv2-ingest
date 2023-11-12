@@ -95,5 +95,5 @@ def add_clinical_donors():
             return generateResponse("Bearer token invalid or unauthorized", ERROR_CODES["UNAUTHORIZED"])
         return generateResponse("Unknown error during authorization", ERROR_CODES["AUTHORIZATIONERR"])
     headers["Content-Type"] = "application/json"
-    response = ingest_clinical_data(dataset, headers)
-    return response, 200
+    response, status_code = ingest_clinical_data(dataset, headers)
+    return response, status_code
