@@ -4,9 +4,6 @@ FROM python:${venv_python}
 ARG prod_environment=FALSE
 ENV PROD_ENVIRONMENT=${prod_environment}
 
-ARG prod_environment=FALSE
-ENV PROD_ENVIRONMENT=${prod_environment}
-
 LABEL Maintainer="CanDIG Project"
 LABEL "candigv2"="ingest_app"
 
