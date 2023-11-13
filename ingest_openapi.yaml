@@ -49,8 +49,7 @@ paths:
                   type: object
   /clinical:
     post:
-      description: |
-        Add a list of donors with clinical data produced by the clinical ETL.
+      description: Add a list of donors with clinical data produced by the clinical ETL.
       operationId: ingest_operations.add_clinical_donors
       requestBody:
         $ref: "#/components/requestBodies/ClinicalDonorRequest"
@@ -151,66 +150,29 @@ components:
       content:
         'application/json':
           schema:
-            type: object
-            properties:
-              donors:
-                $ref: "#/components/schemas/DonorWithClinicalDataField"
-              statistics:
-                $ref: "#/components/schemas/Statistics"
-            required:
-              - donors
+            $ref: "#/components/schemas/ClinicalETLMap"
   schemas:
     S3Access:
       type: string
       description: a specification for an S3 bucket
       pattern: s3:\/\/(.+)\/(.+)
       example: s3://http://candig.docker.internal:9000/mohccn-data
-    DonorWithClinicalDataField: # "Sanity check" validation, everything else happens in ETL validation/katsu
-      type: array
-      description: A DonorWithClinicalData Field (e.g. Donor, Biomarker, etc)
-      items:
-        type: object
-        properties:
-          primary_diagnoses:
-            $ref: '#/components/schemas/DonorWithClinicalDataField'
-          treatments:
-            $ref: '#/components/schemas/DonorWithClinicalDataField'
-          specimens:
-            $ref: '#/components/schemas/DonorWithClinicalDataField'
-          exposures:
-            $ref: '#/components/schemas/DonorWithClinicalDataField'
-          radiations:
-            $ref: '#/components/schemas/DonorWithClinicalDataField'
-          surgeries:
-            $ref: '#/components/schemas/DonorWithClinicalDataField'
-          followups:
-            $ref: '#/components/schemas/DonorWithClinicalDataField'
-          comorbidities:
-            $ref: '#/components/schemas/DonorWithClinicalDataField'
-          hormone_therapies:
-            $ref: '#/components/schemas/DonorWithClinicalDataField'
-          immunotherapies:
-            $ref: '#/components/schemas/DonorWithClinicalDataField'
-          sample_registrations:
-            $ref: '#/components/schemas/DonorWithClinicalDataField'
-          biomarkers:
-            $ref: '#/components/schemas/DonorWithClinicalDataField'
-          chemotherapies:
-            $ref: '#/components/schemas/DonorWithClinicalDataField'
-        additionalProperties:
-          oneOf:
-            - type: string
-              nullable: true
-            - type: number
-            - type: boolean
-            - type: array
-              items:
-                oneOf:
-                  - type: string
-                    nullable: true
-                  - type: number
-                  - type: boolean
-                  - type: array
+    ClinicalETLMap:
+      type: object
+      properties:
+        openapi_url:
+          type: string
+          description: URL of schema used to generate this mapping
+        donors:
+          type: array
+          items:
+            type: object
+            description: A DonorWithClinicalData object, as specified in the schema in openapi_url
+        katsu_sha:
+          type: string
+          description: the SHA of the version of Katsu used to generate the schema.
+        statistics:
+          $ref: "#/components/schemas/Statistics"
     Statistics:
       type: object
       properties:
