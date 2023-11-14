@@ -15,7 +15,7 @@ paths:
             application/json:
               schema:
                 type: object
-  /add-s3-credential:
+  /s3-credential:
     post:
       description: Add credentials for an S3 bucket
       operationId: ingest_operations.add_s3_credential
@@ -34,14 +34,12 @@ paths:
               application/json:
                 schema:
                   type: object
-  /ingest/moh_variants/{program_id}:
+  /genomic:
     post:
-      description: Add a genomic file that corresponds to a SampleRegistration in an MoH Program schema.
+      description: Add linkages between clinical donors and genomic data.
       operationId: ingest_operations.add_moh_variant
-      parameters:
-        - $ref: "#/components/parameters/ProgramId"
       requestBody:
-        $ref: '#/components/requestBodies/MoHVariantRequest'
+        $ref: '#/components/requestBodies/GenomicIngestRequest'
       responses:
           200:
             description: Success
@@ -49,17 +47,10 @@ paths:
               application/json:
                 schema:
                   type: object
-  /ingest/clinical_donors:
+  /clinical:
     post:
       description: |
-        Add a list of donors with clinical data produced by the clinical ETL. \
-        Response codes: \
-        0: Success \
-        1: Unauthorized \
-        2: Validation error (response body will be list of errors) \
-        3: Cohort exists \
-        4: Internal CanDIG error (timeout, problem with Katsu, problem with htsget...) \
-        5: Authorization error (same as previous but specifically for auth - vault, keycloak...)
+        Add a list of donors with clinical data produced by the clinical ETL.
       operationId: ingest_operations.add_clinical_donors
       requestBody:
         $ref: "#/components/requestBodies/ClinicalDonorRequest"
@@ -128,7 +119,7 @@ components:
               - bucket
               - access_key
               - secret_key
-    MoHVariantRequest:
+    GenomicIngestRequest:
       content:
         'application/json':
           schema:
