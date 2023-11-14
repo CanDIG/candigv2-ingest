@@ -4,7 +4,7 @@ import json
 import katsu_ingest
 
 def test_prepare_clinical_ingest():
-    with open("tests/single_ingest.json", "r") as f:
+    with open("tests/clinical_ingest.json", "r") as f:
         data = json.load(f)
         result = katsu_ingest.prepare_clinical_data_for_ingest(data)
         print(json.dumps(result, indent=4))
