@@ -50,7 +50,7 @@ def add_s3_credential():
     token = request.headers['Authorization'].split("Bearer ")[1]
     return auth.store_aws_credential(data["endpoint"], data["bucket"], data["access_key"], data["secret_key"], token)
 
-def add_moh_variant(program_id):
+def add_genomic_linkages():
     token = request.headers["Authorization"].split("Bearer ")[1]
     data = connexion.request.json
     """

@@ -37,7 +37,7 @@ paths:
   /genomic:
     post:
       description: Add linkages between clinical donors and genomic data.
-      operationId: ingest_operations.add_moh_variant
+      operationId: ingest_operations.add_genomic_linkages
       requestBody:
         $ref: '#/components/requestBodies/GenomicIngestRequest'
       responses:
@@ -85,14 +85,6 @@ paths:
               schema:
                 $ref: "#/components/schemas/IngestResponse"
 components:
-  parameters:
-    ProgramId:
-      in: path
-      name: program_id
-      required: true
-      description: name of an MoH program to ingest this genomic file into
-      schema:
-        type: string
   requestBodies:
     S3CredentialRequest:
       content:
@@ -122,41 +114,15 @@ components:
       content:
         'application/json':
           schema:
-            type: object
-            properties:
-              genomic_id:
-                type: string
-                description: The name of the VCF file, including gz, if present
-                example: "HG00096.vcf.gz"
-              index:
-                type: string
-                description: The extension of the index file without the dot (tbi, crai...)
-                example: "tbi"
-              access_method:
-                type: string
-                anyOf:
-                  - $ref: "#/components/schemas/S3Access"
-                  - $ref: "#/components/schemas/FileAccess"
-              samples:
-                type: array
-                items:
-                  $ref: "#/components/schemas/VCFSample"
-            required:
-              - genomic_id
-              - access_method
-              - samples
-              - index
+            type: array
+            items:
+              $ref: "#/components/schemas/GenomicSample"
     ClinicalDonorRequest:
       content:
         'application/json':
           schema:
             $ref: "#/components/schemas/ClinicalETLMap"
   schemas:
-    S3Access:
-      type: string
-      description: a specification for an S3 bucket
-      pattern: s3:\/\/(.+)\/(.+)
-      example: s3://http://candig.docker.internal:9000/mohccn-data
     ClinicalETLMap:
       type: object
       properties:
@@ -202,25 +168,93 @@ components:
             total_cases:
               type: integer
               description: how many cases are in this dataset
-    FileAccess:
-      type: string
-      description: a file path to a directory on the HTSGet server itself
-      pattern: file:\/\/\/(.+)
-      example: file://data/samples/
-    VCFSample:
+    GenomicSample:
       type: object
       properties:
-        sample_registration_id:
+        program_id:
           type: string
-          description: a SampleRegistrationId in the MoH program
-          example: sample_registration_id_1
-        sample_name_in_file:
+          description: Name of the cohort this sample belongs to. The user must be authorized to add data to this cohort.
+        genomic_id:
           type: string
-          description: the name of the sample in the VCF file
-          example: TUMOUR/NORMAL/PROGRAM_SAMPLE_REGISTRATION_ID_1/...
+          description: A unique name for this genomic data resource
+          example: "HG00096.vcf"
+        metadata:
+          type: object
+          description: Additional data that describes the genomic resource
+          properties:
+            sequence_type:
+              type: string
+              description: type of data sequenced (whole genome or whole transcriptome)
+              enum:
+                - wgs
+                - wts
+              default: wgs
+            data_type:
+              type: string
+              description: type of data represented in the resource (variant or read)
+              enum:
+                - variant
+                - read
+            reference:
+              type: string
+              description: which reference genome was used for alignment
+              enum:
+                - hg37
+                - hg38
+              default: hg38
+        main:
+          $ref: "#/components/schemas/File"
+        index:
+          $ref: "#/components/schemas/File"
+        samples:
+          type: array
+          description: An array of links between donor data (e.g. MoH Sample Registrations) and the samples in the genomic data resource
+          items:
+            $ref: "#/components/schemas/SampleLink"
       required:
-        - sample_registration_id
-        - sample_name_in_file
+        - program_id
+        - genomic_id
+        - metadata
+        - main
+        - samples
+    File:
+      type: object
+      description: Object describing a file
+      properties:
+        name:
+          type: string
+          description: name of the file, including all extensions
+        access_method:
+          type: string
+          description: fully-described URI to the file
+          anyOf:
+            - $ref: "#/components/schemas/S3Access"
+            - $ref: "#/components/schemas/FileAccess"
+    FileAccess:
+      type: string
+      description: an absolute path to a local file on the HTSGet server itself, expressed as a file URI
+      pattern: file:\/\/\/(.+)
+      example: file:///data/samples/HG00096.vcf.gz
+    S3Access:
+      type: string
+      description: a description of an S3 URI
+      pattern: s3:\/\/(.+)\/(.+)\/(.+)
+      example: s3://s3.us-east-1.amazonaws.com/1000genomes/HG00096.vcf.gz
+    SampleLink:
+      type: object
+      description: Link between donor data (e.g. MoH Sample Registrations) and the samples in the genomic data resource
+      properties:
+        donor_sample_id:
+          type: string
+          description: the name of the sample as listed in the linked donor data
+          example: sample_registration_id_1
+        genomic_sample_id:
+          type: string
+          description: the name of the sample in the genomic data resource
+          example: TUMOUR/NORMAL/PROGRAM_SAMPLE_REGISTRATION_ID_1
+      required:
+        - donor_sample_id
+        - genomic_sample_id
     BearerToken:
       type: string
       description: An Authorization BearerToken header
