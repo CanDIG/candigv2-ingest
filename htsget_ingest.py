@@ -159,6 +159,10 @@ def htsget_ingest(ingest_json, headers):
         result[sample["genomic_id"]] = {}
         # create the corresponding DRS objects
         response = link_genomic_data(headers, sample)
+        for err in response["errors"]:
+            if "403" in err["error"]:
+                status_code = 403
+                break
         result[sample["genomic_id"]] = response
     return result, status_code
 
