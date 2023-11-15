@@ -51,31 +51,24 @@ def add_s3_credential():
     return auth.store_aws_credential(data["endpoint"], data["bucket"], data["access_key"], data["secret_key"], token)
 
 def add_genomic_linkages():
-    token = request.headers["Authorization"].split("Bearer ")[1]
-    data = connexion.request.json
-    """
-    (For new auth model)
+    headers = {}
+    if "Authorization" not in request.headers:
+        return generateResponse("Bearer token required", ERROR_CODES["UNAUTHORIZED"])
     try:
-        token = auth.get_bearer_from_refresh(token)
+        # New auth model
+        # refresh_token = request.headers["Authorization"].split("Bearer ")[1]
+        # token = auth.get_bearer_from_refresh(refresh_token)
+        if not request.headers["Authorization"].startswith("Bearer "):
+            return generateResponse("Invalid bearer token", ERROR_CODES["UNAUTHORIZED"])
+        token = request.headers["Authorization"].split("Bearer ")[1]
+        headers["Authorization"] = "Bearer %s" % token
     except Exception as e:
-        return {"result": "Error validating token: %s" % str(e)}, 401
-    """
-
-    try:
-        response = htsget_ingest(token, program_id, data)
-    except Exception as e:
-        traceback.print_exc()
-        return {"result": "Unknown error (You may want to report this to a CanDIG developer): %s" % str(e)}, 500
-
-    if type(response) == IngestResult:
-        return {"result": "Ingested genomic sample: %s" % response.value}, 200
-    elif type(response) == IngestUserException:
-        return {"result": "Data error: %s" % response.value}, 400
-    elif type(response) == IngestPermissionsException:
-        return {"result": "Error: You are not authorized to write to program %s." % response.value}, 403
-    elif type(response) == IngestServerException:
-        return {"result": "Ingest encountered the following errors: %s" % response.value}, 500
-    return 500
+        if "Invalid bearer token" in str(e):
+            return generateResponse("Bearer token invalid or unauthorized", ERROR_CODES["UNAUTHORIZED"])
+        return generateResponse("Unknown error during authorization", ERROR_CODES["AUTHORIZATIONERR"])
+    headers["Content-Type"] = "application/json"
+    response, status_code = htsget_ingest(connexion.request.json, headers)
+    return response, status_code
 
 def add_clinical_donors():
     dataset = connexion.request.json

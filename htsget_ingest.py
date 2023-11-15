@@ -4,7 +4,7 @@ import auth
 import os
 import re
 import json
-from ingest_result import IngestPermissionsException, IngestServerException, IngestUserException, IngestResult
+from ingest_result import IngestServerException, IngestUserException, IngestResult
 import requests
 from urllib.parse import urlparse
 
@@ -13,205 +13,168 @@ CANDIG_URL = os.getenv("CANDIG_URL", "")
 HTSGET_URL = CANDIG_URL + "/genomics"
 HOSTNAME = HTSGET_URL.replace(f"{urlparse(CANDIG_URL).scheme}://","")
 
-def post_object(token, genomic_sample, clinical_samples, dataset, ref_genome="hg38", force=False):
-    headers = {"Authorization": f"Bearer {token}"}
-    print(f"working on {genomic_sample['id']}")
+
+def link_genomic_data(headers, sample):
     url = f"{HTSGET_URL}/ga4gh/drs/v1/objects"
 
-    # file object:
-    access_method = {}
-    if genomic_sample['file_access'].startswith("file://"):
-        access_method["access_url"] = {
-            "headers": [],
-            "url": genomic_sample['file_access']
-        }
-        access_method["type"] = "file"
-
-    else:
-        access_method["access_id"] = genomic_sample['file_access']
-        access_method["type"] = "s3"
-
-    obj = {
-        "access_methods": [
-            access_method
-        ],
-        "id": genomic_sample["id"],
-        "name": genomic_sample["id"],
-        "description": "variant",
-        "cohort": dataset,
-        "version": "v1"
+    # get the master genomic object, or create it:
+    genomic_drs_obj = {
+        "id": sample["genomic_id"],
+        "name": sample["genomic_id"],
+        "description": sample["metadata"]["sequence_type"],
+        "cohort": sample["program_id"],
+        "reference_genome": sample["metadata"]["reference"],
+        "version": "v1",
+        "contents": []
     }
-    response = requests.post(url, json=obj, headers=headers)
-    if response.status_code > 200:
-        return response
+    response = requests.get(f"{url}/{sample['genomic_id']}", headers=headers)
+    if response.status_code == 200:
+        genomic_drs_obj = response.json()
 
-    # index object:
-    access_method = {}
-    if genomic_sample['index_access'].startswith("file://"):
-        access_method["access_url"] = {
-            "headers": [],
-            "url": genomic_sample['index_access']
-        }
-        access_method["type"] = "file"
+    # add GenomicDataDrsObject to contents
+    add_file_drs_object(genomic_drs_obj, sample["main"], sample["metadata"]["data_type"], headers)
 
-    else:
-        access_method["access_id"] = genomic_sample['index_access']
-        access_method["type"] = "s3"
+    if "index" in sample:
+        # add GenomicIndexDrsObject to contents
+        add_file_drs_object(genomic_drs_obj, sample["index"], "index", headers)
 
-    obj = {
-        "access_methods": [
-            access_method
-        ],
-        "id": genomic_sample["index"],
-        "name": genomic_sample["index"],
-        "description": "index",
-        "cohort": dataset,
-        "version": "v1"
-    }
-
-    response = requests.post(url, json=obj, headers=headers)
-    if response.status_code > 200:
-        return response
-
-    # add this genomic_id to the sample drs object, if available
-    for sample in clinical_samples:
-        genomic_contents = {"drs_uri": [f"{HOSTNAME}/{genomic_sample['id']}"],
-                            "name": sample['sample_name_in_file'], "id": genomic_sample['id']}
-        obj = {
-            "id": f"{sample['sample_registration_id']}",
-            "contents": [genomic_contents],
-            "cohort": dataset,
+    for clin_sample in sample["samples"]:
+        # for each sample in the samples, get the SampleDrsObject or create it
+        sample_drs_obj = {
+            "id": clin_sample["donor_sample_id"],
+            "name": clin_sample["donor_sample_id"],
             "description": "sample",
-            "version": "v1"
+            "cohort": sample["program_id"],
+            "version": "v1",
+            "contents": []
         }
-
-        response = requests.get(f"{url}/{'sample_registration_id'}", headers=headers)
+        response = requests.get(f"{url}/{clin_sample['donor_sample_id']}", headers=headers)
         if response.status_code == 200:
-            obj = response.json()
-            obj['contents'].append(genomic_contents)
+            sample_drs_obj = response.json()
 
-        response = requests.post(url, json=obj, headers=headers)
+        # add the GenomicDrsObject to its contents, if it's not already there:
+        not_found = True
+        if len(sample_drs_obj["contents"]) > 0:
+            for obj in sample_drs_obj["contents"]:
+                if obj["name"] == clin_sample["donor_sample_id"]:
+                    not_found = False
+        if not_found:
+            contents_obj = {
+                "name": sample["genomic_id"],
+                "id": sample["genomic_id"],
+                "drs_uri": [f"{HOSTNAME}/{sample['genomic_id']}"]
+            }
+            sample_drs_obj["contents"].append(contents_obj)
+
+        # update the sample_drs_object in the database:
+        response = requests.post(f"{url}", json=sample_drs_obj, headers=headers)
         if response.status_code != 200:
             return response
 
-    # master object:
-    obj = {
-        "contents": [
-            {
-                "drs_uri": [
-                    f"drs://{HOSTNAME}/{genomic_sample['id']}"
-                ],
-                "name": genomic_sample['id'],
-                "id": genomic_sample["type"]
-            },
-            {
-                "drs_uri": [
-                    f"drs://{HOSTNAME}/{genomic_sample['index']}"
-                ],
-                "name": genomic_sample['index'],
-                "id": "index"
+        # then add the sample to the GenomicDrsObject's contents, if it's not already there:
+        not_found = True
+        if len(genomic_drs_obj["contents"]) > 0:
+            for obj in genomic_drs_obj["contents"]:
+                if obj["name"] == clin_sample["donor_sample_id"]:
+                    not_found = False
+        if not_found:
+            contents_obj = {
+                "name": clin_sample["donor_sample_id"],
+                "id": clin_sample["genomic_sample_id"],
+                "drs_uri": [f"{HOSTNAME}/{clin_sample['donor_sample_id']}"]
             }
-        ],
-        "id": genomic_sample['id'],
-        "name": genomic_sample['id'],
-        "description": "wgs",
-        "cohort": dataset,
-        "version": "v1"
-    }
+            genomic_drs_obj["contents"].append(contents_obj)
 
-    for sample in clinical_samples:
-        clinical_obj = {"drs_uri": [f"{HOSTNAME}/{sample['sample_registration_id']}"],
-                        "name": f"{sample['sample_registration_id']}",
-                       "id": sample['sample_name_in_file'] }
-        obj["contents"].append(clinical_obj)
-
-    response = requests.post(url, json=obj, headers=headers)
+    # finally, post the genomic_drs_object
+    response = requests.post(url, json=genomic_drs_obj, headers=headers)
     return response
 
 
-def create_s3_sample(genomic_id: str, index: str, client):
-    # If genomic_files is provided, it means the filenames do not correspond to the genomic_id names in the bucket
-    # And have been provided manually.
-    bucket_objects = [object.object_name for object in client['client'].list_objects(client["bucket"])]
-    if (genomic_id not in bucket_objects) or ((genomic_id + '.' + index) not in bucket_objects):
-        return IngestUserException("Genomic file or index specified not found in bucket: "
-                                    f"{genomic_id} (index: {index})")
-    if index == "tbi":
-        type = 'variant'
-    else:
-        type = 'read'
-    return {
-            "id": genomic_id,
-            "index": genomic_id + '.' + index,
-            "type": type,
-            "file_access": f"{client['endpoint']}/{client['bucket']}/{genomic_id}",
-            "index_access": f"{client['endpoint']}/{client['bucket']}/{genomic_id}.{index}"
+def add_file_drs_object(genomic_drs_obj, file, type, headers):
+    url = f"{HTSGET_URL}/ga4gh/drs/v1/objects"
+    # is this file already in the master object?:
+    not_found = True
+    if len(genomic_drs_obj["contents"]) > 0:
+        for obj in genomic_drs_obj["contents"]:
+            if obj["name"] == file["name"]:
+                not_found = False
+    if not_found:
+        # look for this file in htsget:
+        response = requests.get(f"{url}/{file['name']}", headers=headers)
+        print(f"GET {file['name']}: {response.status_code} {response.text}")
+        if response.status_code == 404:
+            obj = {
+                "access_methods": [],
+                "id": file['name'],
+                "name": file['name'],
+                "description": type,
+                "cohort": genomic_drs_obj["cohort"],
+                "version": "v1"
+            }
+            access_method = get_access_method(file["access_method"])
+            if access_method is not None:
+                obj["access_methods"].append(access_method)
+            response = requests.post(url, json=obj, headers=headers)
+            if response.status_code > 200:
+                return response
+            else:
+                contents_obj = {
+                    "name": file["name"],
+                    "id": type,
+                    "drs_uri": [f"{HOSTNAME}/{file['name']}"]
+                }
+                genomic_drs_obj["contents"].append(contents_obj)
+
+
+def get_access_method(url):
+    if url.startswith("s3"):
+        return {
+            "type": "s3",
+            "access_id": url.replace("s3://", "")
         }
-
-def create_local_sample(genomic_id: str, index: str, path: str):
-    if index == "tbi":
-        type = 'variant'
-    else:
-        type = 'read'
-    return {
-            "id": genomic_id,
-            "file": genomic_id,
-            "index": genomic_id + '.' + index,
-            "type": type,
-            "file_access": f"file://{path}",
-            "index_access": f"file://{path} + '.' + index"
+    elif url.startswith("file"):
+        return {
+            "type": "file",
+            "access_url": {
+                "url": url
+            }
         }
+    return None
 
-def htsget_ingest(token, dataset, sample, reference="hg38", indexing=False):
-    local = False
-    match = re.search("s3:\/\/(.+)\/(.+)", sample["access_method"])
-    if match:
-        endpoint = match.group(1)
-        bucket = match.group(2)
-    else:
-        local = True
-    if os.getenv("CANDIG_URL") == "":
-        raise Exception("CANDIG_URL environment variable is not set")
 
-    if not local:
-        try:
-            client = auth.get_minio_client(token, endpoint, bucket)
-        except Exception as e:
-            print(e)
-            return IngestServerException("Failed to access S3 bucket %s. Did you add credentials to vault?" % bucket)
-        # first, find all of the s3 objects related to this sample:
-        object = create_s3_sample(sample["genomic_id"], sample["index"], client)
-    else:
-        object = create_local_sample(sample["genomic_id"], sample["index"], sample["access_method"].split("file://")[1])
-    if isinstance(object, IngestResult):
-        return object # An error occurred
-    response = post_object(token, object, sample["samples"], dataset, ref_genome=reference, force=indexing)
-    if (response.status_code > 200):
-        print(response.text)
-        if response.status_code < 500:
-            return IngestUserException(response.text)
-        else:
-            return IngestServerException(response.text)
-    return IngestResult(sample["genomic_id"])
+def htsget_ingest(ingest_json, headers):
+    result = {
+        "errors": [],
+        "results": []
+    }
+    status_code = 200
+    for sample in ingest_json:
+        # validate the access method
+
+        # create the corresponding DRS objects
+        response = link_genomic_data(headers, sample)
+        if (response.status_code > 200):
+            if response.status_code < 500:
+                result["errors"].append(response.text)
+            else:
+                result["errors"].append(response.text)
+        result["results"].append(sample["genomic_id"])
+    return result, status_code
 
 def main():
     parser = argparse.ArgumentParser(description="A script that ingests a sample vcf and its index into htsget.")
-    parser.add_argument("--samplefile", help="A file specifying a genomic sample")
-    parser.add_argument("--dataset", help="dataset/cohort/program_id", required=True)
-    parser.add_argument("--region", help="optional: s3 region", required=False) # Not used?
-    parser.add_argument("--reference", help="optional: reference genome, either hg37 or hg38", required=False, default="hg38")
-    parser.add_argument("--indexing", action="store_true", help="optional: force re-indexing", required=False)
+    parser.add_argument("--samplefile", help="A file specifying a genomic sample", required=True)
 
     args = parser.parse_args()
 
+    genomic_input = []
     if args.samplefile:
         with open(args.samplefile) as f:
-            genomic_sample = json.loads(f.read())
-
-    result = htsget_ingest(auth.get_site_admin_token(), args.dataset, genomic_sample, args.reference,
-                                    args.indexing)
-    if result.value:
-      print(result.value)
+            genomic_input = json.loads(f.read())
+    if len(genomic_input) == 0:
+        return "No samples to ingest"
+    result = htsget_ingest(genomic_input, auth.get_auth_header())
+    print(json.dumps(result, indent=4))
 
 if __name__ == "__main__":
     main()

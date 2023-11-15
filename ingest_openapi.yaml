@@ -202,6 +202,8 @@ components:
                 - hg37
                 - hg38
               default: hg38
+          required:
+            - data_type
         main:
           $ref: "#/components/schemas/File"
         index:
@@ -230,6 +232,9 @@ components:
           anyOf:
             - $ref: "#/components/schemas/S3Access"
             - $ref: "#/components/schemas/FileAccess"
+      required:
+        - name
+        - access_method
     FileAccess:
       type: string
       description: an absolute path to a local file on the HTSGet server itself, expressed as a file URI
