@@ -1,0 +1,25 @@
+[
+	{
+		"program_id": "SYNTHETIC-2",
+		"genomic_id": "HG00096.cnv.vcf",
+		"main": {
+			"access_method": "s3://1000genomes-dragen.s3.amazonaws.com/data/dragen-3.5.7b/GRCh37-cnv-anchored/HG00096/HG00096.cnv.vcf.gz?public=true",
+			"name": "HG00096.cnv.vcf.gz",
+		},
+		"index": {
+			"access_method": "s3://1000genomes-dragen.s3.amazonaws.com/data/dragen-3.5.7b/GRCh37-cnv-anchored/HG00096/HG00096.cnv.vcf.gz.tbi?public=true",
+			"name": "HG00096.cnv.vcf.gz.tbi",
+		},
+		"metadata": {
+			"sequence_type": "wgs",
+			"data_type": "variant",
+			"reference": "hg37"
+		},
+		"samples": [
+			{
+			  "genomic_sample_id": "TUMOR",
+			  "donor_sample_id": "SAMPLE_REGISTRATION_1"
+			}
+		]
+	}
+]
