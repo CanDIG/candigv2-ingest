@@ -15,7 +15,7 @@ This repository can either be run standalone or as a Docker container.
 * Manifest and mappings for clinical_ETL conversion.
 
 ## Setup
-Run the following:
+Using a Python 3.10+ environment, run the following:
 ```bash
 pip install -r requirements.txt
 git submodule update --init --recursive
@@ -38,8 +38,8 @@ python settings.py
 source env.sh
 ```
 
-## How to use the ingest
-candigv2-ingest can be used as either a command-line tool, a local API server or a docker container. To ingest from a UI, see the [CanDIG Data Portal](https://github.com/CanDIG/candig-data-portal). To run the command line scripts, set your environment variables and follow the command line instructions in the sections below. To use the local API, set your environment variables, run `python app.py`, and follow the API instructions in the sections below. The API will be available at localhost:1236. A swagger UI is also available at /ui. Docker instructions can be found at the bottom of the README. To authorize yourself for these endpoints, you will need to set the Authorization header to a keycloak bearer token (in the format "Bearer ..." without the quotes).
+## How to use candigv2-ingest
+`candigv2-ingest` can be used as either a command-line tool, a local API server or a docker container. To ingest from a UI, see the [CanDIG Data Portal](https://github.com/CanDIG/candig-data-portal). To run the command line scripts, set your environment variables and follow the command line instructions in the sections below. To use the local API, set your environment variables, run `python app.py`, and follow the API instructions in the sections below. The API will be available at localhost:1236. A swagger UI is also available at /ui. Docker instructions can be found at the bottom of the README. To authorize yourself for these endpoints, you will need to set the Authorization header to a keycloak bearer token (in the format "Bearer ..." without the quotes).
 
 
 ## Authorizing users for the new dataset
@@ -95,7 +95,6 @@ python katsu_ingest.py
 ### API
 The clinical ingest API runs at /ingest/clinical_donors. Simply send a request with an authorized bearer token and a JSON body with your DonorWithClinicalData object. See the swagger UI/schema for the response format.
 
-
 ## Ingest genomic files
 
 **First**, ensure that the relevant clinical data is ingested, as this must be completed before your genomic data is ingested.
@@ -135,24 +134,72 @@ If necessary, genomic samples can be loaded directly from the htsget container's
 
 ### Ingest into Htsget
 
-Genomic samples should be specified in a JSON dictionary:
-```json
-{
-	"access_method": "s3://candig.docker.internal:9000/dir",
-	"genomic_id": "HG00096.vcf.gz",
-	"index": "tbi",
-  "samples": [
-    {
-      "sample_name_in_file": "TUMOR",
-      "sample_registration_id": "SAMPLE_REGISTRATION_1"
-    }
-  ]
-}
+Metadata about each genomic file should be specified in a `JSON` file. 
+
+The file should contain an array of dictionaries, where each item represents a single file. Each dictionary specifies important information about the genomic file and how it links to the ingested clinical data. The structure of this dictionary is specified in the ingest [openapi schema](ingest_openapi.yaml#L171C8-L171C8) and a commented example is below: 
+
 ```
-“genomic_id” is the filename of the variation file (e.g. HG00096.vcf.gz, HG00096.bam). Access methods can either be of the format s3://[endpoint]/[bucket name] or file://[directory relative to root on htsget container]. sample_registration_id(s) are the (mandatory) links to clinical sample_registrations.
-"index" is the file extension of the index file for the variation; for instance, "tbi" or "crai".
-If an S3 bucket access method is provided, assuming you have properly added the S3 credentials to vault (see above), the service will scan the S3 bucket to ensure the relevant files are present.
-This will not occur for files local/mounted to htsget, so ensure they are present beforehand.
+[
+    {   ## Example linking to genomic and index files in s3 storage to a single sample
+        "program_id": "SYNTHETIC-2",      # The name of the program
+        "genomic_id": "HG00096.cnv.vcf",  # The identifier used to identify the genomic file, usually the filename
+        "main": {                         # location and name of the main genomic file, bam/cram/vcf
+            "access_method": "s3://s3.us-east-1.amazonaws.com/1000genomes/release/20130502/ALL.chr22.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz?public=true",
+            "name": "HG00096.cnv.vcf.gz"
+        },
+        "index": {                        # location and name of the index for the main genomic file, bai/crai/
+            "access_method": "s3://s3.us-east-1.amazonaws.com/1000genomes/release/20130502/ALL.chr22.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz?public=true",
+            "name": "HG00096.cnv.vcf.gz.tbi"
+        },
+        "metadata": {                     # Metadata about the file
+            "sequence_type": "wgs",       # type of data sequenced (whole genome or whole transcriptome), allowed values: [wgs, wts]
+            "data_type": "variant",       # type of data represented, allowed values: [variant, read]
+            "reference": "hg37"           # which reference genome was used for alignment, allowed values: [hg37, hg38] 
+        },
+        "samples": [                      # Linkage to one or more samples that the genomic file was derived from
+            {
+                "genomic_sample_id": "HG00096",  # The name of the sample in the genomic file
+                "donor_sample_id": "SAMPLE_REGISTRATION_1"   # The submitter_sample_id to link to
+            }
+        ]
+    },
+    {  ## Example linking genomic and index files in local storage to multiple samples 
+        "program_id": "SYNTHETIC-2",
+        "genomic_id": "multisample",
+        "main": {
+            "access_method": "file:////app/htsget_server/data/files/multisample_1.vcf.gz",
+            "name": "multisample_1.vcf.gz"
+        },
+        "index": {
+            "access_method": "file:////app/htsget_server/data/files/multisample_1.vcf.gz.tbi",
+            "name": "multisample_1.vcf.gz.tbi"
+        },
+        "metadata": {
+            "sequence_type": "wgs",
+            "data_type": "variant",
+            "reference": "hg37"
+        },
+        "samples": [
+            {
+                "genomic_sample_id": "TUMOR",
+                "donor_sample_id": "SAMPLE_REGISTRATION_4"
+            },
+			{
+				"genomic_sample_id": "NORMAL",
+				"donor_sample_id": "SPECIMEN_5"
+			}
+        ]
+    }
+]
+```
+
+> [!Tip]
+> - `genomic_id` is the filename of the variation file (e.g. HG00096.vcf.gz, HG00096.bam)
+> - Access methods can either be of the format `s3://[endpoint]/[bucket name]` or `file://[directory relative to root on htsget container]`. 
+> - `donor_sample_id`(s) are the (mandatory) links to the sample_registration objects uploaded during clinical data ingest.
+> - `index` is the file extension of the index file for the variation; for instance, `tbi` or `crai`
+> - If an S3 bucket access method is provided, assuming you have properly added the S3 credentials to vault (see above), the service will scan the S3 bucket to ensure the relevant files are present.
+> - There is no validation that the genomic files that exist locally or mounted to htsget. If the local (`file:///`) method is used it is important to check all files are present before proceeding with ingest.
 
 ### Command line
 To ingest using an S3 container, once the files have been added, you can run the htsget_ingest.py script:
