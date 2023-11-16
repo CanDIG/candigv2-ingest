@@ -227,8 +227,6 @@ To ingest using an S3 container, once the files have been added, you can run the
 python htsget_ingest.py --samplefile [JSON-formatted sample data as specified above]
 ```
 
-
-
 ## Run as Docker Container
 The containerized version runs the API as specified above within a Docker container (which is how this repository is used in the CanDIGv2 stack).
 To run, ensure you have docker installed and CanDIGv2 running, then run the following commands:
@@ -248,7 +246,9 @@ interference while testing.)
 
 
 ## Authorizing users for the new dataset
-### NOTE: OPA ingest is currently not functional, so these instructions will not work.
+
+> [!WARNING]
+> OPA ingest is currently not functional, so these instructions will not work.
 Create a new access.json file:
 
 ```bash
