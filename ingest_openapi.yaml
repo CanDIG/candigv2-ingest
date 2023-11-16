@@ -249,7 +249,7 @@ components:
       type: object
       description: Link between donor data (e.g. MoH Sample Registrations) and the samples in the genomic data resource
       properties:
-        donor_sample_id:
+        submitter_sample_id:
           type: string
           description: the name of the sample as listed in the linked donor data
           example: sample_registration_id_1
@@ -258,7 +258,7 @@ components:
           description: the name of the sample in the genomic data resource
           example: TUMOUR/NORMAL/PROGRAM_SAMPLE_REGISTRATION_ID_1
       required:
-        - donor_sample_id
+        - submitter_sample_id
         - genomic_sample_id
     BearerToken:
       type: string

@@ -159,7 +159,7 @@ The file should contain an array of dictionaries, where each item represents a s
         "samples": [                      # Linkage to one or more samples that the genomic file was derived from
             {
                 "genomic_sample_id": "HG00096",  # The name of the sample in the genomic file
-                "donor_sample_id": "SAMPLE_REGISTRATION_1"   # The submitter_sample_id to link to
+                "submitter_sample_id": "SAMPLE_REGISTRATION_1"   # The submitter_sample_id to link to
             }
         ]
     },
@@ -182,11 +182,11 @@ The file should contain an array of dictionaries, where each item represents a s
         "samples": [
             {
                 "genomic_sample_id": "TUMOR",
-                "donor_sample_id": "SAMPLE_REGISTRATION_4"
+                "submitter_sample_id": "SAMPLE_REGISTRATION_4"
             },
 			{
 				"genomic_sample_id": "NORMAL",
-				"donor_sample_id": "SPECIMEN_5"
+				"submitter_sample_id": "SPECIMEN_5"
 			}
         ]
     }
@@ -196,7 +196,7 @@ The file should contain an array of dictionaries, where each item represents a s
 > [!Tip]
 > - `genomic_id` is the filename of the variation file (e.g. HG00096.vcf.gz, HG00096.bam)
 > - Access methods can either be of the format `s3://[endpoint]/[bucket name]` or `file://[directory relative to root on htsget container]`. 
-> - `donor_sample_id`(s) are the (mandatory) links to the sample_registration objects uploaded during clinical data ingest.
+> - `submitter_sample_id`(s) are the (mandatory) links to the sample_registration objects uploaded during clinical data ingest.
 > - `index` is the file extension of the index file for the variation; for instance, `tbi` or `crai`
 > - If an S3 bucket access method is provided, assuming you have properly added the S3 credentials to vault (see above), the service will scan the S3 bucket to ensure the relevant files are present.
 > - There is no validation that the genomic files that exist locally or mounted to htsget. If the local (`file:///`) method is used it is important to check all files are present before proceeding with ingest.
