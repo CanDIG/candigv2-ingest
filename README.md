@@ -245,7 +245,7 @@ This will start a Docker container with a REST API for the ingest at localhost:1
 interference while testing.)
 
 
-## Authorizing users for the new dataset
+<!--- ## Authorizing users for the new dataset
 
 > [!WARNING]
 > OPA ingest is currently not functional, so these instructions will not work.
@@ -268,3 +268,4 @@ docker cp access.json candigv2_opa_1:/app/permissions_engine/access.json
 ```
 
 Restart the OPA container to take effect
+--->
