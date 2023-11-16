@@ -167,8 +167,9 @@ def htsget_ingest(ingest_json, headers):
     return result, status_code
 
 def main():
-    parser = argparse.ArgumentParser(description="A script that ingests a sample vcf and its index into htsget.")
-    parser.add_argument("--samplefile", help="A file specifying a genomic sample", required=True)
+    parser = argparse.ArgumentParser(description="A script that ingests genomic data into htsget.")
+    parser.add_argument("--samplefile", required=True,
+                        help="A file specifying the location and sample linkages for one or more genomic files")
 
     args = parser.parse_args()
 
