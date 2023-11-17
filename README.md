@@ -230,6 +230,14 @@ This will start a Docker container with a REST API for the ingest at localhost:1
 interference while testing.)
 
 
+## Testing
+
+To test candigv2-ingest, from the repo directory, simply run the following command:
+
+```commandline
+pytest
+```
+
 <!--- ## Authorizing users for the new dataset
 
 > [!WARNING]
