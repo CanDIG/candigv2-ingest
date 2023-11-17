@@ -117,6 +117,8 @@ This information will be used to create the genomic ingest JSON file required fo
 
 ### ii. Move files to an accessible location
 
+Files must be visible to the running htsget server and can either be made available via S3 compatible storage or by storing the files locally within the htsget container or via a NFS mount.
+
 #### S3-compatible system
 
 <blockquote><details><summary>How do I move files into an S3-type bucket?</summary>
