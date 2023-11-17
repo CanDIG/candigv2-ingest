@@ -78,23 +78,6 @@ source env.sh
 python katsu_ingest.py
 ```
 
-<blockquote><details><summary>Testing with ready-made synthetic data</summary>
-NOTE: if you want to skip ETL process and use ready-made [synthetic data](https://github.com/CanDIG/katsu/tree/develop/chord_metadata_service/mohpackets/data/small_dataset/synthetic_data), set the path to:
-
-```bash
-export CLINICAL_DATA_LOCATION=https://raw.githubusercontent.com/CanDIG/katsu/develop/chord_metadata_service/mohpackets/data/small_dataset/synthetic_data/
-source env.sh
-python katsu_ingest.py
-```
-
-or
-
-```commandline
-python katsu_ingest.py --input https://raw.githubusercontent.com/CanDIG/katsu/develop/chord_metadata_service/mohpackets/data/small_dataset/synthetic_data/
-```
-</details></blockquote>
-
-
 ## 2. Genomic data
 
 **First**, ensure that the relevant clinical data is ingested, as this must be completed before your genomic data is ingested.
