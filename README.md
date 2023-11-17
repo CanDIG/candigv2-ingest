@@ -140,7 +140,7 @@ The file should contain an array of dictionaries, where each item represents a s
 [
     {   ## Example linking to genomic and index files in s3 storage to a single sample
         "program_id": "SYNTHETIC-2",      # The name of the program
-        "genomic_id": "HG00096.cnv.vcf",  # The identifier used to identify the genomic file, usually the filename
+        "genomic_file_id": "HG00096.cnv.vcf",  # The identifier used to identify the genomic file, usually the filename
         "main": {                         # location and name of the main genomic file, bam/cram/vcf
             "access_method": "s3://s3.us-east-1.amazonaws.com/1000genomes/release/20130502/ALL.chr22.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz?public=true",
             "name": "HG00096.cnv.vcf.gz"
@@ -156,14 +156,14 @@ The file should contain an array of dictionaries, where each item represents a s
         },
         "samples": [                      # Linkage to one or more samples that the genomic file was derived from
             {
-                "genomic_sample_id": "HG00096",  # The name of the sample in the genomic file
+                "genomic_file_sample_id": "HG00096",  # The name of the sample in the genomic file
                 "submitter_sample_id": "SAMPLE_REGISTRATION_1"   # The submitter_sample_id to link to
             }
         ]
     },
     {  ## Example linking genomic and index files in local storage to multiple samples 
         "program_id": "SYNTHETIC-2",
-        "genomic_id": "multisample",
+        "genomic_file_id": "multisample",
         "main": {
             "access_method": "file:////app/htsget_server/data/files/multisample_1.vcf.gz",
             "name": "multisample_1.vcf.gz"
@@ -179,11 +179,11 @@ The file should contain an array of dictionaries, where each item represents a s
         },
         "samples": [
             {
-                "genomic_sample_id": "TUMOR",
+                "genomic_file_sample_id": "TUMOR",
                 "submitter_sample_id": "SAMPLE_REGISTRATION_4"
             },
 			{
-				"genomic_sample_id": "NORMAL",
+				"genomic_file_sample_id": "NORMAL",
 				"submitter_sample_id": "SPECIMEN_5"
 			}
         ]
@@ -192,7 +192,7 @@ The file should contain an array of dictionaries, where each item represents a s
 ```
 
 > [!Tip]
-> - `genomic_id` is the filename of the variation file (e.g. HG00096.vcf.gz, HG00096.bam)
+> - `genomic_file_id` is the filename of the variation file (e.g. HG00096.vcf.gz, HG00096.bam)
 > - Access methods can either be of the format `s3://[endpoint]/[bucket name]` or `file:///[directory relative to root on htsget container]`. 
 > - `submitter_sample_id`(s) are the (mandatory) links to the `Sample Registration objects uploaded during clinical data ingest.
 > - `index` is the file location and name of the index file; for instance a tabix (`tbi`) or cram index (`crai`)

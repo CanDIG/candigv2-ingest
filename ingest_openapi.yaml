@@ -174,7 +174,7 @@ components:
         program_id:
           type: string
           description: Name of the cohort this sample belongs to. The user must be authorized to add data to this cohort.
-        genomic_id:
+        genomic_file_id:
           type: string
           description: A unique name for this genomic data resource
           example: "HG00096.vcf"
@@ -215,7 +215,7 @@ components:
             $ref: "#/components/schemas/SampleLink"
       required:
         - program_id
-        - genomic_id
+        - genomic_file_id
         - metadata
         - main
         - samples
@@ -253,13 +253,13 @@ components:
           type: string
           description: the name of the sample as listed in the linked donor data
           example: sample_registration_id_1
-        genomic_sample_id:
+        genomic_file_sample_id:
           type: string
           description: the name of the sample in the genomic data resource
           example: TUMOUR/NORMAL/PROGRAM_SAMPLE_REGISTRATION_ID_1
       required:
         - submitter_sample_id
-        - genomic_sample_id
+        - genomic_file_sample_id
     BearerToken:
       type: string
       description: An Authorization BearerToken header

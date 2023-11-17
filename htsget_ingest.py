@@ -22,15 +22,15 @@ def link_genomic_data(headers, sample):
 
     # get the master genomic object, or create it:
     genomic_drs_obj = {
-        "id": sample["genomic_id"],
-        "name": sample["genomic_id"],
+        "id": sample["genomic_file_id"],
+        "name": sample["genomic_file_id"],
         "description": sample["metadata"]["sequence_type"],
         "cohort": sample["program_id"],
         "reference_genome": sample["metadata"]["reference"],
         "version": "v1",
         "contents": []
     }
-    response = requests.get(f"{url}/{sample['genomic_id']}", headers=headers)
+    response = requests.get(f"{url}/{sample['genomic_file_id']}", headers=headers)
     if response.status_code == 200:
         genomic_drs_obj = response.json()
 
@@ -60,13 +60,13 @@ def link_genomic_data(headers, sample):
         not_found = True
         if len(sample_drs_obj["contents"]) > 0:
             for obj in sample_drs_obj["contents"]:
-                if obj["name"] == sample["genomic_id"]:
+                if obj["name"] == sample["genomic_file_id"]:
                     not_found = False
         if not_found:
             contents_obj = {
-                "name": sample["genomic_id"],
-                "id": sample["genomic_id"],
-                "drs_uri": [f"{HOSTNAME}/{sample['genomic_id']}"]
+                "name": sample["genomic_file_id"],
+                "id": sample["genomic_file_id"],
+                "drs_uri": [f"{HOSTNAME}/{sample['genomic_file_id']}"]
             }
             sample_drs_obj["contents"].append(contents_obj)
 
@@ -86,7 +86,7 @@ def link_genomic_data(headers, sample):
         if not_found:
             contents_obj = {
                 "name": clin_sample["submitter_sample_id"],
-                "id": clin_sample["genomic_sample_id"],
+                "id": clin_sample["genomic_file_sample_id"],
                 "drs_uri": [f"{HOSTNAME}/{clin_sample['submitter_sample_id']}"]
             }
             genomic_drs_obj["contents"].append(contents_obj)
@@ -156,14 +156,14 @@ def htsget_ingest(ingest_json, headers):
     status_code = 200
     for sample in ingest_json:
         # validate the access method
-        result[sample["genomic_id"]] = {}
+        result[sample["genomic_file_id"]] = {}
         # create the corresponding DRS objects
         response = link_genomic_data(headers, sample)
         for err in response["errors"]:
             if "403" in err["error"]:
                 status_code = 403
                 break
-        result[sample["genomic_id"]] = response
+        result[sample["genomic_file_id"]] = response
     return result, status_code
 
 def main():

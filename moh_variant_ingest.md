@@ -1,6 +1,6 @@
 For the MoH data model, we will get vcf files that represent paired samples of tumour/normal calls.
 
-We need to know where the vcf file and its index file are located. The genomic_id will be the base filename of the vcf file, without the vcf.gz extension.
+We need to know where the vcf file and its index file are located. The genomic_file_id will be the base filename of the vcf file, without the vcf.gz extension.
 
 If these are located in an S3 bucket, we need to know:
     - endpoint
@@ -16,7 +16,7 @@ We also need to know what sample_registrations represent the tumour and normal s
 ```
 {
     "program_id": program_id,
-    "genomic_id": base_filename,
+    "genomic_file_id": base_filename,
     "access_method": {
         anyOf: [
             "s3://endpoint/bucket",
@@ -43,25 +43,25 @@ The final shape of the DrsObjects that represent this:
 ```
 [
     {
-        "id": f"{input['genomic_id']}".vcf.gz.tbi,
+        "id": f"{input['genomic_file_id']}".vcf.gz.tbi,
         "mime_type": "application/octet-stream",
-        "name": f"{input['genomic_id']}".vcf.gz.tbi,
+        "name": f"{input['genomic_file_id']}".vcf.gz.tbi,
         "contents": [
             {
                 "type": "s3",
-                "access_id": f"{input['access_method']}/{input['genomic_id']}".vcf.gz.tbi"
+                "access_id": f"{input['access_method']}/{input['genomic_file_id']}".vcf.gz.tbi"
             }
         ],
         "version": "v1"
     },
     {
-        "id": f"{input['genomic_id']}".vcf.gz,
+        "id": f"{input['genomic_file_id']}".vcf.gz,
         "mime_type": "application/octet-stream",
-        "name": f"{input['genomic_id']}".vcf.gz,
+        "name": f"{input['genomic_file_id']}".vcf.gz,
         "contents": [
             {
                 "type": "s3",
-                "access_id": f"{input['access_method']}/{input['genomic_id']}".vcf.gz"
+                "access_id": f"{input['access_method']}/{input['genomic_file_id']}".vcf.gz"
             }
         ],
         "version": "v1"
@@ -71,10 +71,10 @@ The final shape of the DrsObjects that represent this:
         "contents": [
             {
                 "drs_uri": [
-                    f"{drs_url}/{input['genomic_id']}"
+                    f"{drs_url}/{input['genomic_file_id']}"
                 ],
                 "name": input['sample'][0]['sample_name_in_file'],
-                "id": f"{input['genomic_id']}"
+                "id": f"{input['genomic_file_id']}"
             }
         ],
         "version": "v1"
@@ -84,31 +84,31 @@ The final shape of the DrsObjects that represent this:
         "contents": [
             {
                 "drs_uri": [
-                    f"{drs_url}/{input['genomic_id']}"
+                    f"{drs_url}/{input['genomic_file_id']}"
                 ],
                 "name": input['sample'][1]['sample_name_in_file'],
-                "id": f"{input['genomic_id']}"
+                "id": f"{input['genomic_file_id']}"
             }
         ],
         "version": "v1"
     },
     {
-        "id": f"{input['genomic_id']}",
+        "id": f"{input['genomic_file_id']}",
         "mime_type": "application/octet-stream",
-        "name": f"{input['genomic_id']}",
+        "name": f"{input['genomic_file_id']}",
         "contents": [
             {
                 "drs_uri": [
-                    f"{drs_url}/f"{input['genomic_id']}".vcf.gz.tbi"
+                    f"{drs_url}/f"{input['genomic_file_id']}".vcf.gz.tbi"
                 ],
-                "name": f"{input['genomic_id']}".vcf.gz.tbi,
+                "name": f"{input['genomic_file_id']}".vcf.gz.tbi,
                 "id": "index"
             },
             {
                 "drs_uri": [
-                    f"{drs_url}/f"{input['genomic_id']}".vcf.gz"
+                    f"{drs_url}/f"{input['genomic_file_id']}".vcf.gz"
                 ],
-                "name": f"{input['genomic_id']}".vcf.gz,
+                "name": f"{input['genomic_file_id']}".vcf.gz,
                 "id": "variant"
             },
             {
