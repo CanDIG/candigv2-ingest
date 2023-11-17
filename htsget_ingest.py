@@ -45,14 +45,14 @@ def link_genomic_data(headers, sample):
     for clin_sample in sample["samples"]:
         # for each sample in the samples, get the SampleDrsObject or create it
         sample_drs_obj = {
-            "id": clin_sample["donor_sample_id"],
-            "name": clin_sample["donor_sample_id"],
+            "id": clin_sample["submitter_sample_id"],
+            "name": clin_sample["submitter_sample_id"],
             "description": "sample",
             "cohort": sample["program_id"],
             "version": "v1",
             "contents": []
         }
-        response = requests.get(f"{url}/{clin_sample['donor_sample_id']}", headers=headers)
+        response = requests.get(f"{url}/{clin_sample['submitter_sample_id']}", headers=headers)
         if response.status_code == 200:
             sample_drs_obj = response.json()
 
@@ -81,13 +81,13 @@ def link_genomic_data(headers, sample):
         not_found = True
         if len(genomic_drs_obj["contents"]) > 0:
             for obj in genomic_drs_obj["contents"]:
-                if obj["name"] == clin_sample["donor_sample_id"]:
+                if obj["name"] == clin_sample["submitter_sample_id"]:
                     not_found = False
         if not_found:
             contents_obj = {
-                "name": clin_sample["donor_sample_id"],
+                "name": clin_sample["submitter_sample_id"],
                 "id": clin_sample["genomic_sample_id"],
-                "drs_uri": [f"{HOSTNAME}/{clin_sample['donor_sample_id']}"]
+                "drs_uri": [f"{HOSTNAME}/{clin_sample['submitter_sample_id']}"]
             }
             genomic_drs_obj["contents"].append(contents_obj)
 
