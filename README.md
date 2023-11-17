@@ -134,9 +134,9 @@ If necessary, genomic samples can be loaded directly from the htsget container's
 
 ### Ingest into Htsget
 
-Metadata about each genomic file should be specified in a `JSON` file. 
+Metadata about each genomic file should be specified in a `JSON` file.
 
-The file should contain an array of dictionaries, where each item represents a single file. Each dictionary specifies important information about the genomic file and how it links to the ingested clinical data. The structure of this dictionary is specified in the ingest [openapi schema](ingest_openapi.yaml#L171C8-L171C8) and a commented example is below: 
+The file should contain an array of dictionaries, where each item represents a single file. Each dictionary specifies important information about the genomic file and how it links to the ingested clinical data. The structure of this dictionary is specified in the ingest [openapi schema](ingest_openapi.yaml#L171C8-L171C8) and a commented example is below:
 
 ```
 [
@@ -154,16 +154,16 @@ The file should contain an array of dictionaries, where each item represents a s
         "metadata": {                     # Metadata about the file
             "sequence_type": "wgs",       # type of data sequenced (whole genome or whole transcriptome), allowed values: [wgs, wts]
             "data_type": "variant",       # type of data represented, allowed values: [variant, read]
-            "reference": "hg37"           # which reference genome was used for alignment, allowed values: [hg37, hg38] 
+            "reference": "hg37"           # which reference genome was used for alignment, allowed values: [hg37, hg38]
         },
         "samples": [                      # Linkage to one or more samples that the genomic file was derived from
             {
                 "genomic_sample_id": "HG00096",  # The name of the sample in the genomic file
-                "donor_sample_id": "SAMPLE_REGISTRATION_1"   # The submitter_sample_id to link to
+                "submitter_sample_id": "SAMPLE_REGISTRATION_1"   # The submitter_sample_id to link to
             }
         ]
     },
-    {  ## Example linking genomic and index files in local storage to multiple samples 
+    {  ## Example linking genomic and index files in local storage to multiple samples
         "program_id": "SYNTHETIC-2",
         "genomic_id": "multisample",
         "main": {
@@ -182,11 +182,11 @@ The file should contain an array of dictionaries, where each item represents a s
         "samples": [
             {
                 "genomic_sample_id": "TUMOR",
-                "donor_sample_id": "SAMPLE_REGISTRATION_4"
+                "submitter_sample_id": "SAMPLE_REGISTRATION_4"
             },
 			{
 				"genomic_sample_id": "NORMAL",
-				"donor_sample_id": "SPECIMEN_5"
+				"submitter_sample_id": "SPECIMEN_5"
 			}
         ]
     }
@@ -195,8 +195,8 @@ The file should contain an array of dictionaries, where each item represents a s
 
 > [!Tip]
 > - `genomic_id` is the filename of the variation file (e.g. HG00096.vcf.gz, HG00096.bam)
-> - Access methods can either be of the format `s3://[endpoint]/[bucket name]` or `file://[directory relative to root on htsget container]`. 
-> - `donor_sample_id`(s) are the (mandatory) links to the sample_registration objects uploaded during clinical data ingest.
+> - Access methods can either be of the format `s3://[endpoint]/[bucket name]` or `file://[directory relative to root on htsget container]`.
+> - `submitter_sample_id`(s) are the (mandatory) links to the sample_registration objects uploaded during clinical data ingest.
 > - `index` is the file extension of the index file for the variation; for instance, `tbi` or `crai`
 > - If an S3 bucket access method is provided, assuming you have properly added the S3 credentials to vault (see above), the service will scan the S3 bucket to ensure the relevant files are present.
 > - There is no validation that the genomic files that exist locally or mounted to htsget. If the local (`file:///`) method is used it is important to check all files are present before proceeding with ingest.
