@@ -35,9 +35,7 @@ def test_htsget_ingest(requests_mock):
             print(json.dumps(response, indent=4))
             assert len(response["errors"]) == 0
             assert "genomic" in response
-            print(len(response["genomic"]["contents"]))
             assert len(response["genomic"]["contents"]) == 2 + len(sample["samples"])
             assert "sample" in response
             assert len(response["sample"]) == len(sample["samples"])
             assert len(response["sample"][0]["contents"]) == 1
-
