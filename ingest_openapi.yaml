@@ -197,7 +197,7 @@ components:
                 - read
             reference:
               type: string
-              description: which reference genome was used for alignment
+              description: which reference genome was used for alignment (hg37 or hg38)
               enum:
                 - hg37
                 - hg38

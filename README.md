@@ -132,7 +132,7 @@ If necessary, genomic samples can be loaded directly from the htsget container's
 
 ### iii. Prepare the Genomic JSON file
 
-Metadata about each genomic file should be specified in a `JSON` file. 
+Metadata about each genomic file should be specified in a `JSON` file.
 
 The file should contain an array of dictionaries, where each item represents a single file. Each dictionary specifies important information about the genomic file and how it links to the ingested clinical data. The structure of this dictionary is specified in the ingest [openapi schema](ingest_openapi.yaml#L171C8-L171C8), an [example file](tests/genomic_ingest.json) exists within the test files and a commented example is below: 
 
@@ -152,7 +152,7 @@ The file should contain an array of dictionaries, where each item represents a s
         "metadata": {                     # Metadata about the file
             "sequence_type": "wgs",       # type of data sequenced (whole genome or whole transcriptome), allowed values: [wgs, wts]
             "data_type": "variant",       # type of data represented, allowed values: [variant, read]
-            "reference": "hg37"           # which reference genome was used for alignment, allowed values: [hg37, hg38] 
+            "reference": "hg37"           # which reference genome was used for alignment, allowed values: [hg37, hg38]
         },
         "samples": [                      # Linkage to one or more samples that the genomic file was derived from
             {
@@ -161,7 +161,7 @@ The file should contain an array of dictionaries, where each item represents a s
             }
         ]
     },
-    {  ## Example linking genomic and index files in local storage to multiple samples 
+    {  ## Example linking genomic and index files in local storage to multiple samples
         "program_id": "SYNTHETIC-2",
         "genomic_file_id": "multisample",
         "main": {
