@@ -60,7 +60,7 @@ The clinical ingest API runs at `/ingest/clinical`. Simply send a request with a
 
 #### Command line
 
-This method is mainly used for development work. 
+This method is mainly used for development work but may also be used if the JSON body is too big to send easily via POST. 
 
 To ingest via the commandline script, the location of your clinical data JSON must be specified. This can be done either by: 
 
