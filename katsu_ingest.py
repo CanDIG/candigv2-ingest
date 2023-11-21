@@ -286,7 +286,7 @@ def main():
     headers = auth.get_auth_header()
 
     parser = argparse.ArgumentParser(description="A script that ingests clinical data into Katsu")
-    parser.add_argument("--input", help="A file specifying the data to ingest")
+    parser.add_argument("--input", help="Path to the clinical json file to ingest.")
     args = parser.parse_args()
 
     data_location = os.environ.get("CLINICAL_DATA_LOCATION")
