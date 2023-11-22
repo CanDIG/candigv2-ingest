@@ -15,7 +15,8 @@ RUN mkdir /ingest_app
 WORKDIR /ingest_app
 
 ADD ./requirements.txt /ingest_app/requirements.txt
-RUN pip install -r requirements.txt
+ADD ./requirements-container.txt /ingest_app/requirements-container.txt
+RUN pip install -r requirements-container.txt
 
 COPY . /ingest_app
 
