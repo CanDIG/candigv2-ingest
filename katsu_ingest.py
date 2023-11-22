@@ -267,7 +267,10 @@ def prepare_clinical_data_for_ingest(ingest_json):
 def ingest_clinical_data(ingest_json, headers):
     schemas_to_ingest = prepare_clinical_data_for_ingest(ingest_json)
     headers["Content-Type"] = "application/json"
+    status_code = 200
     for program in schemas_to_ingest.values():
+        if "schemas" not in program:
+            continue
         schemas = program.pop("schemas")
         ingest_results, status_code = ingest_schemas(schemas, headers)
         print(ingest_results, status_code)
