@@ -99,9 +99,10 @@ def ingest_schemas(fields, headers):
                 result["errors"].append(f"{type}: {message}")
                 break
             else:
-                if "error" in response.json():
-                    result["errors"].append(f"{type}: {response.status_code} {response.json()['error']}")
-                else:
+                try:
+                    if "error" in response.json():
+                        result["errors"].append(f"{type}: {response.status_code} {response.json()['error']}")
+                except:
                     message = f"\nREQUEST STATUS CODE: {response.status_code} \nRETURN MESSAGE: {response.text}\n"
                     result["errors"].append(f"{type}: {message}")
                 if type == "programs" and "unique" in response.text:
