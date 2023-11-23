@@ -292,9 +292,9 @@ def main():
     parser.add_argument("--input", help="Path to the clinical json file to ingest.")
     args = parser.parse_args()
 
-    data_location = os.environ.get("CLINICAL_DATA_LOCATION")
+    data_location = args.input
     if not data_location:
-        data_location = args.input
+        data_location = os.environ.get("CLINICAL_DATA_LOCATION")
         if not data_location:
             print("ERROR: Could not find input data. Either --input is required or CLINICAL_DATA_LOCATION must be set.")
             exit()
