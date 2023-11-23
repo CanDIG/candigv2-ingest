@@ -140,7 +140,7 @@ The file should contain an array of dictionaries, where each item represents a s
 [
     {   ## Example linking to genomic and index files in s3 storage to a single sample
         "program_id": "SYNTHETIC-2",      # The name of the program
-        "genomic_file_id": "HG00096.cnv.vcf",  # The identifier used to identify the genomic file, usually the filename, minus extensions
+        "genomic_file_id": "HG00096.cnv",  # The identifier used to identify the genomic file, usually the filename, minus extensions
         "main": {                         # location and name of the main genomic file, bam/cram/vcf
             "access_method": "s3://s3.us-east-1.amazonaws.com/1000genomes/release/20130502/ALL.chr22.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz?public=true",
             "name": "HG00096.cnv.vcf.gz"
