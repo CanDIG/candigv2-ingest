@@ -7,6 +7,7 @@ import auth
 from ingest_result import *
 from katsu_ingest import ingest_clinical_data
 from htsget_ingest import htsget_ingest
+from opa_ingest import remove_user_from_dataset, add_user_to_dataset
 import config
 
 app = Flask(__name__)
@@ -49,6 +50,27 @@ def add_s3_credential():
     data = connexion.request.json
     token = request.headers['Authorization'].split("Bearer ")[1]
     return auth.store_aws_credential(data["endpoint"], data["bucket"], data["access_key"], data["secret_key"], token)
+
+
+def add_user_access():
+    data = connexion.request.json
+    token = request.headers['Authorization'].split("Bearer ")[1]
+    try:
+        result = add_user_to_dataset(data["email"], data["program"], token)
+        return result, 200
+    except Exception as e:
+        return {"error": str(e)}, 500
+
+
+def remove_user_access():
+        data = connexion.request.json
+        token = request.headers['Authorization'].split("Bearer ")[1]
+        try:
+            result = remove_user_from_dataset(data["email"], data["program"], token)
+            return result, 200
+        except Exception as e:
+            return {"error": "User access could not be added"}, 500
+
 
 def add_genomic_linkages():
     headers = {}

@@ -34,6 +34,32 @@ paths:
               application/json:
                 schema:
                   type: object
+  /user-access:
+    post:
+      description: Add user access for a dataset
+      operationId: ingest_operations.add_user_access
+      requestBody:
+        $ref: '#/components/requestBodies/UserAccessRequest'
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+    delete:
+      description: Delete user access for a dataset
+      operationId: ingest_operations.remove_user_access
+      requestBody:
+        $ref: '#/components/requestBodies/UserAccessRequest'
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+
   /genomic:
     post:
       description: Add linkages between clinical donors and genomic data.
@@ -110,6 +136,21 @@ components:
               - bucket
               - access_key
               - secret_key
+    UserAccessRequest:
+      content:
+        'application/json':
+          schema:
+            type: object
+            properties:
+              email:
+                type: string
+                description: User's email address
+              program:
+                type: string
+                description: name of program to grant user access
+            required:
+              - email
+              - program
     GenomicIngestRequest:
       content:
         'application/json':
