@@ -197,7 +197,7 @@ def main():
             genomic_input = json.loads(f.read())
     if len(genomic_input) == 0:
         return "No samples to ingest"
-    result = htsget_ingest(genomic_input, auth.get_auth_header())
+    result, status_code = htsget_ingest(genomic_input, auth.get_auth_header())
     print(json.dumps(result, indent=4))
 
 if __name__ == "__main__":
