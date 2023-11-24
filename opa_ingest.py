@@ -41,7 +41,7 @@ def remove_user_from_dataset(user, dataset, token):
     controlled_access_list = access["result"]["controlled_access_list"]
     if user in controlled_access_list:
         if dataset in controlled_access_list[user]:
-            controlled_access_list[user].pop(dataset)
+            controlled_access_list[user].remove(dataset)
             # put back:
             response = requests.put(OPA_URL + "/v1/data/access", headers=headers, json=access["result"])
             if response.status_code == 204:
