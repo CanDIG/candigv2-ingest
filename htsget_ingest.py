@@ -15,7 +15,7 @@ import jsonschema
 
 CANDIG_URL = os.getenv("CANDIG_URL", "")
 HTSGET_URL = CANDIG_URL + "/genomics"
-HOSTNAME = HTSGET_URL.replace(f"{urlparse(CANDIG_URL).scheme}://","")
+DRS_HOST_URL = "drs://" + HTSGET_URL.replace(f"{urlparse(CANDIG_URL).scheme}://","")
 
 
 def link_genomic_data(headers, sample):
@@ -70,7 +70,7 @@ def link_genomic_data(headers, sample):
             contents_obj = {
                 "name": sample["genomic_file_id"],
                 "id": sample["genomic_file_id"],
-                "drs_uri": [f"{HOSTNAME}/{sample['genomic_file_id']}"]
+                "drs_uri": [f"{DRS_HOST_URL}/{sample['genomic_file_id']}"]
             }
             sample_drs_obj["contents"].append(contents_obj)
 
@@ -91,7 +91,7 @@ def link_genomic_data(headers, sample):
             contents_obj = {
                 "name": clin_sample["submitter_sample_id"],
                 "id": clin_sample["genomic_file_sample_id"],
-                "drs_uri": [f"{HOSTNAME}/{clin_sample['submitter_sample_id']}"]
+                "drs_uri": [f"{DRS_HOST_URL}/{clin_sample['submitter_sample_id']}"]
             }
             genomic_drs_obj["contents"].append(contents_obj)
 
@@ -133,7 +133,7 @@ def add_file_drs_object(genomic_drs_obj, file, type, headers):
             contents_obj = {
                 "name": file["name"],
                 "id": type,
-                "drs_uri": [f"{HOSTNAME}/{file['name']}"]
+                "drs_uri": [f"{DRS_HOST_URL}/{file['name']}"]
             }
             genomic_drs_obj["contents"].append(contents_obj)
             return contents_obj
