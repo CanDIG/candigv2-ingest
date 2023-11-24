@@ -137,6 +137,7 @@ def add_file_drs_object(genomic_drs_obj, file, type, headers):
     genomic_drs_obj["contents"].append(contents_obj)
     return contents_obj
 
+
 def get_access_method(url):
     if url.startswith("s3"):
         return {
@@ -188,6 +189,7 @@ def htsget_ingest(ingest_json, headers):
             result[sample["genomic_file_id"]] = response
         # result[sample["genomic_file_id"]] = response
     return result, status_code
+
 
 def main():
     parser = argparse.ArgumentParser(description="A script that ingests genomic data into htsget.")
