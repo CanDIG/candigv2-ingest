@@ -199,6 +199,8 @@ components:
         schemas_not_used:
           type: array
           description: a list of schemas that are never used in this dataset
+          items:
+            type: string
         summary_cases:
           type: object
           description: overall completeness counts
