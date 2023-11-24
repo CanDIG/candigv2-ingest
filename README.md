@@ -182,10 +182,10 @@ The file should contain an array of dictionaries, where each item represents a s
                 "genomic_file_sample_id": "TUMOR",
                 "submitter_sample_id": "SAMPLE_REGISTRATION_4"
             },
-			{
-				"genomic_file_sample_id": "NORMAL",
-				"submitter_sample_id": "SPECIMEN_5"
-			}
+            {
+		"genomic_file_sample_id": "NORMAL",
+		"submitter_sample_id": "SPECIMEN_5"
+	    }
         ]
     }
 ]
