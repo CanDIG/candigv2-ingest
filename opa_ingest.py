@@ -57,7 +57,8 @@ def main():
 
     parser.add_argument("--user", help="user name", required=False)
     parser.add_argument("--userfile", help="user file", required=False)
-    parser.add_argument("--dataset", help="dataset name")
+    parser.add_argument("--dataset", help="dataset name", required=True)
+    parser.add_argument("--remove", action='store_true', help="remove user access from dataset", required=False)
 
     args = parser.parse_args()
     token = auth.get_site_admin_token()
@@ -69,10 +70,16 @@ def main():
             for line in lines:
                 if re.match(r"^/s*$", line) is not None:
                     continue
-                last, status_code = add_user_access(line.strip(), args.dataset, OPA_URL, token)
+                if args.remove:
+                    last, status_code = remove_user_from_dataset(line.strip(), args.dataset, token)
+                else:
+                    last, status_code = add_user_to_dataset(line.strip(), args.dataset, token)
             print(json.dumps(last, indent=4))
     elif args.user is not None:
-        print(json.dumps(add_user_access(args.user, args.dataset, OPA_URL, token), indent=4))
+        if args.remove:
+            print(json.dumps(remove_user_from_dataset(args.user, args.dataset, token), indent=4))
+        else:
+            print(json.dumps(add_user_to_dataset(args.user, args.dataset, token), indent=4))
     else:
         raise Exception("Either a user name or a file of users is required.")
 
