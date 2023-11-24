@@ -220,6 +220,7 @@ components:
         - genomic_file_id
         - metadata
         - main
+        - index
         - samples
     File:
       type: object
