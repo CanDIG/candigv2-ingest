@@ -203,7 +203,9 @@ components:
                 - hg38
               default: hg38
           required:
+            - sequence_type
             - data_type
+            - reference
         main:
           $ref: "#/components/schemas/File"
         index:
@@ -229,7 +231,7 @@ components:
         access_method:
           type: string
           description: fully-described URI to the file
-          anyOf:
+          oneOf:
             - $ref: "#/components/schemas/S3Access"
             - $ref: "#/components/schemas/FileAccess"
       required:

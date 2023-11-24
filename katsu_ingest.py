@@ -99,9 +99,10 @@ def ingest_schemas(fields, headers):
                 result["errors"].append(f"{type}: {message}")
                 break
             else:
-                if "error" in response.json():
-                    result["errors"].append(f"{type}: {response.status_code} {response.json()['error']}")
-                else:
+                try:
+                    if "error" in response.json():
+                        result["errors"].append(f"{type}: {response.status_code} {response.json()['error']}")
+                except:
                     message = f"\nREQUEST STATUS CODE: {response.status_code} \nRETURN MESSAGE: {response.text}\n"
                     result["errors"].append(f"{type}: {message}")
                 if type == "programs" and "unique" in response.text:
@@ -292,9 +293,9 @@ def main():
     parser.add_argument("--input", help="Path to the clinical json file to ingest.")
     args = parser.parse_args()
 
-    data_location = os.environ.get("CLINICAL_DATA_LOCATION")
+    data_location = args.input
     if not data_location:
-        data_location = args.input
+        data_location = os.environ.get("CLINICAL_DATA_LOCATION")
         if not data_location:
             print("ERROR: Could not find input data. Either --input is required or CLINICAL_DATA_LOCATION must be set.")
             exit()

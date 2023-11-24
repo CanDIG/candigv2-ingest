@@ -6,7 +6,11 @@ import re
 import json
 from ingest_result import IngestServerException, IngestUserException, IngestResult
 import requests
+import sys
 from urllib.parse import urlparse
+sys.path.append("clinical_ETL_code")
+from clinical_ETL_code.schema import openapi_to_jsonschema
+import jsonschema
 
 
 CANDIG_URL = os.getenv("CANDIG_URL", "")
@@ -152,11 +156,25 @@ def get_access_method(url):
 
 
 def htsget_ingest(ingest_json, headers):
+    with open("ingest_openapi.yaml") as f:
+        openapi_text = f.read()
+        json_schema = openapi_to_jsonschema(openapi_text, "GenomicSample")
     result = {}
     status_code = 200
     for sample in ingest_json:
-        # validate the access method
         result[sample["genomic_file_id"]] = {}
+        # validate the json
+        if sample["genomic_file_id"] == sample["main"]["name"] or sample["genomic_file_id"] == sample["index"]["name"]:
+            result[sample["genomic_file_id"]] = {"errors": f"Sample {sample['genomic_file_id']} cannot have the same name as one of its files."}
+        else:
+            for error in jsonschema.Draft202012Validator(json_schema).iter_errors(sample):
+                if "errors" not in result[sample["genomic_file_id"]]:
+                    result[sample["genomic_file_id"]]["errors"] = []
+                result[sample["genomic_file_id"]]["errors"].append(f"{' > '.join(error.path)}: {error.message}")
+        if "errors" in result[sample["genomic_file_id"]]:
+            continue
+
+        # validate the access method
         # create the corresponding DRS objects
         response = link_genomic_data(headers, sample)
         for err in response["errors"]:
