@@ -21,12 +21,6 @@ paths:
       operationId: ingest_operations.add_s3_credential
       requestBody:
         $ref: '#/components/requestBodies/S3CredentialRequest'
-      parameters:
-        - in: header
-          name: Authorization
-          schema:
-            $ref: '#/components/schemas/BearerToken'
-          required: true
       responses:
           200:
             description: Success
@@ -34,12 +28,21 @@ paths:
               application/json:
                 schema:
                   type: object
-  /user-access:
+  /program/{program_id}/email/{email}:
+    parameters:
+      - in: path
+        name: program_id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: email
+        schema:
+          type: string
+        required: true
     post:
       description: Add user access for a dataset
       operationId: ingest_operations.add_user_access
-      requestBody:
-        $ref: '#/components/requestBodies/UserAccessRequest'
       responses:
         200:
           description: Success
@@ -50,8 +53,6 @@ paths:
     delete:
       description: Delete user access for a dataset
       operationId: ingest_operations.remove_user_access
-      requestBody:
-        $ref: '#/components/requestBodies/UserAccessRequest'
       responses:
         200:
           description: Success
@@ -136,21 +137,6 @@ components:
               - bucket
               - access_key
               - secret_key
-    UserAccessRequest:
-      content:
-        'application/json':
-          schema:
-            type: object
-            properties:
-              email:
-                type: string
-                description: User's email address
-              program:
-                type: string
-                description: name of program to grant user access
-            required:
-              - email
-              - program
     GenomicIngestRequest:
       content:
         'application/json':
@@ -306,10 +292,6 @@ components:
       required:
         - submitter_sample_id
         - genomic_file_sample_id
-    BearerToken:
-      type: string
-      description: An Authorization BearerToken header
-      pattern: Bearer .+
     IngestResponse:
       type: object
       properties:

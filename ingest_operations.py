@@ -52,24 +52,24 @@ def add_s3_credential():
     return auth.store_aws_credential(data["endpoint"], data["bucket"], data["access_key"], data["secret_key"], token)
 
 
-def add_user_access():
-    data = connexion.request.json
+@app.route('/program/<path:program_id>/email/<path:email>')
+def add_user_access(program_id, email):
     token = request.headers['Authorization'].split("Bearer ")[1]
     try:
-        result = add_user_to_dataset(data["email"], data["program"], token)
+        result = add_user_to_dataset(email, program_id, token)
         return result, 200
     except Exception as e:
         return {"error": str(e)}, 500
 
 
-def remove_user_access():
-        data = connexion.request.json
-        token = request.headers['Authorization'].split("Bearer ")[1]
-        try:
-            result = remove_user_from_dataset(data["email"], data["program"], token)
-            return result, 200
-        except Exception as e:
-            return {"error": "User access could not be added"}, 500
+@app.route('/program/<path:program_id>/email/<path:email>')
+def remove_user_access(program_id, email):
+    token = request.headers['Authorization'].split("Bearer ")[1]
+    try:
+        result = remove_user_from_dataset(email, program_id, token)
+        return result, 200
+    except Exception as e:
+        return {"error": str(e)}, 500
 
 
 def add_genomic_linkages():
