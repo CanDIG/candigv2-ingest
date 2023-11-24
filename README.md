@@ -60,9 +60,9 @@ The clinical ingest API runs at `/ingest/clinical`. Simply send a request with a
 
 #### Command line
 
-This method is mainly used for development work but may also be used if the JSON body is too big to send easily via POST. 
+This method is mainly used for development work but may also be used if the JSON body is too big to send easily via POST.
 
-To ingest via the commandline script, the location of your clinical data JSON must be specified. This can be done either by: 
+To ingest via the commandline script, the location of your clinical data JSON must be specified. This can be done either by:
 
 supplying it as an argument to the script:
 
@@ -134,7 +134,7 @@ If necessary, genomic samples can be loaded directly from the htsget container's
 
 Metadata about each genomic file should be specified in a `JSON` file.
 
-The file should contain an array of dictionaries, where each item represents a single file. Each dictionary specifies important information about the genomic file and how it links to the ingested clinical data. The structure of this dictionary is specified in the ingest [openapi schema](ingest_openapi.yaml#L171C8-L171C8), an [example file](tests/genomic_ingest.json) exists within the test files and a commented example is below: 
+The file should contain an array of dictionaries, where each item represents a single file. Each dictionary specifies important information about the genomic file and how it links to the ingested clinical data. The structure of this dictionary is specified in the ingest [openapi schema](ingest_openapi.yaml#L171C8-L171C8), an [example file](tests/genomic_ingest.json) exists within the test files and a commented example is below:
 
 ```
 [
@@ -193,7 +193,7 @@ The file should contain an array of dictionaries, where each item represents a s
 
 > [!Tip]
 > - `genomic_file_id` is the filename of the variation file (e.g. HG00096.vcf.gz, HG00096.bam)
-> - Access methods can either be of the format `s3://[endpoint]/[bucket name]` or `file:///[directory relative to root on htsget container]`. 
+> - Access methods can either be of the format `s3://[endpoint]/[bucket name]` or `file:///[directory relative to root on htsget container]`.
 > - `submitter_sample_id`(s) are the (mandatory) links to the `Sample Registration objects uploaded during clinical data ingest.
 > - `index` is the file location and name of the index file; for instance a tabix (`tbi`) or cram index (`crai`)
 > - If an S3 bucket access method is provided, assuming you have properly added the S3 credentials to vault [(see above)](#Add-s3-credentials-to-vault), the service will scan the S3 bucket to ensure the relevant files are present.
@@ -210,6 +210,18 @@ To ingest using an S3 container, once the files have been added, you can run the
 
 ```bash
 python htsget_ingest.py --samplefile [JSON-formatted sample data as specified above]
+```
+
+## 3. Adding authorization for users to programs
+A site administrator can use either the `opa_ingest.py` command-line script or the API to add authorization for a user to access a program.
+
+#### API
+Use the `/ingest/program/{program_id}/email/{email}` to add or remove a user's email address to the list of users authorized to access that program. Authorization headers for a site admin user must be provided. A POST request adds authorization, while a DELETE request revokes it.
+
+#### Command line
+
+```bash
+python opa_ingest.py --user|userfile [either a user email or a file of user emails] -- dataset [name of dataset] [--remove]
 ```
 
 ## Run as Docker Container
