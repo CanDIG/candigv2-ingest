@@ -15,7 +15,7 @@ import jsonschema
 
 CANDIG_URL = os.getenv("CANDIG_URL", "")
 HTSGET_URL = CANDIG_URL + "/genomics"
-HOSTNAME = HTSGET_URL.replace(f"{urlparse(CANDIG_URL).scheme}://","")
+DRS_HOST_URL = "drs://" + HTSGET_URL.replace(f"{urlparse(CANDIG_URL).scheme}://","")
 
 
 def link_genomic_data(headers, sample):
@@ -70,7 +70,7 @@ def link_genomic_data(headers, sample):
             contents_obj = {
                 "name": sample["genomic_file_id"],
                 "id": sample["genomic_file_id"],
-                "drs_uri": [f"{HOSTNAME}/{sample['genomic_file_id']}"]
+                "drs_uri": [f"{DRS_HOST_URL}/{sample['genomic_file_id']}"]
             }
             sample_drs_obj["contents"].append(contents_obj)
 
@@ -91,7 +91,7 @@ def link_genomic_data(headers, sample):
             contents_obj = {
                 "name": clin_sample["submitter_sample_id"],
                 "id": clin_sample["genomic_file_sample_id"],
-                "drs_uri": [f"{HOSTNAME}/{clin_sample['submitter_sample_id']}"]
+                "drs_uri": [f"{DRS_HOST_URL}/{clin_sample['submitter_sample_id']}"]
             }
             genomic_drs_obj["contents"].append(contents_obj)
 
@@ -129,15 +129,14 @@ def add_file_drs_object(genomic_drs_obj, file, type, headers):
         response = requests.post(url, json=obj, headers=headers)
         if response.status_code > 200:
             return {"error": f"error creating file drs object: {response.status_code} {response.text}"}
-        else:
-            contents_obj = {
-                "name": file["name"],
-                "id": type,
-                "drs_uri": [f"{HOSTNAME}/{file['name']}"]
-            }
-            genomic_drs_obj["contents"].append(contents_obj)
-            return contents_obj
-    return None
+    contents_obj = {
+        "name": file["name"],
+        "id": type,
+        "drs_uri": [f"{DRS_HOST_URL}/{file['name']}"]
+    }
+    genomic_drs_obj["contents"].append(contents_obj)
+    return contents_obj
+
 
 def get_access_method(url):
     if url.startswith("s3"):
@@ -174,15 +173,23 @@ def htsget_ingest(ingest_json, headers):
         if "errors" in result[sample["genomic_file_id"]]:
             continue
 
-        # validate the access method
         # create the corresponding DRS objects
         response = link_genomic_data(headers, sample)
         for err in response["errors"]:
             if "403" in err["error"]:
                 status_code = 403
                 break
-        result[sample["genomic_file_id"]] = response
+
+        # validate the access method
+        url = f"{HTSGET_URL}/htsget/v1/variants/data/{sample['genomic_file_id']}"
+        header_resp = requests.get(url, headers=headers, params={"class": "header"})
+        if header_resp.status_code != 200:
+            result[sample["genomic_file_id"]]["errors"] = header_resp.text
+        else:
+            result[sample["genomic_file_id"]] = response
+        # result[sample["genomic_file_id"]] = response
     return result, status_code
+
 
 def main():
     parser = argparse.ArgumentParser(description="A script that ingests genomic data into htsget.")
@@ -197,7 +204,7 @@ def main():
             genomic_input = json.loads(f.read())
     if len(genomic_input) == 0:
         return "No samples to ingest"
-    result = htsget_ingest(genomic_input, auth.get_auth_header())
+    result, status_code = htsget_ingest(genomic_input, auth.get_auth_header())
     print(json.dumps(result, indent=4))
 
 if __name__ == "__main__":
