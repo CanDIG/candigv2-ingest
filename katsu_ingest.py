@@ -97,6 +97,9 @@ def ingest_schemas(fields, headers):
             ingest_str = f"/katsu/v2/ingest/{name}/"
             ingest_url = CANDIG_URL + ingest_str
 
+            created_count = 0
+            total_count = len(fields[type])
+
             for item in fields[type]:
                 update_headers(headers)
                 response = requests.post(
@@ -104,7 +107,7 @@ def ingest_schemas(fields, headers):
                 )
 
                 if response.status_code == HTTPStatus.CREATED:
-                    result["results"].append(f"Of {len(item)} {type}, {response.json()['created']} were created")
+                    created_count += 1
                 elif response.status_code == HTTPStatus.NOT_FOUND:
                     message = f"ERROR 404: {ingest_url} was not found! Please check the URL."
                     result["errors"].append(f"{type}: {message}")
@@ -123,6 +126,7 @@ def ingest_schemas(fields, headers):
                     if type == "programs" and "unique" in response.text:
                         # this is still okay to return 200:
                         return result, 200
+            result["results"].append(f"Of {total_count} {type}, {created_count} were created")
     return result, response.status_code
 
 
