@@ -72,7 +72,21 @@ def ingest_schemas(fields, headers):
         "results": []
     }
     name_mappings = {
-        "followups": "follow_ups",
+        "programs": "program",
+        "donors": "donor",
+        "primary_diagnoses": "primary_diagnosis",
+        "specimens": "specimen",
+        "sample_registrations": "sample_registration",
+        "treatments": "treatment",
+        "chemotherapies": "chemotherapy",
+        "hormone_therapies": "hormone_therapy",
+        "immunotherapies": "immunotherapy",
+        "radiations": "radiation",
+        "surgeries": "surgery",
+        "biomarkers": "biomarker",
+        "followups": "follow_up",
+        "comorbidities": "comorbidity",
+        "exposures": "exposure"
     }
     for type in fields:
         if len(fields[type]) > 0:
@@ -90,7 +104,7 @@ def ingest_schemas(fields, headers):
                 )
 
                 if response.status_code == HTTPStatus.CREATED:
-                    result["results"].append(f"Of {len(item)} {type}, {response.json()['result']} were created")
+                    result["results"].append(f"Of {len(item)} {type}, {response.json()['created']} were created")
                 elif response.status_code == HTTPStatus.NOT_FOUND:
                     message = f"ERROR 404: {ingest_url} was not found! Please check the URL."
                     result["errors"].append(f"{type}: {message}")
