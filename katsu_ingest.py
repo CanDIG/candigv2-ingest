@@ -72,7 +72,21 @@ def ingest_schemas(fields, headers):
         "results": []
     }
     name_mappings = {
-        "followups": "follow_ups",
+        "programs": "program",
+        "donors": "donor",
+        "primary_diagnoses": "primary_diagnosis",
+        "specimens": "specimen",
+        "sample_registrations": "sample_registration",
+        "treatments": "treatment",
+        "chemotherapies": "chemotherapy",
+        "hormone_therapies": "hormone_therapy",
+        "immunotherapies": "immunotherapy",
+        "radiations": "radiation",
+        "surgeries": "surgery",
+        "biomarkers": "biomarker",
+        "followups": "follow_up",
+        "comorbidities": "comorbidity",
+        "exposures": "exposure"
     }
     for type in fields:
         if len(fields[type]) > 0:
@@ -83,31 +97,36 @@ def ingest_schemas(fields, headers):
             ingest_str = f"/katsu/v2/ingest/{name}/"
             ingest_url = CANDIG_URL + ingest_str
 
-            update_headers(headers)
-            response = requests.post(
-                ingest_url, headers=headers, data=json.dumps(fields[type])
-            )
+            created_count = 0
+            total_count = len(fields[type])
 
-            if response.status_code == HTTPStatus.CREATED:
-                result["results"].append(f"Of {len(fields[type])} {type}, {response.json()['result']} were created")
-            elif response.status_code == HTTPStatus.NOT_FOUND:
-                message = f"ERROR 404: {ingest_url} was not found! Please check the URL."
-                result["errors"].append(f"{type}: {message}")
-                break
-            elif response.status_code == HTTPStatus.FORBIDDEN:
-                message = f"ERROR 403: You do not have permission to ingest {type} for {fields[type][0]['program_id']}"
-                result["errors"].append(f"{type}: {message}")
-                break
-            else:
-                try:
-                    if "error" in response.json():
-                        result["errors"].append(f"{type}: {response.status_code} {response.json()['error']}")
-                except:
-                    message = f"\nREQUEST STATUS CODE: {response.status_code} \nRETURN MESSAGE: {response.text}\n"
+            for item in fields[type]:
+                update_headers(headers)
+                response = requests.post(
+                    ingest_url, headers=headers, data=json.dumps(item)
+                )
+
+                if response.status_code == HTTPStatus.CREATED:
+                    created_count += 1
+                elif response.status_code == HTTPStatus.NOT_FOUND:
+                    message = f"ERROR 404: {ingest_url} was not found! Please check the URL."
                     result["errors"].append(f"{type}: {message}")
-                if type == "programs" and "unique" in response.text:
-                    # this is still okay to return 200:
-                    return result, 200
+                    break
+                elif response.status_code == HTTPStatus.FORBIDDEN:
+                    message = f"ERROR 403: You do not have permission to ingest {type} for {item[0]['program_id']}"
+                    result["errors"].append(f"{type}: {message}")
+                    break
+                else:
+                    try:
+                        if "error" in response.json():
+                            result["errors"].append(f"{type}: {response.status_code} {response.json()['error']}")
+                    except:
+                        message = f"\nREQUEST STATUS CODE: {response.status_code} \nRETURN MESSAGE: {response.text}\n"
+                        result["errors"].append(f"{type}: {message}")
+                    if type == "programs" and "unique" in response.text:
+                        # this is still okay to return 200:
+                        return result, 200
+            result["results"].append(f"Of {total_count} {type}, {created_count} were created")
     return result, response.status_code
 
 
