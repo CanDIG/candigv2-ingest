@@ -7,7 +7,7 @@ import re
 import katsu_ingest
 import htsget_ingest
 
-CANDIG_URL = os.getenv("CANDIG_URL", "")
+CANDIG_URL = os.getenv("CANDIG_URL", "http://localhost")
 HTSGET_URL = CANDIG_URL + "/genomics"
 
 
