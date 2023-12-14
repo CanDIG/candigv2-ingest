@@ -8,8 +8,7 @@ from ingest_result import IngestServerException, IngestUserException, IngestResu
 import requests
 import sys
 from urllib.parse import urlparse
-sys.path.append("clinical_ETL_code")
-from clinical_ETL_code.schema import openapi_to_jsonschema
+from clinical_etl.schema import openapi_to_jsonschema
 import jsonschema
 
 
