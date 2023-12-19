@@ -10,8 +10,7 @@ import requests
 import auth
 from ingest_result import IngestPermissionsException
 
-sys.path.append("clinical_ETL_code")
-from clinical_ETL_code.mohschema import MoHSchema
+from clinical_etl.mohschema import MoHSchema
 
 CANDIG_URL = os.environ.get("CANDIG_URL")
 

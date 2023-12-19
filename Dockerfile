@@ -18,9 +18,6 @@ ADD ./requirements.txt /ingest_app/requirements.txt
 ADD ./requirements-container.txt /ingest_app/requirements-container.txt
 RUN pip install -r requirements-container.txt
 
-ADD ./clinical_ETL_code/requirements.txt /ingest_app/clinical_ETL_code/requirements.txt
-RUN pip install -r clinical_ETL_code/requirements.txt
-
 COPY . /ingest_app
 
 RUN chmod +x ./run.sh
