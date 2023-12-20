@@ -3,7 +3,10 @@ import json
 import requests
 import os
 import re
+import sys
 
+REPO_DIR = os.path.abspath(f"{os.path.dirname(os.path.realpath(__file__))}/..")
+sys.path.insert(0, os.path.abspath(f"{REPO_DIR}"))
 import katsu_ingest
 import htsget_ingest
 
