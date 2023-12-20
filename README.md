@@ -20,8 +20,6 @@ Using a Python 3.10+ environment, run the following:
 
 ```bash
 pip install -r requirements.txt
-git submodule update --init --recursive
-pip install -r clinical_ETL_code/requirements.txt
 ```
 
 ### Set environment variables
