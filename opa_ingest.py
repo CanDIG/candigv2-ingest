@@ -12,12 +12,11 @@ OPA_URL = CANDIG_URL + "/policy"
 
 
 def add_user_to_dataset(user, dataset, token):
-    headers = {"Authorization": f"Bearer {token}"}
     # get current access:
-    access = requests.get(OPA_URL + "/v1/data/access", headers=headers).json()
-    if "result" not in access:
+    access, status_code = auth.get_opa_access()
+    if status_code != 200:
         raise Exception(f"OPA error: {access}")
-    controlled_access_list = access["result"]["controlled_access_list"]
+    controlled_access_list = access["access"]["controlled_access_list"]
     if user in controlled_access_list:
         if dataset not in controlled_access_list[user]:
             controlled_access_list[user].append(dataset)
@@ -25,29 +24,26 @@ def add_user_to_dataset(user, dataset, token):
         controlled_access_list[user] = [dataset]
 
     # put back:
-    response = requests.put(OPA_URL + "/v1/data/access", headers=headers, json=access["result"])
-    if response.status_code == 204:
-        access = requests.get(OPA_URL + "/v1/data/access", headers=headers).json()
-        return {"access": access["result"]}, 200
-    return {"error": f"{response.status_code}: {response.text}"}, response.status_code
+    response, status_code = auth.set_opa_access(access)
+    if status_code != 200:
+        return {"error": f"{status_code}: {response}"}, status_code
+    return response, 200
 
 
 def remove_user_from_dataset(user, dataset, token):
-    headers = {"Authorization": f"Bearer {token}"}
     # get current access:
-    access = requests.get(OPA_URL + "/v1/data/access", headers=headers).json()
-    if "result" not in access:
+    access, status_code = auth.get_opa_access()
+    if status_code != 200:
         raise Exception(f"OPA error: {access}")
-    controlled_access_list = access["result"]["controlled_access_list"]
+    controlled_access_list = access["access"]["controlled_access_list"]
     if user in controlled_access_list:
         if dataset in controlled_access_list[user]:
             controlled_access_list[user].remove(dataset)
             # put back:
-            response = requests.put(OPA_URL + "/v1/data/access", headers=headers, json=access["result"])
-            if response.status_code == 204:
-                access = requests.get(OPA_URL + "/v1/data/access", headers=headers).json()
-                return {"access": access["result"]}
-            return {"error": f"{response.status_code}: {response.text}"}, response.status_code
+            response, status_code = auth.set_opa_access(access)
+            if status_code != 200:
+                return {"error": f"{status_code}: {response}"}, status_code
+            return access, 200
         return {"error": f"Program {dataset} not authorized for {user}"}, 404
     return {"error": f"User {user} not found"}, 404
 

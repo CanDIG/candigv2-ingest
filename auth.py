@@ -132,5 +132,16 @@ def is_authed(request: requests.Request):
         return True
     return False
 
+
+def get_opa_access():
+    response, status_code = authx.auth.get_service_store_secret("opa", key="access")
+    return response, status_code
+
+
+def set_opa_access(input):
+    response, status_code = authx.auth.set_service_store_secret("opa", key="access", value=input)
+    return response, status_code
+
+
 if __name__ == "__main__":
     print(get_site_admin_token())
