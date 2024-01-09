@@ -1,8 +1,7 @@
 import authx.auth
 import os
 import re
-
-
+import json
 import requests
 
 
@@ -139,7 +138,7 @@ def get_opa_access():
 
 
 def set_opa_access(input):
-    response, status_code = authx.auth.set_service_store_secret("opa", key="access", value=input)
+    response, status_code = authx.auth.set_service_store_secret("opa", key="access", value=json.dumps(input))
     return response, status_code
 
 
