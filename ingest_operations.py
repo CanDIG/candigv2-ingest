@@ -56,8 +56,8 @@ def add_s3_credential():
 def add_user_access(program_id, email):
     token = request.headers['Authorization'].split("Bearer ")[1]
     try:
-        result = add_user_to_dataset(email, program_id, token)
-        return result, 200
+        result, status_code = add_user_to_dataset(email, program_id, token)
+        return result, status_code
     except Exception as e:
         return {"error": str(e)}, 500
 
@@ -66,8 +66,8 @@ def add_user_access(program_id, email):
 def remove_user_access(program_id, email):
     token = request.headers['Authorization'].split("Bearer ")[1]
     try:
-        result = remove_user_from_dataset(email, program_id, token)
-        return result, 200
+        result, status_code = remove_user_from_dataset(email, program_id, token)
+        return result, status_code
     except Exception as e:
         return {"error": str(e)}, 500
 
