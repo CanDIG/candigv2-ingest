@@ -24,7 +24,7 @@
     },
     {
         "program_id": "SYNTHETIC-2",
-        "genomic_file_id": "multisample",
+        "genomic_file_id": "multisample_1",
         "main": {
             "access_method": "file:////app/htsget_server/data/files/multisample_1.vcf.gz",
             "name": "multisample_1.vcf.gz"
