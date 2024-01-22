@@ -1,6 +1,6 @@
 # candigv2-ingest
 
-Ingest data into the [CanDIGv2 stack](https://github.com/CanDIG/CanDIGv2). This repository assumes that you have a functional instance of the [CanDIGv2 software stack](https://github.com/CanDIG/CanDIGv2).
+This repository is used to ingest data into the [CanDIGv2 stack](https://github.com/CanDIG/CanDIGv2). It assumes that you have a functional instance of the [CanDIGv2 software stack](https://github.com/CanDIG/CanDIGv2).
 
 This repository can either be run standalone or as a Docker container.
 
@@ -37,6 +37,14 @@ For convenience, you can generate a file `env.sh` from your [`CanDIGv2`](https:/
 cd CanDIGv2
 python settings.py
 source env.sh
+```
+
+## Test your setup
+
+To test candigv2-ingest basic functionality, simply run the following command from the repo directly:
+
+```commandline
+pytest
 ```
 
 ## How to use candigv2-ingest
@@ -239,15 +247,6 @@ This will start a Docker container with a REST API for the ingest at localhost:1
 
 (Note: on the CanDIGv2 repo, the service runs on port 1235; it is run as 1236 locally in these instructions to ensure there is no
 interference while testing.)
-
-
-## Testing
-
-To test candigv2-ingest, from the repo directory, simply run the following command:
-
-```commandline
-pytest
-```
 
 <!--- ## Authorizing users for the new dataset
 
