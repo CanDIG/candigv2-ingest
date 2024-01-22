@@ -55,7 +55,7 @@ pytest
 
 ### i. Prepare clinical data
 
-Before being ingested, data must be transformed to the CanDIG MoH data model. This can be done using CanDIG's [`clinical_ETL_code`](https://github.com/CanDIG/clinical_ETL_code) repository. Please visit that repository for full instructions and return to ingest when you have a valid JSON file with a set of donors. An example file can be found at [tests/single_ingest.json](tests/single_ingest.json)
+Before being ingested, data must be transformed to the CanDIG MoH data model. This can be done using CanDIG's [`clinical_ETL_code`](https://github.com/CanDIG/clinical_ETL_code) repository. Please visit that repository for full instructions and return to ingest when you have a valid JSON file with a set of donors. An example file can be found at [tests/clinical_ingest.json](tests/clinical_ingest.json)
 
 ### ii. Ingest clinical data
 
