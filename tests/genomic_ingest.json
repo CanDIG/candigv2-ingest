@@ -13,7 +13,7 @@
         "metadata": {
             "sequence_type": "wgs",
             "data_type": "variant",
-            "reference": "hg37"
+            "reference": "hg38"
         },
         "samples": [
             {
@@ -36,7 +36,7 @@
         "metadata": {
             "sequence_type": "wgs",
             "data_type": "variant",
-            "reference": "hg37"
+            "reference": "hg38"
         },
         "samples": [
             {
