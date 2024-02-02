@@ -1,26 +1,18 @@
-import argparse
 import json
 import os
 import sys
 import traceback
-from collections import OrderedDict
+import argparse
 from http import HTTPStatus
 
-import jsonschema
 import requests
 
 import auth
-from ingest_result import (
-    IngestCohortException,
-    IngestPermissionsException,
-    IngestResult,
-    IngestServerException,
-    IngestValidationException,
-)
+from ingest_result import IngestPermissionsException
 
-sys.path.append("clinical_ETL_code")
-from clinical_ETL_code import validate_coverage
+from clinical_etl.mohschema import MoHSchema
 
+CANDIG_URL = os.environ.get("CANDIG_URL")
 
 def update_headers(headers):
     """
@@ -73,42 +65,73 @@ def read_json(file_path):
             return None
 
 
-def ingest_fields(fields, katsu_server_url, headers):
-    errors = []
+def ingest_schemas(fields, headers):
+    result = {
+        "errors": [],
+        "results": []
+    }
     name_mappings = {
-        "radiation": "radiations",
-        "surgery": "surgeries",
-        "followups": "follow_ups",
+        "programs": "program",
+        "donors": "donor",
+        "primary_diagnoses": "primary_diagnosis",
+        "specimens": "specimen",
+        "sample_registrations": "sample_registration",
+        "treatments": "treatment",
+        "chemotherapies": "chemotherapy",
+        "hormone_therapies": "hormone_therapy",
+        "immunotherapies": "immunotherapy",
+        "radiations": "radiation",
+        "surgeries": "surgery",
+        "biomarkers": "biomarker",
+        "followups": "follow_up",
+        "comorbidities": "comorbidity",
+        "exposures": "exposure"
     }
     for type in fields:
-        if type in name_mappings:
-            name = name_mappings[type]
-        else:
-            name = type
-        ingest_str = f"/katsu/v2/ingest/{name}/"
-        ingest_url = katsu_server_url + ingest_str
+        if len(fields[type]) > 0:
+            if type in name_mappings:
+                name = name_mappings[type]
+            else:
+                name = type
+            ingest_str = f"/katsu/v2/ingest/{name}/"
+            ingest_url = CANDIG_URL + ingest_str
 
-        update_headers(headers)
-        response = requests.post(
-            ingest_url, headers=headers, data=json.dumps(fields[type])
-        )
+            created_count = 0
+            total_count = len(fields[type])
 
-        if response.status_code == HTTPStatus.CREATED:
-            print(f"INGEST OK 201! \nRETURN MESSAGE: {response.text}\n")
-        elif response.status_code == HTTPStatus.NOT_FOUND:
-            message = f"ERROR 404: {ingest_url} was not found! Please check the URL."
-            print(message)
-            errors.append(response.text)
-        else:
-            message = f"\nREQUEST STATUS CODE: {response.status_code} \nRETURN MESSAGE: {response.text}\n"
-            print(message)
-            errors.append(response.text)
-    return errors
+            for item in fields[type]:
+                update_headers(headers)
+                response = requests.post(
+                    ingest_url, headers=headers, data=json.dumps(item)
+                )
+
+                if response.status_code == HTTPStatus.CREATED:
+                    created_count += 1
+                elif response.status_code == HTTPStatus.NOT_FOUND:
+                    message = f"ERROR 404: {ingest_url} was not found! Please check the URL."
+                    result["errors"].append(f"{type}: {message}")
+                    break
+                elif response.status_code == HTTPStatus.FORBIDDEN:
+                    message = f"ERROR 403: You do not have permission to ingest {type} for {item[0]['program_id']}"
+                    result["errors"].append(f"{type}: {message}")
+                    break
+                else:
+                    try:
+                        if "error" in response.json():
+                            result["errors"].append(f"{type}: {response.status_code} {response.json()['error']}")
+                    except:
+                        message = f"\nREQUEST STATUS CODE: {response.status_code} \nRETURN MESSAGE: {response.text}\n"
+                        result["errors"].append(f"{type}: {message}")
+                    if type == "programs" and "unique" in response.text:
+                        # this is still okay to return 200:
+                        return result, 200
+            result["results"].append(f"Of {total_count} {type}, {created_count} were created")
+    return result, response.status_code
 
 
 def traverse_clinical_field(fields, field: dict, ctype, parents, types, ingested_ids):
     """
-    Helper function for ingest_donor_with_clinical. Parses and ingests clinical fields from a DonorWithClinicalData
+    Helper function for ingest_clinical_data. Parses and ingests clinical fields from a DonorWithClinicalData
     object.
     Args:
         field: The (sub)field of a DonorWithClinicalData object, potentially nested
@@ -120,7 +143,6 @@ def traverse_clinical_field(fields, field: dict, ctype, parents, types, ingested
             ]
         types: A list of possible field types
         id_names: A mapping of field names to what their ID key is (e.g. {"donors": "submitter_donor_id"})
-        errors: A list of strings containing the errors encountered so far
         ingested_ids: A list of IDs that have already been ingested (some fields in DonorWithClinical are duplicates)
     """
 
@@ -159,9 +181,7 @@ def traverse_clinical_field(fields, field: dict, ctype, parents, types, ingested
         if attribute not in types:
             data[attribute] = field.pop(attribute)
 
-    if (
-        len(parents) >= 2
-    ):  # Program & donor have been added (must be the first 2 fields)
+    if len(parents) >= 2:  # Program & donor have been added (must be the first 2 fields)
         foreign_keys = [parents[0], parents[1]]
         if len(parents) > 2:
             foreign_keys.append(parents[-1])
@@ -194,7 +214,7 @@ def traverse_clinical_field(fields, field: dict, ctype, parents, types, ingested
         parents.pop(-1)
 
 
-def ingest_donor_with_clinical(katsu_server_url, dataset, headers):
+def prepare_clinical_data_for_ingest(ingest_json):
     """A single file ingest which validates and loads an MOH donor_with_clinical_data object from JSON.
     JSON format:
     [
@@ -210,113 +230,99 @@ def ingest_donor_with_clinical(katsu_server_url, dataset, headers):
     ]
     (Fully outlined in MOH Schema)
     """
-    print("Validating input")
-    result = validate_coverage.validate_coverage(dataset, "clinical_ETL_code/sample_inputs/manifest.yml")
-    if len(result["warnings"]) > 0:
-        print("Validation returned warnings:")
-        print("\n".join(result["warnings"]))
-    if len(result["errors"]) > 0:
-        return IngestValidationException(
-            "VALIDATION FAILED with the following issues",
-            [str(line) for line in result["errors"]],
-        )
-    print("Validation success.")
+    schema = MoHSchema(ingest_json["openapi_url"])
+    types = ["programs"]
+    types.extend(schema.validation_schema.keys())
 
-    print("Beginning ingest")
+    # split ingest by program_id:
+    by_program = {}
+    for donor in ingest_json["donors"]:
+        if "program_id" not in donor:
+            pass
+        if donor["program_id"] not in by_program:
+            by_program[donor["program_id"]] = {
+                "donors": [],
+                "errors": []
+            }
+        by_program[donor["program_id"]]["donors"].append(donor)
 
-    types = [
-        "programs",
-        "donors",
-        "primary_diagnoses",
-        "specimens",
-        "sample_registrations",
-        "treatments",
-        "chemotherapies",
-        "hormone_therapies",
-        "radiations",
-        "immunotherapies",
-        "surgeries",
-        "followups",
-        "biomarkers",
-        "comorbidities",
-        "exposures",
-    ]
-    fields = {type: [] for type in types}
-
-    program_id = ""
-    if len(dataset["donors"]) > 0:
-        program_id = dataset["donors"][0].pop("program_id")
-        update_headers(headers)
-        program_endpoint = "/katsu/v2/ingest/programs/"
-        request = requests.Request(
-            "POST",
-            katsu_server_url + program_endpoint,
-            headers=headers,
-            data=json.dumps(
-                [{"program_id": program_id, "metadata": dataset["statistics"]}]
-            ),
-        )
-        if not auth.is_authed(request):
-            return IngestPermissionsException(
-                f"Not authorized to write to {program_id}"
+    for program_id in by_program.keys():
+        errors = by_program[program_id]["errors"]
+        print(f"Validating input for program {program_id}")
+        schema.validate_ingest_map(by_program[program_id])
+        if len(schema.validation_warnings) > 0:
+            print("Validation returned warnings:")
+            print("\n".join(schema.validation_warnings))
+        if len(schema.validation_errors) > 0:
+            errors.append(
+                "VALIDATION FAILED with the following issues",
+                [str(line) for line in schema.validation_errors],
             )
-        response = requests.Session().send(request.prepare())
-        if response.status_code != HTTPStatus.CREATED:
-            if "unique" in response.text:
-                return IngestCohortException(
-                    f"Program {program_id} has already been ingested into Katsu. "
-                    "Please delete and try again."
-                )
-            else:
-                return IngestServerException(
-                    [
-                        f"\nREQUEST STATUS CODE: {response.status_code}"
-                        f"\nRETURN MESSAGE: {response.text}\n"
-                    ]
-                )
-    else:
-        return IngestCohortException(f"No ingestable donors found in dataset.")
-    for donor in dataset["donors"]:
-        parents = [("programs", program_id)]
-        print(f"Loading donor {donor['submitter_donor_id']}...")
-        try:
-            ingested_ids = {}
-            traverse_clinical_field(fields, donor, "donors", parents, types, ingested_ids)
-            # print(json.dumps(ingested_ids, indent=2))
-        except Exception as e:
-            print(traceback.format_exc())
-            return IngestServerException(str(e))
-    fields.pop("programs")
-    print(json.dumps(fields, indent=4))
-    errors = ingest_fields(fields, katsu_server_url, headers)
-    if errors:
-        return IngestServerException(errors)
-    else:
-        return IngestResult(len(dataset["donors"]))
+            continue
+        print("Validation success.")
+
+        print("Beginning ingest")
+        donors = by_program[program_id].pop("donors")
+        fields = {type: [] for type in types}
+        for donor in donors:
+            parents = [("programs", program_id)]
+            print(f"Loading donor {donor['submitter_donor_id']}...")
+            try:
+                ingested_ids = {}
+                traverse_clinical_field(fields, donor, "donors", parents, types, ingested_ids)
+            except Exception as e:
+                print(traceback.format_exc())
+                errors.append(str(e))
+        by_program[program_id]["schemas"] = fields
+        by_program[program_id]["schemas"]["programs"] = [
+            {
+                "program_id": program_id,
+                "metadata": schema.statistics
+            }
+        ]
+    return by_program
+
+
+def ingest_clinical_data(ingest_json, headers):
+    schemas_to_ingest = prepare_clinical_data_for_ingest(ingest_json)
+    headers["Content-Type"] = "application/json"
+    status_code = 200
+    for program in schemas_to_ingest.values():
+        if "schemas" not in program:
+            continue
+        schemas = program.pop("schemas")
+        ingest_results, status_code = ingest_schemas(schemas, headers)
+        print(ingest_results, status_code)
+        if len(ingest_results["errors"]) > 0:
+            program["errors"].extend(ingest_results["errors"])
+        else:
+            program["results"] = ingest_results["results"]
+    return schemas_to_ingest, status_code
 
 
 def main():
     # check if os.environ.get("CANDIG_URL") is set
-    if os.environ.get("CANDIG_URL") is None:
-        print("ERROR: ENV is not set. Did you forget to run 'source env.sh'?")
+    if CANDIG_URL is None:
+        print("ERROR: $CANDIG_URL is not set. Did you forget to run 'source env.sh'?")
         exit()
-    katsu_server_url = os.environ.get("CANDIG_URL")
     headers = auth.get_auth_header()
-    data_location = os.environ.get("CLINICAL_DATA_LOCATION")
+
+    parser = argparse.ArgumentParser(description="A script that ingests clinical data into Katsu")
+    parser.add_argument("--input", help="Path to the clinical json file to ingest.")
+    args = parser.parse_args()
+
+    data_location = args.input
     if not data_location:
-        print(
-            "ERROR: Data location is not assigned. Please set the environment variable CLINICAL_DATA_LOCATION."
-        )
-        exit()
+        data_location = os.environ.get("CLINICAL_DATA_LOCATION")
+        if not data_location:
+            print("ERROR: Could not find input data. Either --input is required or CLINICAL_DATA_LOCATION must be set.")
+            exit()
 
-    env_str = "env.sh"
-
-    dataset = read_json(data_location)
-    headers["Content-Type"] = "application/json"
-    result = ingest_donor_with_clinical(katsu_server_url, dataset, headers)
-    print(result.value)
-    if type(result) == IngestValidationException:
-        [print(error) for error in result.validation_errors]
+    ingest_json = read_json(data_location)
+    if "openapi_url" not in ingest_json:
+        ingest_json["openapi_url"] = "https://raw.githubusercontent.com/CanDIG/katsu/develop/chord_metadata_service/mohpackets/docs/schema.yml"
+    result, status_code = ingest_clinical_data(ingest_json, headers)
+    print(json.dumps(result, indent=2))
 
 
 if __name__ == "__main__":

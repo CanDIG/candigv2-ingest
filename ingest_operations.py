@@ -5,8 +5,9 @@ import traceback
 
 import auth
 from ingest_result import *
-from katsu_ingest import ingest_donor_with_clinical
+from katsu_ingest import ingest_clinical_data
 from htsget_ingest import htsget_ingest
+from opa_ingest import remove_user_from_dataset, add_user_to_dataset
 import config
 
 app = Flask(__name__)
@@ -50,35 +51,48 @@ def add_s3_credential():
     token = request.headers['Authorization'].split("Bearer ")[1]
     return auth.store_aws_credential(data["endpoint"], data["bucket"], data["access_key"], data["secret_key"], token)
 
-def add_moh_variant(program_id):
-    token = request.headers["Authorization"].split("Bearer ")[1]
-    data = connexion.request.json
-    """
-    (For new auth model)
-    try:
-        token = auth.get_bearer_from_refresh(token)
-    except Exception as e:
-        return {"result": "Error validating token: %s" % str(e)}, 401
-    """
 
+@app.route('/program/<path:program_id>/email/<path:email>')
+def add_user_access(program_id, email):
+    token = request.headers['Authorization'].split("Bearer ")[1]
     try:
-        response = htsget_ingest(token, program_id, data)
+        result, status_code = add_user_to_dataset(email, program_id, token)
+        return result, status_code
     except Exception as e:
-        traceback.print_exc()
-        return {"result": "Unknown error (You may want to report this to a CanDIG developer): %s" % str(e)}, 500
+        return {"error": str(e)}, 500
 
-    if type(response) == IngestResult:
-        return {"result": "Ingested genomic sample: %s" % response.value}, 200
-    elif type(response) == IngestUserException:
-        return {"result": "Data error: %s" % response.value}, 400
-    elif type(response) == IngestPermissionsException:
-        return {"result": "Error: You are not authorized to write to program %s." % response.value}, 403
-    elif type(response) == IngestServerException:
-        return {"result": "Ingest encountered the following errors: %s" % response.value}, 500
-    return 500
+
+@app.route('/program/<path:program_id>/email/<path:email>')
+def remove_user_access(program_id, email):
+    token = request.headers['Authorization'].split("Bearer ")[1]
+    try:
+        result, status_code = remove_user_from_dataset(email, program_id, token)
+        return result, status_code
+    except Exception as e:
+        return {"error": str(e)}, 500
+
+
+def add_genomic_linkages():
+    headers = {}
+    if "Authorization" not in request.headers:
+        return generateResponse("Bearer token required", ERROR_CODES["UNAUTHORIZED"])
+    try:
+        # New auth model
+        # refresh_token = request.headers["Authorization"].split("Bearer ")[1]
+        # token = auth.get_bearer_from_refresh(refresh_token)
+        if not request.headers["Authorization"].startswith("Bearer "):
+            return generateResponse("Invalid bearer token", ERROR_CODES["UNAUTHORIZED"])
+        token = request.headers["Authorization"].split("Bearer ")[1]
+        headers["Authorization"] = "Bearer %s" % token
+    except Exception as e:
+        if "Invalid bearer token" in str(e):
+            return generateResponse("Bearer token invalid or unauthorized", ERROR_CODES["UNAUTHORIZED"])
+        return generateResponse("Unknown error during authorization", ERROR_CODES["AUTHORIZATIONERR"])
+    headers["Content-Type"] = "application/json"
+    response, status_code = htsget_ingest(connexion.request.json, headers)
+    return response, status_code
 
 def add_clinical_donors():
-    katsu_server_url = os.environ.get("CANDIG_URL")
     dataset = connexion.request.json
     headers = {}
     if "Authorization" not in request.headers:
@@ -96,21 +110,5 @@ def add_clinical_donors():
             return generateResponse("Bearer token invalid or unauthorized", ERROR_CODES["UNAUTHORIZED"])
         return generateResponse("Unknown error during authorization", ERROR_CODES["AUTHORIZATIONERR"])
     headers["Content-Type"] = "application/json"
-    response = ingest_donor_with_clinical(katsu_server_url, dataset, headers)
-    if type(response) == IngestResult:
-        return generateResponse("Ingested %d donors." % response.value, ERROR_CODES["SUCCESS"])
-    elif type(response) == IngestPermissionsException:
-        return generateResponse(f"Permission error: {response.value} Data may be "
-                                "partially ingested. You may need to delete the relevant programs in Katsu.",
-                                ERROR_CODES["UNAUTHORIZED"])
-    elif type(response) == IngestServerException:
-        error_string = ','.join(response.value)
-        return generateResponse(f"Ingest encountered the following errors: {error_string} "
-                "Data may be partially ingested. You may need to delete the relevant programs in Katsu. "
-                "This was an internal error, so you may want to report this issue to a CanDIG developer.",
-                                ERROR_CODES["INTERNAL"])
-    elif type(response) == IngestValidationException:
-        return {"result": response.value, "validation_errors": response.validation_errors,
-                "response_code": 2, "response_message": "Validation error"}
-    elif type(response) == IngestCohortException:
-        return generateResponse(response.value, 3)
+    response, status_code = ingest_clinical_data(dataset, headers)
+    return response, status_code

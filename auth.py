@@ -2,7 +2,6 @@ import authx.auth
 import os
 import re
 import json
-
 import requests
 
 
@@ -11,7 +10,7 @@ AUTH = True
 def get_auth_header():
     if AUTH:
         token = get_site_admin_token()
-        return {"Authorization": f"Bearer {token}"}
+        return {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
     return ""
 
 
@@ -131,6 +130,17 @@ def is_authed(request: requests.Request):
     if (authx.auth.is_site_admin(request)):
         return True
     return False
+
+
+def get_opa_access():
+    response, status_code = authx.auth.get_service_store_secret("opa", key="access")
+    return response, status_code
+
+
+def set_opa_access(input):
+    response, status_code = authx.auth.set_service_store_secret("opa", key="access", value=json.dumps(input))
+    return response, status_code
+
 
 if __name__ == "__main__":
     print(get_site_admin_token())
