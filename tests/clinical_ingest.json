@@ -175,7 +175,8 @@
                     "recurrence_m_category": "M1a(0)",
                     "recurrence_stage_group": "Stage IVBS"
                 }
-            ]
+            ],
+            "date_resolution": "day"
         },
         {
             "submitter_donor_id": "DONOR_2",
@@ -436,7 +437,8 @@
                         }
                     ]
                 }
-            ]
+            ],
+            "date_resolution": "day"
         },
         {
             "submitter_donor_id": "DONOR_3",
@@ -509,7 +511,8 @@
                         }
                     ]
                 }
-            ]
+            ],
+            "date_resolution": "day"
         },
         {
             "submitter_donor_id": "DONOR_4",
@@ -603,7 +606,8 @@
                         }
                     ]
                 }
-            ]
+            ],
+            "date_resolution": "day"
         },
         {
             "submitter_donor_id": "DONOR_6",
@@ -678,8 +682,9 @@
                         }
                     ]
                 }
-            ]
+            ],
+            "date_resolution": "day"
         }
     ],
-    "katsu_sha": "0699c0b58a3f5272eadf151bb253d318c5a912a6"
+    "katsu_sha": "1f0796ecc5b176d6f175d96d6ff6688ab6f59f35"
 }
