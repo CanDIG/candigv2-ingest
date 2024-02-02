@@ -1,5 +1,5 @@
 {
-    "openapi_url": "https://raw.githubusercontent.com/CanDIG/katsu/develop/chord_metadata_service/mohpackets/docs/schema.yml",
+    "openapi_url": "https://github.com/CanDIG/katsu/blob/sonchau/date_intervals_part_1/chord_metadata_service/mohpackets/docs/schema.yml",
     "donors": [
         {
             "submitter_donor_id": "DONOR_1",
