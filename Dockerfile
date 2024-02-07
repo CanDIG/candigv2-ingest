@@ -11,6 +11,7 @@ USER root
 
 RUN useradd -rm candig -U
 
+RUN apt-get update && apt-get -y install vim
 
 RUN mkdir /ingest_app
 WORKDIR /ingest_app
