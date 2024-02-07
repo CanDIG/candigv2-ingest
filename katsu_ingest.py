@@ -255,8 +255,7 @@ def prepare_clinical_data_for_ingest(ingest_json):
             print("\n".join(schema.validation_warnings))
         if len(schema.validation_errors) > 0:
             errors.append(
-                "VALIDATION FAILED with the following issues",
-                [str(line) for line in schema.validation_errors],
+                [str(line) for line in schema.validation_errors]
             )
             continue
         print("Validation success.")
