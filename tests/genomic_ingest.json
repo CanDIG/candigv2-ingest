@@ -7,7 +7,7 @@
             "name": "HG00096.cnv.vcf.gz"
         },
         "index": {
-            "access_method": "s3://s3.us-east-1.amazonaws.com/1000genomes/release/20130502/ALL.chr22.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz?public=true",
+            "access_method": "s3://s3.us-east-1.amazonaws.com/1000genomes/release/20130502/ALL.chr22.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz.tbi?public=true",
             "name": "HG00096.cnv.vcf.gz.tbi"
         },
         "metadata": {
