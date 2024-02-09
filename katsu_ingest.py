@@ -276,7 +276,7 @@ def prepare_clinical_data_for_ingest(ingest_json):
         by_program[program_id]["schemas"]["programs"] = [
             {
                 "program_id": program_id,
-                "metadata": schema.statistics
+                "metadata": schema.statistics.copy()
             }
         ]
     return by_program
