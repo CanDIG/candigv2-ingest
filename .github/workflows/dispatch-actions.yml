@@ -13,11 +13,6 @@ jobs:
     steps:
             - name: Check out repository code
               uses: actions/checkout@v3
-            - name: Get Submodule PR name
-              id: get_pr_name
-              run: |
-                PR_NAME=$(curl -s -X GET -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }} | jq -r '.title')
-                echo "::set-output name=PR_NAME::$PR_NAME"
             - name: Create PR in CanDIGv2
               id: make_pr
               uses: jman005/github-action-pr-expanded@v0
@@ -26,7 +21,7 @@ jobs:
                   parent_repository: ${{ env.PARENT_REPOSITORY }}
                   checkout_branch: ${{ env.CHECKOUT_BRANCH}}
                   pr_against_branch: ${{ env.PR_AGAINST_BRANCH }}
-                  pr_title: 'Submodule update from merging: ${{ steps.get_pr_name.outputs.PR_NAME }}'
+                  pr_title: 'Submodule update from merging: ${{ github.event.pull_request.title }}'
                   pr_description: "PR triggered by update to develop branch on ${{ github.repository }}. Commit hash: `${{ github.sha }}`."
                   owner: ${{ env.OWNER }}
                   submodule_path: lib/candig-ingest/candigv2-ingest
