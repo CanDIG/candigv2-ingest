@@ -24,18 +24,19 @@ def link_genomic_data(headers, sample):
     }
 
     # get the master genomic object, or create it:
-    genomic_drs_obj = {
-        "id": sample["genomic_file_id"],
-        "name": sample["genomic_file_id"],
-        "description": sample["metadata"]["sequence_type"],
-        "cohort": sample["program_id"],
-        "reference_genome": sample["metadata"]["reference"],
-        "version": "v1",
-        "contents": []
-    }
+    genomic_drs_obj = {}
     response = requests.get(f"{url}/{sample['genomic_file_id']}", headers=headers)
     if response.status_code == 200:
         genomic_drs_obj = response.json()
+    genomic_drs_obj["id"] = sample["genomic_file_id"]
+    genomic_drs_obj["name"] = sample["genomic_file_id"]
+    genomic_drs_obj["description"] = sample["metadata"]["sequence_type"]
+    genomic_drs_obj["cohort"] = sample["program_id"]
+    genomic_drs_obj["reference_genome"] = sample["metadata"]["reference"]
+    genomic_drs_obj["version"] = "v1"
+    if "contents" not in genomic_drs_obj:
+        genomic_drs_obj["contents"] = []
+
 
     # add GenomicDataDrsObject to contents
     add_file_drs_object(genomic_drs_obj, sample["main"], sample["metadata"]["data_type"], headers)
