@@ -6,7 +6,7 @@ jobs:
   CanDIG-dispatch:
     runs-on: ubuntu-latest
     env:
-      PARENT_REPOSITORY: 'CanDIG/CanDIGv2'
+      PARENT_REPOSITORY: 'mshadbolt/CanDIGv2'
       CHECKOUT_BRANCH: 'develop'
       PR_AGAINST_BRANCH: 'develop'
       OWNER: 'CanDIG'
