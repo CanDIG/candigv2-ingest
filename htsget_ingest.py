@@ -101,6 +101,10 @@ def link_genomic_data(headers, sample):
         result["errors"].append({"error": f"error posting genomic drs object {genomic_drs_obj['id']}: {response.status_code} {response.text}"})
     else:
         result["genomic"] = response.json()
+
+    # flag the genomic_drs_object for indexing:
+    url =f"{HTSGET_URL}/htsget/v1/variants/{genomic_drs_obj['id']}/index"
+    response = requests.get(url, headers=headers)
     return result
 
 

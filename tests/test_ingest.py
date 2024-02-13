@@ -34,6 +34,9 @@ def test_htsget_ingest(requests_mock):
             matcher = re.compile(f"{HTSGET_URL}/ga4gh/drs/v1/objects/.+")
             requests_mock.post(f"{HTSGET_URL}/ga4gh/drs/v1/objects", json=callback, status_code=200)
             requests_mock.get(matcher, status_code=404)
+
+            matcher = re.compile(f"{HTSGET_URL}/htsget/v1/variants/.+/index")
+            requests_mock.get(matcher, status_code=200)
             response = htsget_ingest.link_genomic_data(headers, sample)
             print(json.dumps(response, indent=4))
             assert len(response["errors"]) == 0
