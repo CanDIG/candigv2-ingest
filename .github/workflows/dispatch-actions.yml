@@ -26,6 +26,7 @@ jobs:
                   parent_repository: ${{ env.PARENT_REPOSITORY }}
                   checkout_branch: ${{ env.CHECKOUT_BRANCH}}
                   pr_against_branch: ${{ env.PR_AGAINST_BRANCH }}
+                  pr_title: 'Submodule update from merging: ${{ steps.get_pr_name.outputs.PR_NAME }}'
                   pr_description: "PR triggered by update to develop branch on ${{ github.repository }}. Commit hash: `${{ github.sha }}`."
                   owner: ${{ env.OWNER }}
                   submodule_path: lib/candig-ingest/candigv2-ingest
