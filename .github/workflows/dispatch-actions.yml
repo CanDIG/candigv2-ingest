@@ -9,10 +9,25 @@ jobs:
       PARENT_REPOSITORY: 'mshadbolt/CanDIGv2'
       CHECKOUT_BRANCH: 'develop'
       PR_AGAINST_BRANCH: 'develop'
-      OWNER: 'CanDIG'
+      OWNER: 'mshadbolt'
     steps:
             - name: Check out repository code
               uses: actions/checkout@v3
+            - uses: actions/github-script@v6
+              id: get_pr_data
+              with:
+                script: |
+                    return (
+                      await github.rest.repos.listPullRequestsAssociatedWithCommit({
+                        commit_sha: context.sha,
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                      })
+                    ).data[0];
+            - name: Pull Request data
+              run: |
+                echo '${{ fromJson(steps.get_pr_data.outputs.result).number }}'
+                echo '${{ fromJson(steps.get_pr_data.outputs.result).title }}'
             - name: Create PR in CanDIGv2
               id: make_pr
               uses: jman005/github-action-pr-expanded@v0
