@@ -37,7 +37,6 @@ def link_genomic_data(headers, sample):
     if "contents" not in genomic_drs_obj:
         genomic_drs_obj["contents"] = []
 
-
     # add GenomicDataDrsObject to contents
     add_file_drs_object(genomic_drs_obj, sample["main"], sample["metadata"]["data_type"], headers)
 
@@ -82,17 +81,19 @@ def link_genomic_data(headers, sample):
             result["sample"].append(response.json())
 
         # then add the sample to the GenomicDrsObject's contents, if it's not already there:
+        contents_obj = {
+            "name": clin_sample["submitter_sample_id"],
+            "id": clin_sample["genomic_file_sample_id"],
+            "drs_uri": [f"{DRS_HOST_URL}/{clin_sample['submitter_sample_id']}"]
+        }
         not_found = True
         if len(genomic_drs_obj["contents"]) > 0:
-            for obj in genomic_drs_obj["contents"]:
-                if obj["name"] == clin_sample["submitter_sample_id"]:
+            for i in range(0, len(genomic_drs_obj["contents"])):
+                if genomic_drs_obj["contents"][i]["name"] == clin_sample["submitter_sample_id"]:
                     not_found = False
+                    genomic_drs_obj["contents"][i] = contents_obj
+                    break
         if not_found:
-            contents_obj = {
-                "name": clin_sample["submitter_sample_id"],
-                "id": clin_sample["genomic_file_sample_id"],
-                "drs_uri": [f"{DRS_HOST_URL}/{clin_sample['submitter_sample_id']}"]
-            }
             genomic_drs_obj["contents"].append(contents_obj)
 
     # finally, post the genomic_drs_object
@@ -119,35 +120,36 @@ def link_genomic_data(headers, sample):
 
 def add_file_drs_object(genomic_drs_obj, file, type, headers):
     url = f"{HTSGET_URL}/ga4gh/drs/v1/objects"
-    # is this file already in the master object?:
-    if len(genomic_drs_obj["contents"]) > 0:
-        for obj in genomic_drs_obj["contents"]:
-            if obj["name"] == file["name"]:
-                not_found = False
-                return obj
-    # look for this file in htsget:
-    response = requests.get(f"{url}/{file['name']}", headers=headers)
-    if response.status_code == 404:
-        obj = {
-            "access_methods": [],
-            "id": file['name'],
-            "name": file['name'],
-            "description": type,
-            "cohort": genomic_drs_obj["cohort"],
-            "version": "v1"
-        }
-        access_method = get_access_method(file["access_method"])
-        if access_method is not None:
-            obj["access_methods"].append(access_method)
-        response = requests.post(url, json=obj, headers=headers)
-        if response.status_code > 200:
-            return {"error": f"error creating file drs object: {response.status_code} {response.text}"}
+    obj = {
+        "access_methods": [],
+        "id": file['name'],
+        "name": file['name'],
+        "description": type,
+        "cohort": genomic_drs_obj["cohort"],
+        "version": "v1"
+    }
+    access_method = get_access_method(file["access_method"])
+    if access_method is not None:
+        obj["access_methods"].append(access_method)
     contents_obj = {
         "name": file["name"],
         "id": type,
         "drs_uri": [f"{DRS_HOST_URL}/{file['name']}"]
     }
-    genomic_drs_obj["contents"].append(contents_obj)
+
+    # is this file already in the master object? If so, replace it:
+    not_found = True
+    if len(genomic_drs_obj["contents"]) > 0:
+        for i in range(0, len(genomic_drs_obj["contents"])):
+            if genomic_drs_obj["contents"][i]["name"] == file["name"]:
+                genomic_drs_obj["contents"][i] = contents_obj
+                not_found = False
+                break
+    if not_found:
+        genomic_drs_obj["contents"].append(contents_obj)
+    response = requests.post(url, json=obj, headers=headers)
+    if response.status_code > 200:
+        return {"error": f"error creating file drs object: {response.status_code} {response.text}"}
     return contents_obj
 
 
