@@ -27,7 +27,7 @@ jobs:
                   ).data[0];
             - name: Create PR in CanDIGv2
               id: make_pr
-              uses: CanDIG/github-action-pr-expanded@v3
+              uses: CanDIG/github-action-pr-expanded@v4-alpha
               with:
                   github_token: ${{ secrets.SUBMODULE_PR }}
                   parent_repository: ${{ env.PARENT_REPOSITORY }}
@@ -37,4 +37,3 @@ jobs:
                   pr_description: "PR triggered by update to develop branch on ${{ github.repository }}. Commit hash: `${{ github.sha }}`. PR link: [#${{ fromJson(steps.get_pr_data.outputs.result).number }}](https://github.com/${{ github.repository }}/pull/${{ fromJson(steps.get_pr_data.outputs.result).number }})"
                   owner: ${{ env.OWNER }}
                   submodule_path: lib/candig-ingest/candigv2-ingest
-                  label: Submodule update
