@@ -103,7 +103,7 @@ def link_genomic_data(headers, sample):
         result["genomic"] = response.json()
 
     # flag the genomic_drs_object for indexing:
-    url =f"{HTSGET_URL}/htsget/v1/variants/{genomic_drs_obj['id']}/index"
+    url = f"{HTSGET_URL}/htsget/v1/variants/{genomic_drs_obj['id']}/index"
     response = requests.get(url, headers=headers)
     return result
 
