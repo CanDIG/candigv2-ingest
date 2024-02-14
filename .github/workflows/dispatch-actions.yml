@@ -12,8 +12,8 @@ jobs:
       OWNER: 'CanDIG'
     steps:
             - name: Check out repository code
-              uses: actions/checkout@v3
-            - uses: actions/github-script@v6
+              uses: actions/checkout@v4
+            - uses: actions/github-script@v7
               id: get_pr_data
               with:
                 script: |
@@ -30,7 +30,7 @@ jobs:
                 echo '${{ fromJson(steps.get_pr_data.outputs.result).title }}'
             - name: Create PR in CanDIGv2
               id: make_pr
-              uses: jman005/github-action-pr-expanded@v0
+              uses: CanDIG/github-action-pr-expanded@v0
               with:
                   github_token: ${{ secrets.SUBMODULE_PR }}
                   parent_repository: ${{ env.PARENT_REPOSITORY }}
