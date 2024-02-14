@@ -187,6 +187,9 @@ def htsget_ingest(ingest_json, headers):
             continue
 
         # create the corresponding DRS objects
+        if "samples" not in sample or len(sample["samples"]) == 0:
+            result[sample["genomic_file_id"]]["errors"].append("No samples were specified for the genomic file mapping")
+            break
         response = link_genomic_data(headers, sample)
         for err in response["errors"]:
             if "403" in err["error"]:
