@@ -102,9 +102,18 @@ def link_genomic_data(headers, sample):
     else:
         result["genomic"] = response.json()
 
-    # flag the genomic_drs_object for indexing:
-    url = f"{HTSGET_URL}/htsget/v1/variants/{genomic_drs_obj['id']}/index"
-    response = requests.get(url, headers=headers)
+    # verify that the genomic file exists and is readable
+    verify_url = f"{HTSGET_URL}/htsget/v1/variants/{genomic_drs_obj['id']}/verify"
+
+    response = requests.get(verify_url, headers=headers)
+    if response.status_code != 200:
+        result["errors"].append({"error": f"could not verify sample: {response.text}"})
+    elif not response.json()['result']:
+        result["errors"].append({"error": f"could not verify sample: {response.json()['message']}"})
+    else:
+        # flag the genomic_drs_object for indexing:
+        url =f"{HTSGET_URL}/htsget/v1/variants/{genomic_drs_obj['id']}/index"
+        response = requests.get(url, headers=headers)
     return result
 
 
