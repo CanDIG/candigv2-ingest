@@ -4,7 +4,7 @@ requests-mock>=1.11.0
 urllib3==1.26.18
 minio==7.1.7
 jsoncomparison~=1.1.0
-candigv2-authx@git+https://github.com/CanDIG/candigv2-authx.git@v2.1.1
+candigv2-authx@git+https://github.com/CanDIG/candigv2-authx.git@v2.1.2
 awscli==1.29.5
 python-dotenv==0.14.0
 dateparser~=1.2.0
