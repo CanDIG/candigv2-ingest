@@ -26,6 +26,9 @@ def test_prepare_clinical_ingest():
 def callback(request, context):
     return request.json()
 
+def verify_callback(request, context):
+    return {"result": True}
+
 def test_htsget_ingest(requests_mock):
     headers = {"Authorization": f"Bearer test", "Content-Type": "application/json"}
     with open("tests/genomic_ingest.json", "r") as f:
@@ -34,9 +37,10 @@ def test_htsget_ingest(requests_mock):
             matcher = re.compile(f"{HTSGET_URL}/ga4gh/drs/v1/objects/.+")
             requests_mock.post(f"{HTSGET_URL}/ga4gh/drs/v1/objects", json=callback, status_code=200)
             requests_mock.get(matcher, status_code=404)
-
             matcher = re.compile(f"{HTSGET_URL}/htsget/v1/variants/.+/index")
             requests_mock.get(matcher, status_code=200)
+            matcher = re.compile(f"{HTSGET_URL}/htsget/v1/variants/.+/verify")
+            requests_mock.get(matcher, json=verify_callback, status_code=200)
             response = htsget_ingest.link_genomic_data(headers, sample)
             print(json.dumps(response, indent=4))
             assert len(response["errors"]) == 0
