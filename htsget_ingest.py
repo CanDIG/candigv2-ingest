@@ -198,14 +198,7 @@ def htsget_ingest(ingest_json, headers):
                 status_code = 403
                 break
 
-        # validate the access method
-        url = f"{HTSGET_URL}/htsget/v1/variants/data/{sample['genomic_file_id']}"
-        header_resp = requests.get(url, headers=headers, params={"class": "header"})
-        if header_resp.status_code != 200:
-            result[sample["genomic_file_id"]]["errors"] = header_resp.text
-        else:
-            result[sample["genomic_file_id"]] = response
-        # result[sample["genomic_file_id"]] = response
+        result[sample["genomic_file_id"]] = response
     return result, status_code
 
 
