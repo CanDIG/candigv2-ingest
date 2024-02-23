@@ -48,5 +48,28 @@
 				"submitter_sample_id": "SPECIMEN_5"
 			}
         ]
+    },
+    {
+        "program_id": "SYNTHETIC-2",
+        "genomic_file_id": "NA02102",
+        "main": {
+            "access_method": "file:////app/htsget_server/data/files/NA02102.bam",
+            "name": "NA02102.bam"
+        },
+        "index": {
+            "access_method": "file:////app/htsget_server/data/files/NA02102.bam.bai",
+            "name": "NA02102.bam.bai"
+        },
+        "metadata": {
+            "sequence_type": "wgs",
+            "data_type": "read",
+            "reference": "hg38"
+        },
+        "samples": [
+            {
+                "genomic_file_sample_id": "NA02102",
+                "submitter_sample_id": "SPECIMEN_5"
+            }
+        ]
     }
 ]
