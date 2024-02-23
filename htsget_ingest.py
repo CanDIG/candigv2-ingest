@@ -154,19 +154,17 @@ def add_file_drs_object(genomic_drs_obj, file, type, headers):
 
 
 def get_access_method(url):
-    if url.startswith("s3"):
-        return {
-            "type": "s3",
-            "access_id": url.replace("s3://", "")
-        }
-    elif url.startswith("file"):
+    if url.startswith("file"):
         return {
             "type": "file",
             "access_url": {
                 "url": url
             }
         }
-    return None
+    return {
+        "type": "s3",
+        "access_id": url
+    }
 
 
 def htsget_ingest(ingest_json, headers):

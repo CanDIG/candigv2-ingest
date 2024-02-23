@@ -275,8 +275,8 @@ components:
     S3Access:
       type: string
       description: a description of an S3 URI
-      pattern: s3:\/\/(.+)\/(.+)\/(.+)
-      example: s3://s3.us-east-1.amazonaws.com/1000genomes/HG00096.vcf.gz
+      pattern: https*:\/\/(.+)\/(.+)\/(.+)
+      example: http://s3.us-east-1.amazonaws.com/1000genomes/HG00096.vcf.gz
     SampleLink:
       type: object
       description: Link between donor data (e.g. MoH Sample Registrations) and the samples in the genomic data resource
