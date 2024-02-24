@@ -122,6 +122,7 @@ components:
               endpoint:
                 type: string
                 description: URL to the endpoint
+                pattern: (https*):\/\/(.+)
                 example: http://candig.docker.internal:9000
               bucket:
                 type: string
