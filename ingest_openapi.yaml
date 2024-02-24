@@ -274,8 +274,9 @@ components:
       example: file:///data/samples/HG00096.vcf.gz
     S3Access:
       type: string
-      description: a description of an S3 URI
-      pattern: https*:\/\/(.+)\/(.+)\/(.+)
+      description: |
+        a description of an S3 URI. NB: even though the s3 prefix is incorrect, we allow it in parsing so that we can give better feedback to the user if a url is provided in that form.
+      pattern: (https*|s3):\/\/(.+)\/(.+)\/(.+)
       example: http://s3.us-east-1.amazonaws.com/1000genomes/HG00096.vcf.gz
     SampleLink:
       type: object
