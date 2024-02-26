@@ -122,6 +122,7 @@ components:
               endpoint:
                 type: string
                 description: URL to the endpoint
+                pattern: (https*):\/\/(.+)
                 example: http://candig.docker.internal:9000
               bucket:
                 type: string
@@ -274,9 +275,10 @@ components:
       example: file:///data/samples/HG00096.vcf.gz
     S3Access:
       type: string
-      description: a description of an S3 URI
-      pattern: s3:\/\/(.+)\/(.+)\/(.+)
-      example: s3://s3.us-east-1.amazonaws.com/1000genomes/HG00096.vcf.gz
+      description: |
+        a description of an S3 URI. NB: even though the s3 prefix is incorrect, we allow it in parsing so that we can give better feedback to the user if a url is provided in that form.
+      pattern: (https*|s3):\/\/(.+)\/(.+)\/(.+)
+      example: http://s3.us-east-1.amazonaws.com/1000genomes/HG00096.vcf.gz
     SampleLink:
       type: object
       description: Link between donor data (e.g. MoH Sample Registrations) and the samples in the genomic data resource

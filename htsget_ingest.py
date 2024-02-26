@@ -38,11 +38,15 @@ def link_genomic_data(headers, sample):
         genomic_drs_obj["contents"] = []
 
     # add GenomicDataDrsObject to contents
-    add_file_drs_object(genomic_drs_obj, sample["main"], sample["metadata"]["data_type"], headers)
+    response = add_file_drs_object(genomic_drs_obj, sample["main"], sample["metadata"]["data_type"], headers)
+    if "error" in response:
+        result["errors"].append(response["error"])
 
     if "index" in sample:
         # add GenomicIndexDrsObject to contents
-        add_file_drs_object(genomic_drs_obj, sample["index"], "index", headers)
+        response = add_file_drs_object(genomic_drs_obj, sample["index"], "index", headers)
+        if "error" in response:
+            result["errors"].append(response["error"])
 
     result["sample"] = []
     for clin_sample in sample["samples"]:
@@ -130,6 +134,8 @@ def add_file_drs_object(genomic_drs_obj, file, type, headers):
     }
     access_method = get_access_method(file["access_method"])
     if access_method is not None:
+        if "message" in access_method:
+            return {"error": access_method["message"]}
         obj["access_methods"].append(access_method)
     contents_obj = {
         "name": file["name"],
@@ -154,19 +160,43 @@ def add_file_drs_object(genomic_drs_obj, file, type, headers):
 
 
 def get_access_method(url):
-    if url.startswith("s3"):
-        return {
-            "type": "s3",
-            "access_id": url.replace("s3://", "")
-        }
-    elif url.startswith("file"):
+    if url.startswith("file"):
         return {
             "type": "file",
             "access_url": {
                 "url": url
             }
         }
-    return None
+    try:
+        result = parse_aws_url(url)
+    except Exception as e:
+        return {
+            "message": str(e)
+        }
+    return {
+        "type": "s3",
+        "access_id": url
+    }
+
+
+def parse_aws_url(url):
+    """
+    Parse a url into s3 components
+    """
+    s3_url_parse = re.match(r"((https*|s3):\/\/(.+?))\/(.+)", url)
+    if s3_url_parse is not None:
+        if s3_url_parse.group(2) == "s3":
+            raise Exception(f"Incorrect URL format {url}. S3 URLs should be in the form http(s)://endpoint-url/bucket-name/object. If your object is stored at AWS S3, you can find more information about endpoint URLs at https://docs.aws.amazon.com/general/latest/gr/rande.html")
+        endpoint = s3_url_parse.group(1)
+        bucket_parse = re.match(r"(.+?)\/(.+)", s3_url_parse.group(4))
+        if bucket_parse is not None:
+            return {
+                "endpoint": endpoint,
+                "bucket": bucket_parse.group(1),
+                "object": bucket_parse.group(2)
+            }
+        raise Exception(f"S3 URI {url} does not contain a bucket name")
+    raise Exception(f"URI {url} cannot be parsed as an S3-style URI")
 
 
 def htsget_ingest(ingest_json, headers):
@@ -194,7 +224,7 @@ def htsget_ingest(ingest_json, headers):
             break
         response = link_genomic_data(headers, sample)
         for err in response["errors"]:
-            if "403" in err["error"]:
+            if "403" in err:
                 status_code = 403
                 break
 
