@@ -50,7 +50,7 @@
         ]
     },
     {
-        "program_id": "SYNTHETIC-2",
+        "program_id": "SYNTHETIC-1",
         "genomic_file_id": "NA02102",
         "main": {
             "access_method": "file:////app/htsget_server/data/files/NA02102.bam",
