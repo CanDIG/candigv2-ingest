@@ -50,6 +50,33 @@
         ]
     },
     {
+        "program_id": "SYNTHETIC-2",
+        "genomic_file_id": "multisample_2",
+        "main": {
+            "access_method": "file:////app/htsget_server/data/files/multisample_2.vcf.gz",
+            "name": "multisample_2.vcf.gz"
+        },
+        "index": {
+            "access_method": "file:////app/htsget_server/data/files/multisample_2.vcf.gz.tbi",
+            "name": "multisample_2.vcf.gz.tbi"
+        },
+        "metadata": {
+            "sequence_type": "wgs",
+            "data_type": "variant",
+            "reference": "hg38"
+        },
+        "samples": [
+            {
+                "genomic_file_sample_id": "TUMOR",
+                "submitter_sample_id": "SAMPLE_REGISTRATION_1"
+            },
+			{
+				"genomic_file_sample_id": "NORMAL",
+				"submitter_sample_id": "SAMPLE_REGISTRATION_2"
+			}
+        ]
+    },
+    {
         "program_id": "SYNTHETIC-1",
         "genomic_file_id": "NA02102",
         "main": {
