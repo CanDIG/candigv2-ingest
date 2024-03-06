@@ -198,6 +198,18 @@ components:
             total_cases:
               type: integer
               description: how many cases are in this dataset
+    IngestResponse:
+      type: object
+      properties:
+        result:
+          type: string
+          example: "Ingested 10 Donors"
+        response_code:
+          type: integer
+          example: 0
+        response_code_readable:
+          type: string
+          example: "Success"
     GenomicSample:
       type: object
       properties:
@@ -294,15 +306,3 @@ components:
       required:
         - submitter_sample_id
         - genomic_file_sample_id
-    IngestResponse:
-      type: object
-      properties:
-        result:
-          type: string
-          example: "Ingested 10 Donors"
-        response_code:
-          type: integer
-          example: 0
-        response_code_readable:
-          type: string
-          example: "Success"
