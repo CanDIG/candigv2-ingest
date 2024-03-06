@@ -149,9 +149,9 @@ components:
       content:
         'application/json':
           schema:
-            $ref: "#/components/schemas/ClinicalETLMap"
+            $ref: "#/components/schemas/ClinicalDonor"
   schemas:
-    ClinicalETLMap:
+    ClinicalDonor:
       type: object
       properties:
         openapi_url:
