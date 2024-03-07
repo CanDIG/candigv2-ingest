@@ -230,10 +230,6 @@ def prepare_clinical_data_for_ingest(ingest_json):
     ]
     (Fully outlined in MOH Schema)
     """
-    schema = MoHSchema(ingest_json["openapi_url"])
-    types = ["programs"]
-    types.extend(schema.validation_schema.keys())
-
     # split ingest by program_id:
     by_program = {}
     for donor in ingest_json["donors"]:
@@ -249,6 +245,10 @@ def prepare_clinical_data_for_ingest(ingest_json):
     for program_id in by_program.keys():
         errors = by_program[program_id]["errors"]
         print(f"Validating input for program {program_id}")
+        schema = MoHSchema(ingest_json["openapi_url"])
+        types = ["programs"]
+        types.extend(schema.validation_schema.keys())
+
         schema.validate_ingest_map(by_program[program_id])
         if len(schema.validation_warnings) > 0:
             print("Validation returned warnings:")
