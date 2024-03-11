@@ -255,8 +255,7 @@ def prepare_clinical_data_for_ingest(ingest_json):
             print("\n".join(schema.validation_warnings))
         if len(schema.validation_errors) > 0:
             errors.append(
-                "VALIDATION FAILED with the following issues",
-                [str(line) for line in schema.validation_errors],
+                [str(line) for line in schema.validation_errors]
             )
             continue
         print("Validation success.")
@@ -277,7 +276,7 @@ def prepare_clinical_data_for_ingest(ingest_json):
         by_program[program_id]["schemas"]["programs"] = [
             {
                 "program_id": program_id,
-                "metadata": schema.statistics
+                "metadata": schema.statistics.copy()
             }
         ]
     return by_program
