@@ -116,14 +116,14 @@
     },
     {
         "program_id": "SYNTHETIC-2",
-        "genomic_file_id": "HG00096.cnv.vcf",
+        "genomic_file_id": "chr22-v5a-phase3.vcf",
         "main": {
             "access_method": "http://s3.us-east-1.amazonaws.com/1000genomes/release/20130502/ALL.chr22.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz?public=true",
-            "name": "HG00096.cnv.vcf.gz"
+            "name": "ALL.chr22.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz"
         },
         "index": {
             "access_method": "http://s3.us-east-1.amazonaws.com/1000genomes/release/20130502/ALL.chr22.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz.tbi?public=true",
-            "name": "HG00096.cnv.vcf.gz.tbi"
+            "name": "ALL.chr22.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz.tbi"
         },
         "metadata": {
             "sequence_type": "wgs",
