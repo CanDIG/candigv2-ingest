@@ -8,8 +8,7 @@ import os
 def parse_args():
     parser = argparse.ArgumentParser(description="A script that ingests clinical data into Katsu")
     parser.add_argument("--output", help="Path to clone synth data repo.", required=True)
-    args = parser.parse_args()
-    return args
+    return parser.parse_args()
 
 
 def main(args):
@@ -18,8 +17,7 @@ def main(args):
     Repo.clone_from("https://github.com/CanDIG/mohccn-synthetic-data.git", args.output)
     print("Converting small_dataset_csvs to raw_data_map.json")
     CSVConvert.csv_convert(input_path=f"{args.output}/small_dataset_csv/raw_data",
-                           manifest_file=f"{args.output}/small_dataset_csv/manifest.yml", minify=True,
-                           index_output=False)
+                           manifest_file=f"{args.output}/small_dataset_csv/manifest.yml")
     print("moving files to tests directory")
     shutil.move(f"{args.output}/small_dataset_csv/raw_data_map.json",
                 f"{ingest_repo_dir}/tests/small_dataset_clinical_ingest.json")
