@@ -8,3 +8,4 @@ env.sh
 .venv/
 _local
 .idea
+tmp/
