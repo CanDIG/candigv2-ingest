@@ -112,3 +112,72 @@ def add_clinical_donors():
     headers["Content-Type"] = "application/json"
     response, status_code = ingest_clinical_data(dataset, headers)
     return response, status_code
+
+
+def add_program_authorization():
+    program = connexion.request.json
+    headers = {}
+    if "Authorization" not in request.headers:
+        return generateResponse("Bearer token required", ERROR_CODES["UNAUTHORIZED"])
+    try:
+        # New auth model
+        # refresh_token = request.headers["Authorization"].split("Bearer ")[1]
+        # token = auth.get_bearer_from_refresh(refresh_token)
+        if not request.headers["Authorization"].startswith("Bearer "):
+            return generateResponse("Invalid bearer token", ERROR_CODES["UNAUTHORIZED"])
+        token = request.headers["Authorization"].split("Bearer ")[1]
+        headers["Authorization"] = "Bearer %s" % token
+    except Exception as e:
+        if "Invalid bearer token" in str(e):
+            return generateResponse("Bearer token invalid or unauthorized", ERROR_CODES["UNAUTHORIZED"])
+        return generateResponse("Unknown error during authorization", ERROR_CODES["AUTHORIZATIONERR"])
+    headers["Content-Type"] = "application/json"
+
+    response, status_code = auth.add_program_to_opa(program, token)
+    return response, status_code
+
+
+@app.route('/program/<path:program_id>')
+def get_program_authorization(program_id):
+    headers = {}
+    if "Authorization" not in request.headers:
+        return generateResponse("Bearer token required", ERROR_CODES["UNAUTHORIZED"])
+    try:
+        # New auth model
+        # refresh_token = request.headers["Authorization"].split("Bearer ")[1]
+        # token = auth.get_bearer_from_refresh(refresh_token)
+        if not request.headers["Authorization"].startswith("Bearer "):
+            return generateResponse("Invalid bearer token", ERROR_CODES["UNAUTHORIZED"])
+        token = request.headers["Authorization"].split("Bearer ")[1]
+        headers["Authorization"] = "Bearer %s" % token
+    except Exception as e:
+        if "Invalid bearer token" in str(e):
+            return generateResponse("Bearer token invalid or unauthorized", ERROR_CODES["UNAUTHORIZED"])
+        return generateResponse("Unknown error during authorization", ERROR_CODES["AUTHORIZATIONERR"])
+    headers["Content-Type"] = "application/json"
+
+    response, status_code = auth.get_program_in_opa(program_id, token)
+    return response, status_code
+
+
+@app.route('/program/<path:program_id>')
+def remove_program_authorization(program_id):
+    headers = {}
+    if "Authorization" not in request.headers:
+        return generateResponse("Bearer token required", ERROR_CODES["UNAUTHORIZED"])
+    try:
+        # New auth model
+        # refresh_token = request.headers["Authorization"].split("Bearer ")[1]
+        # token = auth.get_bearer_from_refresh(refresh_token)
+        if not request.headers["Authorization"].startswith("Bearer "):
+            return generateResponse("Invalid bearer token", ERROR_CODES["UNAUTHORIZED"])
+        token = request.headers["Authorization"].split("Bearer ")[1]
+        headers["Authorization"] = "Bearer %s" % token
+    except Exception as e:
+        if "Invalid bearer token" in str(e):
+            return generateResponse("Bearer token invalid or unauthorized", ERROR_CODES["UNAUTHORIZED"])
+        return generateResponse("Unknown error during authorization", ERROR_CODES["AUTHORIZATIONERR"])
+    headers["Content-Type"] = "application/json"
+
+    response, status_code = auth.remove_program_from_opa(program_id, token)
+    return response, status_code
