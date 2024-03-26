@@ -12,7 +12,7 @@ from ingest_result import IngestPermissionsException
 
 from clinical_etl.mohschema import MoHSchema
 
-CANDIG_URL = os.environ.get("CANDIG_URL")
+KATSU_URL = os.environ.get("KATSU_URL")
 
 def update_headers(headers):
     """
@@ -93,8 +93,7 @@ def ingest_schemas(fields, headers):
                 name = name_mappings[type]
             else:
                 name = type
-            ingest_str = f"/katsu/v2/ingest/{name}/"
-            ingest_url = CANDIG_URL + ingest_str
+            ingest_url = f"{KATSU_URL}/v2/ingest/{name}/"
 
             created_count = 0
             total_count = len(fields[type])
@@ -300,10 +299,6 @@ def ingest_clinical_data(ingest_json, headers):
 
 
 def main():
-    # check if os.environ.get("CANDIG_URL") is set
-    if CANDIG_URL is None:
-        print("ERROR: $CANDIG_URL is not set. Did you forget to run 'source env.sh'?")
-        exit()
     headers = auth.get_auth_header()
 
     parser = argparse.ArgumentParser(description="A script that ingests clinical data into Katsu")

@@ -7,12 +7,9 @@ import auth
 from pathlib import Path
 
 
-CANDIG_URL = os.getenv("CANDIG_URL", "")
-
-
 def main():
     parser = argparse.ArgumentParser(description="Script to ingest files into an S3-compatible bucket.")
-    
+
     parser.add_argument("--sample", help="file name of sample", required=False)
     parser.add_argument("--samplefile", help="file with list of file names of samples", required=False)
     parser.add_argument("--endpoint", help="s3 endpoint")
@@ -33,9 +30,6 @@ def main():
         samples.append(args.sample)
     else:
         raise Exception("Either a sample name or a file of samples is required.")
-
-    if CANDIG_URL == "":
-        raise Exception("CANDIG_URL environment variable is not set.")
 
     if args.awsfile:
         # parse the awsfile:
