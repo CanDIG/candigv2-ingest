@@ -132,13 +132,30 @@ def is_authed(request: requests.Request):
     return False
 
 
-def get_opa_access():
-    response, status_code = authx.auth.get_service_store_secret("opa", key="access")
+def add_program_to_opa(program_dict, token):
+    # check to see if the user is allowed to add program authorizations:
+    if not authx.auth.is_action_allowed_for_program(token, method="POST", path="ingest/program", program=program_dict['program_id']):
+        return "User not authorized to add program authorizations", 403
+
+    response, status_code = authx.auth.add_program_to_opa(program_dict)
     return response, status_code
 
 
-def set_opa_access(input):
-    response, status_code = authx.auth.set_service_store_secret("opa", key="access", value=json.dumps(input))
+def get_program_in_opa(program_id, token):
+    # check to see if the user is allowed to add program authorizations:
+    if not authx.auth.is_action_allowed_for_program(token, method="POST", path="ingest/program", program=program_id):
+        return "User not authorized to add program authorizations", 403
+
+    response, status_code = authx.auth.get_program_in_opa(program_id)
+    return response, status_code
+
+
+def remove_program_from_opa(program_id, token):
+    # check to see if the user is allowed to add program authorizations:
+    if not authx.auth.is_action_allowed_for_program(token, method="POST", path="ingest/program", program=program_id):
+        return "User not authorized to add program authorizations", 403
+
+    response, status_code = authx.auth.remove_program_from_opa(program_id)
     return response, status_code
 
 

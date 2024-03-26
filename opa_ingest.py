@@ -12,40 +12,36 @@ OPA_URL = CANDIG_URL + "/policy"
 
 
 def add_user_to_dataset(user, dataset, token):
-    # get current access:
-    access, status_code = auth.get_opa_access()
-    if status_code != 200:
-        raise Exception(f"OPA error: {access}")
-    controlled_access_list = access["access"]["controlled_access_list"]
-    if user in controlled_access_list:
-        if dataset not in controlled_access_list[user]:
-            controlled_access_list[user].append(dataset)
-    else:
-        controlled_access_list[user] = [dataset]
-
+    response, status_code = auth.get_program_in_opa(dataset, token)
+    if status_code == 404:
+        raise Exception(f"No program {dataset} exists")
+    elif status_code >= 300:
+        raise Exception(f"Error adding user authorization: {response}")
+    if user not in response[dataset]["team_members"]:
+        response[dataset]["team_members"].append(user)
     # put back:
-    response, status_code = auth.set_opa_access(access)
+    response, status_code = auth.add_program_to_opa(response[dataset], token)
+
     if status_code != 200:
         return {"error": f"{status_code}: {response}"}, status_code
-    return response, 200
+    return auth.get_program_in_opa(dataset, token)
 
 
 def remove_user_from_dataset(user, dataset, token):
-    # get current access:
-    access, status_code = auth.get_opa_access()
-    if status_code != 200:
-        raise Exception(f"OPA error: {access}")
-    controlled_access_list = access["access"]["controlled_access_list"]
-    if user in controlled_access_list:
-        if dataset in controlled_access_list[user]:
-            controlled_access_list[user].remove(dataset)
-            # put back:
-            response, status_code = auth.set_opa_access(access)
-            if status_code != 200:
-                return {"error": f"{status_code}: {response}"}, status_code
-            return access, 200
-        return {"error": f"Program {dataset} not authorized for {user}"}, 404
-    return {"error": f"User {user} not found"}, 404
+    response, status_code = auth.get_program_in_opa(dataset, token)
+    if status_code == 404:
+        raise Exception(f"No program {dataset} exists")
+    elif status_code >= 300:
+        raise Exception(f"Error adding user authorization: {response}")
+    if user in response[dataset]["team_members"]:
+        response[dataset]["team_members"].remove(user)
+        # put back:
+        response, status_code = auth.add_program_to_opa(response[dataset], token)
+        if status_code != 200:
+            return {"error": f"{status_code}: {response}"}, status_code
+        return auth.get_program_in_opa(dataset, token)
+    else:
+        return {"error": f"User {user} not found in program {dataset} team_members"}
 
 
 def main():

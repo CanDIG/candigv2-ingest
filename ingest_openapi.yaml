@@ -28,6 +28,46 @@ paths:
               application/json:
                 schema:
                   type: object
+  /program:
+    post:
+      description: Add authorization information for a new program
+      operationId: ingest_operations.add_program_authorization
+      requestBody:
+        $ref: '#/components/requestBodies/ProgramAuthorizationRequest'
+      responses:
+          200:
+            description: Success
+            content:
+              application/json:
+                schema:
+                  type: object
+  /program/{program_id}:
+    parameters:
+      - in: path
+        name: program_id
+        schema:
+          type: string
+        required: true
+    get:
+      description: Get authorization information for a program
+      operationId: ingest_operations.get_program_authorization
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+    delete:
+      description: Delete authorization information for a program
+      operationId: ingest_operations.remove_program_authorization
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
   /program/{program_id}/email/{email}:
     parameters:
       - in: path
@@ -149,9 +189,14 @@ components:
       content:
         'application/json':
           schema:
-            $ref: "#/components/schemas/ClinicalETLMap"
+            $ref: "#/components/schemas/ClinicalDonor"
+    ProgramAuthorizationRequest:
+      content:
+        'application/json':
+          schema:
+            $ref: "#/components/schemas/ProgramAuthorization"
   schemas:
-    ClinicalETLMap:
+    ClinicalDonor:
       type: object
       properties:
         openapi_url:
@@ -198,12 +243,24 @@ components:
             total_cases:
               type: integer
               description: how many cases are in this dataset
+    IngestResponse:
+      type: object
+      properties:
+        result:
+          type: string
+          example: "Ingested 10 Donors"
+        response_code:
+          type: integer
+          example: 0
+        response_code_readable:
+          type: string
+          example: "Success"
     GenomicSample:
       type: object
       properties:
         program_id:
           type: string
-          description: Name of the cohort this sample belongs to. The user must be authorized to add data to this cohort.
+          description: Name of the program this sample belongs to. The user must be authorized to add data to this program.
         genomic_file_id:
           type: string
           description: A unique name for this genomic data resource
@@ -294,15 +351,27 @@ components:
       required:
         - submitter_sample_id
         - genomic_file_sample_id
-    IngestResponse:
+    ProgramAuthorization:
       type: object
+      description: Describes who is allowed to access a program
       properties:
-        result:
+        program_id:
           type: string
-          example: "Ingested 10 Donors"
-        response_code:
-          type: integer
-          example: 0
-        response_code_readable:
+          description: name of the program
+        program_curators:
+          type: array
+          description: list of users who are program curators for this program
+          items:
+            type: string
+        team_members:
+          type: array
+          description: list of users who are original researchers for this program
+          items:
+            type: string
+        creation_date:
           type: string
-          example: "Success"
+          description: date program was created, for embargo purposes. This may or may not be the date of ingest.
+      required:
+        - program_id
+        - program_curators
+        - team_members
