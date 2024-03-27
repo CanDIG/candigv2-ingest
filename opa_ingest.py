@@ -7,8 +7,6 @@ import auth
 import re
 
 
-CANDIG_URL = os.getenv("CANDIG_URL", "")
-OPA_URL = CANDIG_URL + "/policy"
 
 
 def add_user_to_dataset(user, dataset, token):
@@ -54,8 +52,8 @@ def main():
 
     args = parser.parse_args()
     token = auth.get_site_admin_token()
-    if os.environ.get("CANDIG_URL") is None:
-        raise Exception("CANDIG_URL environment variable is not set")
+    if os.environ.get("OPA_URL") is None:
+        raise Exception("OPA_URL environment variable is not set")
     if args.userfile is not None:
         with open(args.userfile) as f:
             lines = f.readlines()

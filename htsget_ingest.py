@@ -13,8 +13,8 @@ import jsonschema
 
 
 CANDIG_URL = os.getenv("CANDIG_URL", "")
-HTSGET_URL = CANDIG_URL + "/genomics"
-DRS_HOST_URL = "drs://" + HTSGET_URL.replace(f"{urlparse(CANDIG_URL).scheme}://","")
+HTSGET_URL = os.getenv("HTSGET_URL", f"{CANDIG_URL}/genomics")
+DRS_HOST_URL = "drs://" + CANDIG_URL.replace(f"{urlparse(CANDIG_URL).scheme}://","") + "/genomics"
 
 
 def link_genomic_data(headers, sample):
