@@ -19,8 +19,8 @@ def main(args):
     ingest_repo_dir = os.path.dirname(os.path.abspath(__file__))
     print(f"Cloning mohccn-synthetic-data repo into {args.output}")
     repo = Repo.clone_from("https://github.com/CanDIG/mohccn-synthetic-data.git", args.output)
-    # TODO: remove after error checking
-    repo.git.checkout('mshadbolt/invalid-data')
+    # can be uncommented to check error behaviour
+    # repo.git.checkout('mshadbolt/invalid-data')
     print("Converting small_dataset_csvs to raw_data_map.json")
     try:
         packets, errors = CSVConvert.csv_convert(input_path=f"{args.output}/small_dataset_csv/raw_data",
