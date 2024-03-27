@@ -1,8 +1,10 @@
 from git import Repo
 import shutil
 from clinical_etl import CSVConvert
+from clinical_etl.schema import ValidationError
 import argparse
 import os
+import sys
 
 
 def parse_args():
@@ -16,18 +18,22 @@ def parse_args():
 def main(args):
     ingest_repo_dir = os.path.dirname(os.path.abspath(__file__))
     print(f"Cloning mohccn-synthetic-data repo into {args.output}")
-    Repo.clone_from("https://github.com/CanDIG/mohccn-synthetic-data.git", args.output)
+    repo = Repo.clone_from("https://github.com/CanDIG/mohccn-synthetic-data.git", args.output)
+    repo.git.checkout('mshadbolt/invalid-data')
     print("Converting small_dataset_csvs to raw_data_map.json")
     try:
-        packets = CSVConvert.csv_convert(input_path=f"{args.output}/small_dataset_csv/raw_data",
-                               manifest_file=f"{args.output}/small_dataset_csv/manifest.yml")
-        if packets:
-            print("hello")
+        packets, errors = CSVConvert.csv_convert(input_path=f"{args.output}/small_dataset_csv/raw_data",
+                                                 manifest_file=f"{args.output}/small_dataset_csv/manifest.yml")
+        if errors:
+            raise ValidationError("Clinical etl conversion failed to create an ingestable json file, "
+                                  "please check the errors above and try again.")
     except Exception as e:
         print(e)
-        print("Clinical etl conversion failed, please check the error above, the inputs, printed outputs and try again.")
+        print("Removing repo.")
+        shutil.rmtree(args.output)
+        sys.exit(0)
 
-    print("moving files to tests directory")
+    print("Ingestable JSON successfully created, moving json files to tests directory")
     shutil.move(f"{args.output}/small_dataset_csv/raw_data_map.json",
                 f"{ingest_repo_dir}/tests/small_dataset_clinical_ingest.json")
     shutil.move(f"{args.output}/small_dataset_csv/genomic.json",
