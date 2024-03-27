@@ -10,5 +10,6 @@ python-dotenv==0.14.0
 dateparser~=1.2.0
 pandas~=2.1.4
 numpy>=1.22.2 # not directly required, pinned by Snyk to avoid a vulnerability
-clinical_etl@git+https://github.com/CanDIG/clinical_ETL_code.git@v2.1.0
+# TODO: update the clinical_etl version
+clinical_etl@git+https://github.com/CanDIG/clinical_ETL_code.git@mshadbolt/raise-exception
 GitPython>=3.1.42
