@@ -6,3 +6,6 @@ access.json
 temp/
 env.sh
 .venv/
+_local
+.idea
+tmp/
