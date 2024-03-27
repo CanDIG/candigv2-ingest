@@ -236,8 +236,6 @@ def htsget_ingest(ingest_json, headers):
         response.pop("errors")
         if len(response) > 0:
             result["results"][sample["genomic_file_id"]] = response
-    if len(result["errors"]) == 0:
-        result.pop("errors")
     return result, status_code
 
 
