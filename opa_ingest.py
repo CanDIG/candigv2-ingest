@@ -7,7 +7,6 @@ import auth
 import re
 
 
-OPA_URL = os.getenv("OPA_URL")
 
 
 def add_user_to_dataset(user, dataset, token):
