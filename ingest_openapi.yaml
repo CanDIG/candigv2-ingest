@@ -28,6 +28,91 @@ paths:
               application/json:
                 schema:
                   type: object
+  /site-role/{role_type}:
+    parameters:
+      - in: path
+        name: role_type
+        schema:
+          type: string
+        required: true
+    get:
+      description: List users in role_type
+      operationId: ingest_operations.list_role
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+    post:
+      description: Assign users to role
+      operationId: ingest_operations.update_role
+      requestBody:
+        type: array
+        items:
+          type: string
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+  /site-role/{role_type}/email/{email}:
+    parameters:
+      - in: path
+        name: role_type
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: email
+        schema:
+          type: string
+        required: true
+    get:
+      description: Is user in this role?
+      operationId: ingest_operations.is_user_in_role
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: boolean
+    post:
+      description: Assign user to role
+      operationId: ingest_operations.add_user_to_role
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+    delete:
+      description: Remove user from role
+      operationId: ingest_operations.remove_user_from_role
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+        404:
+          description: User not found in role
+          content:
+            application/json:
+              schema:
+                type: object
+        405:
+          description: Can't remove user from role
+          content:
+            application/json:
+              schema:
+                type: object
   /program:
     post:
       description: Add authorization information for a new program
