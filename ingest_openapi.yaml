@@ -49,9 +49,7 @@ paths:
       description: Assign users to role
       operationId: ingest_operations.update_role
       requestBody:
-        type: array
-        items:
-          type: string
+        $ref: "#/components/requestBodies/RoleTypeRequest"
       responses:
         200:
           description: Success
@@ -280,6 +278,13 @@ components:
         'application/json':
           schema:
             $ref: "#/components/schemas/ProgramAuthorization"
+    RoleTypeRequest:
+      content:
+        'application/json':
+          schema:
+            type: array
+            items:
+              type: string
   schemas:
     ClinicalDonor:
       type: object
