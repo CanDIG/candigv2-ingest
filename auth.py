@@ -4,7 +4,6 @@ import re
 import json
 import requests
 
-
 AUTH = True
 
 def get_auth_header():
@@ -110,6 +109,13 @@ def store_aws_credential(endpoint, bucket, access, secret, token=None):
     return authx.auth.store_aws_credential(token=token, endpoint=endpoint, bucket=bucket,
                                            access=access, secret=secret)
 
+
+def is_site_admin(token):
+    if (authx.auth.is_site_admin(None, token=token)):
+        return True
+    return False
+
+
 def is_authed(request: requests.Request):
     if 'Authorization' not in request.headers:
         return False
@@ -157,6 +163,32 @@ def remove_program_from_opa(program_id, token):
 
     response, status_code = authx.auth.remove_program_from_opa(program_id)
     return response, status_code
+
+
+def get_role_type_in_opa(role_type, token):
+    if not is_site_admin(token):
+        return {"error": "Only site admins can view site roles"}, 403
+    result, status_code = authx.auth.get_service_store_secret("opa", key=f"roles")
+    print(result)
+    if status_code == 200:
+        if role_type in result['roles']:
+            return {role_type: result['roles'][role_type]}, 200
+        return {"error": f"role type {role_type} does not exist"}, 404
+    return result, status_code
+
+
+def set_role_type_in_opa(role_type, members, token):
+    if not is_site_admin(token):
+        return {"error": "Only site admins can view site roles"}, 403
+    result, status_code = authx.auth.get_service_store_secret("opa", key=f"roles")
+    if status_code == 200:
+        if role_type in result['roles']:
+            result['roles'][role_type] = members
+            result, status_code = authx.auth.set_service_store_secret("opa", key=f"roles", value=json.dumps(result))
+            if status_code == 200:
+                return result['roles'][role_type], status_code
+        return {"error": f"role type {role_type} does not exist"}, 404
+    return result, status_code
 
 
 if __name__ == "__main__":
