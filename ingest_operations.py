@@ -107,7 +107,7 @@ def add_clinical_donors():
 
 def add_program_authorization():
     program = connexion.request.json
-    headers = get_headers()
+    token = request.headers['Authorization'].split("Bearer ")[1]
 
     response, status_code = auth.add_program_to_opa(program, token)
     return response, status_code
@@ -115,7 +115,7 @@ def add_program_authorization():
 
 @app.route('/program/<path:program_id>')
 def get_program_authorization(program_id):
-    headers = get_headers()
+    token = request.headers['Authorization'].split("Bearer ")[1]
 
     response, status_code = auth.get_program_in_opa(program_id, token)
     return response, status_code
@@ -123,7 +123,7 @@ def get_program_authorization(program_id):
 
 @app.route('/program/<path:program_id>')
 def remove_program_authorization(program_id):
-    headers = get_headers()
+    token = request.headers['Authorization'].split("Bearer ")[1]
 
     response, status_code = auth.remove_program_from_opa(program_id, token)
     return response, status_code
