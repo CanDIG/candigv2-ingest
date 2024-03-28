@@ -5,7 +5,7 @@ urllib3==1.26.18
 minio==7.1.7
 jsoncomparison~=1.1.0
 candigv2-authx@git+https://github.com/CanDIG/candigv2-authx.git@v2.2.1
-awscli==1.29.5
+awscli>=1.29.5
 python-dotenv==0.14.0
 dateparser~=1.2.0
 pandas~=2.1.4
