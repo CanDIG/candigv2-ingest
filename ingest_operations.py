@@ -66,6 +66,7 @@ def get_service_info():
         "version": config.VERSION
     }
 
+
 def add_s3_credential():
     data = connexion.request.json
     token = request.headers['Authorization'].split("Bearer ")[1]
@@ -157,6 +158,8 @@ def remove_user_access(program_id, email):
 def add_genomic_linkages():
     headers = get_headers()
     response, status_code = htsget_ingest(connexion.request.json, headers)
+    if auth.is_default_site_admin_set():
+        response["warning"] = f"Default site administrator {os.getenv('DEFAULT_SITE_ADMIN_USER')} is still configured. Use the /ingest/site-role/site_admin endpoint to set a different site admin."
     return response, status_code
 
 
@@ -164,6 +167,8 @@ def add_clinical_donors():
     dataset = connexion.request.json
     headers = get_headers()
     response, status_code = ingest_clinical_data(dataset, headers)
+    if auth.is_default_site_admin_set():
+        response["warning"] = f"Default site administrator {os.getenv('DEFAULT_SITE_ADMIN_USER')} is still configured. Use the /ingest/site-role/site_admin endpoint to set a different site admin."
     return response, status_code
 
 
@@ -172,6 +177,8 @@ def add_program_authorization():
     token = request.headers['Authorization'].split("Bearer ")[1]
 
     response, status_code = auth.add_program_to_opa(program, token)
+    if auth.is_default_site_admin_set():
+        response["warning"] = f"Default site administrator {os.getenv('DEFAULT_SITE_ADMIN_USER')} is still configured. Use the /ingest/site-role/site_admin endpoint to set a different site admin."
     return response, status_code
 
 

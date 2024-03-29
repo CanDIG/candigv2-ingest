@@ -161,3 +161,13 @@ def set_role_type_in_opa(role_type, members, token):
                 return result['roles'][role_type], status_code
         return {"error": f"role type {role_type} does not exist"}, 404
     return result, status_code
+
+
+def is_default_site_admin_set():
+    if os.getenv("DEFAULT_SITE_ADMIN_USER") is not None:
+        result, status_code = authx.auth.get_service_store_secret("opa", key=f"roles")
+        if status_code == 200:
+            if 'site_admin' in result['roles']:
+                return os.getenv("DEFAULT_SITE_ADMIN_USER") in ",".join(result['roles']['site_admin'])
+        raise Exception("ERROR: Unable to list site administrators")
+    return False
