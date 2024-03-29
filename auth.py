@@ -4,32 +4,6 @@ import re
 import json
 import requests
 
-AUTH = True
-
-def get_auth_header():
-    if AUTH:
-        token = get_site_admin_token()
-        return {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
-    return ""
-
-
-def get_site_admin_token():
-    '''
-    Returns a Keycloak bearer token for the site admin.
-    '''
-    # New auth model: return refresh. Current: return bearer
-    secret_file = os.getenv('CANDIG_SECRET_FILE')
-    secret = os.getenv('CANDIG_CLIENT_SECRET')
-    if secret_file is not None:
-        with open(secret_file, "r") as f:
-            secret = f.read().strip()
-    return authx.auth.get_access_token(
-    keycloak_url=os.getenv('KEYCLOAK_PUBLIC_URL'),
-    client_id=os.getenv('CANDIG_CLIENT_ID'),
-    client_secret=secret,
-    username=os.getenv('CANDIG_SITE_ADMIN_USER'),
-    password=os.getenv('CANDIG_SITE_ADMIN_PASSWORD')
-    )
 
 """
 For new auth model
@@ -104,8 +78,6 @@ def parse_aws_credential(awsfile):
 
 
 def store_aws_credential(endpoint, bucket, access, secret, token=None):
-    if token is None:
-        token = get_site_admin_token()
     return authx.auth.store_aws_credential(token=token, endpoint=endpoint, bucket=bucket,
                                            access=access, secret=secret)
 
@@ -189,7 +161,3 @@ def set_role_type_in_opa(role_type, members, token):
                 return result['roles'][role_type], status_code
         return {"error": f"role type {role_type} does not exist"}, 404
     return result, status_code
-
-
-if __name__ == "__main__":
-    print(get_site_admin_token())
