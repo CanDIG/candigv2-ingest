@@ -169,5 +169,5 @@ def is_default_site_admin_set():
         if status_code == 200:
             if 'site_admin' in result['roles']:
                 return os.getenv("DEFAULT_SITE_ADMIN_USER") in ",".join(result['roles']['site_admin'])
-        raise Exception("ERROR: Unable to list site administrators")
+        raise Exception(f"ERROR: Unable to list site administrators {result} {status_code}")
     return False
