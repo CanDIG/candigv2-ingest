@@ -5,33 +5,6 @@ import json
 import requests
 
 
-AUTH = True
-
-def get_auth_header():
-    if AUTH:
-        token = get_site_admin_token()
-        return {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
-    return ""
-
-
-def get_site_admin_token():
-    '''
-    Returns a Keycloak bearer token for the site admin.
-    '''
-    # New auth model: return refresh. Current: return bearer
-    secret_file = os.getenv('CANDIG_SECRET_FILE')
-    secret = os.getenv('CANDIG_CLIENT_SECRET')
-    if secret_file is not None:
-        with open(secret_file, "r") as f:
-            secret = f.read().strip()
-    return authx.auth.get_access_token(
-    keycloak_url=os.getenv('KEYCLOAK_PUBLIC_URL'),
-    client_id=os.getenv('CANDIG_CLIENT_ID'),
-    client_secret=secret,
-    username=os.getenv('CANDIG_SITE_ADMIN_USER'),
-    password=os.getenv('CANDIG_SITE_ADMIN_PASSWORD')
-    )
-
 """
 For new auth model
 def get_bearer_from_refresh(refresh_token):
@@ -105,10 +78,15 @@ def parse_aws_credential(awsfile):
 
 
 def store_aws_credential(endpoint, bucket, access, secret, token=None):
-    if token is None:
-        token = get_site_admin_token()
     return authx.auth.store_aws_credential(token=token, endpoint=endpoint, bucket=bucket,
                                            access=access, secret=secret)
+
+
+def is_site_admin(token):
+    if (authx.auth.is_site_admin(None, token=token)):
+        return True
+    return False
+
 
 def is_authed(request: requests.Request):
     if 'Authorization' not in request.headers:
@@ -159,5 +137,37 @@ def remove_program_from_opa(program_id, token):
     return response, status_code
 
 
-if __name__ == "__main__":
-    print(get_site_admin_token())
+def get_role_type_in_opa(role_type, token):
+    if not is_site_admin(token):
+        return {"error": "Only site admins can view site roles"}, 403
+    result, status_code = authx.auth.get_service_store_secret("opa", key=f"roles")
+    print(result)
+    if status_code == 200:
+        if role_type in result['roles']:
+            return {role_type: result['roles'][role_type]}, 200
+        return {"error": f"role type {role_type} does not exist"}, 404
+    return result, status_code
+
+
+def set_role_type_in_opa(role_type, members, token):
+    if not is_site_admin(token):
+        return {"error": "Only site admins can view site roles"}, 403
+    result, status_code = authx.auth.get_service_store_secret("opa", key=f"roles")
+    if status_code == 200:
+        if role_type in result['roles']:
+            result['roles'][role_type] = members
+            result, status_code = authx.auth.set_service_store_secret("opa", key=f"roles", value=json.dumps(result))
+            if status_code == 200:
+                return result['roles'][role_type], status_code
+        return {"error": f"role type {role_type} does not exist"}, 404
+    return result, status_code
+
+
+def is_default_site_admin_set():
+    if os.getenv("DEFAULT_SITE_ADMIN_USER") is not None:
+        result, status_code = authx.auth.get_service_store_secret("opa", key=f"roles")
+        if status_code == 200:
+            if 'site_admin' in result['roles']:
+                return os.getenv("DEFAULT_SITE_ADMIN_USER") in ",".join(result['roles']['site_admin'])
+        raise Exception(f"ERROR: Unable to list site administrators {result} {status_code}")
+    return False

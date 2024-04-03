@@ -211,17 +211,23 @@ To ingest using an S3 container, once the files have been added, you can run the
 python htsget_ingest.py --samplefile [JSON-formatted sample data as specified above]
 ```
 
-## 3. Adding authorization for users to programs
-A site administrator can use either the `opa_ingest.py` command-line script or the API to add authorization for a user to access a program.
+## 3. Assigning users to programs
+A site administrator can use either the `opa_ingest.py` command-line script or the API to assign user authorizations to programs. Users can be assigned one of two levels of authorization:
+* Team members are researchers of a program and are authorized to read and access all donor-specific data for a program.
+* Program curators are users that are authorized to curate data for the program: they can ingest data.
 
 #### API
-Use the `/ingest/program/{program_id}/email/{email}` to add or remove a user's email address to the list of users authorized to access that program. Authorization headers for a site admin user must be provided. A POST request adds authorization, while a DELETE request revokes it.
+Use the `/ingest/program/{program_id}` to add, update, or delete authorization information for a program. Authorization headers for a site admin user must be provided. A POST request adds authorization, while a DELETE request revokes it.
 
 #### Command line
 
 ```bash
 python opa_ingest.py --user|userfile [either a user email or a file of user emails] -- dataset [name of dataset] [--remove]
 ```
+
+## 4. Adding or removing site administrators
+Use the `/ingest/site-role/site_admin/{user_email}` endpoint to add or remove site administrators. A POST request adds the user as a site admin, while a DELETE request removes the user from the role.
+
 
 ## Run as Docker Container
 The containerized version runs the API as specified above within a Docker container (which is how this repository is used in the CanDIGv2 stack).
