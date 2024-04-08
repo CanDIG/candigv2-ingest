@@ -11,8 +11,8 @@
                 "day_interval": -23376
             },
             "date_of_death": {
-                "month_interval": 28,
-                "day_interval": 851
+                "month_interval": 70,
+                "day_interval": 2100
             },
             "gender": "Man",
             "sex_at_birth": "Male",
@@ -188,8 +188,8 @@
                 "day_interval": -13269
             },
             "date_of_death": {
-                "month_interval": 24,
-                "day_interval": 731
+                "month_interval": 60,
+                "day_interval": 1800
             },
             "gender": "Woman",
             "sex_at_birth": "Female",
@@ -524,8 +524,8 @@
                 "day_interval": -12267
             },
             "date_of_death": {
-                "month_interval": 27,
-                "day_interval": 821
+                "month_interval": 50,
+                "day_interval": 1500
             },
             "gender": "Man",
             "sex_at_birth": "Male",
