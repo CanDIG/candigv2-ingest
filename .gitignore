@@ -9,3 +9,5 @@ env.sh
 _local
 .idea
 tmp/
+tests/small_dataset_clinical_ingest.json
+tests/small_dataset_genomic_ingest.json
