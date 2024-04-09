@@ -23,6 +23,7 @@ def main(args):
     print(f"Cloning mohccn-synthetic-data repo into {args.output}")
     repo = Repo.clone_from("https://github.com/CanDIG/mohccn-synthetic-data.git", args.output)
     # can be commented to check error behaviour
+    # TODO: delete before merging
     repo.git.checkout('mshadbolt/invalid-data')
 
     try:
