@@ -21,10 +21,7 @@ def parse_args():
 def main(args):
     ingest_repo_dir = os.path.dirname(os.path.abspath(__file__))
     print(f"Cloning mohccn-synthetic-data repo into {args.output}")
-    repo = Repo.clone_from("https://github.com/CanDIG/mohccn-synthetic-data.git", args.output)
-    # can be commented to check error behaviour
-    # TODO: delete before merging
-    repo.git.checkout('mshadbolt/invalid-data')
+    Repo.clone_from("https://github.com/CanDIG/mohccn-synthetic-data.git", args.output)
 
     try:
         if args.prefix:
@@ -46,7 +43,7 @@ def main(args):
                 raise ValidationError("Clinical etl conversion failed to create an ingestable json file, "
                                       "please check the errors in tests/clinical_data_validation_results.json and "
                                       "try again.")
-    except Exception as e:
+    except ValidationError as e:
         print(e)
         print(f"Moving validation results file to {ingest_repo_dir}/tests/small_dataset_clinical_ingest_validation_results.json.")
         shutil.move(f"{output_dir}/raw_data_validation_results.json",
