@@ -140,11 +140,11 @@ def remove_program_from_opa(program_id, token):
 def get_role_type_in_opa(role_type, token):
     if not is_site_admin(token):
         return {"error": "Only site admins can view site roles"}, 403
-    result, status_code = authx.auth.get_service_store_secret("opa", key=f"roles")
+    result, status_code = authx.auth.get_service_store_secret("opa", key=f"site_roles")
     print(result)
     if status_code == 200:
-        if role_type in result['roles']:
-            return {role_type: result['roles'][role_type]}, 200
+        if role_type in result['site_roles']:
+            return {role_type: result['site_roles'][role_type]}, 200
         return {"error": f"role type {role_type} does not exist"}, 404
     return result, status_code
 
@@ -152,22 +152,22 @@ def get_role_type_in_opa(role_type, token):
 def set_role_type_in_opa(role_type, members, token):
     if not is_site_admin(token):
         return {"error": "Only site admins can view site roles"}, 403
-    result, status_code = authx.auth.get_service_store_secret("opa", key=f"roles")
+    result, status_code = authx.auth.get_service_store_secret("opa", key=f"site_roles")
     if status_code == 200:
-        if role_type in result['roles']:
-            result['roles'][role_type] = members
-            result, status_code = authx.auth.set_service_store_secret("opa", key=f"roles", value=json.dumps(result))
+        if role_type in result['site_roles']:
+            result['site_roles'][role_type] = members
+            result, status_code = authx.auth.set_service_store_secret("opa", key=f"site_roles", value=json.dumps(result))
             if status_code == 200:
-                return result['roles'][role_type], status_code
+                return result['site_roles'][role_type], status_code
         return {"error": f"role type {role_type} does not exist"}, 404
     return result, status_code
 
 
 def is_default_site_admin_set():
     if os.getenv("DEFAULT_SITE_ADMIN_USER") is not None:
-        result, status_code = authx.auth.get_service_store_secret("opa", key=f"roles")
+        result, status_code = authx.auth.get_service_store_secret("opa", key=f"site_roles")
         if status_code == 200:
-            if 'site_admin' in result['roles']:
-                return os.getenv("DEFAULT_SITE_ADMIN_USER") in ",".join(result['roles']['site_admin'])
+            if 'admin' in result['site_roles']:
+                return os.getenv("DEFAULT_SITE_ADMIN_USER") in ",".join(result['site_roles']['admin'])
         raise Exception(f"ERROR: Unable to list site administrators {result} {status_code}")
     return False
