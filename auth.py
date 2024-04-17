@@ -113,7 +113,7 @@ def is_authed(request: requests.Request):
 def add_program_to_opa(program_dict, token):
     # check to see if the user is allowed to add program authorizations:
     if not authx.auth.is_action_allowed_for_program(token, method="POST", path="ingest/program", program=program_dict['program_id']):
-        return "User not authorized to add program authorizations", 403
+        return {"error": f"User not authorized to add program authorizations for program {program_dict['program_id']}"}, 403
 
     response, status_code = authx.auth.add_program_to_opa(program_dict)
     return response, status_code
@@ -122,7 +122,7 @@ def add_program_to_opa(program_dict, token):
 def get_program_in_opa(program_id, token):
     # check to see if the user is allowed to add program authorizations:
     if not authx.auth.is_action_allowed_for_program(token, method="POST", path="ingest/program", program=program_id):
-        return "User not authorized to add program authorizations", 403
+        return {"error": "User not authorized to add program authorizations"}, 403
 
     response, status_code = authx.auth.get_program_in_opa(program_id)
     return response, status_code
@@ -131,7 +131,7 @@ def get_program_in_opa(program_id, token):
 def remove_program_from_opa(program_id, token):
     # check to see if the user is allowed to add program authorizations:
     if not authx.auth.is_action_allowed_for_program(token, method="POST", path="ingest/program", program=program_id):
-        return "User not authorized to add program authorizations", 403
+        return {"error": "User not authorized to add program authorizations"}, 403
 
     response, status_code = authx.auth.remove_program_from_opa(program_id)
     return response, status_code
