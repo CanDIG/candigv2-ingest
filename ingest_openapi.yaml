@@ -183,7 +183,77 @@ paths:
             application/json:
               schema:
                 type: object
-
+  /user/pending/request:
+    post:
+      description: Add the user specified in the Bearer jwt to the pending users list
+      operationId: ingest_operations.add_pending_user
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+  /user/pending:
+    get:
+      description: List pending users for authorization
+      operationId: ingest_operations.list_pending_users
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+    post:
+      description: Approve bulk pending users for CanDIG access
+      operationId: ingest_operations.approve_pending_users
+      requestBody:
+        $ref: '#/components/requestBodies/PendingUsersAuthorizationRequest'
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+    delete:
+      description: Clear pending users for CanDIG access
+      operationId: ingest_operations.clear_pending_users
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+  /user/pending/{user_id}:
+    parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: string
+        required: true
+    post:
+      description: Approve a pending user for CanDIG access
+      operationId: ingest_operations.approve_pending_user
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+    delete:
+      description: Reject a pending user for CanDIG access
+      operationId: ingest_operations.reject_pending_user
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
   /genomic:
     post:
       description: Add linkages between clinical donors and genomic data.
@@ -278,6 +348,13 @@ components:
         'application/json':
           schema:
             $ref: "#/components/schemas/ProgramAuthorization"
+    PendingUsersAuthorizationRequest:
+      content:
+        'application/json':
+          schema:
+            type: array
+            items:
+              type: string
     RoleTypeRequest:
       content:
         'application/json':
@@ -465,3 +542,18 @@ components:
         - program_id
         - program_curators
         - team_members
+    User:
+      type: object
+      description: describes an authenticated user
+      properties:
+        sample_jwt:
+          type: string
+          description: a sample jwt for this user from their IDP
+        user_name:
+          type: string
+          description: unique id of user, from CANDIG_USER_KEY field
+    PendingUsers:
+      type: array
+      description: a list of Users that are pending approval for access to this CanDIG node
+      items:
+        $ref: "#/components/schemas/User"
