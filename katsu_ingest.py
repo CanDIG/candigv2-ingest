@@ -8,7 +8,7 @@ from http import HTTPStatus
 import requests
 
 import auth
-from auth.authx import get_site_admin_token
+from authx.auth import get_site_admin_token
 from ingest_result import IngestPermissionsException
 
 from clinical_etl.mohschema import MoHSchema
