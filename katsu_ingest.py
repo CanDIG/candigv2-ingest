@@ -301,6 +301,7 @@ def ingest_clinical_data(ingest_json, headers):
 
 def main():
     # check if os.environ.get("CANDIG_URL") is set
+    global KATSU_URL
     if KATSU_URL is None:
         if os.getenv("CANDIG_URL") is None:
             print("ERROR: $CANDIG_URL is not set. Did you forget to run 'source env.sh'?")
