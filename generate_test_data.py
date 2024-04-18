@@ -17,7 +17,6 @@ def parse_args():
                         default="tmp")
     return parser.parse_args()
 
-
 def main(args):
     ingest_repo_dir = os.path.dirname(os.path.abspath(__file__))
     print(f"Cloning mohccn-synthetic-data repo into {args.tmp}")
@@ -25,9 +24,11 @@ def main(args):
 
     try:
         if args.prefix:
-            subprocess.run([f'python {args.tmp}/src/csv_to_ingest.py --size s --prefix {args.prefix}'],
-                           shell=True, check=True)
+
+            process = subprocess.run([f'python {args.tmp}/src/csv_to_ingest.py --size s --prefix {args.prefix}'],
+                                     shell=True, check=True, capture_output=True)
             output_dir = f"{args.tmp}/custom_dataset_csv-{args.prefix}"
+
             with open(f'{output_dir}/raw_data_validation_results.json') as f:
                 validation_results = json.load(f)
                 if len(validation_results['validation_errors']) > 0:
@@ -35,11 +36,13 @@ def main(args):
                                           "please check the errors in tests/clinical_data_validation_results.json and "
                                           "try again.")
         else:
-            print("Converting small_dataset_csvs to raw_data_map.json")
+            print("Converting small_dataset_csvs to small_dataset_clinical_ingest.json")
             output_dir = f"{args.tmp}/small_dataset_csv"
-            packets, errors = CSVConvert.csv_convert(input_path=f"{args.tmp}/small_dataset_csv/raw_data",
-                                                     manifest_file=f"{args.tmp}/small_dataset_csv/manifest.yml")
-            if errors:
+            process = subprocess.run([f'python {args.tmp}/src/csv_to_ingest.py --size s'],
+                                     shell=True, check=True, capture_output=True)
+            with open(f"{args.tmp}/small_dataset_csv/raw_data_validation_results.json") as f:
+                errors = json.load(f)['validation_errors']
+            if len(errors) > 0:
                 raise ValidationError("Clinical etl conversion failed to create an ingestable json file, "
                                       "please check the errors in tests/clinical_data_validation_results.json and "
                                       "try again.")
