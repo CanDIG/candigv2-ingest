@@ -254,6 +254,67 @@ paths:
             application/json:
               schema:
                 type: object
+  /user/{user_id}/authorize:
+    parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: string
+        required: true
+    get:
+      description: List authorizations for programs for a user
+      operationId: ingest_operations.list_programs_for_user
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+    post:
+      description: Authorize a program for a user (or update a program auth for a user)
+      operationId: ingest_operations.authorize_program_for_user
+      requestBody:
+        $ref: '#/components/requestBodies/UserProgramAuthorizationRequest'
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+  /user/{user_id}/authorize/{program_id}:
+    parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: program_id
+        schema:
+          type: string
+        required: true
+    get:
+      description: Get authorization for a program for a user
+      operationId: ingest_operations.get_program_for_user
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+    delete:
+      description: Remove a program for a user
+      operationId: ingest_operations.remove_program_for_user
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
   /genomic:
     post:
       description: Add linkages between clinical donors and genomic data.
@@ -362,6 +423,11 @@ components:
             type: array
             items:
               type: string
+    UserProgramAuthorizationRequest:
+      content:
+        'application/json':
+          schema:
+            $ref: "#/components/schemas/Program"
   schemas:
     ClinicalDonor:
       type: object
@@ -542,6 +608,19 @@ components:
         - program_id
         - program_curators
         - team_members
+    Program:
+      type: object
+      properties:
+        program_id:
+          type: string
+        start_date:
+          type: string
+        end_date:
+          type: string
+      required:
+        - program_id
+        - start_date
+        - end_date
     User:
       type: object
       description: describes an authenticated user
@@ -552,8 +631,24 @@ components:
         user_name:
           type: string
           description: unique id of user, from CANDIG_USER_KEY field
+      required:
+        - user_name
     PendingUsers:
       type: array
       description: a list of Users that are pending approval for access to this CanDIG node
       items:
         $ref: "#/components/schemas/User"
+    UserProgramAuthorization:
+      type: object
+      description: describes an authorized user and the programs the user is authorized to view
+      properties:
+        user:
+          $ref: "#/components/schemas/User"
+        programs:
+          type: array
+          description: list of programs that this user is authorized to view
+          items:
+            $ref: "#/components/schemas/Program"
+      required:
+        - user
+        - programs
