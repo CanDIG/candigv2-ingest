@@ -4,7 +4,7 @@ Ingest data into the [CanDIGv2 stack](https://github.com/CanDIG/CanDIGv2). This 
 
 This repository can either be run standalone or as a Docker container.
 
-## What you'll need
+## What you'll need for ingest
 
 * A valid user for CanDIGv2 that has site administration credentials.
 * List of users that will have access to this dataset.
@@ -253,6 +253,32 @@ To test candigv2-ingest, from the repo directory, simply run the following comma
 
 ```commandline
 pytest
+```
+
+## Generating json files for test ingest
+
+The script `generate_test_data.py` can be used to generate a json files for ingest from an the CanDIG MOHCCN sythetic data repo. The script automatically clones the [`mohccn-synthetic-data`](https://github.com/CanDIG/mohccn-synthetic-data) repo and converts the small dataset, saving the json files needed for ingest in the `tests` directory as `small_dataset_clinical_ingest.json` and `small_dataset_genomic_ingest.json`. It then deletes the cloned repo. If validation of the dataset fails, it saves the validation results to the `tests/` directory as `small_dataset_clinical_ingest_validation_results.json`.
+
+To run:
+
+* Set up a virtual environment and install requirements (if you haven't already)
+```commandline
+pip install -r requirements.txt
+```
+* Run the script with the desired output location and an optional prefix for the identifiers
+
+Usage:
+```commandline
+python generate_test_data.py -h
+usage: generate_test_data.py [-h] [--prefix PREFIX] --output OUTPUT
+
+A script that copies and converts data from mohccn-synthetic-data for ingest into CanDIG platform.
+
+options:
+  -h, --help       show this help message and exit
+  --prefix PREFIX  optional prefix to apply to all identifiers
+  --output OUTPUT  Directory to temporarily clone the mohccn-synthetic-data repo.
+
 ```
 
 <!--- ## Authorizing users for the new dataset
