@@ -186,6 +186,13 @@ def get_program_in_opa(program_id, token):
     return response, status_code
 
 
+def list_programs_in_opa(token):
+    response, status_code = authx.auth.list_programs_in_opa()
+    if status_code == 200:
+        return response
+    return {"error": response}, status_code
+
+
 def remove_program_from_opa(program_id, token):
     # check to see if the user is allowed to add program authorizations:
     if not authx.auth.is_action_allowed_for_program(token, method="POST", path="ingest/program", program=program_id):
