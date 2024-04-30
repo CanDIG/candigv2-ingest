@@ -2,6 +2,7 @@ import connexion
 from flask import request, Flask
 import os
 import traceback
+import urllib.parse
 
 import auth
 from ingest_result import *
@@ -72,6 +73,9 @@ def add_s3_credential():
     token = request.headers['Authorization'].split("Bearer ")[1]
     return auth.store_aws_credential(data["endpoint"], data["bucket"], data["access_key"], data["secret_key"], token)
 
+####
+# Site roles
+####
 
 @app.route('/site-role/<path:role_type>')
 def list_role(role_type):
@@ -134,26 +138,9 @@ def remove_user_from_role(role_type, email):
     except Exception as e:
         return {"error": str(e)}, 500
 
-
-@app.route('/program/<path:program_id>/email/<path:email>')
-def add_user_access(program_id, email):
-    token = request.headers['Authorization'].split("Bearer ")[1]
-    try:
-        result, status_code = add_user_to_dataset(email, program_id, token)
-        return result, status_code
-    except Exception as e:
-        return {"error": str(e)}, 500
-
-
-@app.route('/program/<path:program_id>/email/<path:email>')
-def remove_user_access(program_id, email):
-    token = request.headers['Authorization'].split("Bearer ")[1]
-    try:
-        result, status_code = remove_user_from_dataset(email, program_id, token)
-        return result, status_code
-    except Exception as e:
-        return {"error": str(e)}, 500
-
+####
+# Data ingest
+####
 
 def add_genomic_linkages():
     headers = get_headers()
@@ -171,6 +158,9 @@ def add_clinical_donors():
         response["warning"] = f"Default site administrator {os.getenv('DEFAULT_SITE_ADMIN_USER')} is still configured. Use the /ingest/site-role/site_admin endpoint to set a different site admin."
     return response, status_code
 
+####
+# Program authorizations
+####
 
 def add_program_authorization():
     program = connexion.request.json
@@ -196,3 +186,143 @@ def remove_program_authorization(program_id):
 
     response, status_code = auth.remove_program_from_opa(program_id, token)
     return response, status_code
+
+
+@app.route('/program/<path:program_id>/email/<path:email>')
+def add_user_access(program_id, email):
+    token = request.headers['Authorization'].split("Bearer ")[1]
+    try:
+        result, status_code = add_user_to_dataset(email, program_id, token)
+        return result, status_code
+    except Exception as e:
+        return {"error": str(e)}, 500
+
+
+@app.route('/program/<path:program_id>/email/<path:email>')
+def remove_user_access(program_id, email):
+    token = request.headers['Authorization'].split("Bearer ")[1]
+    try:
+        result, status_code = remove_user_from_dataset(email, program_id, token)
+        return result, status_code
+    except Exception as e:
+        return {"error": str(e)}, 500
+
+####
+# Pending users
+####
+
+def add_pending_user():
+    token = request.headers['Authorization'].split("Bearer ")[1]
+
+    response, status_code = auth.add_pending_user_to_opa(token)
+    return response, status_code
+
+
+def list_pending_users():
+    token = request.headers['Authorization'].split("Bearer ")[1]
+
+    response, status_code = auth.list_pending_users_in_opa(token)
+    return {"results": response}, status_code
+
+
+@app.route('/user/pending/<path:user_id>')
+def approve_pending_user(user_id):
+    token = request.headers['Authorization'].split("Bearer ")[1]
+    user_name = urllib.parse.unquote_plus(user_id)
+
+    response, status_code = auth.approve_pending_user_in_opa(user_name, token)
+    return response, status_code
+
+
+@app.route('/user/pending/<path:user_id>')
+def reject_pending_user(user_id):
+    token = request.headers['Authorization'].split("Bearer ")[1]
+    user_name = urllib.parse.unquote_plus(user_id)
+
+    response, status_code = auth.reject_pending_user_in_opa(user_name, token)
+    return response, status_code
+
+
+def approve_pending_users():
+    users = connexion.request.json
+    token = request.headers['Authorization'].split("Bearer ")[1]
+
+    rejected = []
+    for user_id in users:
+        response, status_code = auth.approve_pending_user_in_opa(user_id, token)
+        if status_code != 200:
+            rejected.append(user_id)
+    if len(rejected) > 0:
+        status_code = 401
+        response = {"message": f"The following requested user IDs could not be approved: {rejected}"}
+
+    return response, status_code
+
+
+def clear_pending_users():
+    token = request.headers['Authorization'].split("Bearer ")[1]
+
+    response, status_code = auth.clear_pending_users_in_opa(token)
+    return response, status_code
+
+####
+# DAC authorization for users
+####
+
+@app.route('/user/<path:user_id>/authorize')
+def list_programs_for_user(user_id):
+    token = request.headers['Authorization'].split("Bearer ")[1]
+    user_name = urllib.parse.unquote_plus(user_id)
+    response, status_code = auth.get_user_in_opa(user_name, token)
+    if status_code != 200:
+        return response, status_code
+    print(response)
+    return {"results": list(response["programs"].values())}, status_code
+
+
+@app.route('/user/<path:user_id>/authorize')
+def authorize_program_for_user(user_id):
+    program_dict = connexion.request.json
+    token = request.headers['Authorization'].split("Bearer ")[1]
+    user_name = urllib.parse.unquote_plus(user_id)
+    response, status_code = auth.get_user_in_opa(user_name, token)
+    if status_code != 200:
+        return response, status_code
+
+    # we need to check to see if the program even exists in the system
+    all_programs = auth.list_programs_in_opa(token)
+    if program_dict["program_id"] not in all_programs:
+        return {"error": f"Program {program_dict['program_id']} does not exist in {all_programs}"}
+    response["programs"][program_dict["program_id"]] = program_dict
+    response, status_code = auth.write_user_in_opa(response, token)
+    return response, status_code
+
+
+@app.route('/user/<path:user_id>/authorize/<path:program_id>')
+def get_program_for_user(user_id, program_id):
+    token = request.headers['Authorization'].split("Bearer ")[1]
+    user_name = urllib.parse.unquote_plus(user_id)
+
+    response, status_code = auth.get_user_in_opa(user_name, token)
+    if status_code != 200:
+        return response, status_code
+    for p in response["programs"]:
+        if p == program_id:
+            return p, 200
+    return {"error": f"No program {program_id} found for user"}, status_code
+
+
+@app.route('/user/<path:user_id>/authorize/<path:program_id>')
+def remove_program_for_user(user_id, program_id):
+    token = request.headers['Authorization'].split("Bearer ")[1]
+    user_name = urllib.parse.unquote_plus(user_id)
+
+    response, status_code = auth.get_user_in_opa(user_name, token)
+    if status_code != 200:
+        return response, status_code
+    for p in response["programs"]:
+        if p == program_id:
+            response["programs"].pop(program_id)
+            response, status_code = auth.write_user_in_opa(response, token)
+            return response, status_code
+    return {"error": f"No program {program_id} found for user"}, status_code
