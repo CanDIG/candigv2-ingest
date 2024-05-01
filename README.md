@@ -220,8 +220,8 @@ A site administrator can use either the `opa_ingest.py` command-line script or t
 Use the `/ingest/program/{program_id}` to add, update, or delete authorization information for a program. Authorization headers for a site admin user must be provided. A POST request adds authorization, while a DELETE request revokes it.
 
 The following is an example of the payload you would need to `POST` to the `/ingest/program/{program_id}` to add the following user roles to `TEST-PROGRAM-1`: 
-- user1@test.ca as a Team member
-- user2@test.ca as a Program curator
+- `user1@test.ca` as a Team member
+- `user2@test.ca` as a Program curator
 
 ```
 {"program": "TEST-PROGRAM-1", "team_members":["user1@test.ca"], "program_curators": ["user2@test.ca"]}
