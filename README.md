@@ -273,11 +273,11 @@ pytest
 
 ## Generating json files for test ingest
 
-The script `generate_test_data.py` can be used to generate a json files for ingest from an the CanDIG MOHCCN sythetic data repo. The script automatically clones the [`mohccn-synthetic-data`](https://github.com/CanDIG/mohccn-synthetic-data) repo and converts the small dataset, saving the json files needed for ingest in the `tests` directory as `small_dataset_clinical_ingest.json` and `small_dataset_genomic_ingest.json`. It then deletes the cloned repo. If validation of the dataset fails, it saves the validation results to the `tests/` directory as `small_dataset_clinical_ingest_validation_results.json`.
+The script `generate_test_data.py` can be used to generate a json files for ingest from an the CanDIG MOHCCN sythetic data repo. The script automatically clones the [`mohccn-synthetic-data`](https://github.com/CanDIG/mohccn-synthetic-data) repo and converts the small dataset, saving the json files needed for ingest in the `tests` directory as `small_dataset_clinical_ingest.json` and `small_dataset_genomic_ingest.json`. It then deletes the cloned repo. If validation of the dataset fails, it saves the validation results to the `tests/` directory as `small_dataset_clinical_ingest_validation_results.json`. If you are running this container as part of the CanDIGv2 stack, this data generation is run as part of the `make compose-candig-ingest` step, so the files may already exist in the `lib/candig-ingest/candigv2-ingest/tests` directory.
 
 To run:
 
-* Set up a virtual environment and install requirements (if you haven't already)
+* Set up a virtual environment and install requirements (if you haven't already). If running inside the ingest docker container, this shouldn't be needed. 
 ```commandline
 pip install -r requirements.txt
 ```
@@ -286,14 +286,14 @@ pip install -r requirements.txt
 Usage:
 ```commandline
 python generate_test_data.py -h
-usage: generate_test_data.py [-h] [--prefix PREFIX] --output OUTPUT
+usage: generate_test_data.py [-h] [--prefix PREFIX] --tmp 
 
 A script that copies and converts data from mohccn-synthetic-data for ingest into CanDIG platform.
 
 options:
   -h, --help       show this help message and exit
   --prefix PREFIX  optional prefix to apply to all identifiers
-  --output OUTPUT  Directory to temporarily clone the mohccn-synthetic-data repo.
+  --TMP TMP  Directory to temporarily clone the mohccn-synthetic-data repo.
 
 ```
 
