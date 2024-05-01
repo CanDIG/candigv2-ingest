@@ -8,6 +8,7 @@ from http import HTTPStatus
 import requests
 
 import auth
+from authx.auth import get_site_admin_token
 from ingest_result import IngestPermissionsException
 
 from clinical_etl.mohschema import MoHSchema
@@ -300,12 +301,15 @@ def ingest_clinical_data(ingest_json, headers):
 
 def main():
     # check if os.environ.get("CANDIG_URL") is set
+    global KATSU_URL
     if KATSU_URL is None:
         if os.getenv("CANDIG_URL") is None:
             print("ERROR: $CANDIG_URL is not set. Did you forget to run 'source env.sh'?")
             exit()
         KATSU_URL = f"{os.getenv('CANDIG_URL')}/katsu"
-    headers = auth.get_auth_header()
+
+    token = get_site_admin_token()
+    headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
 
     parser = argparse.ArgumentParser(description="A script that ingests clinical data into Katsu")
     parser.add_argument("--input", help="Path to the clinical json file to ingest.")
