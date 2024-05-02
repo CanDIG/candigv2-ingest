@@ -212,12 +212,14 @@ python htsget_ingest.py --samplefile [JSON-formatted sample data as specified ab
 ```
 
 ## 3. Assigning users to programs
-A site administrator can use either the `opa_ingest.py` command-line script or the API to assign user authorizations to programs. Users can be assigned one of two levels of authorization:
+The preferred method to assign user authorizations to programs is to use the API. Users can be assigned one of two levels of authorization:
 * Team members are researchers of a program and are authorized to read and access all donor-specific data for a program.
 * Program curators are users that are authorized to curate data for the program: they can ingest data.
 
-#### API
-Use the `/ingest/program/{program_id}` to add, update, or delete authorization information for a program. Authorization headers for a site admin user must be provided. A POST request adds authorization, while a DELETE request revokes it.
+The script `opa_ingest.py` can be used only to add Team member authorizations to a program that already has an existing authorization.
+
+### API
+Use the `/ingest/program/` [endpoint](https://github.com/CanDIG/candigv2-ingest/blob/4257929feca00be0d4384433793fcdf1b4e4137b/ingest_openapi.yaml#L114) to add, update, or delete authorization information for a program. Authorization headers for a site admin user must be provided. A POST request adds authorization, while a DELETE request revokes it.
 
 The following is an example of the payload you would need to `POST` to `/ingest/program/{program_id}` to add the following user roles to `TEST-PROGRAM-1`: 
 - `user1@test.ca` as a Team member
@@ -227,7 +229,7 @@ The following is an example of the payload you would need to `POST` to `/ingest/
 {"program_id": "TEST-PROGRAM-1", "team_members":["user1@test.ca"], "program_curators": ["user2@test.ca"]}
 ```
 
-#### Command line
+### Command line
 
 The `opa_ingest.py` script can be used to add Team members to a program only. To add Program curators, the API described above must be used.
 
