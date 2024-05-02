@@ -212,17 +212,32 @@ python htsget_ingest.py --samplefile [JSON-formatted sample data as specified ab
 ```
 
 ## 3. Assigning users to programs
-A site administrator can use either the `opa_ingest.py` command-line script or the API to assign user authorizations to programs. Users can be assigned one of two levels of authorization:
+The preferred method to assign user authorizations to programs is to use the API. Users can be assigned one of two levels of authorization:
 * Team members are researchers of a program and are authorized to read and access all donor-specific data for a program.
 * Program curators are users that are authorized to curate data for the program: they can ingest data.
 
-#### API
-Use the `/ingest/program/{program_id}` to add, update, or delete authorization information for a program. Authorization headers for a site admin user must be provided. A POST request adds authorization, while a DELETE request revokes it.
+The script `opa_ingest.py` can be used only to add Team member authorizations to a program that already has an existing authorization.
 
-#### Command line
+### API
+Use the `/ingest/program/` [endpoint](https://github.com/CanDIG/candigv2-ingest/blob/4257929feca00be0d4384433793fcdf1b4e4137b/ingest_openapi.yaml#L114) to add, update, or delete authorization information for a program. Authorization headers for a site admin user must be provided. A POST request adds authorization, while a DELETE request revokes it.
 
+The following is an example of the payload you would need to `POST` to `/ingest/program/{program_id}` to add the following user roles to `TEST-PROGRAM-1`: 
+- `user1@test.ca` as a Team member
+- `user2@test.ca` as a Program curator
+
+```
+{"program_id": "TEST-PROGRAM-1", "team_members":["user1@test.ca"], "program_curators": ["user2@test.ca"]}
+```
+
+### Command line
+
+The `opa_ingest.py` script can be used to add Team members to a program only. To add Program curators, the API described above must be used.
+
+The script will add a single user or a list of users to a specified program (`--dataset`). Single users are added using the `--user` flag, while a list of users can be specified in a plain text file, with one user email specified per line, using the `--user-file` flag to specify the path to the file. If the `--remove` flag is used, the users will be removed, rather than added to the program.
+
+example usage:
 ```bash
-python opa_ingest.py --user|userfile [either a user email or a file of user emails] -- dataset [name of dataset] [--remove]
+python opa_ingest.py --user|userfile [either a user email or a file of user emails] --dataset [name of dataset/program] [--remove]
 ```
 
 ## 4. Adding or removing site administrators
@@ -265,11 +280,11 @@ pytest
 
 ## Generating json files for test ingest
 
-The script `generate_test_data.py` can be used to generate a json files for ingest from an the CanDIG MOHCCN sythetic data repo. The script automatically clones the [`mohccn-synthetic-data`](https://github.com/CanDIG/mohccn-synthetic-data) repo and converts the small dataset, saving the json files needed for ingest in the `tests` directory as `small_dataset_clinical_ingest.json` and `small_dataset_genomic_ingest.json`. It then deletes the cloned repo. If validation of the dataset fails, it saves the validation results to the `tests/` directory as `small_dataset_clinical_ingest_validation_results.json`.
+The script `generate_test_data.py` can be used to generate a json files for ingest from an the CanDIG MOHCCN sythetic data repo. The script automatically clones the [`mohccn-synthetic-data`](https://github.com/CanDIG/mohccn-synthetic-data) repo and converts the small dataset, saving the json files needed for ingest in the `tests` directory as `small_dataset_clinical_ingest.json` and `small_dataset_genomic_ingest.json`. It then deletes the cloned repo. If validation of the dataset fails, it saves the validation results to the `tests/` directory as `small_dataset_clinical_ingest_validation_results.json`. If you are running this container as part of the CanDIGv2 stack, this data generation is run as part of the `make compose-candig-ingest` step, so the files may already exist in the `lib/candig-ingest/candigv2-ingest/tests` directory.
 
 To run:
 
-* Set up a virtual environment and install requirements (if you haven't already)
+* Set up a virtual environment and install requirements (if you haven't already). If running inside the ingest docker container, this shouldn't be needed. 
 ```commandline
 pip install -r requirements.txt
 ```
@@ -278,14 +293,14 @@ pip install -r requirements.txt
 Usage:
 ```commandline
 python generate_test_data.py -h
-usage: generate_test_data.py [-h] [--prefix PREFIX] --output OUTPUT
+usage: generate_test_data.py [-h] [--prefix PREFIX] --tmp 
 
 A script that copies and converts data from mohccn-synthetic-data for ingest into CanDIG platform.
 
 options:
   -h, --help       show this help message and exit
   --prefix PREFIX  optional prefix to apply to all identifiers
-  --output OUTPUT  Directory to temporarily clone the mohccn-synthetic-data repo.
+  --TMP TMP  Directory to temporarily clone the mohccn-synthetic-data repo.
 
 ```
 
