@@ -229,6 +229,11 @@ The following is an example of the payload you would need to `POST` to `/ingest/
 
 #### Command line
 
+The `opa_ingest.py` script can be used to add Team members to a program only. To add Program curators, the API described above must be used. 
+
+The script will add a single user (specified by the `--user` flag) or a list of users specified in a plain text file, with one user email specified per line (using the `--user-file` flag to specify the path to the file) to the program id specified with the `--dataset` flag. If the `--remove` flag is used, the users will be removed, rather than added to the program.
+
+example usage:
 ```bash
 python opa_ingest.py --user|userfile [either a user email or a file of user emails] --dataset [name of dataset/program] [--remove]
 ```
