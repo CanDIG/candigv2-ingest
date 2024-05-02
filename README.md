@@ -224,7 +224,7 @@ The following is an example of the payload you would need to `POST` to `/ingest/
 - `user2@test.ca` as a Program curator
 
 ```
-{"program": "TEST-PROGRAM-1", "team_members":["user1@test.ca"], "program_curators": ["user2@test.ca"]}
+{"program_id": "TEST-PROGRAM-1", "team_members":["user1@test.ca"], "program_curators": ["user2@test.ca"]}
 ```
 
 #### Command line
