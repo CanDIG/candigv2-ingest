@@ -1,6 +1,6 @@
 import argparse
 
-import auth
+from authx.auth import get_site_admin_token
 import os
 import re
 import json
@@ -252,7 +252,9 @@ def main():
             genomic_input = json.loads(f.read())
     if len(genomic_input) == 0:
         return "No samples to ingest"
-    result, status_code = htsget_ingest(genomic_input, auth.get_auth_header())
+    token = get_site_admin_token()
+    headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
+    result, status_code = htsget_ingest(genomic_input, headers)
     print(json.dumps(result, indent=4))
 
 if __name__ == "__main__":
