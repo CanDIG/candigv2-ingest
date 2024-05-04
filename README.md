@@ -4,7 +4,7 @@ Ingest data into the [CanDIGv2 stack](https://github.com/CanDIG/CanDIGv2). This 
 
 This repository can either be run standalone or as a Docker container.
 
-## What you'll need
+## What you'll need for ingest
 
 * A valid user for CanDIGv2 that has site administration credentials.
 * List of users that will have access to this dataset.
@@ -211,17 +211,46 @@ To ingest using an S3 container, once the files have been added, you can run the
 python htsget_ingest.py --samplefile [JSON-formatted sample data as specified above]
 ```
 
-## 3. Adding authorization for users to programs
-A site administrator can use either the `opa_ingest.py` command-line script or the API to add authorization for a user to access a program.
+## 3. Assigning users to programs
+The preferred method to assign user authorizations to programs is to use the API. Users can be assigned one of two levels of authorization:
+* Team members are researchers of a program and are authorized to read and access all donor-specific data for a program.
+* Program curators are users that are authorized to curate data for the program: they can ingest data.
 
-#### API
-Use the `/ingest/program/{program_id}/email/{email}` to add or remove a user's email address to the list of users authorized to access that program. Authorization headers for a site admin user must be provided. A POST request adds authorization, while a DELETE request revokes it.
+The script `opa_ingest.py` can be used only to add Team member authorizations to a program that already has an existing authorization.
 
-#### Command line
+### API
+Use the `/ingest/program/` [endpoint](https://github.com/CanDIG/candigv2-ingest/blob/4257929feca00be0d4384433793fcdf1b4e4137b/ingest_openapi.yaml#L114) to add, update, or delete authorization information for a program. Authorization headers for a site admin user must be provided. A POST request adds authorization, while a DELETE request revokes it.
 
-```bash
-python opa_ingest.py --user|userfile [either a user email or a file of user emails] -- dataset [name of dataset] [--remove]
+The following is an example of the payload you would need to `POST` to `/ingest/program/{program_id}` to add the following user roles to `TEST-PROGRAM-1`: 
+- `user1@test.ca` as a Team member
+- `user2@test.ca` as a Program curator
+
 ```
+{"program_id": "TEST-PROGRAM-1", "team_members":["user1@test.ca"], "program_curators": ["user2@test.ca"]}
+```
+
+### Command line
+
+The `opa_ingest.py` script can be used to add Team members to a program only. To add Program curators, the API described above must be used.
+
+The script will add a single user or a list of users to a specified program (`--dataset`). Single users are added using the `--user` flag, while a list of users can be specified in a plain text file, with one user email specified per line, using the `--user-file` flag to specify the path to the file. If the `--remove` flag is used, the users will be removed, rather than added to the program.
+
+example usage:
+```bash
+python opa_ingest.py --user|userfile [either a user email or a file of user emails] --dataset [name of dataset/program] [--remove]
+```
+
+## 4. Adding or removing site administrators
+Use the `/ingest/site-role/site_admin/{user_email}` endpoint to add or remove site administrators. A POST request adds the user as a site admin, while a DELETE request removes the user from the role.
+
+
+## 5. Approving/rejecting pending users
+Use the `/user/pending` endpoint to list pending users. A site admin can approve either a single or multiple pending users by POSTing to the `user/pending/{user}` or `user/pending` endpoints, and likewise reject with DELETEs to the same endpoints. DELETE to the bulk endpoint clears the whole pending list.
+
+
+## 6. Adding a DAC-style program authorization for a user
+An authorized user can be approved to view a program for a particular timeframe by a POST to the `/user/{user_id}/authorize` endpoint. The body should be a json that contains the `program_id`, `start_date`, and `end_date`. Re-posting a new json with the same program ID will update the user's authorization. An authorization for a program can be revoked by a DELETE to the `/user/{user_id}/authorize/{program_id}` endpoint.
+
 
 ## Run as Docker Container
 The containerized version runs the API as specified above within a Docker container (which is how this repository is used in the CanDIGv2 stack).
@@ -247,6 +276,32 @@ To test candigv2-ingest, from the repo directory, simply run the following comma
 
 ```commandline
 pytest
+```
+
+## Generating json files for test ingest
+
+The script `generate_test_data.py` can be used to generate a json files for ingest from an the CanDIG MOHCCN sythetic data repo. The script automatically clones the [`mohccn-synthetic-data`](https://github.com/CanDIG/mohccn-synthetic-data) repo and converts the small dataset, saving the json files needed for ingest in the `tests` directory as `small_dataset_clinical_ingest.json` and `small_dataset_genomic_ingest.json`. It then deletes the cloned repo. If validation of the dataset fails, it saves the validation results to the `tests/` directory as `small_dataset_clinical_ingest_validation_results.json`. If you are running this container as part of the CanDIGv2 stack, this data generation is run as part of the `make compose-candig-ingest` step, so the files may already exist in the `lib/candig-ingest/candigv2-ingest/tests` directory.
+
+To run:
+
+* Set up a virtual environment and install requirements (if you haven't already). If running inside the ingest docker container, this shouldn't be needed. 
+```commandline
+pip install -r requirements.txt
+```
+* Run the script with the desired output location and an optional prefix for the identifiers
+
+Usage:
+```commandline
+python generate_test_data.py -h
+usage: generate_test_data.py [-h] [--prefix PREFIX] --tmp 
+
+A script that copies and converts data from mohccn-synthetic-data for ingest into CanDIG platform.
+
+options:
+  -h, --help       show this help message and exit
+  --prefix PREFIX  optional prefix to apply to all identifiers
+  --TMP TMP  Directory to temporarily clone the mohccn-synthetic-data repo.
+
 ```
 
 <!--- ## Authorizing users for the new dataset

@@ -1,6 +1,6 @@
 import argparse
 
-import auth
+from authx.auth import get_site_admin_token
 import os
 import re
 import json
@@ -13,8 +13,8 @@ import jsonschema
 
 
 CANDIG_URL = os.getenv("CANDIG_URL", "")
-HTSGET_URL = CANDIG_URL + "/genomics"
-DRS_HOST_URL = "drs://" + HTSGET_URL.replace(f"{urlparse(CANDIG_URL).scheme}://","")
+HTSGET_URL = os.getenv("HTSGET_URL", f"{CANDIG_URL}/genomics")
+DRS_HOST_URL = "drs://" + CANDIG_URL.replace(f"{urlparse(CANDIG_URL).scheme}://","") + "/genomics"
 
 
 def link_genomic_data(headers, sample):
@@ -99,6 +99,8 @@ def link_genomic_data(headers, sample):
                     break
         if not_found:
             genomic_drs_obj["contents"].append(contents_obj)
+    if len(result["sample"]) == 0:
+            result.pop("sample")
 
     # finally, post the genomic_drs_object
     response = requests.post(url, json=genomic_drs_obj, headers=headers)
@@ -203,32 +205,37 @@ def htsget_ingest(ingest_json, headers):
     with open("ingest_openapi.yaml") as f:
         openapi_text = f.read()
         json_schema = openapi_to_jsonschema(openapi_text, "GenomicSample")
-    result = {}
+    result = {
+        "errors": {},
+        "results": {}
+    }
     status_code = 200
     for sample in ingest_json:
-        result[sample["genomic_file_id"]] = {}
+        result["errors"][sample["genomic_file_id"]] = []
         # validate the json
         if sample["genomic_file_id"] == sample["main"]["name"] or sample["genomic_file_id"] == sample["index"]["name"]:
-            result[sample["genomic_file_id"]] = {"errors": f"Sample {sample['genomic_file_id']} cannot have the same name as one of its files."}
+            result["errors"][sample["genomic_file_id"]].append(f"Sample {sample['genomic_file_id']} cannot have the same name as one of its files.")
         else:
             for error in jsonschema.Draft202012Validator(json_schema).iter_errors(sample):
-                if "errors" not in result[sample["genomic_file_id"]]:
-                    result[sample["genomic_file_id"]]["errors"] = []
-                result[sample["genomic_file_id"]]["errors"].append(f"{' > '.join(error.path)}: {error.message}")
-        if "errors" in result[sample["genomic_file_id"]]:
+                result["errors"][sample["genomic_file_id"]].append(f"{' > '.join(error.path)}: {error.message}")
+        if len(result["errors"][sample["genomic_file_id"]]) > 0:
             continue
 
         # create the corresponding DRS objects
         if "samples" not in sample or len(sample["samples"]) == 0:
-            result[sample["genomic_file_id"]]["errors"].append("No samples were specified for the genomic file mapping")
+            result["errors"][sample["genomic_file_id"]].append("No samples were specified for the genomic file mapping")
             break
         response = link_genomic_data(headers, sample)
         for err in response["errors"]:
+            result["errors"][sample["genomic_file_id"]].append(err)
             if "403" in err:
                 status_code = 403
                 break
-
-        result[sample["genomic_file_id"]] = response
+        if len(result["errors"][sample["genomic_file_id"]]) == 0:
+            result["errors"].pop(sample["genomic_file_id"])
+        response.pop("errors")
+        if len(response) > 0:
+            result["results"][sample["genomic_file_id"]] = response
     return result, status_code
 
 
@@ -245,7 +252,9 @@ def main():
             genomic_input = json.loads(f.read())
     if len(genomic_input) == 0:
         return "No samples to ingest"
-    result, status_code = htsget_ingest(genomic_input, auth.get_auth_header())
+    token = get_site_admin_token()
+    headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
+    result, status_code = htsget_ingest(genomic_input, headers)
     print(json.dumps(result, indent=4))
 
 if __name__ == "__main__":

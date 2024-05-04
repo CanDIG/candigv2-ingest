@@ -6,3 +6,10 @@ access.json
 temp/
 env.sh
 .venv/
+_local
+.idea
+tmp/
+tests/small_dataset_clinical_ingest.json
+tests/small_dataset_genomic_ingest.json
+tests/clinical_data_validation_results.json
+.DS_Store
