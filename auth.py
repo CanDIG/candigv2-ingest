@@ -131,9 +131,16 @@ def parse_aws_credential(awsfile):
     return {"access": access, "secret": secret}
 
 
-def store_aws_credential(endpoint, bucket, access, secret, token=None):
-    return authx.auth.store_aws_credential(token=token, endpoint=endpoint, bucket=bucket,
-                                           access=access, secret=secret)
+#####
+# AWS credentials
+#####
+
+def store_aws_credential(endpoint, bucket, access, secret, token):
+    if not is_site_admin(token):
+        return {"error": "Only site admins can store aws credentials"}, 403
+    return authx.auth.store_aws_credential(endpoint=endpoint, bucket=bucket, access=access, secret=secret)
+
+
 
 #####
 # Site roles
