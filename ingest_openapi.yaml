@@ -28,6 +28,39 @@ paths:
               application/json:
                 schema:
                   type: object
+  /s3-credential/endpoint/{endpoint_id}/bucket/{bucket_id}:
+    parameters:
+      - in: path
+        name: endpoint_id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: bucket_id
+        schema:
+          type: string
+        required: true
+    get:
+      description: get credentials for an S3 bucket
+      operationId: ingest_operations.get_s3_credential
+      responses:
+          200:
+            description: Success
+            content:
+              application/json:
+                schema:
+                  type: object
+    delete:
+      description: delete credentials for an S3 bucket
+      operationId: ingest_operations.delete_s3_credential
+      responses:
+          200:
+            description: Success
+            content:
+              application/json:
+                schema:
+                  type: object
+
   /site-role/{role_type}:
     parameters:
       - in: path

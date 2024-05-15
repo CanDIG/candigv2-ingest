@@ -1,6 +1,7 @@
 import connexion
 from flask import request, Flask
 import os
+import re
 import traceback
 import urllib.parse
 
@@ -68,10 +69,29 @@ def get_service_info():
     }
 
 
+####
+# S3 credentials
+####
+
 def add_s3_credential():
     data = connexion.request.json
     token = request.headers['Authorization'].split("Bearer ")[1]
     return auth.store_aws_credential(data["endpoint"], data["bucket"], data["access_key"], data["secret_key"], token)
+
+
+@app.route('/s3-credential/endpoint/<path:endpoint_id>/bucket/<path:bucket_id>')
+def get_s3_credential(endpoint_id, bucket_id):
+    token = request.headers['Authorization'].split("Bearer ")[1]
+    endpoint_cleaned = re.sub(r"\W", "_", endpoint_id)
+    return auth.get_aws_credential(endpoint_cleaned, bucket_id, token)
+
+
+@app.route('/s3-credential/endpoint/<path:endpoint_id>/bucket/<path:bucket_id>')
+def delete_s3_credential(endpoint_id, bucket_id):
+    token = request.headers['Authorization'].split("Bearer ")[1]
+    endpoint_cleaned = re.sub(r"\W", "_", endpoint_id)
+    return auth.remove_aws_credential(endpoint_cleaned, bucket_id, token)
+
 
 ####
 # Site roles

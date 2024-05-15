@@ -141,6 +141,17 @@ def store_aws_credential(endpoint, bucket, access, secret, token):
     return authx.auth.store_aws_credential(endpoint=endpoint, bucket=bucket, access=access, secret=secret)
 
 
+def get_aws_credential(endpoint, bucket, token):
+    if not is_site_admin(token):
+        return {"error": "Only site admins can view aws credentials"}, 403
+    return authx.auth.get_aws_credential(endpoint=endpoint, bucket=bucket)
+
+
+def remove_aws_credential(endpoint, bucket, token):
+    if not is_site_admin(token):
+        return {"error": "Only site admins can remove aws credentials"}, 403
+    return authx.auth.remove_aws_credential(endpoint=endpoint, bucket=bucket)
+
 
 #####
 # Site roles
