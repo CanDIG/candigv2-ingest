@@ -157,6 +157,16 @@ paths:
               application/json:
                 schema:
                   type: object
+    get:
+      description: List programs authorized on server
+      operationId: ingest_operations.list_program_authorizations
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
   /program/{program_id}:
     parameters:
       - in: path

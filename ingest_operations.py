@@ -182,6 +182,13 @@ def add_clinical_donors():
 # Program authorizations
 ####
 
+def list_program_authorizations():
+    token = request.headers['Authorization'].split("Bearer ")[1]
+
+    response, status_code = auth.list_programs_in_opa(token)
+    return response, status_code
+
+
 def add_program_authorization():
     program = connexion.request.json
     token = request.headers['Authorization'].split("Bearer ")[1]
