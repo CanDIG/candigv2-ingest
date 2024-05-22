@@ -170,7 +170,7 @@ def get_access_method(url):
             }
         }
     try:
-        result = parse_aws_url(url)
+        result = parse_s3_url(url)
     except Exception as e:
         return {
             "message": str(e)
@@ -181,7 +181,7 @@ def get_access_method(url):
     }
 
 
-def parse_aws_url(url):
+def parse_s3_url(url):
     """
     Parse a url into s3 components
     """
