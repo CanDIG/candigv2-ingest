@@ -76,8 +76,6 @@ def get_user_name(token):
 def is_site_admin(token):
     if (authx.auth.is_site_admin(None, token=token)):
         return True
-    if os.getenv("OPA_SECRET") is None:
-        print("OPA_SECRET is not set")
     return False
 
 
