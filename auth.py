@@ -108,7 +108,7 @@ def get_minio_client(token, s3_endpoint, bucket, access_key=None, secret_key=Non
     return authx.auth.get_minio_client(token=token, s3_endpoint=s3_endpoint, bucket=bucket, access_key=access_key, secret_key=secret_key, region=region, secure=secure)
 
 
-def parse_aws_credential(awsfile):
+def parse_s3_credential(awsfile):
     # parse the awsfile:
     access = None
     secret = None
@@ -133,22 +133,22 @@ def parse_aws_credential(awsfile):
 # AWS credentials
 #####
 
-def store_aws_credential(endpoint, bucket, access, secret, token):
+def store_s3_credential(endpoint, bucket, access, secret, token):
     if not is_site_admin(token):
         return {"error": "Only site admins can store aws credentials"}, 403
-    return authx.auth.store_aws_credential(endpoint=endpoint, bucket=bucket, access=access, secret=secret)
+    return authx.auth.store_s3_credential(endpoint=endpoint, bucket=bucket, access=access, secret=secret)
 
 
-def get_aws_credential(endpoint, bucket, token):
+def get_s3_credential(endpoint, bucket, token):
     if not is_site_admin(token):
         return {"error": "Only site admins can view aws credentials"}, 403
-    return authx.auth.get_aws_credential(endpoint=endpoint, bucket=bucket)
+    return authx.auth.get_s3_credential(endpoint=endpoint, bucket=bucket)
 
 
-def remove_aws_credential(endpoint, bucket, token):
+def remove_s3_credential(endpoint, bucket, token):
     if not is_site_admin(token):
         return {"error": "Only site admins can remove aws credentials"}, 403
-    return authx.auth.remove_aws_credential(endpoint=endpoint, bucket=bucket)
+    return authx.auth.remove_s3_credential(endpoint=endpoint, bucket=bucket)
 
 
 #####
