@@ -136,19 +136,19 @@ def parse_s3_credential(awsfile):
 def store_s3_credential(endpoint, bucket, access, secret, token):
     if not is_site_admin(token):
         return {"error": "Only site admins can store aws credentials"}, 403
-    return authx.auth.store_s3_credential(endpoint=endpoint, bucket=bucket, access=access, secret=secret)
+    return authx.auth.store_aws_credential(endpoint=endpoint, bucket=bucket, access=access, secret=secret)
 
 
 def get_s3_credential(endpoint, bucket, token):
     if not is_site_admin(token):
         return {"error": "Only site admins can view aws credentials"}, 403
-    return authx.auth.get_s3_credential(endpoint=endpoint, bucket=bucket)
+    return authx.auth.get_aws_credential(endpoint=endpoint, bucket=bucket)
 
 
 def remove_s3_credential(endpoint, bucket, token):
     if not is_site_admin(token):
         return {"error": "Only site admins can remove aws credentials"}, 403
-    return authx.auth.remove_s3_credential(endpoint=endpoint, bucket=bucket)
+    return authx.auth.remove_aws_credential(endpoint=endpoint, bucket=bucket)
 
 
 #####
