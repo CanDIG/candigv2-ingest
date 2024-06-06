@@ -25,7 +25,7 @@ def main(args):
     try:
         if args.prefix:
 
-            process = subprocess.run([f'python {args.tmp}/src/csv_to_ingest.py --size s --prefix {args.prefix}'],
+            process = subprocess.run([f'python {args.tmp}/src/csv_to_ingest.py --donors-per-program 30 --number-of-programs 3 --prefix {args.prefix}'],
                                      shell=True, check=True, capture_output=True)
             output_dir = f"{args.tmp}/custom_dataset_csv-{args.prefix}"
 
