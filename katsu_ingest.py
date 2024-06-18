@@ -66,59 +66,39 @@ def read_json(file_path):
             return None
 
 
-def ingest_schemas(fields, headers):
-    result = {
-        "errors": [],
-        "results": []
-    }
-    name_mappings = {
-        "programs": "program",
-        "donors": "donor",
-        "primary_diagnoses": "primary_diagnosis",
-        "specimens": "specimen",
-        "sample_registrations": "sample_registration",
-        "treatments": "treatment",
-        "chemotherapies": "chemotherapy",
-        "hormone_therapies": "hormone_therapy",
-        "immunotherapies": "immunotherapy",
-        "radiations": "radiation",
-        "surgeries": "surgery",
-        "biomarkers": "biomarker",
-        "followups": "follow_up",
-        "comorbidities": "comorbidity",
-        "exposures": "exposure"
-    }
+def ingest_schemas(fields, headers, batch_size):
+    result = {"errors": [], "results": []}
     for type in fields:
         if len(fields[type]) > 0:
-            if type in name_mappings:
-                name = name_mappings[type]
-            else:
-                name = type
-            ingest_url = f"{KATSU_URL}/v2/ingest/{name}/"
+            ingest_url = f"{KATSU_URL}/v2/ingest/{type}/"
 
             created_count = 0
             total_count = len(fields[type])
 
-            for item in fields[type]:
-                update_headers(headers)
+            data = fields[type]
+            for i in range(0, len(data), batch_size):
+                batch = data[i : i + batch_size]
                 response = requests.post(
-                    ingest_url, headers=headers, data=json.dumps(item)
+                    ingest_url, headers=headers, data=json.dumps(batch)
                 )
-
                 if response.status_code == HTTPStatus.CREATED:
-                    created_count += 1
+                    created_count += len(batch)
                 elif response.status_code == HTTPStatus.NOT_FOUND:
-                    message = f"ERROR 404: {ingest_url} was not found! Please check the URL."
+                    message = (
+                        f"ERROR 404: {ingest_url} was not found! Please check the URL."
+                    )
                     result["errors"].append(f"{type}: {message}")
                     break
                 elif response.status_code == HTTPStatus.FORBIDDEN:
-                    message = f"ERROR 403: You do not have permission to ingest {type} for {item[0]['program_id']}"
+                    message = f"ERROR 403: You do not have permission to ingest {type}"
                     result["errors"].append(f"{type}: {message}")
                     break
                 else:
                     try:
                         if "error" in response.json():
-                            result["errors"].append(f"{type}: {response.status_code} {response.json()['error']}")
+                            result["errors"].append(
+                                f"{type}: {response.status_code} {response.json()['error']}"
+                            )
                     except:
                         message = f"\nREQUEST STATUS CODE: {response.status_code} \nRETURN MESSAGE: {response.text}\n"
                         result["errors"].append(f"{type}: {message}")
@@ -282,7 +262,7 @@ def prepare_clinical_data_for_ingest(ingest_json):
     return by_program
 
 
-def ingest_clinical_data(ingest_json, headers):
+def ingest_clinical_data(ingest_json, headers, batch_size):
     schemas_to_ingest = prepare_clinical_data_for_ingest(ingest_json)
     headers["Content-Type"] = "application/json"
     status_code = 200
@@ -290,7 +270,7 @@ def ingest_clinical_data(ingest_json, headers):
         if "schemas" not in program:
             continue
         schemas = program.pop("schemas")
-        ingest_results, status_code = ingest_schemas(schemas, headers)
+        ingest_results, status_code = ingest_schemas(schemas, headers, batch_size)
         print(ingest_results, status_code)
         if len(ingest_results["errors"]) > 0:
             program["errors"].extend(ingest_results["errors"])
@@ -304,7 +284,9 @@ def main():
     global KATSU_URL
     if KATSU_URL is None:
         if os.getenv("CANDIG_URL") is None:
-            print("ERROR: $CANDIG_URL is not set. Did you forget to run 'source env.sh'?")
+            print(
+                "ERROR: $CANDIG_URL is not set. Did you forget to run 'source env.sh'?"
+            )
             exit()
         KATSU_URL = f"{os.getenv('CANDIG_URL')}/katsu"
 
@@ -313,20 +295,28 @@ def main():
 
     parser = argparse.ArgumentParser(description="A script that ingests clinical data into Katsu")
     parser.add_argument("--input", help="Path to the clinical json file to ingest.")
+    parser.add_argument("--batch_size", help="How many items for batch ingest.")
     args = parser.parse_args()
 
     data_location = args.input
     if not data_location:
         data_location = os.environ.get("CLINICAL_DATA_LOCATION")
         if not data_location:
-            print("ERROR: Could not find input data. Either --input is required or CLINICAL_DATA_LOCATION must be set.")
+            print(
+                "ERROR: Could not find input data. Either --input is required or CLINICAL_DATA_LOCATION must be set."
+            )
             exit()
+    batch_size = int(args.batch_size)
+    if not batch_size:
+        batch_size = 1000
 
     ingest_json = read_json(data_location)
     if "openapi_url" not in ingest_json:
         ingest_json["openapi_url"] = "https://raw.githubusercontent.com/CanDIG/katsu/develop/chord_metadata_service/mohpackets/docs/schema.yml"
-    result, status_code = ingest_clinical_data(ingest_json, headers)
+
+    result, status_code = ingest_clinical_data(ingest_json, headers, batch_size)
     print(json.dumps(result, indent=2))
+
 
 
 if __name__ == "__main__":
