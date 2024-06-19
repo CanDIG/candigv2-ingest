@@ -172,8 +172,9 @@ def add_genomic_linkages():
 
 def add_clinical_donors():
     dataset = connexion.request.json
+    batch_size = int(connexion.request.args.get("batch_size", 1000))
     headers = get_headers()
-    response, status_code = ingest_clinical_data(dataset, headers)
+    response, status_code = ingest_clinical_data(dataset, headers, batch_size)
     if auth.is_default_site_admin_set():
         response["warning"] = f"Default site administrator {os.getenv('DEFAULT_SITE_ADMIN_USER')} is still configured. Use the /ingest/site-role/site_admin endpoint to set a different site admin."
     return response, status_code
