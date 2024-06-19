@@ -302,9 +302,9 @@ def main():
                 "ERROR: Could not find input data. Either --input is required or CLINICAL_DATA_LOCATION must be set."
             )
             exit()
-    batch_size = int(args.batch_size)
-    if not batch_size:
-        batch_size = 1000
+    batch_size = 1000
+    if args.batch_size:
+        batch_size = int(args.batch_size)
 
     ingest_json = read_json(data_location)
     if "openapi_url" not in ingest_json:
