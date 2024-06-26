@@ -375,6 +375,13 @@ paths:
     post:
       description: Add a list of donors with clinical data produced by the clinical ETL.
       operationId: ingest_operations.add_clinical_donors
+      parameters:
+        - name: batch_size
+          in: query
+          required: false
+          schema:
+            type: integer
+          description: Number of items to be processed in one batch
       requestBody:
         $ref: "#/components/requestBodies/ClinicalDonorRequest"
       responses:
