@@ -38,7 +38,7 @@ The preferred method for clinical data ingest is using the API.
 
 #### API
 
-The clinical ingest API runs at `/ingest/clinical`. Simply send a request with an authorized bearer token and a JSON body with your `DonorWithClinicalData` object. See the swagger UI/[schema](ingest_openapi.yaml) for the response format.
+The clinical ingest API runs at `$CANDIG_URL/ingest/clinical`. Simply send a request with an authorized bearer token and a JSON body with your `DonorWithClinicalData` object. See the swagger UI/[schema](ingest_openapi.yaml) for the response format.
 
 #### Command line
 
@@ -48,15 +48,15 @@ To ingest via the commandline script, the location of your clinical data JSON, c
 
 If you are in a testing environment and the default site administrator is still in place, this can be done by copying the `env.sh` file to the ingest container and executing it
 
-```
+```bash
 docker cp env.sh candigv2_candig-ingest_1:ingest_app
 docker exec -it candigv2_candig-ingest_1 bash
 source env.sh
 ```
 
-Or if you prefer to enter valid credentials when prompted, set only the `CLIENT_ID` and `CLIENT_SECRET` variables and you will be prompted for your credentials when running the script
+Or if you prefer to enter valid credentials when prompted, set only the `CLIENT_ID` and `CLIENT_SECRET` variables and you will be prompted for your credentials when running the script. This can be done with the following commands in a bash terminal.
 
-```
+```bash
 awk '/CANDIG_CLIENT/' env.sh > ingest_env.sh
 docker cp ingest_env.sh candigv2_candig-ingest_1:ingest_app
 docker exec -it candigv2_candig-ingest_1 bash
@@ -201,14 +201,21 @@ The file should contain an array of dictionaries, where each item represents a s
 ### iv. Ingest genomic files
 
 #### API
-Use the `/ingest/genomic` endpoint with the proper Authorization headers and your genomic JSON as specified above for the body to ingest and link to the clinical dataset program_id.
+Use the `$CANDIG_URL/ingest/genomic` endpoint with the proper Authorization headers and your genomic JSON as specified above for the body to ingest and link to the clinical dataset program_id.
 
 #### Command line
 
-To ingest using an S3 container, once the files have been added, you can run the htsget_ingest.py script:
+Command line ingest is done by calling the `htsget_ingest.py` script directly and referring to the genomic json ingest file as the `--samplefile`. The genomic ingest file will need to be copied into the running candig-ingest container. Only site administrators or program curators are allowed to ingest. If you are in a testing environment and the default site administrator is still in place, you can export the site administrator credentials by copying the `env.sh` file to the ingest container and executing it. 
 
 ```bash
-python htsget_ingest.py --samplefile [JSON-formatted sample data as specified above]
+docker cp env.sh candigv2_candig-ingest_1:ingest_app
+docker exec -it candigv2_candig-ingest_1 bash
+source env.sh
+```
+Otherwise you will be prompted to enter valid credentials of a program curator or site administrator when running `htsget_ingest.py`. The script can be run as follows:
+
+```bash
+python htsget_ingest.py --samplefile <path/to/genomic.json>
 ```
 
 ## 3. Assigning users to programs
