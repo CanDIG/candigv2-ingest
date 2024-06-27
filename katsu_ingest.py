@@ -85,8 +85,8 @@ def ingest_schemas(fields, headers, batch_size):
                     )
                     result["errors"].append(f"{type}: {message}")
                     break
-                elif response.status_code == HTTPStatus.FORBIDDEN:
-                    message = f"ERROR 403: You do not have permission to ingest {type}"
+                elif response.status_code == HTTPStatus.UNAUTHORIZED:
+                    message = f"ERROR 401: You do not have permission to ingest {type}"
                     result["errors"].append(f"{type}: {message}")
                     break
                 else:
