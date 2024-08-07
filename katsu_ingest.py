@@ -66,7 +66,7 @@ def ingest_schemas(fields, headers, batch_size):
     result = {"errors": [], "results": []}
     for type in fields:
         if len(fields[type]) > 0:
-            ingest_url = f"{KATSU_URL}/v2/ingest/{type}/"
+            ingest_url = f"{KATSU_URL}/v3/ingest/{type}/"
 
             created_count = 0
             total_count = len(fields[type])
