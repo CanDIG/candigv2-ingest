@@ -6,7 +6,7 @@ from http import HTTPStatus
 
 import requests
 from authx.auth import get_site_admin_token
-from clinical_etl.mohschema import MoHSchema
+from clinical_etl.mohschemav3 import MoHSchemaV3
 
 KATSU_URL = os.environ.get("KATSU_URL")
 
@@ -210,7 +210,7 @@ def prepare_clinical_data_for_ingest(ingest_json):
     ]
     (Fully outlined in MOH Schema)
     """
-    schema = MoHSchema(ingest_json["openapi_url"])
+    schema = MoHSchemaV3(ingest_json["openapi_url"])
     types = ["programs"]
     types.extend(schema.validation_schema.keys())
 
