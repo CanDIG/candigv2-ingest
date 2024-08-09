@@ -21,6 +21,8 @@ def main(args):
     ingest_repo_dir = os.path.dirname(os.path.abspath(__file__))
     print(f"Cloning mohccn-synthetic-data repo into {args.tmp}")
     Repo.clone_from("https://github.com/CanDIG/mohccn-synthetic-data.git", args.tmp)
+    # TODO: remove next line when changes are merged into develop
+    Repo.git.checkout('mshadbolt/factory-boy-synth-data')
 
     try:
         if args.prefix:
