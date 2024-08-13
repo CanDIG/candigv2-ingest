@@ -14,7 +14,7 @@ def parse_args():
                                                  "ingest into CanDIG platform.")
     parser.add_argument("--prefix", help="optional prefix to apply to all identifiers")
     parser.add_argument("--tmp", help="Directory to temporarily clone the mohccn-synthetic-data repo.",
-                        default="tmp")
+                        default="tmp-data")
     return parser.parse_args()
 
 
