@@ -44,8 +44,8 @@
                 "submitter_sample_id": "SAMPLE_0002"
             },
             {
-                "genomic_file_sample_id": "NORMAL",
-                "submitter_sample_id": "SAMPLE_0002"
+              "genomic_file_sample_id": "NORMAL",
+              "submitter_sample_id": "SAMPLE_0003"
             }
         ]
     },
