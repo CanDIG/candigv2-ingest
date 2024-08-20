@@ -7,8 +7,11 @@ from http import HTTPStatus
 import requests
 from authx.auth import get_site_admin_token
 from clinical_etl.mohschemav3 import MoHSchemaV3
+from candigv2_logging.logging import initialize, CanDIGLogger
 
 KATSU_URL = os.environ.get("KATSU_URL")
+
+logger = CanDIGLogger(__file__)
 
 
 def update_headers(headers):
@@ -50,7 +53,7 @@ def read_json(file_path):
             data = response.json()
             return data
         except requests.exceptions.RequestException as e:
-            print("Failed to retrieve data. Error:", e)
+            logger.error("Failed to retrieve data. Error:", e)
             return None
     else:
         try:
@@ -58,7 +61,7 @@ def read_json(file_path):
                 data = json.load(f)
                 return data
         except FileNotFoundError as e:
-            print("File not found. Error:", e)
+            logger.error("File not found. Error:", e)
             return None
 
 
@@ -149,7 +152,7 @@ def traverse_clinical_field(fields, field: dict, ctype, parents, types, ingested
         if id_key not in ingested_ids:
             ingested_ids[id_key] = []
         if field_id in ingested_ids[id_key]:
-            print(f"Skipping {field_id} in {id_key} (Already ingested).")
+            logger.info(f"Skipping {field_id} in {id_key} (Already ingested).")
             return
         data[id_key] = field_id
         ingested_ids[id_key].append(field_id)
@@ -178,9 +181,9 @@ def traverse_clinical_field(fields, field: dict, ctype, parents, types, ingested
     subfields = field.keys()
     for subfield in subfields:
         if id_key:
-            print(f"Loading {subfield} for {data[id_key]}...")
+            logger.info(f"Loading {subfield} for {data[id_key]}...")
         else:
-            print(f"Loading {subfield}...")
+            logger.info(f"Loading {subfield}...")
         if type(field[subfield]) == list:
             for elem in field[subfield]:
                 traverse_clinical_field(
@@ -225,29 +228,29 @@ def prepare_clinical_data_for_ingest(ingest_json):
 
     for program_id in by_program.keys():
         errors = by_program[program_id]["errors"]
-        print(f"Validating input for program {program_id}")
+        logger.info(f"Validating input for program {program_id}")
         schema.validate_ingest_map(by_program[program_id])
         if len(schema.validation_warnings) > 0:
-            print("Validation returned warnings:")
-            print("\n".join(schema.validation_warnings))
+            logger.info("Validation returned warnings:")
+            logger.info("\n".join(schema.validation_warnings))
         if len(schema.validation_errors) > 0:
             errors.append([str(line) for line in schema.validation_errors])
             continue
-        print("Validation success.")
+        logger.info("Validation success.")
 
-        print("Beginning ingest")
+        logger.info("Beginning ingest")
         donors = by_program[program_id].pop("donors")
         fields = {type: [] for type in types}
         for donor in donors:
             parents = [("programs", program_id)]
-            print(f"Loading donor {donor['submitter_donor_id']}...")
+            logger.info(f"Loading donor {donor['submitter_donor_id']}...")
             try:
                 ingested_ids = {}
                 traverse_clinical_field(
                     fields, donor, "donors", parents, types, ingested_ids
                 )
             except Exception as e:
-                print(traceback.format_exc())
+                logger.error(traceback.format_exc())
                 errors.append(str(e))
         by_program[program_id]["schemas"] = fields
         by_program[program_id]["schemas"]["programs"] = [
@@ -265,7 +268,6 @@ def ingest_clinical_data(ingest_json, headers, batch_size):
             continue
         schemas = program.pop("schemas")
         ingest_results, status_code = ingest_schemas(schemas, headers, batch_size)
-        print(ingest_results, status_code)
         if len(ingest_results["errors"]) > 0:
             program["errors"].extend(ingest_results["errors"])
         else:
@@ -317,4 +319,5 @@ def main():
 
 
 if __name__ == "__main__":
+    initialize()
     main()
