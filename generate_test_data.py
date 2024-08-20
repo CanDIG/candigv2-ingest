@@ -77,6 +77,22 @@ def main(args):
     print("Removing repo.")
     shutil.rmtree(args.tmp)
 
+    programs = {}
+    with open('tests/small_dataset_clinical_ingest.json', "r") as f:
+        full_json = json.load(f)
+    # split ingest files by program
+    for donor in full_json['donors']:
+        try:
+            programs[donor['program_id']]['donors'].append(donor)
+        except KeyError as e:
+            programs[donor['program_id']] = {
+                "openapi_url": "https://raw.githubusercontent.com/CanDIG/katsu/model_3/chord_metadata_service/mohpackets/docs/schema.yml",
+                "schema_class": "MoHSchemaV3",
+                "donors": [donor]}
+    for program, content in programs.items():
+        with open(f"tests/{program}.json", "w+") as f:
+            json.dump(content, f)
+
 
 if __name__ == "__main__":
     args = parse_args()
