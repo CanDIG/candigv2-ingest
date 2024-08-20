@@ -90,7 +90,7 @@ def main(args):
                 "schema_class": "MoHSchemaV3",
                 "donors": [donor]}
     for program, content in programs.items():
-        with open(f"tests/{program}.json", "w+") as f:
+        with open(f"{ingest_repo_dir}/tests/{program}.json", "w+") as f:
             json.dump(content, f)
 
 
