@@ -78,7 +78,7 @@ def main(args):
     shutil.rmtree(args.tmp)
 
     programs = {}
-    with open('tests/small_dataset_clinical_ingest.json', "r") as f:
+    with open(f'{ingest_repo_dir}/tests/small_dataset_clinical_ingest.json', "r") as f:
         full_json = json.load(f)
     # split ingest files by program
     for donor in full_json['donors']:
