@@ -6,12 +6,13 @@ from http import HTTPStatus
 
 import requests
 from authx.auth import get_site_admin_token
-from clinical_etl.mohschema import MoHSchema
+from clinical_etl.mohschemav3 import MoHSchemaV3
 from candigv2_logging.logging import initialize, CanDIGLogger
 
 KATSU_URL = os.environ.get("KATSU_URL")
 
 logger = CanDIGLogger(__file__)
+
 
 def update_headers(headers):
     """
@@ -68,7 +69,7 @@ def ingest_schemas(fields, headers, batch_size):
     result = {"errors": [], "results": []}
     for type in fields:
         if len(fields[type]) > 0:
-            ingest_url = f"{KATSU_URL}/v2/ingest/{type}/"
+            ingest_url = f"{KATSU_URL}/v3/ingest/{type}/"
 
             created_count = 0
             total_count = len(fields[type])
@@ -212,7 +213,7 @@ def prepare_clinical_data_for_ingest(ingest_json):
     ]
     (Fully outlined in MOH Schema)
     """
-    schema = MoHSchema(ingest_json["openapi_url"])
+    schema = MoHSchemaV3(ingest_json["openapi_url"])
     types = ["programs"]
     types.extend(schema.validation_schema.keys())
 

@@ -1,6 +1,6 @@
 [
     {
-        "program_id": "SYNTHETIC-2",
+        "program_id": "SYNTH_02",
         "genomic_file_id": "HG00096.cnv.vcf",
         "main": {
             "access_method": "http://s3.us-east-1.amazonaws.com/1000genomes/release/20130502/ALL.chr22.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz?public=true",
@@ -18,12 +18,12 @@
         "samples": [
             {
                 "genomic_file_sample_id": "HG00096",
-                "submitter_sample_id": "SAMPLE_REGISTRATION_1"
+                "submitter_sample_id": "SAMPLE_0017"
             }
         ]
     },
     {
-        "program_id": "SYNTHETIC-1",
+        "program_id": "SYNTH_01",
         "genomic_file_id": "multisample_1",
         "main": {
             "access_method": "file:////app/htsget_server/data/files/multisample_1.vcf.gz",
@@ -41,16 +41,16 @@
         "samples": [
             {
                 "genomic_file_sample_id": "TUMOR",
-                "submitter_sample_id": "SAMPLE_REGISTRATION_4"
+                "submitter_sample_id": "SAMPLE_0002"
             },
             {
-                "genomic_file_sample_id": "NORMAL",
-                "submitter_sample_id": "SPECIMEN_5"
+              "genomic_file_sample_id": "NORMAL",
+              "submitter_sample_id": "SAMPLE_0003"
             }
         ]
     },
     {
-        "program_id": "SYNTHETIC-2",
+        "program_id": "SYNTH_02",
         "genomic_file_id": "multisample_2",
         "main": {
             "access_method": "file:////app/htsget_server/data/files/multisample_2.vcf.gz",
@@ -68,16 +68,16 @@
         "samples": [
             {
                 "genomic_file_sample_id": "TUMOR",
-                "submitter_sample_id": "SAMPLE_REGISTRATION_1"
+                "submitter_sample_id": "SAMPLE_0020"
             },
             {
                 "genomic_file_sample_id": "NORMAL",
-                "submitter_sample_id": "SAMPLE_REGISTRATION_2"
+                "submitter_sample_id": "SAMPLE_0019"
             }
         ]
     },
     {
-        "program_id": "SYNTHETIC-1",
+        "program_id": "SYNTH_01",
         "genomic_file_id": "NA02102",
         "main": {
             "access_method": "file:////app/htsget_server/data/files/NA02102.bam",
@@ -95,7 +95,7 @@
         "samples": [
             {
                 "genomic_file_sample_id": "NA02102",
-                "submitter_sample_id": "SPECIMEN_5"
+                "submitter_sample_id": "SAMPLE_0004"
             }
         ]
     }

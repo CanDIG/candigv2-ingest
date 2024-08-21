@@ -14,13 +14,26 @@ def parse_args():
                                                  "ingest into CanDIG platform.")
     parser.add_argument("--prefix", help="optional prefix to apply to all identifiers")
     parser.add_argument("--tmp", help="Directory to temporarily clone the mohccn-synthetic-data repo.",
-                        default="tmp")
+                        default="tmp-data")
     return parser.parse_args()
+
 
 def main(args):
     ingest_repo_dir = os.path.dirname(os.path.abspath(__file__))
+    if os.path.exists(args.tmp):
+        yes = ['yes', 'y', 'ye', '']
+        no = ['no', 'n']
+        response = input(f"Specified directory {args.tmp}, ok to delete? (yes/no)")
+        if response.lower() in yes:
+            shutil.rmtree(args.tmp)
+        else:
+            print("Cannot clone repo until --tmp directory is removed. Remove manually or specify an alternate --tmp "
+                  "destination.")
+            sys.exit()
     print(f"Cloning mohccn-synthetic-data repo into {args.tmp}")
-    Repo.clone_from("https://github.com/CanDIG/mohccn-synthetic-data.git", args.tmp)
+    synth_repo = Repo.clone_from("https://github.com/CanDIG/mohccn-synthetic-data.git", args.tmp)
+    # TODO: remove next line when changes are merged into develop
+    synth_repo.git.checkout('mshadbolt/factory-boy-synth-data')
 
     try:
         if args.prefix:
@@ -63,6 +76,22 @@ def main(args):
                 f"{ingest_repo_dir}/tests/small_dataset_genomic_ingest.json")
     print("Removing repo.")
     shutil.rmtree(args.tmp)
+
+    programs = {}
+    with open(f'{ingest_repo_dir}/tests/small_dataset_clinical_ingest.json', "r") as f:
+        full_json = json.load(f)
+    # split ingest files by program
+    for donor in full_json['donors']:
+        try:
+            programs[donor['program_id']]['donors'].append(donor)
+        except KeyError as e:
+            programs[donor['program_id']] = {
+                "openapi_url": "https://raw.githubusercontent.com/CanDIG/katsu/model_3/chord_metadata_service/mohpackets/docs/schema.yml",
+                "schema_class": "MoHSchemaV3",
+                "donors": [donor]}
+    for program, content in programs.items():
+        with open(f"{ingest_repo_dir}/tests/{program}.json", "w+") as f:
+            json.dump(content, f)
 
 
 if __name__ == "__main__":
