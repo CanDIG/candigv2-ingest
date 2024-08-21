@@ -32,8 +32,6 @@ def main(args):
             sys.exit()
     print(f"Cloning mohccn-synthetic-data repo into {args.tmp}")
     synth_repo = Repo.clone_from("https://github.com/CanDIG/mohccn-synthetic-data.git", args.tmp)
-    # TODO: remove next line when changes are merged into develop
-    synth_repo.git.checkout('mshadbolt/factory-boy-synth-data')
 
     try:
         if args.prefix:
@@ -77,6 +75,7 @@ def main(args):
     print("Removing repo.")
     shutil.rmtree(args.tmp)
 
+    print("Splitting by program...")
     programs = {}
     with open(f'{ingest_repo_dir}/tests/small_dataset_clinical_ingest.json', "r") as f:
         full_json = json.load(f)
