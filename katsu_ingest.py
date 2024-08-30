@@ -14,18 +14,6 @@ KATSU_URL = os.environ.get("KATSU_URL")
 logger = CanDIGLogger(__file__)
 
 
-def update_headers(headers):
-    """
-    For new auth model
-    refresh_token = headers["refresh_token"]
-    bearer = auth.get_bearer_from_refresh(refresh_token)
-    new_refresh = auth.get_refresh_token(refresh_token=refresh_token)
-    headers["refresh_token"] = new_refresh
-    headers["Authorization"] = f"Bearer {bearer}"
-    """
-    pass
-
-
 def read_json(file_path):
     """Read data from either a URL or a local file in JSON format.
 
