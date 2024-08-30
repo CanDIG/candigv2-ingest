@@ -11,6 +11,10 @@ from katsu_ingest import ingest_clinical_data
 from htsget_ingest import htsget_ingest
 from opa_ingest import remove_user_from_dataset, add_user_to_dataset
 import config
+import tempfile
+import uuid
+import json
+
 
 app = Flask(__name__)
 
@@ -174,10 +178,38 @@ def add_clinical_donors():
     dataset = connexion.request.json
     batch_size = int(connexion.request.args.get("batch_size", 1000))
     headers = get_headers()
-    response, status_code = ingest_clinical_data(dataset, headers, batch_size)
+    token = request.headers['Authorization'].split("Bearer ")[1]
+    response, status_code = ingest_clinical_data(dataset, token, batch_size)
+    if status_code == 200:
+        ingest_uuid = add_to_queue(response)
+        response = {"queue_id": ingest_uuid}
     if auth.is_default_site_admin_set():
         response["warning"] = f"Default site administrator {os.getenv('DEFAULT_SITE_ADMIN_USER')} is still configured. Use the /ingest/site-role/site_admin endpoint to set a different site admin."
     return response, status_code
+
+
+def add_to_queue(ingest_json):
+    queue_id = str(uuid.uuid1())
+    with tempfile.NamedTemporaryFile(delete_on_close=False, mode="w") as f:
+        json.dump(ingest_json, f, indent=4)
+        os.rename(f.name, os.path.join(config.DAEMON_PATH, "to_ingest", queue_id))
+    results_path = os.path.join(config.DAEMON_PATH, "results", queue_id)
+    with open(results_path, "w") as f:
+        json.dump({"status": "still in queue"}, f)
+    return queue_id
+
+
+@app.route('/status/<path:queue_id>')
+def get_ingest_status(queue_id):
+    try:
+        results_path = os.path.join(config.DAEMON_PATH, "results", queue_id)
+        with open(results_path) as f:
+            json_data = json.load(f)
+            # os.remove(results_path)
+            return json_data, 200
+    except:
+        return {"error": f"no such queue_id {queue_id}"}, 404
+
 
 ####
 # Program authorizations
