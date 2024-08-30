@@ -7,7 +7,7 @@ import urllib.parse
 
 import auth
 from ingest_result import *
-from katsu_ingest import ingest_clinical_data
+from katsu_ingest import prep_check_clinical_data
 from htsget_ingest import htsget_ingest
 from opa_ingest import remove_user_from_dataset, add_user_to_dataset
 import config
@@ -179,7 +179,7 @@ def add_clinical_donors():
     batch_size = int(connexion.request.args.get("batch_size", 1000))
     headers = get_headers()
     token = request.headers['Authorization'].split("Bearer ")[1]
-    response, status_code = ingest_clinical_data(dataset, token, batch_size)
+    response, status_code = prep_check_clinical_data(dataset, token, batch_size)
     if status_code == 200:
         ingest_uuid = add_to_queue(response)
         response = {"queue_id": ingest_uuid}

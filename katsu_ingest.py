@@ -107,7 +107,7 @@ def ingest_schemas(fields, batch_size=1000):
 
 def traverse_clinical_field(fields, field: dict, ctype, parents, types, ingested_ids):
     """
-    Helper function for ingest_clinical_data. Parses and ingests clinical fields from a DonorWithClinicalData
+    Helper function for prep_check_clinical_data. Parses and ingests clinical fields from a DonorWithClinicalData
     object.
     Args:
         field: The (sub)field of a DonorWithClinicalData object, potentially nested
@@ -248,7 +248,7 @@ def prepare_clinical_data_for_ingest(ingest_json):
     return by_program
 
 
-def ingest_clinical_data(ingest_json, token, batch_size):
+def prep_check_clinical_data(ingest_json, token, batch_size):
     schemas_to_ingest = prepare_clinical_data_for_ingest(ingest_json)
     result = {}
 
@@ -307,7 +307,7 @@ def main():
         )
 
     results = {}
-    json_data, status_code = ingest_clinical_data(ingest_json, token, batch_size)
+    json_data, status_code = prep_check_clinical_data(ingest_json, token, batch_size)
     schemas_to_ingest = list(json_data.keys())
     for program_id in schemas_to_ingest:
         program = json_data[program_id]
