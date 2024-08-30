@@ -3,9 +3,8 @@ import json
 import os
 import traceback
 from http import HTTPStatus
-
 import requests
-from authx.auth import get_site_admin_token
+from authx.auth import get_site_admin_token, create_service_token, is_action_allowed_for_program
 from clinical_etl.mohschemav3 import MoHSchemaV3
 from candigv2_logging.logging import initialize, CanDIGLogger
 
@@ -53,8 +52,16 @@ def read_json(file_path):
             return None
 
 
-def ingest_schemas(fields, headers, batch_size):
+## This will be called by the daemon
+def ingest_schemas(fields, batch_size=1000):
     result = {"errors": [], "results": []}
+
+    # Use service token to authenticate this with katsu
+    headers = {
+        "X-Service-Token": create_service_token(),
+        "Content-Type": "application/json"
+    }
+
     for type in fields:
         if len(fields[type]) > 0:
             ingest_url = f"{KATSU_URL}/v3/ingest/{type}/"
@@ -168,10 +175,6 @@ def traverse_clinical_field(fields, field: dict, ctype, parents, types, ingested
         parents.append((ctype, data[id_key]))
     subfields = field.keys()
     for subfield in subfields:
-        if id_key:
-            logger.info(f"Loading {subfield} for {data[id_key]}...")
-        else:
-            logger.info(f"Loading {subfield}...")
         if type(field[subfield]) == list:
             for elem in field[subfield]:
                 traverse_clinical_field(
@@ -226,12 +229,10 @@ def prepare_clinical_data_for_ingest(ingest_json):
             continue
         logger.info("Validation success.")
 
-        logger.info("Beginning ingest")
         donors = by_program[program_id].pop("donors")
         fields = {type: [] for type in types}
         for donor in donors:
             parents = [("programs", program_id)]
-            logger.info(f"Loading donor {donor['submitter_donor_id']}...")
             try:
                 ingested_ids = {}
                 traverse_clinical_field(
@@ -247,20 +248,24 @@ def prepare_clinical_data_for_ingest(ingest_json):
     return by_program
 
 
-def ingest_clinical_data(ingest_json, headers, batch_size):
+def ingest_clinical_data(ingest_json, token, batch_size):
     schemas_to_ingest = prepare_clinical_data_for_ingest(ingest_json)
-    headers["Content-Type"] = "application/json"
-    status_code = 200
-    for program in schemas_to_ingest.values():
-        if "schemas" not in program:
-            continue
-        schemas = program.pop("schemas")
-        ingest_results, status_code = ingest_schemas(schemas, headers, batch_size)
-        if len(ingest_results["errors"]) > 0:
-            program["errors"].extend(ingest_results["errors"])
-        else:
-            program["results"] = ingest_results["results"]
-    return schemas_to_ingest, status_code
+    result = {}
+
+    for program_id in schemas_to_ingest.keys():
+        program = schemas_to_ingest[program_id]
+        result["errors"] = {program_id: []}
+        if len(program["errors"]) > 0:
+            result["errors"][program_id].extend(program["errors"])
+        if not is_action_allowed_for_program(token, method="POST", path="/v3/ingest/programs/", program=program_id):
+            result["errors"][program_id].extend({"unauthorized": "user is not allowed to ingest to program"})
+        if len(result["errors"][program_id]) == 0:
+            result["errors"].pop(program_id)
+
+    # if any of the programs had errors, return:
+    if len(result["errors"]) > 0:
+        return result, 400
+    return schemas_to_ingest, 200
 
 
 def main():
@@ -275,7 +280,6 @@ def main():
         KATSU_URL = f"{os.getenv('CANDIG_URL')}/katsu"
 
     token = get_site_admin_token()
-    headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
 
     parser = argparse.ArgumentParser(
         description="A script that ingests clinical data into Katsu"
@@ -302,8 +306,16 @@ def main():
             "https://raw.githubusercontent.com/CanDIG/katsu/develop/chord_metadata_service/mohpackets/docs/schema.yml"
         )
 
-    result, status_code = ingest_clinical_data(ingest_json, headers, batch_size)
-    print(json.dumps(result, indent=2))
+    results = {}
+    json_data, status_code = ingest_clinical_data(ingest_json, token, batch_size)
+    schemas_to_ingest = list(json_data.keys())
+    for program_id in schemas_to_ingest:
+        program = json_data[program_id]
+        schemas = program.pop("schemas")
+        ingest_results, status_code = ingest_schemas(schemas)
+        results[program_id] = ingest_results
+
+    print(json.dumps(results, indent=2))
 
 
 if __name__ == "__main__":
