@@ -38,13 +38,13 @@ The preferred method for clinical data ingest is using the API.
 
 #### API
 
-The clinical ingest API runs at `$CANDIG_URL/ingest/clinical`. Simply send a request with an authorized bearer token and a JSON body with your `DonorWithClinicalData` object. See the swagger UI/[schema](ingest_openapi.yaml) for the response format.
+The clinical ingest API runs at `$CANDIG_URL/ingest/clinical`. Simply send a request with an authorized bearer token and a JSON body with your `DonorWithClinicalData` object. See the swagger UI/[schema](ingest_openapi.yaml) for the response format. The request will return a response with a queue ID. You can check the status of your ingest using that ID at `$CANDIG_URL/ingest/status/{queue_id}`.
 
 #### Command line
 
 This method is mainly used for development work but may also be used if the JSON body is too big to send easily via POST.
 
-To ingest via the commandline script, the location of your clinical data JSON, credentials of a user authorized to ingest (`site_admin` or `program_curator`) and the `client_id` and `client_secret` must be specified. 
+To ingest via the commandline script, the location of your clinical data JSON, credentials of a user authorized to ingest (`site_admin` or `program_curator`) and the `client_id` and `client_secret` must be specified.
 
 If you are in a testing environment and the default site administrator is still in place, this can be done by copying the `env.sh` file to the ingest container and executing it
 
@@ -205,7 +205,7 @@ Use the `$CANDIG_URL/ingest/genomic` endpoint with the proper Authorization head
 
 #### Command line
 
-Command line ingest is done by calling the `htsget_ingest.py` script directly and referring to the genomic json ingest file as the `--samplefile`. The genomic ingest file will need to be copied into the running candig-ingest container. Only site administrators or program curators are allowed to ingest. If you are in a testing environment and the default site administrator is still in place, you can export the site administrator credentials by copying the `env.sh` file to the ingest container and executing it. 
+Command line ingest is done by calling the `htsget_ingest.py` script directly and referring to the genomic json ingest file as the `--samplefile`. The genomic ingest file will need to be copied into the running candig-ingest container. Only site administrators or program curators are allowed to ingest. If you are in a testing environment and the default site administrator is still in place, you can export the site administrator credentials by copying the `env.sh` file to the ingest container and executing it.
 
 ```bash
 docker cp env.sh candigv2_candig-ingest_1:ingest_app
@@ -228,7 +228,7 @@ The script `opa_ingest.py` can be used only to add Team member authorizations to
 ### API
 Use the `/ingest/program/` [endpoint](https://github.com/CanDIG/candigv2-ingest/blob/4257929feca00be0d4384433793fcdf1b4e4137b/ingest_openapi.yaml#L114) to add, update, or delete authorization information for a program. Authorization headers for a site admin user must be provided. A POST request adds authorization, while a DELETE request revokes it.
 
-The following is an example of the payload you would need to `POST` to `/ingest/program/{program_id}` to add the following user roles to `TEST-PROGRAM-1`: 
+The following is an example of the payload you would need to `POST` to `/ingest/program/{program_id}` to add the following user roles to `TEST-PROGRAM-1`:
 - `user1@test.ca` as a Team member
 - `user2@test.ca` as a Program curator
 
@@ -291,7 +291,7 @@ The script `generate_test_data.py` can be used to generate a json files for inge
 
 To run:
 
-* Set up a virtual environment and install requirements (if you haven't already). If running inside the ingest docker container, this shouldn't be needed. 
+* Set up a virtual environment and install requirements (if you haven't already). If running inside the ingest docker container, this shouldn't be needed.
 ```commandline
 pip install -r requirements.txt
 ```
@@ -300,7 +300,7 @@ pip install -r requirements.txt
 Usage:
 ```commandline
 python generate_test_data.py -h
-usage: generate_test_data.py [-h] [--prefix PREFIX] --tmp 
+usage: generate_test_data.py [-h] [--prefix PREFIX] --tmp
 
 A script that copies and converts data from mohccn-synthetic-data for ingest into CanDIG platform.
 
