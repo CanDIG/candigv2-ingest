@@ -9,8 +9,8 @@ This repository can either be run standalone or as a Docker container.
 * A valid user for CanDIGv2 that has site administration credentials.
 * List of users that will have access to this dataset.
 * Clinical data, saved as either an Excel file or as a set of csv files.
-* Genomic data files in vcf, bam or cram format with paired index files for each.
-* File map of genomic files in a csv file, linking genomic sample IDs to the clinical samples.
+* Locations of Genomic data files in vcf, bam or cram format with paired index files for each.
+* File map of genomic files in a csv or json file, linking genomic sample IDs to the clinical samples.
 * (if needed) Credentials for s3 endpoints: url, access ID, secret key.
 * Reference genome used for the variant files.
 * Manifest and mappings for [`clinical_ETL_code`](https://github.com/CanDIG/clinical_ETL_code) conversion.
@@ -40,43 +40,6 @@ The preferred method for clinical data ingest is using the API.
 
 The clinical ingest API runs at `$CANDIG_URL/ingest/clinical`. Simply send a request with an authorized bearer token and a JSON body with your `DonorWithClinicalData` object. See the swagger UI/[schema](ingest_openapi.yaml) for the response format. The request will return a response with a queue ID. You can check the status of your ingest using that ID at `$CANDIG_URL/ingest/status/{queue_id}`.
 
-#### Command line
-
-This method is mainly used for development work but may also be used if the JSON body is too big to send easily via POST.
-
-To ingest via the commandline script, the location of your clinical data JSON, credentials of a user authorized to ingest (`site_admin` or `program_curator`) and the `client_id` and `client_secret` must be specified.
-
-If you are in a testing environment and the default site administrator is still in place, this can be done by copying the `env.sh` file to the ingest container and executing it
-
-```bash
-docker cp env.sh candigv2_candig-ingest_1:ingest_app
-docker exec -it candigv2_candig-ingest_1 bash
-source env.sh
-```
-
-Or if you prefer to enter valid credentials when prompted, set only the `CLIENT_ID` and `CLIENT_SECRET` variables and you will be prompted for your credentials when running the script. This can be done with the following commands in a bash terminal.
-
-```bash
-awk '/CANDIG_CLIENT/' env.sh > ingest_env.sh
-docker cp ingest_env.sh candigv2_candig-ingest_1:ingest_app
-docker exec -it candigv2_candig-ingest_1 bash
-source ingest_env.sh
-```
-
-The location of clinical data can be specified either by supplying it as an argument to the script:
-
-```commandline
-python katsu_ingest.py --input path/to/clinical/data/
-```
-
-Or by exporting an environment variable `CLINICAL_DATA_LOCATION`, then running the script:
-
-```bash
-export CLINICAL_DATA_LOCATION=path/to/clinical/data/
-python katsu_ingest.py
-```
-
-
 ## 2. Genomic data
 
 **First**, ensure that the relevant clinical data is ingested, as this must be completed before your genomic data is ingested.
@@ -88,7 +51,7 @@ Accepted file types:
 * Aligned reads (`.bam` or `.cram`) with paired index files (`.bai`, `.crai`)
 
 For each file, you need to have a note of:
-* The `submitter_sample_id` that the file should link to
+* The `submitter_sample_id`(s) that the file should link to
 * How that sample is referred to within the file, e.g. the `sample ID` in a VCF or `@RG SM` in BAM/CRAM
 * Where the file is located in relation to the running htsget server
 
@@ -203,27 +166,10 @@ The file should contain an array of dictionaries, where each item represents a s
 #### API
 Use the `$CANDIG_URL/ingest/genomic` endpoint with the proper Authorization headers and your genomic JSON as specified above for the body to ingest and link to the clinical dataset program_id.
 
-#### Command line
-
-Command line ingest is done by calling the `htsget_ingest.py` script directly and referring to the genomic json ingest file as the `--samplefile`. The genomic ingest file will need to be copied into the running candig-ingest container. Only site administrators or program curators are allowed to ingest. If you are in a testing environment and the default site administrator is still in place, you can export the site administrator credentials by copying the `env.sh` file to the ingest container and executing it.
-
-```bash
-docker cp env.sh candigv2_candig-ingest_1:ingest_app
-docker exec -it candigv2_candig-ingest_1 bash
-source env.sh
-```
-Otherwise you will be prompted to enter valid credentials of a program curator or site administrator when running `htsget_ingest.py`. The script can be run as follows:
-
-```bash
-python htsget_ingest.py --samplefile <path/to/genomic.json>
-```
-
-## 3. Assigning users to programs
-The preferred method to assign user authorizations to programs is to use the API. Users can be assigned one of two levels of authorization:
+## 3. Authorizing users to programs
+Users can be assigned one of two levels of authorization:
 * Team members are researchers of a program and are authorized to read and access all donor-specific data for a program.
-* Program curators are users that are authorized to curate data for the program: they can ingest data.
-
-The script `opa_ingest.py` can be used only to add Team member authorizations to a program that already has an existing authorization.
+* Program curators are users that are authorized to curate data for the program: they can ingest and delete data.
 
 ### API
 Use the `/ingest/program/` [endpoint](https://github.com/CanDIG/candigv2-ingest/blob/4257929feca00be0d4384433793fcdf1b4e4137b/ingest_openapi.yaml#L114) to add, update, or delete authorization information for a program. Authorization headers for a site admin user must be provided. A POST request adds authorization, while a DELETE request revokes it.
@@ -234,17 +180,6 @@ The following is an example of the payload you would need to `POST` to `/ingest/
 
 ```
 {"program_id": "TEST-PROGRAM-1", "team_members":["user1@test.ca"], "program_curators": ["user2@test.ca"]}
-```
-
-### Command line
-
-The `opa_ingest.py` script can be used to add Team members to a program only. To add Program curators, the API described above must be used.
-
-The script will add a single user or a list of users to a specified program (`--dataset`). Single users are added using the `--user` flag, while a list of users can be specified in a plain text file, with one user email specified per line, using the `--user-file` flag to specify the path to the file. If the `--remove` flag is used, the users will be removed, rather than added to the program.
-
-example usage:
-```bash
-python opa_ingest.py --user|userfile [either a user email or a file of user emails] --dataset [name of dataset/program] [--remove]
 ```
 
 ## 4. Adding or removing site administrators
