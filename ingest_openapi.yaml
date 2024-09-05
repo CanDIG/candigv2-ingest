@@ -415,6 +415,23 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/IngestResponse"
+  /status/{queue_id}:
+    parameters:
+      - in: path
+        name: queue_id
+        schema:
+          type: string
+        required: true
+    get:
+      description: Return status of ingest operation
+      operationId: ingest_operations.get_ingest_status
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
 components:
   requestBodies:
     S3CredentialRequest:

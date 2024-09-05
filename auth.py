@@ -7,54 +7,6 @@ import requests
 import urllib.parse
 
 
-"""
-For new auth model
-def get_bearer_from_refresh(refresh_token):
-    '''
-    Transforms a refresh token into a usable bearer token through keycloak.
-    Args:
-        refresh_token: A Keycloak refresh token.
-    Returns: A keycloak bearer token.
-    '''
-    return authx.auth.get_access_token(keycloak_url=os.getenv('KEYCLOAK_PUBLIC_URL'),
-                                       client_id=os.getenv("CANDIG_CLIENT_ID"),
-                                       client_secret=os.getenv('CANDIG_CLIENT_SECRET'),
-                                       refresh_token=refresh_token)
-"""
-
-"""
-For new auth model
-def get_refresh_token(username=None, password=None, refresh_token=None):
-    '''
-    Returns a fresh Keycloak refresh token from either a username/password or existing refresh token.
-    Args:
-        username: If refresh token is not provided, a Keycloak username.
-        password: If refresh token is not provided, a Keycloak password.
-        refresh_token: If username/password are not provided, a Keycloak refresh token.
-
-    Returns: A new Keycloak refresh token.
-
-    '''
-    if refresh_token:
-        return authx.auth.get_refresh_token(
-            keycloak_url=os.getenv('KEYCLOAK_PUBLIC_URL'),
-            client_id=os.getenv('CANDIG_CLIENT_ID'),
-            client_secret=os.getenv('CANDIG_CLIENT_SECRET'),
-            refresh_token=refresh_token
-        )
-    if (username and password):
-        return authx.auth.get_refresh_token(
-            keycloak_url=os.getenv('KEYCLOAK_PUBLIC_URL'),
-            client_id=os.getenv('CANDIG_CLIENT_ID'),
-            client_secret=os.getenv('CANDIG_CLIENT_SECRET'),
-            username=os.getenv(username),
-            password=os.getenv(password)
-        )
-    else:
-        raise ValueError("Username and password or refresh token required")
-"""
-
-
 def is_default_site_admin_set():
     if os.getenv("DEFAULT_SITE_ADMIN_USER") is not None:
         result, status_code = authx.auth.get_service_store_secret("opa", key=f"site_roles")
@@ -78,27 +30,6 @@ def is_site_admin(token):
         return True
     return False
 
-
-def is_authed(request: requests.Request):
-    if 'Authorization' not in request.headers:
-        return False
-
-    """
-    New auth model
-    request_object = json.dumps({
-        "url": request.url,
-        "method": request.method,
-        "headers": request.headers,
-        "data": request.data
-    })
-    """
-    request.path = request.url # Compatibility with old auth model
-
-    # New auth model:
-    # if (authx.auth.is_permissible(request_object)): return True
-    if (authx.auth.is_site_admin(request)):
-        return True
-    return False
 
 #####
 # AWS stuff
