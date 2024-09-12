@@ -1,6 +1,6 @@
 import argparse
 
-from authx.auth import get_site_admin_token
+from authx.auth import get_site_admin_token, is_action_allowed_for_program
 import os
 import re
 import json
@@ -15,6 +15,7 @@ import jsonschema
 CANDIG_URL = os.getenv("CANDIG_URL", "")
 HTSGET_URL = os.getenv("HTSGET_URL", f"{CANDIG_URL}/genomics")
 DRS_HOST_URL = "drs://" + CANDIG_URL.replace(f"{urlparse(CANDIG_URL).scheme}://","") + "/genomics"
+KATSU_URL = os.environ.get("KATSU_URL")
 
 
 def link_genomic_data(headers, sample):
@@ -239,6 +240,64 @@ def htsget_ingest(ingest_json, headers):
     return result, status_code
 
 
+def check_genomic_data(dataset, token):
+    with open("ingest_openapi.yaml") as f:
+        openapi_text = f.read()
+        json_schema = openapi_to_jsonschema(openapi_text, "GenomicSample")
+    result = {
+        "errors": {},
+    }
+    headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
+    # list samples by program
+    by_program = {}
+    for sample in dataset:
+        program_id = sample["program_id"]
+        if program_id not in by_program:
+            by_program[program_id] = []
+        by_program[program_id].append(sample)
+
+    for program_id in by_program.keys():
+        if program_id not in result["errors"]:
+            result["errors"][program_id] = []
+        if not is_action_allowed_for_program(token, method="POST", path="/ga4gh/drs/v1/objects", program=program_id):
+            result["errors"][program_id].extend({"unauthorized": "user is not allowed to ingest to program"})
+            continue
+        # look for program in katsu
+        response = requests.get(f"{KATSU_URL}/v3/authorized/programs", params={"program_id": program_id}, headers=headers)
+        print(response.text)
+        if response.status_code == 200:
+            if "items" in response.json() and len(response.json()["items"]) == 0:
+                result["errors"][program_id].extend({"no such program": "program does not exist in clinical data"})
+                continue
+
+        # get all sample_registrations for this program
+        samples_in_program = []
+        response = requests.get(f"{KATSU_URL}/v3/authorized/sample_registrations", params={"program_id": program_id}, headers=headers)
+        if response.status_code == 200:
+            samples_in_program = list(map(lambda x: x["submitter_sample_id"], response.json()["items"]))
+
+        for sample in by_program[program_id]:
+            result["errors"][program_id][sample["genomic_file_id"]] = []
+            # validate the json
+            if sample["genomic_file_id"] == sample["main"]["name"] or sample["genomic_file_id"] == sample["index"]["name"]:
+                result["errors"][sample["genomic_file_id"]].append(f"Sample {sample['genomic_file_id']} cannot have the same name as one of its files.")
+            else:
+                for error in jsonschema.Draft202012Validator(json_schema).iter_errors(sample):
+                    result["errors"][sample["genomic_file_id"]].append(f"{' > '.join(error.path)}: {error.message}")
+            if len(result["errors"][sample["genomic_file_id"]]) > 0:
+                continue
+
+            # check to see if the samples exist in katsu
+            for submitter_sample in by_program[program_id]["samples"]:
+                if submitter_sample not in samples_in_program:
+                    result["errors"][program_id].extend({"no such sample": f"sample {submitter_sample} does not exist in clinical data"})
+        if len(result["errors"][program_id]) == 0:
+            result["errors"].pop(program_id)
+    if len(result["errors"]) == 0:
+        return by_program
+    return result
+
+
 def main():
     parser = argparse.ArgumentParser(description="A script that ingests genomic data into htsget.")
     parser.add_argument("--samplefile", required=True,
@@ -254,7 +313,8 @@ def main():
         return "No samples to ingest"
     token = get_site_admin_token()
     headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
-    result, status_code = htsget_ingest(genomic_input, headers)
+    result = check_genomic_data(genomic_input, token)
+    #result, status_code = htsget_ingest(genomic_input, headers)
     print(json.dumps(result, indent=4))
 
 if __name__ == "__main__":
