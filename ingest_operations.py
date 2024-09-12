@@ -8,7 +8,7 @@ import urllib.parse
 import auth
 from ingest_result import *
 from katsu_ingest import prep_check_clinical_data
-from htsget_ingest import htsget_ingest
+from htsget_ingest import check_genomic_data
 from opa_ingest import remove_user_from_dataset, add_user_to_dataset
 import config
 import tempfile
@@ -167,8 +167,13 @@ def remove_user_from_role(role_type, email):
 ####
 
 def add_genomic_linkages():
+    dataset = connexion.request.json
     headers = get_headers()
-    response, status_code = htsget_ingest(connexion.request.json, headers)
+    token = request.headers['Authorization'].split("Bearer ")[1]
+    response, status_code = check_genomic_data(dataset, token)
+    if status_code == 200:
+        ingest_uuid = add_to_queue({"htsget": response})
+        response = {"queue_id": ingest_uuid}
     if auth.is_default_site_admin_set():
         response["warning"] = f"Default site administrator {os.getenv('DEFAULT_SITE_ADMIN_USER')} is still configured. Use the /ingest/site-role/site_admin endpoint to set a different site admin."
     return response, status_code
@@ -181,7 +186,7 @@ def add_clinical_donors():
     token = request.headers['Authorization'].split("Bearer ")[1]
     response, status_code = prep_check_clinical_data(dataset, token, batch_size)
     if status_code == 200:
-        ingest_uuid = add_to_queue(response)
+        ingest_uuid = add_to_queue({"katsu": response})
         response = {"queue_id": ingest_uuid}
     if auth.is_default_site_admin_set():
         response["warning"] = f"Default site administrator {os.getenv('DEFAULT_SITE_ADMIN_USER')} is still configured. Use the /ingest/site-role/site_admin endpoint to set a different site admin."
