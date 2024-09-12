@@ -1,6 +1,6 @@
 import argparse
 
-from authx.auth import get_site_admin_token, is_action_allowed_for_program
+from authx.auth import get_site_admin_token, is_action_allowed_for_program, create_service_token
 import os
 import re
 import json
@@ -18,10 +18,16 @@ DRS_HOST_URL = "drs://" + CANDIG_URL.replace(f"{urlparse(CANDIG_URL).scheme}://"
 KATSU_URL = os.environ.get("KATSU_URL")
 
 
-def link_genomic_data(headers, sample):
+def link_genomic_data(sample):
     url = f"{HTSGET_URL}/ga4gh/drs/v1/objects"
     result = {
         "errors": []
+    }
+
+    # Use service token to authenticate this with htsget
+    headers = {
+        "X-Service-Token": create_service_token(),
+        "Content-Type": "application/json"
     }
 
     # get the master genomic object, or create it:
@@ -202,10 +208,7 @@ def parse_s3_url(url):
     raise Exception(f"URI {url} cannot be parsed as an S3-style URI")
 
 
-def htsget_ingest(ingest_json, headers):
-    with open("ingest_openapi.yaml") as f:
-        openapi_text = f.read()
-        json_schema = openapi_to_jsonschema(openapi_text, "GenomicSample")
+def htsget_ingest(ingest_json):
     result = {
         "errors": {},
         "results": {}
@@ -213,20 +216,11 @@ def htsget_ingest(ingest_json, headers):
     status_code = 200
     for sample in ingest_json:
         result["errors"][sample["genomic_file_id"]] = []
-        # validate the json
-        if sample["genomic_file_id"] == sample["main"]["name"] or sample["genomic_file_id"] == sample["index"]["name"]:
-            result["errors"][sample["genomic_file_id"]].append(f"Sample {sample['genomic_file_id']} cannot have the same name as one of its files.")
-        else:
-            for error in jsonschema.Draft202012Validator(json_schema).iter_errors(sample):
-                result["errors"][sample["genomic_file_id"]].append(f"{' > '.join(error.path)}: {error.message}")
-        if len(result["errors"][sample["genomic_file_id"]]) > 0:
-            continue
-
         # create the corresponding DRS objects
         if "samples" not in sample or len(sample["samples"]) == 0:
             result["errors"][sample["genomic_file_id"]].append("No samples were specified for the genomic file mapping")
             break
-        response = link_genomic_data(headers, sample)
+        response = link_genomic_data(sample)
         for err in response["errors"]:
             result["errors"][sample["genomic_file_id"]].append(err)
             if "403" in err:
@@ -258,16 +252,15 @@ def check_genomic_data(dataset, token):
 
     for program_id in by_program.keys():
         if program_id not in result["errors"]:
-            result["errors"][program_id] = []
+            result["errors"][program_id] = {}
         if not is_action_allowed_for_program(token, method="POST", path="/ga4gh/drs/v1/objects", program=program_id):
-            result["errors"][program_id].extend({"unauthorized": "user is not allowed to ingest to program"})
+            result["errors"][program_id]["unauthorized"] = "user is not allowed to ingest to program"
             continue
         # look for program in katsu
         response = requests.get(f"{KATSU_URL}/v3/authorized/programs", params={"program_id": program_id}, headers=headers)
-        print(response.text)
         if response.status_code == 200:
             if "items" in response.json() and len(response.json()["items"]) == 0:
-                result["errors"][program_id].extend({"no such program": "program does not exist in clinical data"})
+                result["errors"][program_id]["no such program"] = "program does not exist in clinical data"
                 continue
 
         # get all sample_registrations for this program
@@ -277,25 +270,26 @@ def check_genomic_data(dataset, token):
             samples_in_program = list(map(lambda x: x["submitter_sample_id"], response.json()["items"]))
 
         for sample in by_program[program_id]:
-            result["errors"][program_id][sample["genomic_file_id"]] = []
+            sample_errors = []
             # validate the json
             if sample["genomic_file_id"] == sample["main"]["name"] or sample["genomic_file_id"] == sample["index"]["name"]:
-                result["errors"][sample["genomic_file_id"]].append(f"Sample {sample['genomic_file_id']} cannot have the same name as one of its files.")
+                sample_errors = f"Sample {sample['genomic_file_id']} cannot have the same name as one of its files."
             else:
                 for error in jsonschema.Draft202012Validator(json_schema).iter_errors(sample):
-                    result["errors"][sample["genomic_file_id"]].append(f"{' > '.join(error.path)}: {error.message}")
-            if len(result["errors"][sample["genomic_file_id"]]) > 0:
+                    sample_errors.extend(f"{' > '.join(error.path)}: {error.message}")
+            if len(sample_errors) > 0:
                 continue
-
             # check to see if the samples exist in katsu
-            for submitter_sample in by_program[program_id]["samples"]:
-                if submitter_sample not in samples_in_program:
-                    result["errors"][program_id].extend({"no such sample": f"sample {submitter_sample} does not exist in clinical data"})
+            for submitter_sample in sample["samples"]:
+                if submitter_sample["submitter_sample_id"] not in samples_in_program:
+                    sample_errors.append({"no such sample": f"sample {submitter_sample['submitter_sample_id']} does not exist in clinical data {samples_in_program}"})
+            if len(sample_errors) > 0:
+                result["errors"][program_id][sample["genomic_file_id"]] = sample_errors
         if len(result["errors"][program_id]) == 0:
             result["errors"].pop(program_id)
     if len(result["errors"]) == 0:
-        return by_program
-    return result
+        return by_program, 200
+    return result, 400
 
 
 def main():
@@ -313,8 +307,9 @@ def main():
         return "No samples to ingest"
     token = get_site_admin_token()
     headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
-    result = check_genomic_data(genomic_input, token)
-    #result, status_code = htsget_ingest(genomic_input, headers)
+    result, status_code = check_genomic_data(genomic_input, token)
+    if status_code == 200:
+        result, status_code = htsget_ingest(result)
     print(json.dumps(result, indent=4))
 
 if __name__ == "__main__":
