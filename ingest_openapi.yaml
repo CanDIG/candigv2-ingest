@@ -362,6 +362,13 @@ paths:
     post:
       description: Add linkages between clinical donors and genomic data.
       operationId: ingest_operations.add_genomic_linkages
+      parameters:
+        - name: do_not_index
+          in: query
+          required: false
+          schema:
+            type: boolean
+          description: set to true to prevent indexing of genomic files
       requestBody:
         $ref: '#/components/requestBodies/GenomicIngestRequest'
       responses:

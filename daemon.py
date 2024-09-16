@@ -5,6 +5,7 @@ import watchdog.events
 from candigv2_logging.logging import initialize, CanDIGLogger
 import json
 from katsu_ingest import ingest_schemas
+from htsget_ingest import htsget_ingest
 
 
 KATSU_URL = os.environ.get("KATSU_URL")
@@ -23,12 +24,21 @@ def ingest_file(file_path):
         json_data = json.load(f)
     if json_data is not None:
         logger.info(f"Ingesting {file_path}")
-        schemas_to_ingest = list(json_data.keys())
-        for program_id in schemas_to_ingest:
-            program = json_data[program_id]
-            schemas = program.pop("schemas")
-            ingest_results, status_code = ingest_schemas(schemas)
-            results[program_id] = ingest_results
+        if "katsu" in json_data:
+            json_data = json_data["katsu"]
+            programs = list(json_data.keys())
+            for program_id in programs:
+                ingest_results, status_code = ingest_schemas(json_data[program_id]["schemas"])
+                results[program_id] = ingest_results
+        elif "htsget" in json_data:
+            do_not_index = False
+            if "do_not_index" in json_data:
+                do_not_index = json_data["do_not_index"]
+            json_data = json_data["htsget"]
+            programs = list(json_data.keys())
+            for program_id in programs:
+                ingest_results, status_code = htsget_ingest(json_data[program_id], do_not_index)
+                results[program_id] = ingest_results
         with open(results_path, "w") as f:
             json.dump(results, f)
         os.remove(file_path)
