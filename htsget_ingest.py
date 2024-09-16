@@ -10,6 +10,10 @@ import sys
 from urllib.parse import urlparse
 from clinical_etl.schema import openapi_to_jsonschema
 import jsonschema
+from candigv2_logging.logging import CanDIGLogger
+
+
+logger = CanDIGLogger(__file__)
 
 
 CANDIG_URL = os.getenv("CANDIG_URL", "")
@@ -18,7 +22,7 @@ DRS_HOST_URL = "drs://" + CANDIG_URL.replace(f"{urlparse(CANDIG_URL).scheme}://"
 KATSU_URL = os.environ.get("KATSU_URL")
 
 
-def link_genomic_data(sample):
+def link_genomic_data(sample, do_not_index=False):
     url = f"{HTSGET_URL}/ga4gh/drs/v1/objects"
     result = {
         "errors": []
@@ -118,6 +122,7 @@ def link_genomic_data(sample):
 
     # verify that the genomic file exists and is readable
     verify_url = f"{HTSGET_URL}/htsget/v1/{sample['metadata']['data_type']}s/{genomic_drs_obj['id']}/verify"
+    logger.debug(f"{sample['genomic_file_id']} Are we indexing? do_not_index = {do_not_index}")
 
     response = requests.get(verify_url, headers=headers)
     if response.status_code != 200:
@@ -126,8 +131,9 @@ def link_genomic_data(sample):
         result["errors"].append({"error": f"could not verify sample: {response.json()['message']}"})
     else:
         # flag the genomic_drs_object for indexing:
+        logger.debug(f"Are we indexing? do_not_index = {do_not_index}")
         url =f"{HTSGET_URL}/htsget/v1/{sample['metadata']['data_type']}s/{genomic_drs_obj['id']}/index"
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=headers, params={"do_not_index": do_not_index})
     return result
 
 
@@ -208,19 +214,20 @@ def parse_s3_url(url):
     raise Exception(f"URI {url} cannot be parsed as an S3-style URI")
 
 
-def htsget_ingest(ingest_json):
+def htsget_ingest(ingest_json, do_not_index=False):
     result = {
         "errors": {},
         "results": {}
     }
     status_code = 200
     for sample in ingest_json:
+        logger.debug(f"Ingesting {sample['genomic_file_id']}, do_not_index = {do_not_index}")
         result["errors"][sample["genomic_file_id"]] = []
         # create the corresponding DRS objects
         if "samples" not in sample or len(sample["samples"]) == 0:
             result["errors"][sample["genomic_file_id"]].append("No samples were specified for the genomic file mapping")
             break
-        response = link_genomic_data(sample)
+        response = link_genomic_data(sample, do_not_index)
         for err in response["errors"]:
             result["errors"][sample["genomic_file_id"]].append(err)
             if "403" in err:

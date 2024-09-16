@@ -168,11 +168,12 @@ def remove_user_from_role(role_type, email):
 
 def add_genomic_linkages():
     dataset = connexion.request.json
+    do_not_index = bool(connexion.request.args.get("do_not_index", False))
     headers = get_headers()
     token = request.headers['Authorization'].split("Bearer ")[1]
     response, status_code = check_genomic_data(dataset, token)
     if status_code == 200:
-        ingest_uuid = add_to_queue({"htsget": response})
+        ingest_uuid = add_to_queue({"htsget": response, "do_not_index": do_not_index})
         response = {"queue_id": ingest_uuid}
     if auth.is_default_site_admin_set():
         response["warning"] = f"Default site administrator {os.getenv('DEFAULT_SITE_ADMIN_USER')} is still configured. Use the /ingest/site-role/site_admin endpoint to set a different site admin."

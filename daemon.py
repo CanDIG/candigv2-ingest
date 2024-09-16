@@ -31,10 +31,13 @@ def ingest_file(file_path):
                 ingest_results, status_code = ingest_schemas(json_data[program_id]["schemas"])
                 results[program_id] = ingest_results
         elif "htsget" in json_data:
+            do_not_index = False
+            if "do_not_index" in json_data:
+                do_not_index = json_data["do_not_index"]
             json_data = json_data["htsget"]
             programs = list(json_data.keys())
             for program_id in programs:
-                ingest_results, status_code = htsget_ingest(json_data[program_id])
+                ingest_results, status_code = htsget_ingest(json_data[program_id], do_not_index)
                 results[program_id] = ingest_results
         with open(results_path, "w") as f:
             json.dump(results, f)
