@@ -20,6 +20,7 @@ CANDIG_URL = os.getenv("CANDIG_URL", "")
 HTSGET_URL = os.getenv("HTSGET_URL", f"{CANDIG_URL}/genomics")
 DRS_HOST_URL = "drs://" + CANDIG_URL.replace(f"{urlparse(CANDIG_URL).scheme}://","") + "/genomics"
 KATSU_URL = os.environ.get("KATSU_URL")
+IS_TESTING = os.getenv("IS_TESTING", False)
 
 
 def link_genomic_data(sample, do_not_index=False):
@@ -29,10 +30,12 @@ def link_genomic_data(sample, do_not_index=False):
     }
 
     # Use service token to authenticate this with htsget
-    headers = {
-        "X-Service-Token": create_service_token(),
-        "Content-Type": "application/json"
-    }
+    headers = {}
+    if not IS_TESTING:
+        headers = {
+            "X-Service-Token": create_service_token(),
+            "Content-Type": "application/json"
+        }
 
     # get the master genomic object, or create it:
     genomic_drs_obj = {}
