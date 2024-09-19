@@ -206,16 +206,6 @@ def prepare_clinical_data_for_ingest(ingest_json):
     """
     schema = MoHSchemaV3(ingest_json["openapi_url"])
 
-    # check to see if we're running in an environment with an active katsu:
-    # if we can get a response for the katsu schema url, use that.
-    active_schema_url = f"{KATSU_URL}/static/schema.yml"
-    try:
-        response = requests.get(active_schema_url)
-        if response.status_code == 200:
-            logger.info(f"Validating against active katsu schema at {active_schema_url}")
-            schema = MoHSchemaV3(active_schema_url)
-    except:
-        pass
     types = ["programs"]
     types.extend(schema.validation_schema.keys())
 
@@ -260,8 +250,27 @@ def prepare_clinical_data_for_ingest(ingest_json):
 
 
 def prep_check_clinical_data(ingest_json, token, batch_size):
-    schemas_to_ingest = prepare_clinical_data_for_ingest(ingest_json)
+    # check to see if we're running in an environment with an active katsu:
+    # if we can get a response for the katsu schema url, use that.
     result = {}
+
+    active_schema_url = f"{KATSU_URL}/static/schema.yml"
+    try:
+        response = requests.get(active_schema_url)
+        if response.status_code == 200:
+            logger.info(f"Validating against active katsu schema at {active_schema_url}")
+
+            # compare this schema against the one listed in the ingest_json:
+            response2 = requests.get(ingest_json["openapi_url"])
+            if response2.status_code == 200:
+                if response2.text != response.text:
+                    result["warnings"] = [f"CanDIG is using a different schema version than the one listed in the clinical data file! Please compare your data against {os.getenv('CANDIG_URL')}/katsu/static/schema.yml."]
+
+            ingest_json["openapi_url"] = active_schema_url
+    except:
+        pass
+
+    schemas_to_ingest = prepare_clinical_data_for_ingest(ingest_json)
 
     for program_id in schemas_to_ingest.keys():
         program = schemas_to_ingest[program_id]
