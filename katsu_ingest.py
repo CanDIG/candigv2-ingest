@@ -205,6 +205,15 @@ def prepare_clinical_data_for_ingest(ingest_json):
     (Fully outlined in MOH Schema)
     """
     schema = MoHSchemaV3(ingest_json["openapi_url"])
+
+    # check to see if we're running in an environment with an active katsu:
+    # if we can get a response for the katsu schema url, use that.
+    active_schema_url = f"{KATSU_URL}/static/schema.yml"
+    response = requests.get(active_schema_url)
+    if response.status_code == 200:
+        logger.info(f"Validating against active katsu schema at {active_schema_url}")
+        schema = MoHSchemaV3(active_schema_url)
+
     types = ["programs"]
     types.extend(schema.validation_schema.keys())
 
