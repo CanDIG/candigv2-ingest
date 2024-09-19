@@ -323,7 +323,7 @@ def main():
     ingest_json = read_json(data_location)
     if "openapi_url" not in ingest_json:
         ingest_json["openapi_url"] = (
-            "https://raw.githubusercontent.com/CanDIG/katsu/develop/chord_metadata_service/mohpackets/docs/schema.yml"
+            "https://raw.githubusercontent.com/CanDIG/katsu/develop/chord_metadata_service/mohpackets/docs/schemas/schema.yml"
         )
 
     results = {}
