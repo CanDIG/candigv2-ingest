@@ -85,7 +85,7 @@ def main(args):
             programs[donor['program_id']]['donors'].append(donor)
         except KeyError as e:
             programs[donor['program_id']] = {
-                "openapi_url": "https://raw.githubusercontent.com/CanDIG/katsu/model_3/chord_metadata_service/mohpackets/docs/schema.yml",
+                "openapi_url": "https://raw.githubusercontent.com/CanDIG/katsu/model_3/chord_metadata_service/mohpackets/docs/schemas/schema.yml",
                 "schema_class": "MoHSchemaV3",
                 "donors": [donor]}
     for program, content in programs.items():
