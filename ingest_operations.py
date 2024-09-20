@@ -59,6 +59,13 @@ def get_headers():
     return headers
 
 
+def check_default_site_admin(response):
+    if auth.is_default_site_admin_set():
+        if "warnings" not in response:
+            response["warnings"] = []
+        response["warnings"].append(f"Default site administrator {os.getenv('DEFAULT_SITE_ADMIN_USER')} is still configured. Use the /ingest/site-role/site_admin endpoint to set a different site admin.")
+
+
 # API endpoints
 def get_service_info():
     return {
@@ -175,8 +182,7 @@ def add_genomic_linkages():
     if status_code == 200:
         ingest_uuid = add_to_queue({"htsget": response, "do_not_index": do_not_index})
         response = {"queue_id": ingest_uuid}
-    if auth.is_default_site_admin_set():
-        response["warning"] = f"Default site administrator {os.getenv('DEFAULT_SITE_ADMIN_USER')} is still configured. Use the /ingest/site-role/site_admin endpoint to set a different site admin."
+    check_default_site_admin(response)
     return response, status_code
 
 
@@ -189,8 +195,7 @@ def add_clinical_donors():
     if status_code == 200:
         ingest_uuid = add_to_queue({"katsu": response})
         response = {"queue_id": ingest_uuid}
-    if auth.is_default_site_admin_set():
-        response["warning"] = f"Default site administrator {os.getenv('DEFAULT_SITE_ADMIN_USER')} is still configured. Use the /ingest/site-role/site_admin endpoint to set a different site admin."
+    check_default_site_admin(response)
     return response, status_code
 
 
@@ -233,8 +238,6 @@ def add_program_authorization():
     token = request.headers['Authorization'].split("Bearer ")[1]
 
     response, status_code = auth.add_program_to_opa(program, token)
-    if auth.is_default_site_admin_set():
-        response["warning"] = f"Default site administrator {os.getenv('DEFAULT_SITE_ADMIN_USER')} is still configured. Use the /ingest/site-role/site_admin endpoint to set a different site admin."
     return response, status_code
 
 
