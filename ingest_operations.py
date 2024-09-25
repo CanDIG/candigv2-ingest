@@ -238,6 +238,7 @@ def add_program_authorization():
     token = request.headers['Authorization'].split("Bearer ")[1]
 
     response, status_code = auth.add_program_to_opa(program, token)
+    check_default_site_admin(response)
     return response, status_code
 
 
@@ -254,6 +255,7 @@ def remove_program_authorization(program_id):
     token = request.headers['Authorization'].split("Bearer ")[1]
 
     response, status_code = auth.remove_program_from_opa(program_id, token)
+    check_default_site_admin(response)
     return response, status_code
 
 
