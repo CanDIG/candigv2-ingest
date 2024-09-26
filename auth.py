@@ -31,6 +31,14 @@ def is_site_admin(token):
     return False
 
 
+def get_refresh_token(token):
+    with open("/run/secrets/client_secret", 'r') as f:
+        client_secret = f.read()
+    return authx.auth.get_oauth_response(
+        client_secret = client_secret,
+        refresh_token=token
+        )
+
 #####
 # AWS stuff
 #####

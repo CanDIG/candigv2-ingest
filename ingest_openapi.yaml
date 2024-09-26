@@ -439,6 +439,17 @@ paths:
             application/json:
               schema:
                 type: object
+  /get-token:
+    get:
+      description: Exchange the refresh token implicit in the request for a new one
+      operationId: ingest_operations.get_token
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
 components:
   requestBodies:
     S3CredentialRequest:
