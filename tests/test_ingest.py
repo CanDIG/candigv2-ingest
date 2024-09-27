@@ -11,8 +11,8 @@ import katsu_ingest
 import htsget_ingest
 
 CANDIG_URL = os.getenv("CANDIG_URL", "http://localhost")
-HTSGET_URL = CANDIG_URL + "/genomics"
-
+HTSGET_URL = os.getenv("HTSGET_URL", f"{CANDIG_URL}/genomics")
+VAULT_URL = os.getenv("VAULT_URL", f"{CANDIG_URL}/vault")
 
 def test_prepare_clinical_ingest():
     with open("tests/clinical_ingest.json", "r") as f:
@@ -41,6 +41,12 @@ def test_htsget_ingest(requests_mock):
     requests_mock.get(matcher, status_code=200)
     matcher = re.compile(f"{HTSGET_URL}/htsget/v1/reads/.+/verify")
     requests_mock.get(matcher, json=verify_callback, status_code=200)
+    requests_mock.post(f"{VAULT_URL}/v1/auth/approle/role/candig-ingest/secret-id", json={"data": {"secret_id": "sfsfd"}}, status_code=200)
+    requests_mock.post(f"{VAULT_URL}/v1/auth/approle/login", json={"auth": {"client_token": "sfsfd"}}, status_code=200)
+    matcher = re.compile(f"{VAULT_URL}/v1/candig-ingest/token/.+")
+    requests_mock.get(matcher, json={"data": {"client_token": "sfsfd"}}, status_code=200)
+    requests_mock.post(matcher, json={"data": {"client_token": "sfsfd"}}, status_code=200)
+
 
     headers = {"Authorization": f"Bearer test", "Content-Type": "application/json"}
     with open("tests/genomic_ingest.json", "r") as f:
