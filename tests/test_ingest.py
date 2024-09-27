@@ -19,8 +19,8 @@ def test_prepare_clinical_ingest():
         data = json.load(f)
         result = katsu_ingest.prepare_clinical_data_for_ingest(data)
         print(json.dumps(result, indent=4))
-        assert len(result) == 2
-        assert len(result["SYNTH_02"]["schemas"]["systemic_therapies"]) == 20
+        assert len(result) == 1
+        assert len(result["SYNTH_01"]["schemas"]["systemic_therapies"]) == 16
 
 
 def callback(request, context):
