@@ -397,3 +397,22 @@ def remove_program_for_user(user_id, program_id):
             response, status_code = auth.write_user_in_opa(response, token)
             return response, status_code
     return {"error": f"No program {program_id} found for user"}, status_code
+
+@app.route('/get-token')
+def get_token():
+    # Attempt to grab the token via session_id
+    if not hasattr(request, 'cookies'):
+        return {'error': 'Unable to use the get-token endpoint without cookies'}, 200
+    token = request.cookies['session_id']
+
+    return {"token": token}, 200
+
+    # Uncomment the below to exchange for a new token and return
+    # that, instead
+    # try:
+    #    response = auth.get_refresh_token(token)
+    #    if "error" in response:
+    #        return {"error": response["error"]}, 500
+    #    return {"token": response["refresh_token"]}, 200
+    #except Exception as e:
+    #    return {"error": str(e)}, 500

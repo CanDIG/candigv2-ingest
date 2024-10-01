@@ -31,6 +31,13 @@ def is_site_admin(token):
     return False
 
 
+def get_refresh_token(token):
+    client_secret = authx.auth.get_service_store_secret(service="keycloak", key="client-secret")
+    return authx.auth.get_oauth_response(
+        client_secret = client_secret,
+        refresh_token=token
+        )
+
 #####
 # AWS stuff
 #####
