@@ -32,8 +32,7 @@ def is_site_admin(token):
 
 
 def get_refresh_token(token):
-    with open("/run/secrets/client_secret", 'r') as f:
-        client_secret = f.read()
+    client_secret = authx.auth.get_service_store_secret(service="keycloak", key="client-secret")
     return authx.auth.get_oauth_response(
         client_secret = client_secret,
         refresh_token=token

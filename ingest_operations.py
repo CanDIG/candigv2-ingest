@@ -401,6 +401,8 @@ def remove_program_for_user(user_id, program_id):
 @app.route('/get-token')
 def get_token():
     # Attempt to grab the token via session_id
+    if not hasattr(request, 'cookies'):
+        return {'error': 'Unable to use the get-token endpoint without cookies'}, 200
     token = request.cookies['session_id']
 
     return {"token": token}, 200
