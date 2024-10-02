@@ -15,11 +15,16 @@ def parse_args():
     parser.add_argument("--prefix", help="optional prefix to apply to all identifiers")
     parser.add_argument("--tmp", help="Directory to temporarily clone the mohccn-synthetic-data repo.",
                         default="tmp-data")
+    parser.add_argument("--delete", "-d", action="store_true",
+                        help="If enabled, automatically deletes existing data in the tmp directory. Otherwise prompts "
+                             "user to proceed")
     return parser.parse_args()
 
 
 def main(args):
     ingest_repo_dir = os.path.dirname(os.path.abspath(__file__))
+    if args.delete:
+        shutil.rmtree(args.tmp)
     if os.path.exists(args.tmp):
         yes = ['yes', 'y', 'ye', '']
         no = ['no', 'n']
