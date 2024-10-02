@@ -7,6 +7,7 @@ import os
 import sys
 import subprocess
 import json
+import pprint
 
 
 def parse_args():
@@ -55,8 +56,17 @@ def main(args):
         else:
             print("Converting small_dataset_csvs to small_dataset_clinical_ingest.json")
             output_dir = f"{args.tmp}/small_dataset_csv"
-            process = subprocess.run([f'python {args.tmp}/src/csv_to_ingest.py --size s'],
-                                     shell=True, check=True, capture_output=True)
+            try:
+                process = subprocess.run([f'python {args.tmp}/src/csv_to_ingest.py --size s'],
+                                         shell=True, check=True, capture_output=True)
+            except subprocess.CalledProcessError as e:
+                print("Data conversion failed, review error messages below and try again.")
+                print(e)
+                pprint.pprint(e.output)
+                print("Removing repo.")
+                shutil.rmtree(args.tmp)
+                sys.exit(0)
+
             with open(f"{args.tmp}/small_dataset_csv/raw_data_validation_results.json") as f:
                 errors = json.load(f)['validation_errors']
             if len(errors) > 0:
