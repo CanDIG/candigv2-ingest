@@ -31,6 +31,13 @@ def is_site_admin(token):
     return False
 
 
+def get_refresh_token(token):
+    client_secret = authx.auth.get_service_store_secret(service="keycloak", key="client-secret")
+    return authx.auth.get_oauth_response(
+        client_secret = client_secret,
+        refresh_token=token
+        )
+
 #####
 # AWS stuff
 #####
@@ -117,7 +124,7 @@ def set_role_type_in_opa(role_type, members, token):
 
 def add_program_to_opa(program_dict, token):
     # check to see if the user is allowed to add program authorizations:
-    if not authx.auth.is_action_allowed_for_program(token, method="POST", path="ingest/program", program=program_dict['program_id']):
+    if not authx.auth.is_action_allowed_for_program(token, method="POST", path="/ingest/program", program=program_dict['program_id']):
         return {"error": f"User not authorized to add program authorizations for program {program_dict['program_id']}"}, 403
 
     response, status_code = authx.auth.add_program_to_opa(program_dict)
@@ -126,7 +133,7 @@ def add_program_to_opa(program_dict, token):
 
 def get_program_in_opa(program_id, token):
     # check to see if the user is allowed to add program authorizations:
-    if not authx.auth.is_action_allowed_for_program(token, method="POST", path="ingest/program", program=program_id):
+    if not authx.auth.is_action_allowed_for_program(token, method="POST", path="/ingest/program", program=program_id):
         return {"error": "User not authorized to add program authorizations"}, 403
 
     response, status_code = authx.auth.get_program_in_opa(program_id)
@@ -142,7 +149,7 @@ def list_programs_in_opa(token):
 
 def remove_program_from_opa(program_id, token):
     # check to see if the user is allowed to add program authorizations:
-    if not authx.auth.is_action_allowed_for_program(token, method="POST", path="ingest/program", program=program_id):
+    if not authx.auth.is_action_allowed_for_program(token, method="POST", path="/ingest/program", program=program_id):
         return {"error": "User not authorized to add program authorizations"}, 403
 
     response, status_code = authx.auth.remove_program_from_opa(program_id)

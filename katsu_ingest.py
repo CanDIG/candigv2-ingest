@@ -4,6 +4,7 @@ import os
 import traceback
 from http import HTTPStatus
 import requests
+import auth
 from authx.auth import get_site_admin_token, create_service_token, is_action_allowed_for_program
 from clinical_etl.mohschemav3 import MoHSchemaV3
 from candigv2_logging.logging import initialize, CanDIGLogger
@@ -271,14 +272,18 @@ def prep_check_clinical_data(ingest_json, token, batch_size):
         pass
 
     schemas_to_ingest = prepare_clinical_data_for_ingest(ingest_json)
+    result["errors"] = {}
 
     for program_id in schemas_to_ingest.keys():
+        result["errors"][program_id] = []
         program = schemas_to_ingest[program_id]
-        result["errors"] = {program_id: []}
+        response, status_code = auth.get_program_in_opa(program_id, token)
+        if status_code > 300:
+            result["errors"][program_id].append({"not found": "No program authorization exists"})
+        if not is_action_allowed_for_program(token, method="POST", path="/v3/ingest/programs/", program=program_id):
+            result["errors"][program_id].append({"unauthorized": "user is not allowed to ingest to program"})
         if len(program["errors"]) > 0:
             result["errors"][program_id].extend(program["errors"])
-        if not is_action_allowed_for_program(token, method="POST", path="/v3/ingest/programs/", program=program_id):
-            result["errors"][program_id].extend({"unauthorized": "user is not allowed to ingest to program"})
         if len(result["errors"][program_id]) == 0:
             result["errors"].pop(program_id)
 
