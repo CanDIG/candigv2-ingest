@@ -1,5 +1,5 @@
 {
-  "openapi_url": "https://raw.githubusercontent.com/CanDIG/katsu/model_3/chord_metadata_service/mohpackets/docs/schema.yml",
+  "openapi_url": "https://raw.githubusercontent.com/CanDIG/katsu/model_3/chord_metadata_service/mohpackets/docs/schemas/schema.yml",
   "schema_class": "MoHSchemaV3",
   "donors": [
     {
