@@ -56,7 +56,7 @@ curl -s --request POST \
 ```
 
 > [!CAUTION]
-> A POST request to the `ingest/program` replaces any existing program registration data for that program, so to add a curator, existing users plus the additional user would need to be added. 
+> A POST request to the `ingest/program` replaces any existing program registration data for that program, so to add a curator, existing users plus the additional users would need to be added to the payload. 
 
 ## 2. Clinical data
 
@@ -202,7 +202,7 @@ Use the `$CANDIG_URL/ingest/genomic` endpoint with the proper Authorization head
 Use the `/ingest/site-role/site_admin/{user_email}` endpoint to add or remove site administrators. A POST request adds the user as a site admin, while a DELETE request removes the user from the role.
 
 ## 5. Adding or removing site curators
-Use the `/ingest/site-role/curator/{user_email}` endpoint to add or remove site curators. A POST request adds the user as a site curator, a GET request returns true/false, while a DELETE request removes the user from the role.
+Use the `/ingest/site-role/curator/{user_email}` endpoint to add or remove site curators. A POST request adds the user as a site curator, a GET request returns whether the user is a site curator as a boolean, while a DELETE request removes the user from the role.
 
 ## 6. Approving/rejecting pending users
 Use the `/user/pending` endpoint to list pending users. A site admin can approve either a single or multiple pending users by POSTing to the `user/pending/{user}` or `user/pending` endpoints, and likewise reject with DELETEs to the same endpoints. DELETE to the bulk endpoint clears the whole pending list.
