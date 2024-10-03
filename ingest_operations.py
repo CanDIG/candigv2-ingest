@@ -147,8 +147,9 @@ def add_user_to_role(role_type, email):
         token = request.headers['Authorization'].split("Bearer ")[1]
         result, status_code = auth.get_role_type_in_opa(role_type, token)
         if status_code == 200:
-            result[role_type].append(email)
-            result, status_code = auth.set_role_type_in_opa(role_type, result[role_type], token)
+            if email not in result[role_type]:
+                result[role_type].append(email)
+                result, status_code = auth.set_role_type_in_opa(role_type, result[role_type], token)
         return result, status_code
     except Exception as e:
         return {"error": str(e)}, 500
