@@ -7,6 +7,7 @@ import os
 import sys
 import subprocess
 import json
+import pprint
 
 
 def parse_args():
@@ -23,18 +24,19 @@ def parse_args():
 
 def main(args):
     ingest_repo_dir = os.path.dirname(os.path.abspath(__file__))
-    if args.delete:
-        shutil.rmtree(args.tmp)
     if os.path.exists(args.tmp):
-        yes = ['yes', 'y', 'ye', '']
-        no = ['no', 'n']
-        response = input(f"Specified directory {args.tmp}, ok to delete? (yes/no)")
-        if response.lower() in yes:
+        if args.delete:
             shutil.rmtree(args.tmp)
         else:
-            print("Cannot clone repo until --tmp directory is removed. Remove manually or specify an alternate --tmp "
-                  "destination.")
-            sys.exit()
+            yes = ['yes', 'y', 'ye', '']
+            no = ['no', 'n']
+            response = input(f"Specified directory {args.tmp}, ok to delete? (yes/no)")
+            if response.lower() in yes:
+                shutil.rmtree(args.tmp)
+            else:
+                print("Cannot clone repo until --tmp directory is removed. Remove manually or specify an alternate --tmp "
+                      "destination.")
+                sys.exit()
     print(f"Cloning mohccn-synthetic-data repo into {args.tmp}")
     synth_repo = Repo.clone_from("https://github.com/CanDIG/mohccn-synthetic-data.git", args.tmp)
 
@@ -54,8 +56,17 @@ def main(args):
         else:
             print("Converting small_dataset_csvs to small_dataset_clinical_ingest.json")
             output_dir = f"{args.tmp}/small_dataset_csv"
-            process = subprocess.run([f'python {args.tmp}/src/csv_to_ingest.py --size s'],
-                                     shell=True, check=True, capture_output=True)
+            try:
+                process = subprocess.run([f'python {args.tmp}/src/csv_to_ingest.py --size s'],
+                                         shell=True, check=True, capture_output=True)
+            except subprocess.CalledProcessError as e:
+                print("Data conversion failed, review error messages below and try again.")
+                print(e)
+                pprint.pprint(e.output)
+                print("Removing repo.")
+                shutil.rmtree(args.tmp)
+                sys.exit(0)
+
             with open(f"{args.tmp}/small_dataset_csv/raw_data_validation_results.json") as f:
                 errors = json.load(f)['validation_errors']
             if len(errors) > 0:
