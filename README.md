@@ -26,6 +26,35 @@ pip install -r requirements.txt
 
 `candigv2-ingest` can be used as a local API server or a docker container and is generally expected to be used as part of a running [CanDIGv2 stack](https://github.com/CanDIG/CanDIGv2). To use the local API, set your environment variables, run `python app.py`, and follow the API instructions in the sections below. The API will be available at `localhost:1236`. A swagger UI is also available at `/ui`. Docker instructions can be found at the [bottom of this document](#Run-as-Docker-Container). To authorize yourself for these endpoints, you will need to set the Authorization header to a keycloak bearer token (in the format `"Bearer ..."` without the quotes).
 
+### Getting a bearer token
+<details><summary> </summary>
+
+Users can obtain a bearer token by logging into the CanDIG data portal, clicking the cog in the top right corner, clicking `*** Get API Token` and clicking the token to copy it. 
+
+Site administrators or users using a local candig install can also obtain a token programmatically using the following curl commands from the CanDIGv2 repo:
+
+```bash
+source env.sh
+```
+
+```bash
+CURL_OUTPUT=$(curl -s --request POST \
+  --url $KEYCLOAK_PUBLIC_URL'/auth/realms/candig/protocol/openid-connect/token' \
+  --header 'Content-Type: application/x-www-form-urlencoded' \
+  --data grant_type=password \
+  --data client_id=$CANDIG_CLIENT_ID \
+  --data client_secret=$CANDIG_CLIENT_SECRET \
+  --data username=$CANDIG_SITE_ADMIN_USER \
+  --data password=$CANDIG_SITE_ADMIN_PASSWORD \
+  --data scope=openid)
+```
+
+```bash
+export TOKEN=$(echo $CURL_OUTPUT | grep -Eo 'access_token":"[a-zA-Z0-9._\-]+' | cut -d '"' -f3)
+```
+
+</details>
+
 ## 1. Program registration
 
 Programs need to be registered before any data can be ingested. Initial program registration can be done by either a site admin or site curator. More information about assigning [site admins](#4-adding-or-removing-site-administrators) and [site curators](#5-adding-or-removing-site-curators) is in sections 4 and 5 below.
@@ -55,8 +84,10 @@ curl -s --request POST \
   -d '{"program_id": "PROGRAM_ID", "program_curators": ["curator1@test.ca", "curator2@test.ca"], "team_members": ["user2@test.ca", "user1@test.ca"]}'
 ```
 
+See [Getting a bearer token](#getting-a-bearer-token) for how to get a token.
+
 > [!CAUTION]
-> A POST request to the `ingest/program` replaces any existing program registration data for that program, so to add a curator, existing users plus the additional users would need to be added to the payload. 
+> A POST request to the `ingest/program` replaces any existing program registration data for that program. It is advisable to first use a GET request to see the current users authorized to a program before adding additional program_curators and/or team_members when POSTing to this endpoint
 
 ## 2. Clinical data
 
@@ -70,7 +101,17 @@ The preferred method for clinical data ingest is using the API.
 
 #### API
 
-The clinical ingest API runs at `$CANDIG_URL/ingest/clinical`. Simply send a request with an authorized bearer token and a JSON body with your `DonorWithClinicalData` object. See the swagger UI/[schema](ingest_openapi.yaml) for the response format. The request will return a response with a queue ID. You can check the status of your ingest using that ID at `$CANDIG_URL/ingest/status/{queue_id}`.
+The clinical ingest API runs at `$CANDIG_URL/ingest/clinical`. Simply send a request with an [authorized bearer](#getting-a-bearer-token) token and a JSON body with your clinical data json output from clinical_etl. See the swagger UI/[schema](ingest_openapi.yaml) for the response format. The request will return a response with a queue ID. You can check the status of your ingest using that ID at `$CANDIG_URL/ingest/status/{queue_id}`.
+
+Example curl POST to ingest clinical data:
+```bash
+curl -X 'POST' \
+  $CANDIG_URL'/ingest/clinical' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization: Bearer '$TOKEN \
+  -d '@/absolute/path/to/clinical_map.json>'
+```
 
 ## 3. Genomic data
 
@@ -196,10 +237,22 @@ The file should contain an array of dictionaries, where each item represents a s
 ### iv. Ingest genomic files
 
 #### API
-Use the `$CANDIG_URL/ingest/genomic` endpoint with the proper Authorization headers and your genomic JSON as specified above for the body to ingest and link to the clinical dataset program_id.
+Use the `$CANDIG_URL/ingest/genomic` endpoint with the proper [Authorization headers](#getting-a-bearer-token)  and your genomic JSON as specified above for the body to ingest and link to the clinical dataset program_id.
+
+Example curl POST request to ingest genomic data:
+```bash
+curl -X 'POST' \
+  $CANDIG_URL'/ingest/genomic' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization: Bearer '$TOKEN \
+  -d '@/absolute/path/to/genomic.json>'
+```
+
+See [Getting a bearer token](#getting-a-bearer-token) for how to get a token.
 
 ## 4. Adding or removing site administrators
-Use the `/ingest/site-role/site_admin/{user_email}` endpoint to add or remove site administrators. A POST request adds the user as a site admin, while a DELETE request removes the user from the role. A valid site administrator token must be used with this endpoint.
+Use the `/ingest/site-role/admin/{user_email}` endpoint to add or remove site administrators. A POST request adds the user as a site admin, while a DELETE request removes the user from the role. A valid site administrator token must be used with this endpoint.
 
 ## 5. Adding or removing site curators
 Use the `/ingest/site-role/curator/{user_email}` endpoint to add or remove site curators. A POST request adds the user as a site curator, a GET request returns whether the user is a site curator as a boolean, while a DELETE request removes the user from the role. A valid site administrator token must be used with this endpoint.
