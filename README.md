@@ -199,10 +199,10 @@ The file should contain an array of dictionaries, where each item represents a s
 Use the `$CANDIG_URL/ingest/genomic` endpoint with the proper Authorization headers and your genomic JSON as specified above for the body to ingest and link to the clinical dataset program_id.
 
 ## 4. Adding or removing site administrators
-Use the `/ingest/site-role/site_admin/{user_email}` endpoint to add or remove site administrators. A POST request adds the user as a site admin, while a DELETE request removes the user from the role.
+Use the `/ingest/site-role/site_admin/{user_email}` endpoint to add or remove site administrators. A POST request adds the user as a site admin, while a DELETE request removes the user from the role. A valid site administrator token must be used with this endpoint.
 
 ## 5. Adding or removing site curators
-Use the `/ingest/site-role/curator/{user_email}` endpoint to add or remove site curators. A POST request adds the user as a site curator, a GET request returns whether the user is a site curator as a boolean, while a DELETE request removes the user from the role.
+Use the `/ingest/site-role/curator/{user_email}` endpoint to add or remove site curators. A POST request adds the user as a site curator, a GET request returns whether the user is a site curator as a boolean, while a DELETE request removes the user from the role. A valid site administrator token must be used with this endpoint.
 
 ## 6. Approving/rejecting pending users
 Use the `/user/pending` endpoint to list pending users. A site admin can approve either a single or multiple pending users by POSTing to the `user/pending/{user}` or `user/pending` endpoints, and likewise reject with DELETEs to the same endpoints. DELETE to the bulk endpoint clears the whole pending list.
