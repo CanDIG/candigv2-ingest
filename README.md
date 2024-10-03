@@ -6,7 +6,7 @@ This repository can either be run standalone or as a Docker container.
 
 ## What you'll need for ingest
 
-* A valid user for CanDIGv2 that has site administration credentials.
+* A valid user for CanDIGv2 that has site administrator, site curator or program curator privileges for the programs you intend to ingest.
 * List of users that will have access to this dataset.
 * Clinical data, saved as either an Excel file or as a set of csv files.
 * Locations of Genomic data files in vcf, bam or cram format with paired index files for each.
@@ -24,9 +24,41 @@ pip install -r requirements.txt
 
 ## How to use candigv2-ingest
 
-`candigv2-ingest` can be used as either a command-line tool, a local API server or a docker container. To run the command line scripts, set your environment variables and follow the command line instructions in the sections below. To use the local API, set your environment variables, run `python app.py`, and follow the API instructions in the sections below. The API will be available at `localhost:1236`. A swagger UI is also available at `/ui`. Docker instructions can be found at the [bottom of this document](#Run-as-Docker-Container). To authorize yourself for these endpoints, you will need to set the Authorization header to a keycloak bearer token (in the format `"Bearer ..."` without the quotes).
+`candigv2-ingest` can be used as a local API server or a docker container and is generally expected to be used as part of a running [CanDIGv2 stack](https://github.com/CanDIG/CanDIGv2). To use the local API, set your environment variables, run `python app.py`, and follow the API instructions in the sections below. The API will be available at `localhost:1236`. A swagger UI is also available at `/ui`. Docker instructions can be found at the [bottom of this document](#Run-as-Docker-Container). To authorize yourself for these endpoints, you will need to set the Authorization header to a keycloak bearer token (in the format `"Bearer ..."` without the quotes).
 
-## 1. Clinical data
+## 1. Program registration
+
+Programs need to be registered before any data can be ingested. Initial program registration can be done by either a site admin or site curator. More information about assigning [site admins](#4-adding-or-removing-site-administrators) and [site curators](#5-adding-or-removing-site-curators) is in sections 4 and 5 below.
+
+To register a program, use the `/ingest/program/` [endpoint](https://github.com/CanDIG/candigv2-ingest/blob/4257929feca00be0d4384433793fcdf1b4e4137b/ingest_openapi.yaml#L114) to add, update, or delete authorization information for a program. Authorization headers for a site admin or site curator user must be provided. A POST request replaces a program authorization, while a DELETE request revokes it. 
+
+During program registration, users can be assigned one of two levels of authorization:
+* Team members are researchers of a program and are authorized to read and access all donor-specific data for a program.
+* Program curators are users that are authorized to curate data for the program: they can ingest and delete data.
+
+The following is an example of the payload you would need to `POST` to `/ingest/program` to add the following user roles to `TEST-PROGRAM-1`:
+- `user1@test.ca` as a Team member
+- `user2@test.ca` as a Program curator
+
+```
+{"program_id": "TEST-PROGRAM-1", "team_members":["user1@test.ca"], "program_curators": ["user2@test.ca"]}
+```
+
+An example `curl` command that adds two program curators and 2 team members is below:
+
+```bash
+curl -s --request POST \
+  --url $CANDIG_URL'/ingest/program' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization: Bearer '$TOKEN \
+  -d '{"program_id": "PROGRAM_ID", "program_curators": ["curator1@test.ca", "curator2@test.ca"], "team_members": ["user2@test.ca", "user1@test.ca"]}'
+```
+
+> [!CAUTION]
+> A POST request to the `ingest/program` replaces any existing program registration data for that program, so to add a curator, existing users plus the additional user would need to be added. 
+
+## 2. Clinical data
 
 ### i. Prepare clinical data
 
@@ -40,7 +72,7 @@ The preferred method for clinical data ingest is using the API.
 
 The clinical ingest API runs at `$CANDIG_URL/ingest/clinical`. Simply send a request with an authorized bearer token and a JSON body with your `DonorWithClinicalData` object. See the swagger UI/[schema](ingest_openapi.yaml) for the response format. The request will return a response with a queue ID. You can check the status of your ingest using that ID at `$CANDIG_URL/ingest/status/{queue_id}`.
 
-## 2. Genomic data
+## 3. Genomic data
 
 **First**, ensure that the relevant clinical data is ingested, as this must be completed before your genomic data is ingested.
 
@@ -166,33 +198,17 @@ The file should contain an array of dictionaries, where each item represents a s
 #### API
 Use the `$CANDIG_URL/ingest/genomic` endpoint with the proper Authorization headers and your genomic JSON as specified above for the body to ingest and link to the clinical dataset program_id.
 
-## 3. Authorizing users to programs
-Users can be assigned one of two levels of authorization:
-* Team members are researchers of a program and are authorized to read and access all donor-specific data for a program.
-* Program curators are users that are authorized to curate data for the program: they can ingest and delete data.
-
-### API
-Use the `/ingest/program/` [endpoint](https://github.com/CanDIG/candigv2-ingest/blob/4257929feca00be0d4384433793fcdf1b4e4137b/ingest_openapi.yaml#L114) to add, update, or delete authorization information for a program. Authorization headers for a site admin user must be provided. A POST request adds authorization, while a DELETE request revokes it.
-
-The following is an example of the payload you would need to `POST` to `/ingest/program/{program_id}` to add the following user roles to `TEST-PROGRAM-1`:
-- `user1@test.ca` as a Team member
-- `user2@test.ca` as a Program curator
-
-```
-{"program_id": "TEST-PROGRAM-1", "team_members":["user1@test.ca"], "program_curators": ["user2@test.ca"]}
-```
-
 ## 4. Adding or removing site administrators
 Use the `/ingest/site-role/site_admin/{user_email}` endpoint to add or remove site administrators. A POST request adds the user as a site admin, while a DELETE request removes the user from the role.
 
+## 5. Adding or removing site curators
+Use the `/ingest/site-role/curator/{user_email}` endpoint to add or remove site curators. A POST request adds the user as a site curator, a GET request returns true/false, while a DELETE request removes the user from the role.
 
-## 5. Approving/rejecting pending users
+## 6. Approving/rejecting pending users
 Use the `/user/pending` endpoint to list pending users. A site admin can approve either a single or multiple pending users by POSTing to the `user/pending/{user}` or `user/pending` endpoints, and likewise reject with DELETEs to the same endpoints. DELETE to the bulk endpoint clears the whole pending list.
 
-
-## 6. Adding a DAC-style program authorization for a user
+## 7. Adding a DAC-style program authorization for a user
 An authorized user can be approved to view a program for a particular timeframe by a POST to the `/user/{user_id}/authorize` endpoint. The body should be a json that contains the `program_id`, `start_date`, and `end_date`. Re-posting a new json with the same program ID will update the user's authorization. An authorization for a program can be revoked by a DELETE to the `/user/{user_id}/authorize/{program_id}` endpoint.
-
 
 ## Run as Docker Container
 The containerized version runs the API as specified above within a Docker container (which is how this repository is used in the CanDIGv2 stack).
