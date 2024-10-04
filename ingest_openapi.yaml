@@ -28,6 +28,39 @@ paths:
               application/json:
                 schema:
                   type: object
+  /s3-credential/endpoint/{endpoint_id}/bucket/{bucket_id}:
+    parameters:
+      - in: path
+        name: endpoint_id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: bucket_id
+        schema:
+          type: string
+        required: true
+    get:
+      description: get credentials for an S3 bucket
+      operationId: ingest_operations.get_s3_credential
+      responses:
+          200:
+            description: Success
+            content:
+              application/json:
+                schema:
+                  type: object
+    delete:
+      description: delete credentials for an S3 bucket
+      operationId: ingest_operations.delete_s3_credential
+      responses:
+          200:
+            description: Success
+            content:
+              application/json:
+                schema:
+                  type: object
+
   /site-role/{role_type}:
     parameters:
       - in: path
@@ -124,6 +157,16 @@ paths:
               application/json:
                 schema:
                   type: object
+    get:
+      description: List programs authorized on server
+      operationId: ingest_operations.list_program_authorizations
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
   /program/{program_id}:
     parameters:
       - in: path
@@ -319,6 +362,13 @@ paths:
     post:
       description: Add linkages between clinical donors and genomic data.
       operationId: ingest_operations.add_genomic_linkages
+      parameters:
+        - name: do_not_index
+          in: query
+          required: false
+          schema:
+            type: boolean
+          description: set to true to prevent indexing of genomic files
       requestBody:
         $ref: '#/components/requestBodies/GenomicIngestRequest'
       responses:
@@ -332,6 +382,13 @@ paths:
     post:
       description: Add a list of donors with clinical data produced by the clinical ETL.
       operationId: ingest_operations.add_clinical_donors
+      parameters:
+        - name: batch_size
+          in: query
+          required: false
+          schema:
+            type: integer
+          description: Number of items to be processed in one batch
       requestBody:
         $ref: "#/components/requestBodies/ClinicalDonorRequest"
       responses:
@@ -365,6 +422,34 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/IngestResponse"
+  /status/{queue_id}:
+    parameters:
+      - in: path
+        name: queue_id
+        schema:
+          type: string
+        required: true
+    get:
+      description: Return status of ingest operation
+      operationId: ingest_operations.get_ingest_status
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+  /get-token:
+    get:
+      description: Exchange the refresh token implicit in the request for a new one
+      operationId: ingest_operations.get_token
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
 components:
   requestBodies:
     S3CredentialRequest:

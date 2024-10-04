@@ -33,7 +33,7 @@ def main():
 
     if args.awsfile:
         # parse the awsfile:
-        result = auth.parse_aws_credential(args.awsfile)
+        result = auth.parse_s3_credential(args.awsfile)
         access_key = result["access"]
         secret_key = result["secret"]
         if "error" in result:

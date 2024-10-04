@@ -11,6 +11,7 @@ jobs:
         python-version: ["3.12"]
     env:
       CANDIG_URL: "http://localhost"
+      IS_TESTING: true
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python-version }}

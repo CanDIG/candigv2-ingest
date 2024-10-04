@@ -6,11 +6,11 @@ This repository can either be run standalone or as a Docker container.
 
 ## What you'll need for ingest
 
-* A valid user for CanDIGv2 that has site administration credentials.
+* A valid user for CanDIGv2 that has site administrator, site curator or program curator privileges for the programs you intend to ingest.
 * List of users that will have access to this dataset.
 * Clinical data, saved as either an Excel file or as a set of csv files.
-* Genomic data files in vcf, bam or cram format with paired index files for each.
-* File map of genomic files in a csv file, linking genomic sample IDs to the clinical samples.
+* Locations of Genomic data files in vcf, bam or cram format with paired index files for each.
+* File map of genomic files in a csv or json file, linking genomic sample IDs to the clinical samples.
 * (if needed) Credentials for s3 endpoints: url, access ID, secret key.
 * Reference genome used for the variant files.
 * Manifest and mappings for [`clinical_ETL_code`](https://github.com/CanDIG/clinical_ETL_code) conversion.
@@ -22,28 +22,74 @@ Using a Python 3.10+ environment, run the following:
 pip install -r requirements.txt
 ```
 
-### Set environment variables
+## How to use candigv2-ingest
 
-* CANDIG_URL (same as TYK_LOGIN_TARGET_URL, if you're using CanDIGv2's example.env)
-* KEYCLOAK_PUBLIC_URL
-* CANDIG_CLIENT_ID
-* CANDIG_CLIENT_SECRET
-* CANDIG_SITE_ADMIN_USER
-* CANDIG_SITE_ADMIN_PASSWORD
+`candigv2-ingest` can be used as a local API server or a docker container and is generally expected to be used as part of a running [CanDIGv2 stack](https://github.com/CanDIG/CanDIGv2). To use the local API, set your environment variables, run `python app.py`, and follow the API instructions in the sections below. The API will be available at `localhost:1236`. A swagger UI is also available at `/ui`. Docker instructions can be found at the [bottom of this document](#Run-as-Docker-Container). To authorize yourself for these endpoints, you will need to set the Authorization header to a keycloak bearer token (in the format `"Bearer ..."` without the quotes).
 
-For convenience, you can generate a file `env.sh` from your [`CanDIGv2`](https://github.com/CanDIG/CanDIGv2) repo:
+### Getting a bearer token
+<details><summary> </summary>
+
+Users can obtain a bearer token by logging into the CanDIG data portal, clicking the cog in the top right corner, clicking `*** Get API Token` and clicking the token to copy it. 
+
+Site administrators or users using a local candig install can also obtain a token programmatically using the following curl commands from the CanDIGv2 repo:
 
 ```bash
-cd CanDIGv2
-python settings.py
 source env.sh
 ```
 
-## How to use candigv2-ingest
+```bash
+CURL_OUTPUT=$(curl -s --request POST \
+  --url $KEYCLOAK_PUBLIC_URL'/auth/realms/candig/protocol/openid-connect/token' \
+  --header 'Content-Type: application/x-www-form-urlencoded' \
+  --data grant_type=password \
+  --data client_id=$CANDIG_CLIENT_ID \
+  --data client_secret=$CANDIG_CLIENT_SECRET \
+  --data username=$CANDIG_SITE_ADMIN_USER \
+  --data password=$CANDIG_SITE_ADMIN_PASSWORD \
+  --data scope=openid)
+```
 
-`candigv2-ingest` can be used as either a command-line tool, a local API server or a docker container. To run the command line scripts, set your environment variables and follow the command line instructions in the sections below. To use the local API, set your environment variables, run `python app.py`, and follow the API instructions in the sections below. The API will be available at `localhost:1236`. A swagger UI is also available at `/ui`. Docker instructions can be found at the [bottom of this document](#Run-as-Docker-Container). To authorize yourself for these endpoints, you will need to set the Authorization header to a keycloak bearer token (in the format `"Bearer ..."` without the quotes).
+```bash
+export TOKEN=$(echo $CURL_OUTPUT | grep -Eo 'access_token":"[a-zA-Z0-9._\-]+' | cut -d '"' -f3)
+```
 
-## 1. Clinical data
+</details>
+
+## 1. Program registration
+
+Programs need to be registered before any data can be ingested. Initial program registration can be done by either a site admin or site curator. More information about assigning [site admins](#4-adding-or-removing-site-administrators) and [site curators](#5-adding-or-removing-site-curators) is in sections 4 and 5 below.
+
+To register a program, use the `/ingest/program/` [endpoint](https://github.com/CanDIG/candigv2-ingest/blob/4257929feca00be0d4384433793fcdf1b4e4137b/ingest_openapi.yaml#L114) to add, update, or delete authorization information for a program. Authorization headers for a site admin or site curator user must be provided. A POST request replaces a program authorization, while a DELETE request revokes it. 
+
+During program registration, users can be assigned one of two levels of authorization:
+* Team members are researchers of a program and are authorized to read and access all donor-specific data for a program.
+* Program curators are users that are authorized to curate data for the program: they can ingest and delete data.
+
+The following is an example of the payload you would need to `POST` to `/ingest/program` to add the following user roles to `TEST-PROGRAM-1`:
+- `user1@test.ca` as a Team member
+- `user2@test.ca` as a Program curator
+
+```
+{"program_id": "TEST-PROGRAM-1", "team_members":["user1@test.ca"], "program_curators": ["user2@test.ca"]}
+```
+
+An example `curl` command that adds two program curators and 2 team members is below:
+
+```bash
+curl -s --request POST \
+  --url $CANDIG_URL'/ingest/program' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization: Bearer '$TOKEN \
+  -d '{"program_id": "PROGRAM_ID", "program_curators": ["curator1@test.ca", "curator2@test.ca"], "team_members": ["user2@test.ca", "user1@test.ca"]}'
+```
+
+See [Getting a bearer token](#getting-a-bearer-token) for how to get a token.
+
+> [!CAUTION]
+> A POST request to the `ingest/program` replaces any existing program registration data for that program. It is advisable to first use a GET request to see the current users authorized to a program before adding additional program_curators and/or team_members when POSTing to this endpoint
+
+## 2. Clinical data
 
 ### i. Prepare clinical data
 
@@ -55,29 +101,19 @@ The preferred method for clinical data ingest is using the API.
 
 #### API
 
-The clinical ingest API runs at `/ingest/clinical`. Simply send a request with an authorized bearer token and a JSON body with your `DonorWithClinicalData` object. See the swagger UI/[schema](ingest_openapi.yaml) for the response format.
+The clinical ingest API runs at `$CANDIG_URL/ingest/clinical`. Simply send a request with an [authorized bearer](#getting-a-bearer-token) token and a JSON body with your clinical data json output from clinical_etl. See the swagger UI/[schema](ingest_openapi.yaml) for the response format. The request will return a response with a queue ID. You can check the status of your ingest using that ID at `$CANDIG_URL/ingest/status/{queue_id}`.
 
-#### Command line
-
-This method is mainly used for development work but may also be used if the JSON body is too big to send easily via POST.
-
-To ingest via the commandline script, the location of your clinical data JSON must be specified. This can be done either by:
-
-supplying it as an argument to the script:
-
-```commandline
-python katsu_ingest.py --input path/to/clinical/data/
-```
-
-Or by exporting an environment variable `CLINICAL_DATA_LOCATION`, then running the script:
-
+Example curl POST to ingest clinical data:
 ```bash
-export CLINICAL_DATA_LOCATION=path/to/clinical/data/
-source env.sh
-python katsu_ingest.py
+curl -X 'POST' \
+  $CANDIG_URL'/ingest/clinical' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization: Bearer '$TOKEN \
+  -d '@/absolute/path/to/clinical_map.json>'
 ```
 
-## 2. Genomic data
+## 3. Genomic data
 
 **First**, ensure that the relevant clinical data is ingested, as this must be completed before your genomic data is ingested.
 
@@ -88,7 +124,7 @@ Accepted file types:
 * Aligned reads (`.bam` or `.cram`) with paired index files (`.bai`, `.crai`)
 
 For each file, you need to have a note of:
-* The `submitter_sample_id` that the file should link to
+* The `submitter_sample_id`(s) that the file should link to
 * How that sample is referred to within the file, e.g. the `sample ID` in a VCF or `@RG SM` in BAM/CRAM
 * Where the file is located in relation to the running htsget server
 
@@ -201,56 +237,31 @@ The file should contain an array of dictionaries, where each item represents a s
 ### iv. Ingest genomic files
 
 #### API
-Use the `/ingest/genomic` endpoint with the proper Authorization headers and your genomic JSON as specified above for the body to ingest and link to the clinical dataset program_id.
+Use the `$CANDIG_URL/ingest/genomic` endpoint with the proper [Authorization headers](#getting-a-bearer-token)  and your genomic JSON as specified above for the body to ingest and link to the clinical dataset program_id.
 
-#### Command line
-
-To ingest using an S3 container, once the files have been added, you can run the htsget_ingest.py script:
-
+Example curl POST request to ingest genomic data:
 ```bash
-python htsget_ingest.py --samplefile [JSON-formatted sample data as specified above]
+curl -X 'POST' \
+  $CANDIG_URL'/ingest/genomic' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization: Bearer '$TOKEN \
+  -d '@/absolute/path/to/genomic.json>'
 ```
 
-## 3. Assigning users to programs
-The preferred method to assign user authorizations to programs is to use the API. Users can be assigned one of two levels of authorization:
-* Team members are researchers of a program and are authorized to read and access all donor-specific data for a program.
-* Program curators are users that are authorized to curate data for the program: they can ingest data.
-
-The script `opa_ingest.py` can be used only to add Team member authorizations to a program that already has an existing authorization.
-
-### API
-Use the `/ingest/program/` [endpoint](https://github.com/CanDIG/candigv2-ingest/blob/4257929feca00be0d4384433793fcdf1b4e4137b/ingest_openapi.yaml#L114) to add, update, or delete authorization information for a program. Authorization headers for a site admin user must be provided. A POST request adds authorization, while a DELETE request revokes it.
-
-The following is an example of the payload you would need to `POST` to `/ingest/program/{program_id}` to add the following user roles to `TEST-PROGRAM-1`: 
-- `user1@test.ca` as a Team member
-- `user2@test.ca` as a Program curator
-
-```
-{"program_id": "TEST-PROGRAM-1", "team_members":["user1@test.ca"], "program_curators": ["user2@test.ca"]}
-```
-
-### Command line
-
-The `opa_ingest.py` script can be used to add Team members to a program only. To add Program curators, the API described above must be used.
-
-The script will add a single user or a list of users to a specified program (`--dataset`). Single users are added using the `--user` flag, while a list of users can be specified in a plain text file, with one user email specified per line, using the `--user-file` flag to specify the path to the file. If the `--remove` flag is used, the users will be removed, rather than added to the program.
-
-example usage:
-```bash
-python opa_ingest.py --user|userfile [either a user email or a file of user emails] --dataset [name of dataset/program] [--remove]
-```
+See [Getting a bearer token](#getting-a-bearer-token) for how to get a token.
 
 ## 4. Adding or removing site administrators
-Use the `/ingest/site-role/site_admin/{user_email}` endpoint to add or remove site administrators. A POST request adds the user as a site admin, while a DELETE request removes the user from the role.
+Use the `/ingest/site-role/admin/{user_email}` endpoint to add or remove site administrators. A POST request adds the user as a site admin, while a DELETE request removes the user from the role. A valid site administrator token must be used with this endpoint.
 
+## 5. Adding or removing site curators
+Use the `/ingest/site-role/curator/{user_email}` endpoint to add or remove site curators. A POST request adds the user as a site curator, a GET request returns whether the user is a site curator as a boolean, while a DELETE request removes the user from the role. A valid site administrator token must be used with this endpoint.
 
-## 5. Approving/rejecting pending users
+## 6. Approving/rejecting pending users
 Use the `/user/pending` endpoint to list pending users. A site admin can approve either a single or multiple pending users by POSTing to the `user/pending/{user}` or `user/pending` endpoints, and likewise reject with DELETEs to the same endpoints. DELETE to the bulk endpoint clears the whole pending list.
 
-
-## 6. Adding a DAC-style program authorization for a user
+## 7. Adding a DAC-style program authorization for a user
 An authorized user can be approved to view a program for a particular timeframe by a POST to the `/user/{user_id}/authorize` endpoint. The body should be a json that contains the `program_id`, `start_date`, and `end_date`. Re-posting a new json with the same program ID will update the user's authorization. An authorization for a program can be revoked by a DELETE to the `/user/{user_id}/authorize/{program_id}` endpoint.
-
 
 ## Run as Docker Container
 The containerized version runs the API as specified above within a Docker container (which is how this repository is used in the CanDIGv2 stack).
@@ -284,7 +295,7 @@ The script `generate_test_data.py` can be used to generate a json files for inge
 
 To run:
 
-* Set up a virtual environment and install requirements (if you haven't already). If running inside the ingest docker container, this shouldn't be needed. 
+* Set up a virtual environment and install requirements (if you haven't already). If running inside the ingest docker container, this shouldn't be needed.
 ```commandline
 pip install -r requirements.txt
 ```
@@ -293,7 +304,7 @@ pip install -r requirements.txt
 Usage:
 ```commandline
 python generate_test_data.py -h
-usage: generate_test_data.py [-h] [--prefix PREFIX] --tmp 
+usage: generate_test_data.py [-h] [--prefix PREFIX] --tmp
 
 A script that copies and converts data from mohccn-synthetic-data for ingest into CanDIG platform.
 

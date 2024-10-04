@@ -1,15 +1,20 @@
 import connexion
 from flask import request, Flask
 import os
+import re
 import traceback
 import urllib.parse
 
 import auth
 from ingest_result import *
-from katsu_ingest import ingest_clinical_data
-from htsget_ingest import htsget_ingest
+from katsu_ingest import prep_check_clinical_data
+from htsget_ingest import check_genomic_data
 from opa_ingest import remove_user_from_dataset, add_user_to_dataset
 import config
+import tempfile
+import uuid
+import json
+
 
 app = Flask(__name__)
 
@@ -54,6 +59,13 @@ def get_headers():
     return headers
 
 
+def check_default_site_admin(response):
+    if auth.is_default_site_admin_set():
+        if "warnings" not in response:
+            response["warnings"] = []
+        response["warnings"].append(f"Default site administrator {os.getenv('DEFAULT_SITE_ADMIN_USER')} is still configured. Use the /ingest/site-role/site_admin endpoint to set a different site admin.")
+
+
 # API endpoints
 def get_service_info():
     return {
@@ -68,10 +80,29 @@ def get_service_info():
     }
 
 
+####
+# S3 credentials
+####
+
 def add_s3_credential():
     data = connexion.request.json
     token = request.headers['Authorization'].split("Bearer ")[1]
-    return auth.store_aws_credential(data["endpoint"], data["bucket"], data["access_key"], data["secret_key"], token)
+    return auth.store_s3_credential(data["endpoint"], data["bucket"], data["access_key"], data["secret_key"], token)
+
+
+@app.route('/s3-credential/endpoint/<path:endpoint_id>/bucket/<path:bucket_id>')
+def get_s3_credential(endpoint_id, bucket_id):
+    token = request.headers['Authorization'].split("Bearer ")[1]
+    endpoint_cleaned = re.sub(r"\W", "_", endpoint_id)
+    return auth.get_s3_credential(endpoint_cleaned, bucket_id, token)
+
+
+@app.route('/s3-credential/endpoint/<path:endpoint_id>/bucket/<path:bucket_id>')
+def delete_s3_credential(endpoint_id, bucket_id):
+    token = request.headers['Authorization'].split("Bearer ")[1]
+    endpoint_cleaned = re.sub(r"\W", "_", endpoint_id)
+    return auth.remove_s3_credential(endpoint_cleaned, bucket_id, token)
+
 
 ####
 # Site roles
@@ -116,8 +147,9 @@ def add_user_to_role(role_type, email):
         token = request.headers['Authorization'].split("Bearer ")[1]
         result, status_code = auth.get_role_type_in_opa(role_type, token)
         if status_code == 200:
-            result[role_type].append(email)
-            result, status_code = auth.set_role_type_in_opa(role_type, result[role_type], token)
+            if email not in result[role_type]:
+                result[role_type].append(email)
+                result, status_code = auth.set_role_type_in_opa(role_type, result[role_type], token)
         return result, status_code
     except Exception as e:
         return {"error": str(e)}, 500
@@ -143,32 +175,71 @@ def remove_user_from_role(role_type, email):
 ####
 
 def add_genomic_linkages():
+    dataset = connexion.request.json
+    do_not_index = bool(connexion.request.args.get("do_not_index", False))
     headers = get_headers()
-    response, status_code = htsget_ingest(connexion.request.json, headers)
-    if auth.is_default_site_admin_set():
-        response["warning"] = f"Default site administrator {os.getenv('DEFAULT_SITE_ADMIN_USER')} is still configured. Use the /ingest/site-role/site_admin endpoint to set a different site admin."
+    token = request.headers['Authorization'].split("Bearer ")[1]
+    response, status_code = check_genomic_data(dataset, token)
+    if status_code == 200:
+        ingest_uuid = add_to_queue({"htsget": response, "do_not_index": do_not_index})
+        response = {"queue_id": ingest_uuid}
+    check_default_site_admin(response)
     return response, status_code
 
 
 def add_clinical_donors():
     dataset = connexion.request.json
+    batch_size = int(connexion.request.args.get("batch_size", 1000))
     headers = get_headers()
-    response, status_code = ingest_clinical_data(dataset, headers)
-    if auth.is_default_site_admin_set():
-        response["warning"] = f"Default site administrator {os.getenv('DEFAULT_SITE_ADMIN_USER')} is still configured. Use the /ingest/site-role/site_admin endpoint to set a different site admin."
+    token = request.headers['Authorization'].split("Bearer ")[1]
+    response, status_code = prep_check_clinical_data(dataset, token, batch_size)
+    if status_code == 200:
+        ingest_uuid = add_to_queue({"katsu": response})
+        response = {"queue_id": ingest_uuid}
+    check_default_site_admin(response)
     return response, status_code
+
+
+def add_to_queue(ingest_json):
+    queue_id = str(uuid.uuid1())
+    with tempfile.NamedTemporaryFile(delete_on_close=False, mode="w") as f:
+        json.dump(ingest_json, f, indent=4)
+        os.rename(f.name, os.path.join(config.DAEMON_PATH, "to_ingest", queue_id))
+    results_path = os.path.join(config.DAEMON_PATH, "results", queue_id)
+    with open(results_path, "w") as f:
+        json.dump({"status": "still in queue"}, f)
+    return queue_id
+
+
+@app.route('/status/<path:queue_id>')
+def get_ingest_status(queue_id):
+    try:
+        results_path = os.path.join(config.DAEMON_PATH, "results", queue_id)
+        with open(results_path) as f:
+            json_data = json.load(f)
+            # os.remove(results_path)
+            return json_data, 200
+    except:
+        return {"error": f"no such queue_id {queue_id}"}, 404
+
 
 ####
 # Program authorizations
 ####
+
+def list_program_authorizations():
+    token = request.headers['Authorization'].split("Bearer ")[1]
+
+    response, status_code = auth.list_programs_in_opa(token)
+    return response, status_code
+
 
 def add_program_authorization():
     program = connexion.request.json
     token = request.headers['Authorization'].split("Bearer ")[1]
 
     response, status_code = auth.add_program_to_opa(program, token)
-    if auth.is_default_site_admin_set():
-        response["warning"] = f"Default site administrator {os.getenv('DEFAULT_SITE_ADMIN_USER')} is still configured. Use the /ingest/site-role/site_admin endpoint to set a different site admin."
+    check_default_site_admin(response)
     return response, status_code
 
 
@@ -185,6 +256,7 @@ def remove_program_authorization(program_id):
     token = request.headers['Authorization'].split("Bearer ")[1]
 
     response, status_code = auth.remove_program_from_opa(program_id, token)
+    check_default_site_admin(response)
     return response, status_code
 
 
@@ -326,3 +398,22 @@ def remove_program_for_user(user_id, program_id):
             response, status_code = auth.write_user_in_opa(response, token)
             return response, status_code
     return {"error": f"No program {program_id} found for user"}, status_code
+
+@app.route('/get-token')
+def get_token():
+    # Attempt to grab the token via session_id
+    if not hasattr(request, 'cookies'):
+        return {'error': 'Unable to use the get-token endpoint without cookies'}, 200
+    token = request.cookies['session_id']
+
+    return {"token": token}, 200
+
+    # Uncomment the below to exchange for a new token and return
+    # that, instead
+    # try:
+    #    response = auth.get_refresh_token(token)
+    #    if "error" in response:
+    #        return {"error": response["error"]}, 500
+    #    return {"token": response["refresh_token"]}, 200
+    #except Exception as e:
+    #    return {"error": str(e)}, 500

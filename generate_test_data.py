@@ -7,6 +7,7 @@ import os
 import sys
 import subprocess
 import json
+import pprint
 
 
 def parse_args():
@@ -14,13 +15,30 @@ def parse_args():
                                                  "ingest into CanDIG platform.")
     parser.add_argument("--prefix", help="optional prefix to apply to all identifiers")
     parser.add_argument("--tmp", help="Directory to temporarily clone the mohccn-synthetic-data repo.",
-                        default="tmp")
+                        default="tmp-data")
+    parser.add_argument("--delete", "-d", action="store_true",
+                        help="If enabled, automatically deletes existing data in the tmp directory. Otherwise prompts "
+                             "user to proceed")
     return parser.parse_args()
+
 
 def main(args):
     ingest_repo_dir = os.path.dirname(os.path.abspath(__file__))
+    if os.path.exists(args.tmp):
+        if args.delete:
+            shutil.rmtree(args.tmp)
+        else:
+            yes = ['yes', 'y', 'ye', '']
+            no = ['no', 'n']
+            response = input(f"Specified directory {args.tmp}, ok to delete? (yes/no)")
+            if response.lower() in yes:
+                shutil.rmtree(args.tmp)
+            else:
+                print("Cannot clone repo until --tmp directory is removed. Remove manually or specify an alternate --tmp "
+                      "destination.")
+                sys.exit()
     print(f"Cloning mohccn-synthetic-data repo into {args.tmp}")
-    Repo.clone_from("https://github.com/CanDIG/mohccn-synthetic-data.git", args.tmp)
+    synth_repo = Repo.clone_from("https://github.com/CanDIG/mohccn-synthetic-data.git", args.tmp)
 
     try:
         if args.prefix:
@@ -38,8 +56,17 @@ def main(args):
         else:
             print("Converting small_dataset_csvs to small_dataset_clinical_ingest.json")
             output_dir = f"{args.tmp}/small_dataset_csv"
-            process = subprocess.run([f'python {args.tmp}/src/csv_to_ingest.py --size s'],
-                                     shell=True, check=True, capture_output=True)
+            try:
+                process = subprocess.run([f'python {args.tmp}/src/csv_to_ingest.py --size s'],
+                                         shell=True, check=True, capture_output=True)
+            except subprocess.CalledProcessError as e:
+                print("Data conversion failed, review error messages below and try again.")
+                print(e)
+                pprint.pprint(e.output)
+                print("Removing repo.")
+                shutil.rmtree(args.tmp)
+                sys.exit(0)
+
             with open(f"{args.tmp}/small_dataset_csv/raw_data_validation_results.json") as f:
                 errors = json.load(f)['validation_errors']
             if len(errors) > 0:
@@ -63,6 +90,24 @@ def main(args):
                 f"{ingest_repo_dir}/tests/small_dataset_genomic_ingest.json")
     print("Removing repo.")
     shutil.rmtree(args.tmp)
+
+    print("Splitting by program...")
+    programs = {}
+    with open(f'{ingest_repo_dir}/tests/small_dataset_clinical_ingest.json', "r") as f:
+        full_json = json.load(f)
+    # split ingest files by program
+    for donor in full_json['donors']:
+        try:
+            programs[donor['program_id']]['donors'].append(donor)
+        except KeyError as e:
+            programs[donor['program_id']] = {
+                "openapi_url": "https://raw.githubusercontent.com/CanDIG/katsu/develop/chord_metadata_service/mohpackets/docs/schemas/schema.yml",
+                "schema_class": "MoHSchemaV3",
+                "donors": [donor]}
+    for program, content in programs.items():
+        print(f"Saving {program}.json to tests/")
+        with open(f"{ingest_repo_dir}/tests/{program}.json", "w+") as f:
+            json.dump(content, f)
 
 
 if __name__ == "__main__":

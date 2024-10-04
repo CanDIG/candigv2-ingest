@@ -1,3 +1,6 @@
 #!/usr/bin/env bash
-export OPA_SECRET=$(cat /run/secrets/opa-service-token)
-uwsgi /ingest_app/uwsgi.ini
+mkdir -p $DAEMON_PATH/to_ingest
+mkdir -p $DAEMON_PATH/results
+python /ingest_app/daemon.py &
+
+gunicorn server:app
