@@ -281,7 +281,11 @@ def check_genomic_data(dataset, token):
         samples_in_program = []
         response = requests.get(f"{KATSU_URL}/v3/authorized/sample_registrations", params={"program_id": program_id}, headers=headers)
         if response.status_code == 200:
-            samples_in_program = list(map(lambda x: x["submitter_sample_id"], response.json()["items"]))
+            if "next_page" in response.json():
+                count = response.json()["count"]
+                response = requests.get(f"{KATSU_URL}/v3/authorized/sample_registrations", params={"program_id": program_id, "page_size": count}, headers=headers)
+            if response.status_code == 200:
+                samples_in_program = list(map(lambda x: x["submitter_sample_id"], response.json()["items"]))
 
         for sample in by_program[program_id]:
             sample_errors = []
