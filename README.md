@@ -33,6 +33,9 @@ Users can obtain a bearer token by logging into the CanDIG data portal, clicking
 
 Site administrators or users using a local candig install can also obtain a token programmatically using the following curl commands from the CanDIGv2 repo:
 
+> [!IMPORTANT]
+> This is an access token and has an expiry period of 5 minutes from when it was obtained
+
 ```bash
 source env.sh
 ```
