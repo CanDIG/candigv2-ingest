@@ -120,7 +120,7 @@ paths:
               schema:
                 type: boolean
     post:
-      Summary: Assign user to role
+      summary: Assign user to role
       description: Assign user to role
       operationId: ingest_operations.add_user_to_role
       responses:
@@ -168,6 +168,7 @@ paths:
                 schema:
                   type: object
     get:
+      summary: List registered programs
       description: List programs authorized on server
       operationId: ingest_operations.list_program_authorizations
       responses:
