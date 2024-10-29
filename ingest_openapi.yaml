@@ -1,7 +1,7 @@
 openapi: 3.0.0
 servers:
-  - url: https://candig-prod-url
-  - url: http://candig.docker.internal:5080
+  - url: https://candig-prod-url/ingest
+  - url: http://candig.docker.internal:5080/ingest
 info:
   version: v1.0.0
   title: 'CanDIGv2 Ingest Service'
