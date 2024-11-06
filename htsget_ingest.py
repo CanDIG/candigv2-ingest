@@ -321,6 +321,13 @@ def check_genomic_data(dataset, token):
     return result, 400
 
 
+def delete_program(program_id, token):
+    headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
+    url = f"{HTSGET_URL}/ga4gh/drs/v1/cohorts/{program_id}"
+
+    return requests.delete(url, headers=headers)
+
+
 def main():
     parser = argparse.ArgumentParser(description="A script that ingests genomic data into htsget.")
     parser.add_argument("--samplefile", required=True,
