@@ -254,8 +254,9 @@ def htsget_ingest(ingest_json, do_not_index=False):
         }
 
     # send off index calls
-    for url in to_index:
-        response = requests.get(url, headers=headers, params={"do_not_index": do_not_index})
+    if not do_not_index:
+        for url in to_index:
+            response = requests.get(url, headers=headers, params={"do_not_index": do_not_index})
 
     return result, status_code
 
