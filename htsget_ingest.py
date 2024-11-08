@@ -254,8 +254,9 @@ def htsget_ingest(ingest_json, do_not_index=False):
         }
 
     # send off index calls
-    for url in to_index:
-        response = requests.get(url, headers=headers, params={"do_not_index": do_not_index})
+    if not do_not_index:
+        for url in to_index:
+            response = requests.get(url, headers=headers, params={"do_not_index": do_not_index})
 
     return result, status_code
 
@@ -318,6 +319,13 @@ def check_genomic_data(dataset, token):
     if len(result["errors"]) == 0:
         return by_program, 200
     return result, 400
+
+
+def delete_program(program_id, token):
+    headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
+    url = f"{HTSGET_URL}/ga4gh/drs/v1/cohorts/{program_id}"
+
+    return requests.delete(url, headers=headers)
 
 
 def main():

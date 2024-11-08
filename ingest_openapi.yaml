@@ -185,8 +185,8 @@ paths:
               schema:
                 type: object
     delete:
-      description: Delete authorization information for a program
-      operationId: ingest_operations.remove_program_authorization
+      description: Delete a program
+      operationId: ingest_operations.remove_program
       responses:
         200:
           description: Success

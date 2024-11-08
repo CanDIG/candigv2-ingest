@@ -293,6 +293,13 @@ def prep_check_clinical_data(ingest_json, token, batch_size):
     return schemas_to_ingest, 200
 
 
+def delete_program(program_id, token):
+    headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
+    url = f"{KATSU_URL}/v3/ingest/program/{program_id}/"
+
+    return requests.delete(url, headers=headers)
+
+
 def main():
     # check if os.environ.get("CANDIG_URL") is set
     global KATSU_URL

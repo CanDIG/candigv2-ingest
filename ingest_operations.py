@@ -7,8 +7,8 @@ import urllib.parse
 
 import auth
 from ingest_result import *
-from katsu_ingest import prep_check_clinical_data
-from htsget_ingest import check_genomic_data
+import katsu_ingest
+import htsget_ingest
 from opa_ingest import remove_user_from_dataset, add_user_to_dataset
 import config
 import tempfile
@@ -179,7 +179,7 @@ def add_genomic_linkages():
     do_not_index = bool(connexion.request.args.get("do_not_index", False))
     headers = get_headers()
     token = request.headers['Authorization'].split("Bearer ")[1]
-    response, status_code = check_genomic_data(dataset, token)
+    response, status_code = htsget_ingest.check_genomic_data(dataset, token)
     if status_code == 200:
         ingest_uuid = add_to_queue({"htsget": response, "do_not_index": do_not_index})
         response = {"queue_id": ingest_uuid}
@@ -192,7 +192,7 @@ def add_clinical_donors():
     batch_size = int(connexion.request.args.get("batch_size", 1000))
     headers = get_headers()
     token = request.headers['Authorization'].split("Bearer ")[1]
-    response, status_code = prep_check_clinical_data(dataset, token, batch_size)
+    response, status_code = katsu_ingest.prep_check_clinical_data(dataset, token, batch_size)
     if status_code == 200:
         ingest_uuid = add_to_queue({"katsu": response})
         response = {"queue_id": ingest_uuid}
@@ -252,12 +252,34 @@ def get_program_authorization(program_id):
 
 
 @app.route('/program/<path:program_id>')
-def remove_program_authorization(program_id):
+def remove_program(program_id):
     token = request.headers['Authorization'].split("Bearer ")[1]
-
-    response, status_code = auth.remove_program_from_opa(program_id, token)
+    response = {"errors": {}}
     check_default_site_admin(response)
-    return response, status_code
+
+    opa_response, opa_status = auth.remove_program_from_opa(program_id, token)
+    katsu_response = katsu_ingest.delete_program(program_id, token)
+    htsget_response = htsget_ingest.delete_program(program_id, token)
+
+    if opa_status == 404:
+        # htsget status is not included here because it doesn't have a 404 response
+        return {"message": f"Program {program_id} not found"}, 404
+
+    if opa_status != 200:
+        response["errors"]["opa"] = {"message": opa_response, "status_code": opa_status}
+
+    if katsu_response.status_code != 204 and katsu_response.status_code != 404:
+        response["errors"]["katsu"] = {"message": katsu_response.text, "status_code": katsu_response.status_code}
+
+    if htsget_response.status_code != 200:
+        response["errors"]["htsget"] = {"message": htsget_response.text, "status_code": htsget_response.status_code}
+
+    if len(response["errors"]) == 0:
+        response.pop("errors")
+        response["message"] = f"Program {program_id} successfully deleted"
+        return response, 200
+
+    return response, 500
 
 
 @app.route('/program/<path:program_id>/email/<path:email>')
