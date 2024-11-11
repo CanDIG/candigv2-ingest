@@ -372,12 +372,12 @@ paths:
       requestBody:
         $ref: '#/components/requestBodies/GenomicIngestRequest'
       responses:
-          200:
-            description: Success
-            content:
-              application/json:
-                schema:
-                  type: object
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IngestResponse"
   /clinical:
     post:
       description: Add a list of donors with clinical data produced by the clinical ETL.
@@ -394,30 +394,6 @@ paths:
       responses:
         200:
           description: Success
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/IngestResponse"
-        422:
-          description: User error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/IngestResponse"
-        401:
-          description: Authorization error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/IngestResponse"
-        403:
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/IngestResponse"
-        500:
-          description: Internal error
           content:
             application/json:
               schema:
@@ -564,15 +540,13 @@ components:
     IngestResponse:
       type: object
       properties:
-        result:
+        queue_id:
           type: string
-          example: "Ingested 10 Donors"
-        response_code:
-          type: integer
-          example: 0
-        response_code_readable:
-          type: string
-          example: "Success"
+          description: Queue ID to get status of ingest
+        warnings:
+          type: array
+          items:
+            type: string
     GenomicSample:
       type: object
       properties:
