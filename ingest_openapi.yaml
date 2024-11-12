@@ -1,11 +1,14 @@
 openapi: 3.0.0
+servers:
+  - url: /ingest
 info:
   version: v1.0.0
-  title: ''
-  description: ''
+  title: 'CanDIGv2 Ingest Service'
+  description: 'API for ingesting data into the CanDIG stack'
 paths:
   /service-info:
     get:
+      summary: Retrieve information about this service
       description: Returns information about the ingest service
       operationId: ingest_operations.get_service_info
       responses:
@@ -17,6 +20,7 @@ paths:
                 type: object
   /s3-credential:
     post:
+      summary: Add credentials for an S3 bucket
       description: Add credentials for an S3 bucket
       operationId: ingest_operations.add_s3_credential
       requestBody:
@@ -41,6 +45,7 @@ paths:
           type: string
         required: true
     get:
+      summary: get credentials for an S3 bucket
       description: get credentials for an S3 bucket
       operationId: ingest_operations.get_s3_credential
       responses:
@@ -51,6 +56,7 @@ paths:
                 schema:
                   type: object
     delete:
+      summary: delete credentials for an S3 bucket
       description: delete credentials for an S3 bucket
       operationId: ingest_operations.delete_s3_credential
       responses:
@@ -69,6 +75,7 @@ paths:
           type: string
         required: true
     get:
+      summary: List users in role_type
       description: List users in role_type
       operationId: ingest_operations.list_role
       responses:
@@ -79,6 +86,7 @@ paths:
               schema:
                 type: object
     post:
+      summary: Assign users to role
       description: Assign users to role
       operationId: ingest_operations.update_role
       requestBody:
@@ -103,6 +111,7 @@ paths:
           type: string
         required: true
     get:
+      summary: Is user in this role?
       description: Is user in this role?
       operationId: ingest_operations.is_user_in_role
       responses:
@@ -113,6 +122,7 @@ paths:
               schema:
                 type: boolean
     post:
+      summary: Assign user to role
       description: Assign user to role
       operationId: ingest_operations.add_user_to_role
       responses:
@@ -123,6 +133,7 @@ paths:
               schema:
                 type: object
     delete:
+      summary: Remove user from role
       description: Remove user from role
       operationId: ingest_operations.remove_user_from_role
       responses:
@@ -146,6 +157,7 @@ paths:
                 type: object
   /program:
     post:
+      summary: Add authorization information for a new program
       description: Add authorization information for a new program
       operationId: ingest_operations.add_program_authorization
       requestBody:
@@ -158,6 +170,7 @@ paths:
                 schema:
                   type: object
     get:
+      summary: List registered programs
       description: List programs authorized on server
       operationId: ingest_operations.list_program_authorizations
       responses:
@@ -175,6 +188,7 @@ paths:
           type: string
         required: true
     get:
+      summary: Get authorization information for a program
       description: Get authorization information for a program
       operationId: ingest_operations.get_program_authorization
       responses:
@@ -207,6 +221,7 @@ paths:
           type: string
         required: true
     post:
+      summary: Add user access for a dataset
       description: Add user access for a dataset
       operationId: ingest_operations.add_user_access
       responses:
@@ -217,6 +232,7 @@ paths:
               schema:
                 type: object
     delete:
+      summary: Delete user access for a dataset
       description: Delete user access for a dataset
       operationId: ingest_operations.remove_user_access
       responses:
@@ -228,6 +244,7 @@ paths:
                 type: object
   /user/pending/request:
     post:
+      summary: Add pending user
       description: Add the user specified in the Bearer jwt to the pending users list
       operationId: ingest_operations.add_pending_user
       responses:
@@ -239,6 +256,7 @@ paths:
                 type: object
   /user/pending:
     get:
+      summary: List pending users
       description: List pending users for authorization
       operationId: ingest_operations.list_pending_users
       responses:
@@ -249,6 +267,7 @@ paths:
               schema:
                 type: object
     post:
+      summary: Approve pending users
       description: Approve bulk pending users for CanDIG access
       operationId: ingest_operations.approve_pending_users
       requestBody:
@@ -261,6 +280,7 @@ paths:
               schema:
                 type: object
     delete:
+      summary: Delete pending users
       description: Clear pending users for CanDIG access
       operationId: ingest_operations.clear_pending_users
       responses:
@@ -278,6 +298,7 @@ paths:
           type: string
         required: true
     post:
+      summary: Approve pending user
       description: Approve a pending user for CanDIG access
       operationId: ingest_operations.approve_pending_user
       responses:
@@ -288,6 +309,7 @@ paths:
               schema:
                 type: object
     delete:
+      summary: Reject pending user
       description: Reject a pending user for CanDIG access
       operationId: ingest_operations.reject_pending_user
       responses:
@@ -305,6 +327,7 @@ paths:
           type: string
         required: true
     get:
+      summary: List program authorizations
       description: List authorizations for programs for a user
       operationId: ingest_operations.list_programs_for_user
       responses:
@@ -315,6 +338,7 @@ paths:
               schema:
                 type: object
     post:
+      summary: Authorize a program for a user
       description: Authorize a program for a user (or update a program auth for a user)
       operationId: ingest_operations.authorize_program_for_user
       requestBody:
@@ -339,6 +363,7 @@ paths:
           type: string
         required: true
     get:
+      summary: Get program authorization for a user
       description: Get authorization for a program for a user
       operationId: ingest_operations.get_program_for_user
       responses:
@@ -349,6 +374,7 @@ paths:
               schema:
                 type: object
     delete:
+      summary: Remove a program authorization for a user
       description: Remove a program for a user
       operationId: ingest_operations.remove_program_for_user
       responses:
@@ -360,6 +386,7 @@ paths:
                 type: object
   /genomic:
     post:
+      summary: Ingest Genomic data
       description: Add linkages between clinical donors and genomic data.
       operationId: ingest_operations.add_genomic_linkages
       parameters:
@@ -380,6 +407,7 @@ paths:
                 $ref: "#/components/schemas/IngestResponse"
   /clinical:
     post:
+      summary: Ingest Clinical data
       description: Add a list of donors with clinical data produced by the clinical ETL.
       operationId: ingest_operations.add_clinical_donors
       parameters:
@@ -406,6 +434,7 @@ paths:
           type: string
         required: true
     get:
+      summary: Check status of ingest
       description: Return status of ingest operation
       operationId: ingest_operations.get_ingest_status
       responses:
@@ -417,6 +446,7 @@ paths:
                 type: object
   /get-token:
     get:
+      summary: Get a new token
       description: Exchange the refresh token implicit in the request for a new one
       operationId: ingest_operations.get_token
       responses:
