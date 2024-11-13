@@ -1,6 +1,4 @@
 openapi: 3.0.0
-servers:
-  - url: /
 info:
   version: v1.0.0
   title: 'CanDIGv2 Ingest Service'
