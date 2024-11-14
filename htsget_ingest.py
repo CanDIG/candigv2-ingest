@@ -224,10 +224,12 @@ def htsget_ingest(ingest_json, do_not_index=False):
         "errors": {},
         "results": {}
     }
+    program_ids = set()
     to_index = []
     status_code = 200
     for sample in ingest_json:
         logger.debug(f"Ingesting {sample['genomic_file_id']}, do_not_index = {do_not_index}")
+        program_ids.add(sample["program_id"])
         result["errors"][sample["genomic_file_id"]] = []
         # create the corresponding DRS objects
         if "samples" not in sample or len(sample["samples"]) == 0:
@@ -258,6 +260,36 @@ def htsget_ingest(ingest_json, do_not_index=False):
         for url in to_index:
             response = requests.get(url, headers=headers, params={"do_not_index": do_not_index})
 
+    # update completeness stats for program_ids with created samples
+    statistics = {}
+    for program_id in program_ids:
+        url = f"{HTSGET_URL}/htsget/v1/samples"
+        response = requests.get(url, headers=headers, params={"cohort": program_id})
+        if response.status_code == 200:
+            for sample in response.json():
+                if program_id not in statistics:
+                    statistics[program_id] = { 'genomes': 0, 'transcriptomes': 0, 'all': 0 }
+                if len(sample['genomes']) > 0 and len(sample['transcriptomes']) > 0:
+                    statistics[program_id]['all'] += 1
+                if len(sample['genomes']) > 0:
+                    statistics[program_id]['genomes'] += 1
+                if len(sample['transcriptomes']) > 0:
+                    statistics[program_id]['transcriptomes'] += 1
+        else:
+            result["errors"] = f"Could not collect completeness stats for program: {response.text}"
+
+    for program_id in statistics:
+        # get the cohort
+        url = f"{HTSGET_URL}/ga4gh/drs/v1/cohorts"
+        response = requests.get(f"{url}/{program_id}", headers=headers)
+        if response.status_code == 200:
+            cohort = response.json()
+            cohort["statistics"] = statistics[program_id]
+            response = requests.post(url, headers=headers, json=cohort)
+            if response.status_code != 200:
+                result["errors"] = f"Could not add statistics for program: {response.text}"
+        else:
+            result["errors"] = f"Could not add statistics for program: {response.text}"
     return result, status_code
 
 
