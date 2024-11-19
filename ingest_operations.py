@@ -21,7 +21,7 @@ ERROR_CODES = {
     "SUCCESS": 0,
     "UNAUTHORIZED": 1,
     "VALIDATION": 2,
-    "COHORTEXISTS": 3,
+    "PROGRAMEXISTS": 3,
     "INTERNAL": 4,
     "AUTHORIZATIONERR": 5
 }
@@ -31,7 +31,7 @@ def generateResponse(result, response_code):
         0: ("Success", 200),
         1: ("Unauthorized", 403),
         2: ("Validation error", 422),
-        3: ("Cohort exists", 422),
+        3: ("Program exists", 422),
         4: ("Internal CanDIG error", 500),
         5: ("Authorization error", 401)
     }
