@@ -6,7 +6,6 @@ import traceback
 import urllib.parse
 
 import auth
-from ingest_result import *
 import katsu_ingest
 import htsget_ingest
 from opa_ingest import remove_user_from_dataset, add_user_to_dataset
