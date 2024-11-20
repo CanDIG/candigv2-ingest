@@ -20,8 +20,13 @@ def ingest_file(file_path):
     json_data = None
     results = {}
     results_path = os.path.join(DAEMON_PATH, "results", os.path.basename(file_path))
-    with open(file_path) as f:
-        json_data = json.load(f)
+    try:
+        with open(file_path) as f:
+            json_data = json.load(f)
+    except Exception as e:
+        message = f"Couldn't load data from {file_path}: {type(e)} {str(e)}"
+        logger.error(message)
+        results["error"] = message
     if json_data is not None:
         logger.info(f"Ingesting {file_path}")
         if "katsu" in json_data:
