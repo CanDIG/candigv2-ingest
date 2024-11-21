@@ -143,7 +143,7 @@ def get_program_in_opa(program_id, token):
 def list_programs_in_opa(token):
     response, status_code = authx.auth.list_programs_in_opa()
     if status_code == 200:
-        return response
+        return response, 200
     return {"error": response}, status_code
 
 
