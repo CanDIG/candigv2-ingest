@@ -5,7 +5,6 @@ from authx.auth import get_site_admin_token, is_action_allowed_for_program, crea
 import os
 import re
 import json
-from ingest_result import IngestServerException, IngestUserException, IngestResult
 import requests
 import sys
 from urllib.parse import urlparse
@@ -47,7 +46,7 @@ def link_genomic_data(sample, do_not_index=False):
     genomic_drs_obj["id"] = sample["genomic_file_id"]
     genomic_drs_obj["name"] = sample["genomic_file_id"]
     genomic_drs_obj["description"] = sample["metadata"]["sequence_type"]
-    genomic_drs_obj["cohort"] = sample["program_id"]
+    genomic_drs_obj["program"] = sample["program_id"]
     genomic_drs_obj["reference_genome"] = sample["metadata"]["reference"]
     genomic_drs_obj["version"] = "v1"
     if "contents" not in genomic_drs_obj:
@@ -71,7 +70,7 @@ def link_genomic_data(sample, do_not_index=False):
             "id": clin_sample["submitter_sample_id"],
             "name": clin_sample["submitter_sample_id"],
             "description": "sample",
-            "cohort": sample["program_id"],
+            "program": sample["program_id"],
             "version": "v1",
             "contents": []
         }
@@ -149,7 +148,7 @@ def add_file_drs_object(genomic_drs_obj, file, type, headers):
         "id": file['name'],
         "name": file['name'],
         "description": type,
-        "cohort": genomic_drs_obj["cohort"],
+        "program": genomic_drs_obj["program"],
         "version": "v1"
     }
     access_method = get_access_method(file["access_method"])
@@ -264,7 +263,7 @@ def htsget_ingest(ingest_json, do_not_index=False):
     statistics = {}
     for program_id in program_ids:
         url = f"{HTSGET_URL}/htsget/v1/samples"
-        response = requests.get(url, headers=headers, params={"cohort": program_id})
+        response = requests.get(url, headers=headers, params={"program": program_id})
         if response.status_code == 200:
             for sample in response.json():
                 if program_id not in statistics:
@@ -279,13 +278,13 @@ def htsget_ingest(ingest_json, do_not_index=False):
             result["errors"] = f"Could not collect completeness stats for program: {response.text}"
 
     for program_id in statistics:
-        # get the cohort
-        url = f"{HTSGET_URL}/ga4gh/drs/v1/cohorts"
+        # get the program
+        url = f"{HTSGET_URL}/ga4gh/drs/v1/programs"
         response = requests.get(f"{url}/{program_id}", headers=headers)
         if response.status_code == 200:
-            cohort = response.json()
-            cohort["statistics"] = statistics[program_id]
-            response = requests.post(url, headers=headers, json=cohort)
+            program = response.json()
+            program["statistics"] = statistics[program_id]
+            response = requests.post(url, headers=headers, json=program)
             if response.status_code != 200:
                 result["errors"] = f"Could not add statistics for program: {response.text}"
         else:
@@ -355,7 +354,7 @@ def check_genomic_data(dataset, token):
 
 def delete_program(program_id, token):
     headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
-    url = f"{HTSGET_URL}/ga4gh/drs/v1/cohorts/{program_id}"
+    url = f"{HTSGET_URL}/ga4gh/drs/v1/programs/{program_id}"
 
     return requests.delete(url, headers=headers)
 
