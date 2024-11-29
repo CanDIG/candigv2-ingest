@@ -1,5 +1,5 @@
 import connexion
-from flask import request, Flask
+from flask import Flask
 import os
 import re
 import traceback
@@ -40,15 +40,15 @@ def generateResponse(result, response_code):
 
 def get_headers():
     headers = {}
-    if "Authorization" not in request.headers:
+    if "Authorization" not in connexion.request.headers:
         return generateResponse("Bearer token required", ERROR_CODES["UNAUTHORIZED"])
     try:
         # New auth model
-        # refresh_token = request.headers["Authorization"].split("Bearer ")[1]
+        # refresh_token = connexion.request.headers["Authorization"].split("Bearer ")[1]
         # token = auth.get_bearer_from_refresh(refresh_token)
-        if not request.headers["Authorization"].startswith("Bearer "):
+        if not connexion.request.headers["Authorization"].startswith("Bearer "):
             return generateResponse("Invalid bearer token", ERROR_CODES["UNAUTHORIZED"])
-        token = request.headers["Authorization"].split("Bearer ")[1]
+        token = connexion.request.headers["Authorization"].split("Bearer ")[1]
         headers["Authorization"] = "Bearer %s" % token
     except Exception as e:
         if "Invalid bearer token" in str(e):
@@ -83,22 +83,22 @@ def get_service_info():
 # S3 credentials
 ####
 
-def add_s3_credential():
-    data = connexion.request.json
-    token = request.headers['Authorization'].split("Bearer ")[1]
+async def add_s3_credential():
+    data = await connexion.request.json()
+    token = connexion.request.headers['Authorization'].split("Bearer ")[1]
     return auth.store_s3_credential(data["endpoint"], data["bucket"], data["access_key"], data["secret_key"], token)
 
 
 @app.route('/s3-credential/endpoint/<path:endpoint_id>/bucket/<path:bucket_id>')
 def get_s3_credential(endpoint_id, bucket_id):
-    token = request.headers['Authorization'].split("Bearer ")[1]
+    token = connexion.request.headers['Authorization'].split("Bearer ")[1]
     endpoint_cleaned = re.sub(r"\W", "_", endpoint_id)
     return auth.get_s3_credential(endpoint_cleaned, bucket_id, token)
 
 
 @app.route('/s3-credential/endpoint/<path:endpoint_id>/bucket/<path:bucket_id>')
 def delete_s3_credential(endpoint_id, bucket_id):
-    token = request.headers['Authorization'].split("Bearer ")[1]
+    token = connexion.request.headers['Authorization'].split("Bearer ")[1]
     endpoint_cleaned = re.sub(r"\W", "_", endpoint_id)
     return auth.remove_s3_credential(endpoint_cleaned, bucket_id, token)
 
@@ -110,7 +110,7 @@ def delete_s3_credential(endpoint_id, bucket_id):
 @app.route('/site-role/<path:role_type>')
 def list_role(role_type):
     try:
-        token = request.headers['Authorization'].split("Bearer ")[1]
+        token = connexion.request.headers['Authorization'].split("Bearer ")[1]
         result, status_code = auth.get_role_type_in_opa(role_type, token)
         return result, status_code
     except Exception as e:
@@ -118,10 +118,10 @@ def list_role(role_type):
 
 
 @app.route('/site-role/<path:role_type>')
-def update_role(role_type):
-    role_members = connexion.request.json
+async def update_role(role_type):
+    role_members = await connexion.request.json()
     try:
-        token = request.headers['Authorization'].split("Bearer ")[1]
+        token = connexion.request.headers['Authorization'].split("Bearer ")[1]
         result, status_code = auth.set_role_type_in_opa(role_type, role_members, token)
         return result, status_code
     except Exception as e:
@@ -131,7 +131,7 @@ def update_role(role_type):
 @app.route('/site-role/<path:role_type>/email/<path:email>')
 def is_user_in_role(role_type, email):
     try:
-        token = request.headers['Authorization'].split("Bearer ")[1]
+        token = connexion.request.headers['Authorization'].split("Bearer ")[1]
         result, status_code = auth.get_role_type_in_opa(role_type, token)
         if status_code == 200:
             return (email in result[role_type]), 200
@@ -143,7 +143,7 @@ def is_user_in_role(role_type, email):
 @app.route('/site-role/<path:role_type>/email/<path:email>')
 def add_user_to_role(role_type, email):
     try:
-        token = request.headers['Authorization'].split("Bearer ")[1]
+        token = connexion.request.headers['Authorization'].split("Bearer ")[1]
         result, status_code = auth.get_role_type_in_opa(role_type, token)
         if status_code == 200:
             if email not in result[role_type]:
@@ -157,7 +157,7 @@ def add_user_to_role(role_type, email):
 @app.route('/site-role/<path:role_type>/email/<path:email>')
 def remove_user_from_role(role_type, email):
     try:
-        token = request.headers['Authorization'].split("Bearer ")[1]
+        token = connexion.request.headers['Authorization'].split("Bearer ")[1]
         result, status_code = auth.get_role_type_in_opa(role_type, token)
         if status_code == 200:
             if email in result[role_type]:
@@ -173,11 +173,11 @@ def remove_user_from_role(role_type, email):
 # Data ingest
 ####
 
-def add_genomic_linkages():
-    dataset = connexion.request.json
-    do_not_index = bool(connexion.request.args.get("do_not_index", False))
+async def add_genomic_linkages():
+    dataset = await connexion.request.json()
+    do_not_index = bool(connexion.request.query_params.get("do_not_index", False))
     headers = get_headers()
-    token = request.headers['Authorization'].split("Bearer ")[1]
+    token = connexion.request.headers['Authorization'].split("Bearer ")[1]
     response, status_code = htsget_ingest.check_genomic_data(dataset, token)
     if status_code == 200:
         ingest_uuid = add_to_queue({"htsget": response, "do_not_index": do_not_index})
@@ -186,11 +186,11 @@ def add_genomic_linkages():
     return response, status_code
 
 
-def add_clinical_donors():
-    dataset = connexion.request.json
-    batch_size = int(connexion.request.args.get("batch_size", 1000))
+async def add_clinical_donors():
+    dataset = await connexion.request.json()
+    batch_size = int(connexion.request.query_params.get("batch_size", 1000))
     headers = get_headers()
-    token = request.headers['Authorization'].split("Bearer ")[1]
+    token = connexion.request.headers['Authorization'].split("Bearer ")[1]
     response, status_code = katsu_ingest.prep_check_clinical_data(dataset, token, batch_size)
     if status_code == 200:
         ingest_uuid = add_to_queue({"katsu": response})
@@ -227,15 +227,15 @@ def get_ingest_status(queue_id):
 ####
 
 def list_program_authorizations():
-    token = request.headers['Authorization'].split("Bearer ")[1]
+    token = connexion.request.headers['Authorization'].split("Bearer ")[1]
 
     response, status_code = auth.list_programs_in_opa(token)
     return response, status_code
 
 
-def add_program_authorization():
-    program = connexion.request.json
-    token = request.headers['Authorization'].split("Bearer ")[1]
+async def add_program_authorization():
+    program = await connexion.request.json()
+    token = connexion.request.headers['Authorization'].split("Bearer ")[1]
 
     response, status_code = auth.add_program_to_opa(program, token)
     check_default_site_admin(response)
@@ -244,7 +244,7 @@ def add_program_authorization():
 
 @app.route('/program/<path:program_id>')
 def get_program_authorization(program_id):
-    token = request.headers['Authorization'].split("Bearer ")[1]
+    token = connexion.request.headers['Authorization'].split("Bearer ")[1]
 
     response, status_code = auth.get_program_in_opa(program_id, token)
     return response, status_code
@@ -252,7 +252,7 @@ def get_program_authorization(program_id):
 
 @app.route('/program/<path:program_id>')
 def remove_program(program_id):
-    token = request.headers['Authorization'].split("Bearer ")[1]
+    token = connexion.request.headers['Authorization'].split("Bearer ")[1]
     response = {"errors": {}}
     check_default_site_admin(response)
 
@@ -283,7 +283,7 @@ def remove_program(program_id):
 
 @app.route('/program/<path:program_id>/email/<path:email>')
 def add_user_access(program_id, email):
-    token = request.headers['Authorization'].split("Bearer ")[1]
+    token = connexion.request.headers['Authorization'].split("Bearer ")[1]
     try:
         result, status_code = add_user_to_dataset(email, program_id, token)
         return result, status_code
@@ -293,7 +293,7 @@ def add_user_access(program_id, email):
 
 @app.route('/program/<path:program_id>/email/<path:email>')
 def remove_user_access(program_id, email):
-    token = request.headers['Authorization'].split("Bearer ")[1]
+    token = connexion.request.headers['Authorization'].split("Bearer ")[1]
     try:
         result, status_code = remove_user_from_dataset(email, program_id, token)
         return result, status_code
@@ -305,14 +305,14 @@ def remove_user_access(program_id, email):
 ####
 
 def add_pending_user():
-    token = request.headers['Authorization'].split("Bearer ")[1]
+    token = connexion.request.headers['Authorization'].split("Bearer ")[1]
 
     response, status_code = auth.add_pending_user_to_opa(token)
     return response, status_code
 
 
 def list_pending_users():
-    token = request.headers['Authorization'].split("Bearer ")[1]
+    token = connexion.request.headers['Authorization'].split("Bearer ")[1]
 
     response, status_code = auth.list_pending_users_in_opa(token)
     return {"results": response}, status_code
@@ -320,7 +320,7 @@ def list_pending_users():
 
 @app.route('/user/pending/<path:user_id>')
 def approve_pending_user(user_id):
-    token = request.headers['Authorization'].split("Bearer ")[1]
+    token = connexion.request.headers['Authorization'].split("Bearer ")[1]
     user_name = urllib.parse.unquote_plus(user_id)
 
     response, status_code = auth.approve_pending_user_in_opa(user_name, token)
@@ -329,16 +329,16 @@ def approve_pending_user(user_id):
 
 @app.route('/user/pending/<path:user_id>')
 def reject_pending_user(user_id):
-    token = request.headers['Authorization'].split("Bearer ")[1]
+    token = connexion.request.headers['Authorization'].split("Bearer ")[1]
     user_name = urllib.parse.unquote_plus(user_id)
 
     response, status_code = auth.reject_pending_user_in_opa(user_name, token)
     return response, status_code
 
 
-def approve_pending_users():
-    users = connexion.request.json
-    token = request.headers['Authorization'].split("Bearer ")[1]
+async def approve_pending_users():
+    users = await connexion.request.json()
+    token = connexion.request.headers['Authorization'].split("Bearer ")[1]
 
     rejected = []
     for user_id in users:
@@ -353,7 +353,7 @@ def approve_pending_users():
 
 
 def clear_pending_users():
-    token = request.headers['Authorization'].split("Bearer ")[1]
+    token = connexion.request.headers['Authorization'].split("Bearer ")[1]
 
     response, status_code = auth.clear_pending_users_in_opa(token)
     return response, status_code
@@ -364,7 +364,7 @@ def clear_pending_users():
 
 @app.route('/user/<path:user_id>/authorize')
 def list_programs_for_user(user_id):
-    token = request.headers['Authorization'].split("Bearer ")[1]
+    token = connexion.request.headers['Authorization'].split("Bearer ")[1]
     user_name = urllib.parse.unquote_plus(user_id)
     response, status_code = auth.get_user_in_opa(user_name, token)
     if status_code != 200:
@@ -374,9 +374,9 @@ def list_programs_for_user(user_id):
 
 
 @app.route('/user/<path:user_id>/authorize')
-def authorize_program_for_user(user_id):
-    program_dict = connexion.request.json
-    token = request.headers['Authorization'].split("Bearer ")[1]
+async def authorize_program_for_user(user_id):
+    program_dict = await connexion.request.json()
+    token = connexion.request.headers['Authorization'].split("Bearer ")[1]
     user_name = urllib.parse.unquote_plus(user_id)
     response, status_code = auth.get_user_in_opa(user_name, token)
     if status_code != 200:
@@ -395,7 +395,7 @@ def authorize_program_for_user(user_id):
 
 @app.route('/user/<path:user_id>/authorize/<path:program_id>')
 def get_program_for_user(user_id, program_id):
-    token = request.headers['Authorization'].split("Bearer ")[1]
+    token = connexion.request.headers['Authorization'].split("Bearer ")[1]
     user_name = urllib.parse.unquote_plus(user_id)
 
     response, status_code = auth.get_user_in_opa(user_name, token)
@@ -409,7 +409,7 @@ def get_program_for_user(user_id, program_id):
 
 @app.route('/user/<path:user_id>/authorize/<path:program_id>')
 def remove_program_for_user(user_id, program_id):
-    token = request.headers['Authorization'].split("Bearer ")[1]
+    token = connexion.request.headers['Authorization'].split("Bearer ")[1]
     user_name = urllib.parse.unquote_plus(user_id)
 
     response, status_code = auth.get_user_in_opa(user_name, token)
@@ -425,9 +425,9 @@ def remove_program_for_user(user_id, program_id):
 @app.route('/get-token')
 def get_token():
     # Attempt to grab the token via session_id
-    if not hasattr(request, 'cookies'):
+    if not hasattr(connexion.request, 'cookies'):
         return {'error': 'Unable to use the get-token endpoint without cookies'}, 200
-    token = request.cookies['session_id']
+    token = connexion.request.cookies['session_id']
 
     return {"token": token}, 200
 
