@@ -46,6 +46,7 @@ def ingest_file(file_path):
                         results[program_id] = ingest_results
                     except Exception as e:
                         results[program_id] = f"Exception: {type(e)} {str(e)}"
+        os.remove(file_path)
     except Exception as e:
         message = f"Couldn't load data from {file_path}: {type(e)} {str(e)}"
         logger.error(message)
@@ -53,7 +54,6 @@ def ingest_file(file_path):
         status_code = 500
     with open(results_path, "w") as f:
         json.dump(results, f)
-    os.remove(file_path)
     return results, status_code
 
 
