@@ -7,3 +7,4 @@ connexion[flask]
 gunicorn>=23.0.0
 uvicorn[standard]==0.30.6
 werkzeug>=2.3.8 # not directly required, pinned by Snyk to avoid a vulnerability
+watchdog~=4.0.0
