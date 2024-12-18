@@ -317,6 +317,18 @@ paths:
             application/json:
               schema:
                 type: object
+  /user/self_authorize:
+    get:
+      summary: List program authorizations
+      description: List authorizations for programs for the authenticated user
+      operationId: ingest_operations.is_self_authorized
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
   /user/{user_id}/authorize:
     parameters:
       - in: path

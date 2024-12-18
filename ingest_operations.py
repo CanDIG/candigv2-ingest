@@ -362,6 +362,19 @@ def clear_pending_users():
 # DAC authorization for users
 ####
 
+def is_self_authorized():
+    token = connexion.request.headers['Authorization'].split("Bearer ")[1]
+    response, status_code = auth.get_self_in_opa(token)
+    if status_code == 404:
+        # We next check if the user is pending
+        response, status_code = auth.is_self_pending(token)
+        # NB: The results is a string if unauthorized or pending, and a list otherwise
+        return {"results": "Pending" if response else "Unauthorized"}, status_code
+    print(response)
+    # NB: The results is a list if authorized, and a string otherwise
+    return {"results": list(response["programs"].values())}, status_code
+
+
 @app.route('/user/<path:user_id>/authorize')
 def list_programs_for_user(user_id):
     token = connexion.request.headers['Authorization'].split("Bearer ")[1]

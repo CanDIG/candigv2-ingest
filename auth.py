@@ -193,6 +193,16 @@ def list_pending_users_in_opa(token):
     return response, status_code
 
 
+def is_self_pending(token):
+    response, status_code = authx.auth.get_service_store_secret("opa", key=f"pending_users")
+    if status_code == 200:
+        user_name = get_user_name(token)
+        response = user_name in response["pending_users"]
+    else:
+        response = False
+    return response, status_code
+
+
 def approve_pending_user_in_opa(user_name, token):
     if not is_site_admin(token):
         return {"error": f"User not authorized to approve pending users"}, 403
@@ -254,6 +264,12 @@ def get_user_in_opa(user_name, token):
         return {"error": f"User not authorized to view users"}, 403
 
     safe_name = urllib.parse.quote_plus(user_name)
+    response, status_code = authx.auth.get_service_store_secret("opa", key=f"users/{safe_name}")
+    return response, status_code
+
+
+def get_self_in_opa(token):
+    safe_name = urllib.parse.quote_plus(get_user_name(token))
     response, status_code = authx.auth.get_service_store_secret("opa", key=f"users/{safe_name}")
     return response, status_code
 
