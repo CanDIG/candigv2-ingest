@@ -362,15 +362,34 @@ def clear_pending_users():
 # DAC authorization for users
 ####
 
+def list_programs_for_self(token):
+    response, status_code = auth.get_self_in_opa(token)
+    if status_code == 404:
+        # We next check if the user is pending
+        response, status_code = auth.is_self_pending(token)
+        # NB: The results is a string if unauthorized or pending, and a list otherwise
+        return "Pending" if response else "Unauthorized", status_code
+    print(response)
+    # NB: The results is a list if authorized, and a string otherwise
+    return list(response["programs"].values()), status_code
+
+
 @app.route('/user/<path:user_id>/authorize')
 def list_programs_for_user(user_id):
     token = connexion.request.headers['Authorization'].split("Bearer ")[1]
-    user_name = urllib.parse.unquote_plus(user_id)
-    response, status_code = auth.get_user_in_opa(user_name, token)
-    if status_code != 200:
-        return response, status_code
+    response = ""
+    status_code = 0
+    if user_id == "me":
+        # Grab the user's own authorization
+        response, status_code = list_programs_for_self(token)
+    else:
+        user_name = urllib.parse.unquote_plus(user_id)
+        response, status_code = auth.get_user_in_opa(user_name, token)
+        if status_code != 200:
+            return response, status_code
+        response = list(response["programs"].values())
     print(response)
-    return {"results": list(response["programs"].values())}, status_code
+    return {"results": response}, status_code
 
 
 @app.route('/user/<path:user_id>/authorize')

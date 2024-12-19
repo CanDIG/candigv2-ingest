@@ -324,6 +324,7 @@ paths:
         schema:
           type: string
         required: true
+        description: The user ID to check. If "me", return information about the requesting user
     get:
       summary: List program authorizations
       description: List authorizations for programs for a user
