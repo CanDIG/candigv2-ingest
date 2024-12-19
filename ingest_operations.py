@@ -362,7 +362,8 @@ def clear_pending_users():
 # DAC authorization for users
 ####
 
-def is_self_authorized():
+@app.route('/user/self/authorize')
+def list_programs_for_self():
     token = connexion.request.headers['Authorization'].split("Bearer ")[1]
     response, status_code = auth.get_self_in_opa(token)
     if status_code == 404:
