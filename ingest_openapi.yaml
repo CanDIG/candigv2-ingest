@@ -317,18 +317,6 @@ paths:
             application/json:
               schema:
                 type: object
-  /user/self/authorize:
-    get:
-      summary: List own program authorizations
-      description: List authorizations for programs for the authenticated user
-      operationId: ingest_operations.list_programs_for_self
-      responses:
-        200:
-          description: Success
-          content:
-            application/json:
-              schema:
-                type: object
   /user/{user_id}/authorize:
     parameters:
       - in: path
@@ -336,6 +324,7 @@ paths:
         schema:
           type: string
         required: true
+        description: The user ID to check. If "me", return information about the requesting user
     get:
       summary: List program authorizations
       description: List authorizations for programs for a user
