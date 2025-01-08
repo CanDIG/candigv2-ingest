@@ -8,7 +8,6 @@ import urllib.parse
 import auth
 import katsu_ingest
 import htsget_ingest
-from opa_ingest import remove_user_from_dataset, add_user_to_dataset
 import config
 import tempfile
 import uuid
