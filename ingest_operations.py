@@ -282,7 +282,7 @@ def remove_program(program_id):
 
 
 ####
-# Pending users
+# Pending users: approving a pending user creates a CanDIG-authorized user
 ####
 
 def add_pending_user():
@@ -338,6 +338,7 @@ def clear_pending_users():
 
     response, status_code = auth.clear_pending_users_in_opa(token)
     return response, status_code
+
 
 ####
 # DAC authorization for users
@@ -421,6 +422,7 @@ def remove_program_for_user(user_id, program_id):
             response, status_code = auth.write_user_in_opa(response, token)
             return response, status_code
     return {"error": f"No program {program_id} found for user"}, status_code
+
 
 @app.route('/get-token')
 def get_token():
