@@ -281,25 +281,6 @@ def remove_program(program_id):
     return response, 500
 
 
-@app.route('/program/<path:program_id>/email/<path:email>')
-def add_user_access(program_id, email):
-    token = connexion.request.headers['Authorization'].split("Bearer ")[1]
-    try:
-        result, status_code = add_user_to_dataset(email, program_id, token)
-        return result, status_code
-    except Exception as e:
-        return {"error": str(e)}, 500
-
-
-@app.route('/program/<path:program_id>/email/<path:email>')
-def remove_user_access(program_id, email):
-    token = connexion.request.headers['Authorization'].split("Bearer ")[1]
-    try:
-        result, status_code = remove_user_from_dataset(email, program_id, token)
-        return result, status_code
-    except Exception as e:
-        return {"error": str(e)}, 500
-
 ####
 # Pending users
 ####
