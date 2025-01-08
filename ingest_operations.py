@@ -281,27 +281,8 @@ def remove_program(program_id):
     return response, 500
 
 
-@app.route('/program/<path:program_id>/email/<path:email>')
-def add_user_access(program_id, email):
-    token = connexion.request.headers['Authorization'].split("Bearer ")[1]
-    try:
-        result, status_code = add_user_to_dataset(email, program_id, token)
-        return result, status_code
-    except Exception as e:
-        return {"error": str(e)}, 500
-
-
-@app.route('/program/<path:program_id>/email/<path:email>')
-def remove_user_access(program_id, email):
-    token = connexion.request.headers['Authorization'].split("Bearer ")[1]
-    try:
-        result, status_code = remove_user_from_dataset(email, program_id, token)
-        return result, status_code
-    except Exception as e:
-        return {"error": str(e)}, 500
-
 ####
-# Pending users
+# Pending users: approving a pending user creates a CanDIG-authorized user
 ####
 
 def add_pending_user():
@@ -357,6 +338,7 @@ def clear_pending_users():
 
     response, status_code = auth.clear_pending_users_in_opa(token)
     return response, status_code
+
 
 ####
 # DAC authorization for users
@@ -440,6 +422,7 @@ def remove_program_for_user(user_id, program_id):
             response, status_code = auth.write_user_in_opa(response, token)
             return response, status_code
     return {"error": f"No program {program_id} found for user"}, status_code
+
 
 @app.route('/get-token')
 def get_token():

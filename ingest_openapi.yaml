@@ -206,40 +206,6 @@ paths:
             application/json:
               schema:
                 type: object
-  /program/{program_id}/email/{email}:
-    parameters:
-      - in: path
-        name: program_id
-        schema:
-          type: string
-        required: true
-      - in: path
-        name: email
-        schema:
-          type: string
-        required: true
-    post:
-      summary: Add user access for a dataset
-      description: Add user access for a dataset
-      operationId: ingest_operations.add_user_access
-      responses:
-        200:
-          description: Success
-          content:
-            application/json:
-              schema:
-                type: object
-    delete:
-      summary: Delete user access for a dataset
-      description: Delete user access for a dataset
-      operationId: ingest_operations.remove_user_access
-      responses:
-        200:
-          description: Success
-          content:
-            application/json:
-              schema:
-                type: object
   /user/pending/request:
     post:
       summary: Add pending user
