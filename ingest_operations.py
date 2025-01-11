@@ -86,11 +86,16 @@ async def add_s3_credential():
     data = await connexion.request.json()
     token = connexion.request.headers['Authorization'].split("Bearer ")[1]
     return auth.store_s3_credential(data["endpoint"], data["bucket"], data["access_key"], data["secret_key"], token)
+    if not is_action_allowed_for_program(token, method="POST", path="/ingest/s3-credential", program=None):
+        return {"error": "Not authorized to store aws credentials"}, 403
+
 
 
 @app.route('/s3-credential/endpoint/<path:endpoint_id>/bucket/<path:bucket_id>')
 def get_s3_credential(endpoint_id, bucket_id):
     token = connexion.request.headers['Authorization'].split("Bearer ")[1]
+    if not is_action_allowed_for_program(token, method="GET", path="/ingest/s3-credential", program=None):
+        return {"error": "Not authorized to view aws credentials"}, 403
     endpoint_cleaned = re.sub(r"\W", "_", endpoint_id)
     return auth.get_s3_credential(endpoint_cleaned, bucket_id, token)
 
@@ -98,6 +103,8 @@ def get_s3_credential(endpoint_id, bucket_id):
 @app.route('/s3-credential/endpoint/<path:endpoint_id>/bucket/<path:bucket_id>')
 def delete_s3_credential(endpoint_id, bucket_id):
     token = connexion.request.headers['Authorization'].split("Bearer ")[1]
+    if not is_action_allowed_for_program(token, method="DELETE", path="/ingest/s3-credential", program=None):
+        return {"error": "Not authorized to remove aws credentials"}, 403
     endpoint_cleaned = re.sub(r"\W", "_", endpoint_id)
     return auth.remove_s3_credential(endpoint_cleaned, bucket_id, token)
 
@@ -111,6 +118,9 @@ def list_role(role_type):
     try:
         token = connexion.request.headers['Authorization'].split("Bearer ")[1]
         result, status_code = auth.get_role_type_in_opa(role_type, token)
+        if not is_action_allowed_for_program(token, method="GET", path="/ingest/site-role", program=None):
+            return {"error": f"User not authorized to list site roles"}, 403
+
         return result, status_code
     except Exception as e:
         return {"error": str(e)}, 500
@@ -122,6 +132,9 @@ async def update_role(role_type):
     try:
         token = connexion.request.headers['Authorization'].split("Bearer ")[1]
         result, status_code = auth.set_role_type_in_opa(role_type, role_members, token)
+        if not is_action_allowed_for_program(token, method="POST", path="/ingest/site-role", program=None):
+            return {"error": f"User not authorized to update site roles"}, 403
+
         return result, status_code
     except Exception as e:
         return {"error": str(e)}, 500
@@ -132,6 +145,9 @@ def is_user_in_role(role_type, email):
     try:
         token = connexion.request.headers['Authorization'].split("Bearer ")[1]
         result, status_code = auth.get_role_type_in_opa(role_type, token)
+
+        if not is_action_allowed_for_program(token, method="GET", path="/ingest/site-role", program=None):
+            return {"error": f"User not authorized to list site roles"}, 403
         if status_code == 200:
             return (email in result[role_type]), 200
         return result, status_code
@@ -144,6 +160,9 @@ def add_user_to_role(role_type, email):
     try:
         token = connexion.request.headers['Authorization'].split("Bearer ")[1]
         result, status_code = auth.get_role_type_in_opa(role_type, token)
+        if not is_action_allowed_for_program(token, method="POST", path="/ingest/site-role", program=None):
+            return {"error": f"User not authorized to add to site roles"}, 403
+
         if status_code == 200:
             if email not in result[role_type]:
                 result[role_type].append(email)
@@ -158,6 +177,9 @@ def remove_user_from_role(role_type, email):
     try:
         token = connexion.request.headers['Authorization'].split("Bearer ")[1]
         result, status_code = auth.get_role_type_in_opa(role_type, token)
+        if not is_action_allowed_for_program(token, method="GET", path="/ingest/site-role", program=None):
+            return {"error": f"User not authorized to remove users from site roles"}, 403
+
         if status_code == 200:
             if email in result[role_type]:
                 result[role_type].remove(email)
@@ -229,6 +251,9 @@ def list_program_authorizations():
     token = connexion.request.headers['Authorization'].split("Bearer ")[1]
 
     response, status_code = auth.list_programs_in_opa(token)
+    if not is_action_allowed_for_program(token, method="GET", path="/ingest/program", program=None):
+        return {"error": f"User not authorized to add program authorizations for program {program['program_id']}"}, 403
+
     return response, status_code
 
 
@@ -237,6 +262,9 @@ async def add_program_authorization():
     token = connexion.request.headers['Authorization'].split("Bearer ")[1]
 
     response, status_code = auth.add_program_to_opa(program, token)
+    if not is_action_allowed_for_program(token, method="POST", path="/ingest/program", program=program['program_id']):
+        return {"error": f"User not authorized to add program authorizations for program {program['program_id']}"}, 403
+
     check_default_site_admin(response)
     return response, status_code
 
@@ -246,12 +274,18 @@ def get_program_authorization(program_id):
     token = connexion.request.headers['Authorization'].split("Bearer ")[1]
 
     response, status_code = auth.get_program_in_opa(program_id, token)
+    if not authx.auth.is_action_allowed_for_program(token, method="GET", path="/ingest/program", program=program_id):
+        return {"error": f"User not authorized to add program authorizations for program {program_id}"}, 403
+
     return response, status_code
 
 
 @app.route('/program/<path:program_id>')
 def remove_program(program_id):
     token = connexion.request.headers['Authorization'].split("Bearer ")[1]
+
+    if not is_action_allowed_for_program(token, method="DELETE", path="/ingest/program", program=program_id):
+        return {"error": "User not authorized to add program authorizations"}, 403
     response = {"errors": {}}
     check_default_site_admin(response)
 
@@ -293,6 +327,8 @@ def add_pending_user():
 
 def list_pending_users():
     token = connexion.request.headers['Authorization'].split("Bearer ")[1]
+    if not is_site_admin(token):
+        return {"error": f"User not authorized to list pending users"}, 403
 
     response, status_code = auth.list_pending_users_in_opa(token)
     return {"results": response}, status_code
@@ -301,6 +337,9 @@ def list_pending_users():
 @app.route('/user/pending/<path:user_id>')
 def approve_pending_user(user_id):
     token = connexion.request.headers['Authorization'].split("Bearer ")[1]
+    if not is_site_admin(token):
+        return {"error": f"User not authorized to approve pending users"}, 403
+
     user_name = urllib.parse.unquote_plus(user_id)
 
     response, status_code = auth.approve_pending_user_in_opa(user_name, token)
@@ -310,6 +349,9 @@ def approve_pending_user(user_id):
 @app.route('/user/pending/<path:user_id>')
 def reject_pending_user(user_id):
     token = connexion.request.headers['Authorization'].split("Bearer ")[1]
+    if not is_site_admin(token):
+        return {"error": f"User not authorized to reject pending users"}, 403
+
     user_name = urllib.parse.unquote_plus(user_id)
 
     response, status_code = auth.reject_pending_user_in_opa(user_name, token)
@@ -319,6 +361,8 @@ def reject_pending_user(user_id):
 async def approve_pending_users():
     users = await connexion.request.json()
     token = connexion.request.headers['Authorization'].split("Bearer ")[1]
+    if not is_site_admin(token):
+        return {"error": f"User not authorized to approve pending users"}, 403
 
     rejected = []
     for user_id in users:
@@ -336,6 +380,9 @@ def clear_pending_users():
     token = connexion.request.headers['Authorization'].split("Bearer ")[1]
 
     response, status_code = auth.clear_pending_users_in_opa(token)
+    if not is_site_admin(token):
+        return {"error": f"User not authorized to clear pending users"}, 403
+
     return response, status_code
 
 
@@ -366,6 +413,9 @@ def list_programs_for_user(user_id):
     else:
         user_name = urllib.parse.unquote_plus(user_id)
         response, status_code = auth.get_user_in_opa(user_name, token)
+        if not is_action_allowed_for_program(token, method="GET", path="/ingest/user", program=None):
+            return {"error": "User not authorized to list programs for user"}, 403
+
         if status_code != 200:
             return response, status_code
         response = list(response["programs"].values())
@@ -379,6 +429,9 @@ async def authorize_program_for_user(user_id):
     token = connexion.request.headers['Authorization'].split("Bearer ")[1]
     user_name = urllib.parse.unquote_plus(user_id)
     response, status_code = auth.get_user_in_opa(user_name, token)
+
+    if not is_action_allowed_for_program(token, method="POST", path="/ingest/user", program=program_dict["program_id"]):
+        return {"error": "User not authorized to authorize programs for user"}, 403
     if status_code != 200:
         return response, status_code
 
@@ -399,6 +452,9 @@ def get_program_for_user(user_id, program_id):
     user_name = urllib.parse.unquote_plus(user_id)
 
     response, status_code = auth.get_user_in_opa(user_name, token)
+    if not is_action_allowed_for_program(token, method="GET", path="/ingest/user", program=None):
+        return {"error": "User not authorized to get programs for user"}, 403
+
     if status_code != 200:
         return response, status_code
     for p in response["programs"]:
@@ -413,6 +469,9 @@ def remove_program_for_user(user_id, program_id):
     user_name = urllib.parse.unquote_plus(user_id)
 
     response, status_code = auth.get_user_in_opa(user_name, token)
+    if not is_action_allowed_for_program(token, method="DELETE", path="/ingest/user", program=program_id):
+        return {"error": "User not authorized to remove programs for user"}, 403
+
     if status_code != 200:
         return response, status_code
     for p in response["programs"]:
