@@ -246,22 +246,22 @@ def get_ingest_status(queue_id):
 # Program authorizations
 ####
 
-def list_program_authorizations():
+def list_programs():
     token = connexion.request.headers['Authorization'].split("Bearer ")[1]
 
     if not authx.auth.is_action_allowed_for_program(token, method="GET", path="/ingest/program", program=None):
-        return {"error": f"User not authorized to add program authorizations for program {program['program_id']}"}, 403
+        return {"error": f"User not authorized to list programs"}, 403
 
     response, status_code = authx.auth.list_programs_in_opa()
     return response, status_code
 
 
-async def add_program_authorization():
+async def add_program():
     program = await connexion.request.json()
     token = connexion.request.headers['Authorization'].split("Bearer ")[1]
 
     if not authx.auth.is_action_allowed_for_program(token, method="POST", path="/ingest/program", program=program['program_id']):
-        return {"error": f"User not authorized to add program authorizations for program {program['program_id']}"}, 403
+        return {"error": f"User not authorized to add program {program['program_id']}"}, 403
 
     response, status_code = authx.auth.add_program_to_opa(program)
     check_default_site_admin(response)
@@ -269,11 +269,11 @@ async def add_program_authorization():
 
 
 @app.route('/program/<path:program_id>')
-def get_program_authorization(program_id):
+def get_program(program_id):
     token = connexion.request.headers['Authorization'].split("Bearer ")[1]
 
     if not authx.auth.is_action_allowed_for_program(token, method="GET", path="/ingest/program", program=program_id):
-        return {"error": f"User not authorized to add program authorizations for program {program_id}"}, 403
+        return {"error": f"User not authorized to get program {program_id}"}, 403
 
     response, status_code = authx.auth.get_program_in_opa(program_id)
     return response, status_code
@@ -284,7 +284,7 @@ def remove_program(program_id):
     token = connexion.request.headers['Authorization'].split("Bearer ")[1]
 
     if not authx.auth.is_action_allowed_for_program(token, method="DELETE", path="/ingest/program", program=program_id):
-        return {"error": "User not authorized to add program authorizations"}, 403
+        return {"error": "User not authorized to remove programs"}, 403
 
     response = {"errors": {}}
     check_default_site_admin(response)
@@ -390,41 +390,38 @@ def clear_pending_users():
 # DAC authorization for users
 ####
 
-def list_programs_for_self(token):
-    response, status_code = authx.auth.get_user_in_opa(auth.get_user_name(token))
-    if status_code == 404:
-        # We next check if the user is pending
-        response, status_code = authx.auth.is_self_pending(token)
-        # NB: The results is a string if unauthorized or pending, and a list otherwise
-        return "Pending" if response else "Unauthorized", status_code
-    print(response)
-    # NB: The results is a list if authorized, and a string otherwise
-    return list(response["programs"].values()), status_code
-
-
-@app.route('/user/<path:user_id>/authorize')
-def list_programs_for_user(user_id):
+@app.route('/user/<path:user_id>')
+def list_authz_for_user(user_id):
     token = connexion.request.headers['Authorization'].split("Bearer ")[1]
 
     response = ""
     status_code = 0
-    if user_id == "me":
-        # Grab the user's own authorization
-        response, status_code = list_programs_for_self(token)
-    else:
-        if not authx.auth.is_action_allowed_for_program(token, method="GET", path="/ingest/user", program=None):
-            return {"error": "User not authorized to list programs for user"}, 403
+    if not authx.auth.is_action_allowed_for_program(token, method="GET", path=f"/ingest/user/{user_id}", program=None):
+        return {"error": "User not authorized to list programs for user"}, 403
 
-        response, status_code = authx.auth.get_user_in_opa(user_id)
-        if status_code != 200:
-            return response, status_code
-        response = list(response["programs"].values())
-    print(response)
+    if user_id == "me":
+        user_id = authx.auth.get_user_id(request)
+    response, status_code = authx.auth.get_user_in_opa(user_id)
+    if status_code != 200:
+        # We next check if the user is pending
+        response, status_code = authx.auth.is_user_pending(token)
+        # NB: The results is a string if unauthorized or pending, and a list otherwise
+        return "Pending" if response else "Unauthorized", status_code
+    response = list(response["programs"].values())
     return {"results": response}, status_code
 
 
-@app.route('/user/<path:user_id>/authorize')
-async def authorize_program_for_user(user_id):
+@app.route('/user/<path:user_id>')
+def revoke_authz_for_user(user_id):
+    if not authx.auth.is_action_allowed_for_program(token, method="DELETE", path=f"/ingest/user/{user_id}", program=None):
+        return {"error": "User not authorized to revoke authorization for users"}, 403
+
+    response, status_code = authx.auth.remove_user_from_opa(user_id)
+    return response, status_code
+
+
+@app.route('/user/<path:user_id>/dac_authorization')
+async def add_dac_authz_for_user(user_id):
     program_dict = await connexion.request.json()
     token = connexion.request.headers['Authorization'].split("Bearer ")[1]
 
@@ -446,8 +443,8 @@ async def authorize_program_for_user(user_id):
     return response, status_code
 
 
-@app.route('/user/<path:user_id>/authorize/<path:program_id>')
-def get_program_for_user(user_id, program_id):
+@app.route('/user/<path:user_id>/dac_authorization/<path:program_id>')
+def get_dac_authz_for_user(user_id, program_id):
     token = connexion.request.headers['Authorization'].split("Bearer ")[1]
 
     if not authx.auth.is_action_allowed_for_program(token, method="GET", path="/ingest/user", program=None):
@@ -463,7 +460,7 @@ def get_program_for_user(user_id, program_id):
 
 
 @app.route('/user/<path:user_id>/authorize/<path:program_id>')
-def remove_program_for_user(user_id, program_id):
+def remove_dac_authz_for_user(user_id, program_id):
     token = connexion.request.headers['Authorization'].split("Bearer ")[1]
 
     if not authx.auth.is_action_allowed_for_program(token, method="DELETE", path="/ingest/user", program=program_id):
