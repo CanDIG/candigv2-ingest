@@ -439,7 +439,7 @@ async def add_dac_authz_for_user(user_id):
         return all_programs, status_code
     if program_dict["program_id"] not in all_programs:
         return {"error": f"Program {program_dict['program_id']} does not exist in {all_programs}"}
-    response["programs"][program_dict["program_id"]] = program_dict
+    response["dac_authorizations"][program_dict["program_id"]] = program_dict
     response, status_code = authx.auth.write_user_in_opa(response)
     return response, status_code
 
@@ -454,7 +454,7 @@ def get_dac_authz_for_user(user_id, program_id):
     response, status_code = authx.auth.get_user_in_opa(user_id)
     if status_code != 200:
         return response, status_code
-    for p in response["programs"]:
+    for p in response["dac_authorizations"]:
         if p == program_id:
             return p, 200
     return {"error": f"No program {program_id} found for user"}, status_code
@@ -470,9 +470,9 @@ def remove_dac_authz_for_user(user_id, program_id):
     response, status_code = authx.auth.get_user_in_opa(user_id)
     if status_code != 200:
         return response, status_code
-    for p in response["programs"]:
+    for p in response["dac_authorizations"]:
         if p == program_id:
-            response["programs"].pop(program_id)
+            response["dac_authorizations"].pop(program_id)
             response, status_code = authx.auth.write_user_in_opa(response)
             return response, status_code
     return {"error": f"No program {program_id} found for user"}, status_code
