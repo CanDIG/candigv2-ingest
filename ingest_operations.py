@@ -405,18 +405,34 @@ def list_authz_for_user(user_id):
 
     if user_id == "me":
         user_id = authx.auth.get_user_id(request)
-    response, status_code = authx.auth.get_user_in_opa(user_id)
+
+    user_result, status_code = authx.auth.get_user_in_opa(user_id)
     if status_code != 200:
-        # We next check if the user is pending
-        response, status_code = authx.auth.is_user_pending(token)
-        # NB: The results is a string if unauthorized or pending, and a list otherwise
-        return "Pending" if response else "Unauthorized", status_code
-    response = list(response["programs"].values())
-    return {"results": response}, status_code
+        return user_result, status_code
+
+    user_result["site_roles"] = []
+    role_types, status_code = authx.auth.list_role_types_in_opa()
+    if status_code == 200:
+        for role_type in role_types:
+            users, status_code = authx.auth.get_role_type_in_opa(role_type)
+            if user_id in users[role_type]:
+                user_result["site_roles"].append(role_type)
+
+    user_result["program_authorizations"] = {}
+    opa_permissions, status_code = authx.auth.get_opa_permissions(bearer_token=token, user_token=user_result["userinfo"]["sample_jwt"])
+    if status_code == 200:
+        user_result["program_authorizations"]["team_member"] = opa_permissions["team_member_programs"]
+        user_result["program_authorizations"]["program_curator"] = opa_permissions["curator_programs"]
+
+    user_result["program_authorizations"]["dac_authorizations"] = user_result.pop("dac_authorizations")
+
+    return user_result, status_code
 
 
 @app.route('/user/<path:user_id>')
 def revoke_authz_for_user(user_id):
+    token = connexion.request.headers['Authorization'].split("Bearer ")[1]
+
     if not authx.auth.is_action_allowed_for_program(token, method="DELETE", path=f"/ingest/user/{user_id}", program=None):
         return {"error": "User not authorized to revoke authorization for users"}, 403
 
