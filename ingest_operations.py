@@ -391,6 +391,84 @@ def clear_pending_users():
 
 
 ####
+# Preapproved users: If a preapproved user requests to be pending, the user will automatically be approved as a CanDIG-authorized user
+####
+
+def list_preapproved_users():
+    token = connexion.request.headers['Authorization'].split("Bearer ")[1]
+    if not auth.is_site_admin(token):
+        return {"error": f"User not authorized to list preapproved users"}, 403
+
+    response, status_code = authx.auth.list_preapproved_users_in_opa()
+    return {"results": response}, status_code
+
+
+async def add_preapproved_users():
+    users = await connexion.request.json()
+    token = connexion.request.headers['Authorization'].split("Bearer ")[1]
+    if not auth.is_site_admin(token):
+        return {"error": f"User not authorized to add preapproved users"}, 403
+
+    rejected = []
+    for user_id in users:
+        response, status_code = authx.auth.add_preapproved_user_in_opa(user_id)
+        if status_code not in [200, 201]:
+            rejected.append(user_id)
+    if len(rejected) > 0:
+        status_code = 401
+        response = {"message": f"The following requested user IDs could not be added: {rejected}"}
+    else:
+        response = {"message": "Success"}
+    return response, status_code
+
+
+def clear_preapproved_users():
+    token = connexion.request.headers['Authorization'].split("Bearer ")[1]
+
+    if not auth.is_site_admin(token):
+        return {"error": f"User not authorized to clear preapproved users"}, 403
+
+    response, status_code = authx.auth.clear_preapproved_users_in_opa()
+    return response, status_code
+
+
+@app.route('/user/preapproved/<path:user_id>')
+def get_preapproved_user(user_id):
+    token = connexion.request.headers['Authorization'].split("Bearer ")[1]
+    if not auth.is_site_admin(token):
+        return {"error": f"User not authorized to get preapproved users"}, 403
+
+    user_name = urllib.parse.unquote_plus(user_id)
+
+    response, status_code = authx.auth.get_preapproved_user_in_opa(user_name)
+    return response, status_code
+
+
+@app.route('/user/preapproved/<path:user_id>')
+def add_preapproved_user(user_id):
+    token = connexion.request.headers['Authorization'].split("Bearer ")[1]
+    if not auth.is_site_admin(token):
+        return {"error": f"User not authorized to add preapproved users"}, 403
+
+    user_name = urllib.parse.unquote_plus(user_id)
+
+    response, status_code = authx.auth.add_preapproved_user_in_opa(user_name)
+    return response, status_code
+
+
+@app.route('/user/preapproved/<path:user_id>')
+def remove_preapproved_user(user_id):
+    token = connexion.request.headers['Authorization'].split("Bearer ")[1]
+    if not auth.is_site_admin(token):
+        return {"error": f"User not authorized to remove preapproved users"}, 403
+
+    user_name = urllib.parse.unquote_plus(user_id)
+
+    response, status_code = authx.auth.remove_preapproved_user_in_opa(user_name)
+    return response, status_code
+
+
+####
 # DAC authorization for users
 ####
 

@@ -261,6 +261,70 @@ paths:
       responses:
         200:
           description: Success
+  /user/preapproved:
+            get:
+              summary: List preapproved users
+              description: List preapproved users for authorization
+              operationId: ingest_operations.list_preapproved_users
+              responses:
+                200:
+                  description: Success
+                  content:
+                    application/json:
+                      schema:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/UserInfo"
+            post:
+              summary: Add preapproved users
+              description: Add bulk preapproved users for CanDIG access
+              operationId: ingest_operations.add_preapproved_users
+              requestBody:
+                $ref: '#/components/requestBodies/AddPreapprovedUserRequest'
+              responses:
+                200:
+                  description: Success
+            delete:
+              summary: Delete preapproved users
+              description: Clear preapproved users for CanDIG access
+              operationId: ingest_operations.clear_preapproved_users
+              responses:
+                200:
+                  description: Success
+  /user/preapproved/{user_id}:
+    parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: string
+        required: true
+    get:
+      summary: Check preapproved list for user
+      description: Check preapproved list for user
+      operationId: ingest_operations.get_preapproved_user
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserInfo"
+        404:
+          description: User not found
+    post:
+      summary: Add preapproved user
+      description: Add a preapproved user for CanDIG access
+      operationId: ingest_operations.add_preapproved_user
+      responses:
+        200:
+          description: Success
+    delete:
+      summary: Remove preapproved user
+      description: Remove a preapproved user for CanDIG access
+      operationId: ingest_operations.remove_preapproved_user
+      responses:
+        200:
+          description: Success
   /user/{user_id}:
     parameters:
       - in: path
@@ -439,6 +503,13 @@ components:
           schema:
             $ref: "#/components/schemas/Program"
     ApprovePendingUserRequest:
+      content:
+        'application/json':
+          schema:
+            type: array
+            items:
+              type: string
+    AddPreapprovedUserRequest:
       content:
         'application/json':
           schema:
