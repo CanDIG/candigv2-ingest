@@ -430,6 +430,7 @@ async def add_dac_authz_for_user(user_id):
 
     response, status_code = authx.auth.get_user_in_opa(user_id)
     if status_code != 200:
+        # will return 404 if user is not authorized for CanDIG
         return response, status_code
 
     # we need to check to see if the program even exists in the system
