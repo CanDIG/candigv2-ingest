@@ -13,6 +13,10 @@ import config
 import tempfile
 import uuid
 import json
+from candigv2_logging.logging import CanDIGLogger
+
+
+logger = CanDIGLogger(__file__)
 
 
 app = Flask(__name__)
