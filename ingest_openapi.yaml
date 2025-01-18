@@ -100,7 +100,7 @@ paths:
                 type: array
                 items:
                   type: string
-  /site-role/{role_type}/email/{email}:
+  /site-role/{role_type}/user_id/{user_id}:
     parameters:
       - in: path
         name: role_type
@@ -108,7 +108,7 @@ paths:
           type: string
         required: true
       - in: path
-        name: email
+        name: user_id
         schema:
           type: string
         required: true

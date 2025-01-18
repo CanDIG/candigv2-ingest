@@ -142,8 +142,8 @@ async def update_role(role_type):
         return {"error": str(e)}, 500
 
 
-@app.route('/site-role/<path:role_type>/email/<path:email>')
-def is_user_in_role(role_type, email):
+@app.route('/site-role/<path:role_type>/user_id/<path:user_id>')
+def is_user_in_role(role_type, user_id):
     try:
         token = connexion.request.headers['Authorization'].split("Bearer ")[1]
 
@@ -152,14 +152,14 @@ def is_user_in_role(role_type, email):
 
         result, status_code = authx.auth.get_role_type_in_opa(role_type)
         if status_code == 200:
-            return (email in result[role_type]), 200
+            return (user_id in result[role_type]), 200
         return result, status_code
     except Exception as e:
         return {"error": str(e)}, 500
 
 
-@app.route('/site-role/<path:role_type>/email/<path:email>')
-def add_user_to_role(role_type, email):
+@app.route('/site-role/<path:role_type>/user_id/<path:user_id>')
+def add_user_to_role(role_type, user_id):
     try:
         token = connexion.request.headers['Authorization'].split("Bearer ")[1]
         if not authx.auth.is_action_allowed_for_program(token, method="POST", path="/ingest/site-role", program=None):
@@ -167,16 +167,16 @@ def add_user_to_role(role_type, email):
 
         result, status_code = authx.auth.get_role_type_in_opa(role_type)
         if status_code == 200:
-            if email not in result[role_type]:
-                result[role_type].append(email)
+            if user_id not in result[role_type]:
+                result[role_type].append(user_id)
                 result, status_code = authx.auth.set_role_type_in_opa(role_type, result[role_type])
         return result, status_code
     except Exception as e:
         return {"error": str(e)}, 500
 
 
-@app.route('/site-role/<path:role_type>/email/<path:email>')
-def remove_user_from_role(role_type, email):
+@app.route('/site-role/<path:role_type>/user_id/<path:user_id>')
+def remove_user_from_role(role_type, user_id):
     try:
         token = connexion.request.headers['Authorization'].split("Bearer ")[1]
         if not authx.auth.is_action_allowed_for_program(token, method="GET", path="/ingest/site-role", program=None):
@@ -184,11 +184,11 @@ def remove_user_from_role(role_type, email):
 
         result, status_code = authx.auth.get_role_type_in_opa(role_type)
         if status_code == 200:
-            if email in result[role_type]:
-                result[role_type].remove(email)
+            if user_id in result[role_type]:
+                result[role_type].remove(user_id)
                 result, status_code = authx.auth.set_role_type_in_opa(role_type, result[role_type])
             else:
-                return {"error": f"User {email} not found in role {role_type}"}, 404
+                return {"error": f"User {user_id} not found in role {role_type}"}, 404
         return result, status_code
     except Exception as e:
         return {"error": str(e)}, 500
