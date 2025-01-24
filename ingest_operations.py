@@ -482,7 +482,7 @@ def list_authz_for_user(user_id):
         return {"error": "User not authorized to list programs for user"}, 403
 
     if user_id == "me":
-        user_id = authx.auth.get_user_id(request)
+        user_id = authx.auth.get_user_id(connexion.request)
 
     user_result, status_code = authx.auth.get_user_in_opa(user_id)
     if status_code != 200:
