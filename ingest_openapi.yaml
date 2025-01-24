@@ -247,6 +247,18 @@ paths:
         schema:
           type: string
         required: true
+        description: The user ID to check. If "me", return information about the requesting user
+    get:
+      summary: Is a user pending?
+      description: Is a user pending?
+      operationId: ingest_operations.is_user_pending
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: boolean
     post:
       summary: Approve pending user
       description: Approve a pending user for CanDIG access
@@ -262,35 +274,35 @@ paths:
         200:
           description: Success
   /user/preapproved:
-            get:
-              summary: List preapproved users
-              description: List preapproved users for authorization
-              operationId: ingest_operations.list_preapproved_users
-              responses:
-                200:
-                  description: Success
-                  content:
-                    application/json:
-                      schema:
-                        type: array
-                        items:
-                          $ref: "#/components/schemas/UserInfo"
-            post:
-              summary: Add preapproved users
-              description: Add bulk preapproved users for CanDIG access
-              operationId: ingest_operations.add_preapproved_users
-              requestBody:
-                $ref: '#/components/requestBodies/AddPreapprovedUserRequest'
-              responses:
-                200:
-                  description: Success
-            delete:
-              summary: Delete preapproved users
-              description: Clear preapproved users for CanDIG access
-              operationId: ingest_operations.clear_preapproved_users
-              responses:
-                200:
-                  description: Success
+    get:
+      summary: List preapproved users
+      description: List preapproved users for authorization
+      operationId: ingest_operations.list_preapproved_users
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserInfo"
+    post:
+      summary: Add preapproved users
+      description: Add bulk preapproved users for CanDIG access
+      operationId: ingest_operations.add_preapproved_users
+      requestBody:
+        $ref: '#/components/requestBodies/AddPreapprovedUserRequest'
+      responses:
+        200:
+          description: Success
+    delete:
+      summary: Delete preapproved users
+      description: Clear preapproved users for CanDIG access
+      operationId: ingest_operations.clear_preapproved_users
+      responses:
+        200:
+          description: Success
   /user/preapproved/{user_id}:
     parameters:
       - in: path

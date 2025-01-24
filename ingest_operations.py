@@ -339,6 +339,23 @@ def list_pending_users():
 
 
 @app.route('/user/pending/<path:user_id>')
+def is_user_pending(user_id):
+    token = connexion.request.headers['Authorization'].split("Bearer ")[1]
+    if not authx.auth.is_action_allowed_for_program(token, method="GET", path=f"/ingest/user/pending/{user_id}", program=None):
+        return {"error": "User not authorized to list programs for user"}, 403
+
+    if user_id == "me":
+        user_id = authx.auth.get_user_id(connexion.request)
+
+    user_name = urllib.parse.unquote_plus(user_id)
+
+    pending_users, status_code = authx.auth.list_pending_users_in_opa()
+    if status_code == 200:
+        return user_name in pending_users
+    return False, 404
+
+
+@app.route('/user/pending/<path:user_id>')
 def approve_pending_user(user_id):
     token = connexion.request.headers['Authorization'].split("Bearer ")[1]
     if not auth.is_site_admin(token):
@@ -482,7 +499,7 @@ def list_authz_for_user(user_id):
         return {"error": "User not authorized to list programs for user"}, 403
 
     if user_id == "me":
-        user_id = authx.auth.get_user_id(request)
+        user_id = authx.auth.get_user_id(connexion.request)
 
     user_result, status_code = authx.auth.get_user_in_opa(user_id)
     if status_code != 200:
