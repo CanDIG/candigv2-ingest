@@ -4,8 +4,7 @@ import os
 import traceback
 from http import HTTPStatus
 import requests
-import auth
-from authx.auth import get_site_admin_token, create_service_token, is_action_allowed_for_program
+from authx.auth import get_site_admin_token, create_service_token, is_action_allowed_for_program, get_program_in_opa
 from clinical_etl.mohschemav3 import MoHSchemaV3
 from candigv2_logging.logging import initialize, CanDIGLogger
 
@@ -277,7 +276,7 @@ def prep_check_clinical_data(ingest_json, token, batch_size):
     for program_id in schemas_to_ingest.keys():
         result["errors"][program_id] = []
         program = schemas_to_ingest[program_id]
-        response, status_code = auth.get_program_in_opa(program_id, token)
+        response, status_code = get_program_in_opa(program_id)
         if status_code > 300:
             result["errors"][program_id].append({"not found": "No program authorization exists"})
         if not is_action_allowed_for_program(token, method="POST", path="/v3/ingest/programs/", program=program_id):

@@ -29,7 +29,7 @@ pip install -r requirements.txt
 ### Getting a bearer token
 <details><summary> </summary>
 
-Users can obtain a bearer token by logging into the CanDIG data portal, clicking the cog in the top right corner, clicking `*** Get API Token` and clicking the token to copy it. 
+Users can obtain a bearer token by logging into the CanDIG data portal, clicking the cog in the top right corner, clicking `*** Get API Token` and clicking the token to copy it.
 
 Site administrators or users using a local candig install can also obtain a token programmatically using the following curl commands from the CanDIGv2 repo:
 
@@ -59,7 +59,7 @@ export TOKEN=$(echo $CURL_OUTPUT | grep -Eo 'access_token":"[a-zA-Z0-9._\-]+' | 
 
 Programs need to be registered before any data can be ingested. Initial program registration can be done by either a site admin or site curator. More information about assigning [site admins](#4-adding-or-removing-site-administrators) and [site curators](#5-adding-or-removing-site-curators) is in sections 4 and 5 below.
 
-To register a program, use the `/ingest/program/` [endpoint](https://github.com/CanDIG/candigv2-ingest/blob/4257929feca00be0d4384433793fcdf1b4e4137b/ingest_openapi.yaml#L114) to add, update, or delete authorization information for a program. Authorization headers for a site admin or site curator user must be provided. A POST request replaces a program authorization, while a DELETE request revokes it. 
+To register a program, use the `/ingest/program/` [endpoint](https://github.com/CanDIG/candigv2-ingest/blob/4257929feca00be0d4384433793fcdf1b4e4137b/ingest_openapi.yaml#L114) to add, update, or delete authorization information for a program. Authorization headers for a site admin or site curator user must be provided. A POST request replaces a program authorization, while a DELETE request revokes it.
 
 During program registration, users can be assigned one of two levels of authorization:
 * Team members are researchers of a program and are authorized to read and access all donor-specific data for a program.
@@ -314,28 +314,3 @@ options:
   --TMP TMP  Directory to temporarily clone the mohccn-synthetic-data repo.
 
 ```
-
-<!--- ## Authorizing users for the new dataset
-
-> [!WARNING]
-> OPA ingest is currently not functional, so these instructions will not work.
-Create a new access.json file:
-
-```bash
-python opa_ingest.py --dataset <dataset> --userfile <user file> > access.json
-```
-
-Alternately, you can add a single user:
-
-```bash
-python opa_ingest.py --dataset <dataset> --user <user email> > access.json
-```
-
-If you're running OPA in the CanDIGv2 Docker stack, you should copy the file to the Docker volume to persist the change between restarts:
-
-```bash
-docker cp access.json candigv2_opa_1:/app/permissions_engine/access.json
-```
-
-Restart the OPA container to take effect
---->

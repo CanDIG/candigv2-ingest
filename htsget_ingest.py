@@ -1,7 +1,6 @@
 import argparse
 
-import auth
-from authx.auth import get_site_admin_token, is_action_allowed_for_program, create_service_token
+from authx.auth import get_site_admin_token, is_action_allowed_for_program, create_service_token, get_program_in_opa
 import os
 import re
 import json
@@ -311,7 +310,7 @@ def check_genomic_data(dataset, token):
     for program_id in by_program.keys():
         if program_id not in result["errors"]:
             result["errors"][program_id] = []
-        response, status_code = auth.get_program_in_opa(program_id, token)
+        response, status_code = get_program_in_opa(program_id)
         if status_code > 300:
             result["errors"][program_id].append({"not found": "No program authorization exists"})
         elif not is_action_allowed_for_program(token, method="POST", path="/ga4gh/drs/v1/objects", program=program_id):
