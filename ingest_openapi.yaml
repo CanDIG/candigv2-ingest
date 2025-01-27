@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  version: v1.1.0
+  version: v1.0.0
   title: 'CanDIGv2 Ingest Service'
   description: 'API for ingesting data into the CanDIG stack'
 paths:
@@ -29,7 +29,7 @@ paths:
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/S3Credential'
+                  type: object
   /s3-credential/endpoint/{endpoint_id}/bucket/{bucket_id}:
     parameters:
       - in: path
@@ -52,7 +52,7 @@ paths:
             content:
               application/json:
                 schema:
-                  $ref: "#/components/schemas/S3Credential"
+                  type: object
     delete:
       summary: delete credentials for an S3 bucket
       description: delete credentials for an S3 bucket
@@ -82,9 +82,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  type: string
+                type: object
     post:
       summary: Assign users to role
       description: Assign users to role
@@ -97,10 +95,8 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  type: string
-  /site-role/{role_type}/user_id/{user_id}:
+                type: object
+  /site-role/{role_type}/email/{email}:
     parameters:
       - in: path
         name: role_type
@@ -108,7 +104,7 @@ paths:
           type: string
         required: true
       - in: path
-        name: user_id
+        name: email
         schema:
           type: string
         required: true
@@ -133,9 +129,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  type: string
+                type: object
     delete:
       summary: Remove user from role
       description: Remove user from role
@@ -143,37 +137,47 @@ paths:
       responses:
         200:
           description: Success
+          content:
+            application/json:
+              schema:
+                type: object
         404:
           description: User not found in role
+          content:
+            application/json:
+              schema:
+                type: object
         405:
           description: Can't remove user from role
+          content:
+            application/json:
+              schema:
+                type: object
   /program:
     post:
       summary: Add authorization information for a new program
       description: Add authorization information for a new program
-      operationId: ingest_operations.add_program
+      operationId: ingest_operations.add_program_authorization
       requestBody:
-        $ref: '#/components/requestBodies/ProgramIngestRequest'
+        $ref: '#/components/requestBodies/ProgramAuthorizationRequest'
       responses:
           200:
             description: Success
             content:
               application/json:
                 schema:
-                  $ref: "#/components/schemas/Program"
+                  type: object
     get:
       summary: List registered programs
       description: List programs authorized on server
-      operationId: ingest_operations.list_programs
+      operationId: ingest_operations.list_program_authorizations
       responses:
         200:
           description: Success
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Program"
+                type: object
   /program/{program_id}:
     parameters:
       - in: path
@@ -184,14 +188,14 @@ paths:
     get:
       summary: Get authorization information for a program
       description: Get authorization information for a program
-      operationId: ingest_operations.get_program
+      operationId: ingest_operations.get_program_authorization
       responses:
         200:
           description: Success
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Program"
+                type: object
     delete:
       description: Delete a program
       operationId: ingest_operations.remove_program
@@ -201,7 +205,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Program"
+                type: object
   /user/pending/request:
     post:
       summary: Add pending user
@@ -210,6 +214,10 @@ paths:
       responses:
         200:
           description: Success
+          content:
+            application/json:
+              schema:
+                type: object
   /user/pending:
     get:
       summary: List pending users
@@ -221,18 +229,20 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/UserInfo"
+                type: object
     post:
       summary: Approve pending users
       description: Approve bulk pending users for CanDIG access
       operationId: ingest_operations.approve_pending_users
       requestBody:
-        $ref: '#/components/requestBodies/ApprovePendingUserRequest'
+        $ref: '#/components/requestBodies/PendingUsersAuthorizationRequest'
       responses:
         200:
           description: Success
+          content:
+            application/json:
+              schema:
+                type: object
     delete:
       summary: Delete pending users
       description: Clear pending users for CanDIG access
@@ -240,6 +250,10 @@ paths:
       responses:
         200:
           description: Success
+          content:
+            application/json:
+              schema:
+                type: object
   /user/pending/{user_id}:
     parameters:
       - in: path
@@ -247,18 +261,6 @@ paths:
         schema:
           type: string
         required: true
-        description: The user ID to check. If "me", return information about the requesting user
-    get:
-      summary: Is a user pending?
-      description: Is a user pending?
-      operationId: ingest_operations.is_user_pending
-      responses:
-        200:
-          description: Success
-          content:
-            application/json:
-              schema:
-                type: boolean
     post:
       summary: Approve pending user
       description: Approve a pending user for CanDIG access
@@ -266,6 +268,10 @@ paths:
       responses:
         200:
           description: Success
+          content:
+            application/json:
+              schema:
+                type: object
     delete:
       summary: Reject pending user
       description: Reject a pending user for CanDIG access
@@ -273,71 +279,11 @@ paths:
       responses:
         200:
           description: Success
-  /user/preapproved:
-    get:
-      summary: List preapproved users
-      description: List preapproved users for authorization
-      operationId: ingest_operations.list_preapproved_users
-      responses:
-        200:
-          description: Success
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/UserInfo"
-    post:
-      summary: Add preapproved users
-      description: Add bulk preapproved users for CanDIG access
-      operationId: ingest_operations.add_preapproved_users
-      requestBody:
-        $ref: '#/components/requestBodies/AddPreapprovedUserRequest'
-      responses:
-        200:
-          description: Success
-    delete:
-      summary: Delete preapproved users
-      description: Clear preapproved users for CanDIG access
-      operationId: ingest_operations.clear_preapproved_users
-      responses:
-        200:
-          description: Success
-  /user/preapproved/{user_id}:
-    parameters:
-      - in: path
-        name: user_id
-        schema:
-          type: string
-        required: true
-    get:
-      summary: Check preapproved list for user
-      description: Check preapproved list for user
-      operationId: ingest_operations.get_preapproved_user
-      responses:
-        200:
-          description: Success
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/UserInfo"
-        404:
-          description: User not found
-    post:
-      summary: Add preapproved user
-      description: Add a preapproved user for CanDIG access
-      operationId: ingest_operations.add_preapproved_user
-      responses:
-        200:
-          description: Success
-    delete:
-      summary: Remove preapproved user
-      description: Remove a preapproved user for CanDIG access
-      operationId: ingest_operations.remove_preapproved_user
-      responses:
-        200:
-          description: Success
-  /user/{user_id}:
+                type: object
+  /user/{user_id}/authorize:
     parameters:
       - in: path
         name: user_id
@@ -346,46 +292,30 @@ paths:
         required: true
         description: The user ID to check. If "me", return information about the requesting user
     get:
-      summary: List authorization information about a user
-      description: List authorization information about a user
-      operationId: ingest_operations.list_authz_for_user
+      summary: List program authorizations
+      description: List authorizations for programs for a user
+      operationId: ingest_operations.list_programs_for_user
       responses:
         200:
           description: Success
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UserAuthorization"
-        403:
-          description: User not found
-    delete:
-      summary: Revoke CanDIG authorization for a user
-      description: Revoke CanDIG authorization for a user
-      operationId: ingest_operations.revoke_authz_for_user
-      responses:
-        200:
-          description: Success
-  /user/{user_id}/dac_authorization:
-    parameters:
-      - in: path
-        name: user_id
-        schema:
-          type: string
-        required: true
+                type: object
     post:
       summary: Authorize a program for a user
       description: Authorize a program for a user (or update a program auth for a user)
-      operationId: ingest_operations.add_dac_authz_for_user
+      operationId: ingest_operations.authorize_program_for_user
       requestBody:
-        $ref: '#/components/requestBodies/DACAuthorizationRequest'
+        $ref: '#/components/requestBodies/UserProgramAuthorizationRequest'
       responses:
         200:
           description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserAuthorization'
-  /user/{user_id}/dac_authorization/{program_id}:
+                type: object
+  /user/{user_id}/authorize/{program_id}:
     parameters:
       - in: path
         name: user_id
@@ -398,23 +328,27 @@ paths:
           type: string
         required: true
     get:
-      summary: Get a DAC authorization for a user
-      description: Remove a DAC authorization for a user
-      operationId: ingest_operations.get_dac_authz_for_user
+      summary: Get program authorization for a user
+      description: Get authorization for a program for a user
+      operationId: ingest_operations.get_program_for_user
       responses:
         200:
           description: Success
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DACAuthorization"
+                type: object
     delete:
-      summary: Remove a DAC authorization for a user
-      description: Remove a DAC authorization for a user
-      operationId: ingest_operations.remove_dac_authz_for_user
+      summary: Remove a program authorization for a user
+      description: Remove a program for a user
+      operationId: ingest_operations.remove_program_for_user
       responses:
         200:
           description: Success
+          content:
+            application/json:
+              schema:
+                type: object
   /genomic:
     post:
       summary: Ingest Genomic data
@@ -487,16 +421,33 @@ paths:
             application/json:
               schema:
                 type: object
-                properties:
-                  token:
-                    type: string
 components:
   requestBodies:
     S3CredentialRequest:
       content:
         'application/json':
           schema:
-            $ref: "#/components/schemas/S3Credential"
+            type: object
+            properties:
+              endpoint:
+                type: string
+                description: URL to the endpoint
+                pattern: (https*):\/\/(.+)
+                example: http://candig.docker.internal:9000
+              bucket:
+                type: string
+                description: name of the bucket
+              access_key:
+                type: string
+                description: access key for the bucket
+              secret_key:
+                type: string
+                description: secret key for the bucket
+            required:
+              - endpoint
+              - bucket
+              - access_key
+              - secret_key
     GenomicIngestRequest:
       content:
         'application/json':
@@ -509,19 +460,12 @@ components:
         'application/json':
           schema:
             $ref: "#/components/schemas/ClinicalDonor"
-    ProgramIngestRequest:
+    ProgramAuthorizationRequest:
       content:
         'application/json':
           schema:
-            $ref: "#/components/schemas/Program"
-    ApprovePendingUserRequest:
-      content:
-        'application/json':
-          schema:
-            type: array
-            items:
-              type: string
-    AddPreapprovedUserRequest:
+            $ref: "#/components/schemas/ProgramAuthorization"
+    PendingUsersAuthorizationRequest:
       content:
         'application/json':
           schema:
@@ -535,34 +479,12 @@ components:
             type: array
             items:
               type: string
-    DACAuthorizationRequest:
+    UserProgramAuthorizationRequest:
       content:
         'application/json':
           schema:
-            $ref: "#/components/schemas/DACAuthorization"
+            $ref: "#/components/schemas/Program"
   schemas:
-    S3Credential:
-      type: object
-      properties:
-        endpoint:
-          type: string
-          description: URL to the endpoint
-          pattern: (https*):\/\/(.+)
-          example: http://candig.docker.internal:9000
-        bucket:
-          type: string
-          description: name of the bucket
-        access_key:
-          type: string
-          description: access key for the bucket
-        secret_key:
-          type: string
-          description: secret key for the bucket
-      required:
-        - endpoint
-        - bucket
-        - access_key
-        - secret_key
     ClinicalDonor:
       type: object
       properties:
@@ -716,9 +638,9 @@ components:
       required:
         - submitter_sample_id
         - genomic_file_sample_id
-    Program:
+    ProgramAuthorization:
       type: object
-      description: Describes a program
+      description: Describes who is allowed to access a program
       properties:
         program_id:
           type: string
@@ -740,7 +662,7 @@ components:
         - program_id
         - program_curators
         - team_members
-    DACAuthorization:
+    Program:
       type: object
       properties:
         program_id:
@@ -753,7 +675,7 @@ components:
         - program_id
         - start_date
         - end_date
-    UserInfo:
+    User:
       type: object
       description: describes an authenticated user
       properties:
@@ -765,31 +687,22 @@ components:
           description: unique id of user, from CANDIG_USER_KEY field
       required:
         - user_name
-    UserAuthorization:
+    PendingUsers:
+      type: array
+      description: a list of Users that are pending approval for access to this CanDIG node
+      items:
+        $ref: "#/components/schemas/User"
+    UserProgramAuthorization:
       type: object
       description: describes an authorized user and the programs the user is authorized to view
       properties:
-        userinfo:
-          $ref: "#/components/schemas/UserInfo"
-        site_roles:
+        user:
+          $ref: "#/components/schemas/User"
+        programs:
           type: array
+          description: list of programs that this user is authorized to view
           items:
-            type: string
-        program_authorizations:
-          type: object
-          properties:
-            team_member:
-              type: array
-              description: list of programs that the user is a team member of
-              items:
-                type: string
-            program_curator:
-              type: array
-              description: list of programs that the user is a curator of
-              items:
-                type: string
-            dac_authorizations:
-              type: array
-              description: list of programs that this user is authorized to view
-              items:
-                $ref: "#/components/schemas/DACAuthorization"
+            $ref: "#/components/schemas/Program"
+      required:
+        - user
+        - programs
