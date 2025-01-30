@@ -27,7 +27,7 @@ def ingest_file(file_path):
                 programs = list(json_data.keys())
                 for program_id in programs:
                     try:
-                        ingest_results, status_code = ingest_schemas(json_data[program_id]["schemas"])
+                        ingest_results, status_code = ingest_schemas(json_data[program_id]["schemas"], results_path=results_path, result_dict=results, program_id=program_id)
                         results[program_id] = ingest_results
                     except Exception as e:
                         results[program_id] = f"Exception: {type(e)} {str(e)}"

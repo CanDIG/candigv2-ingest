@@ -53,8 +53,11 @@ def read_json(file_path):
 
 
 ## This will be called by the daemon
-def ingest_schemas(fields, batch_size=1000):
+def ingest_schemas(fields, batch_size=1000, results_path=None, result_dict=None, program_id=None):
     result = {"errors": [], "results": []}
+
+    if result_dict is not None and program_id is not None:
+            result_dict[program_id] = result
 
     # Use service token to authenticate this with katsu
     headers = {
@@ -102,6 +105,10 @@ def ingest_schemas(fields, batch_size=1000):
             result["results"].append(
                 f"Of {total_count} {type}, {created_count} were created"
             )
+        if results_path is not None and result_dict is not None:
+            with open(results_path, "w") as f:
+                json.dump(result_dict, f)
+
     return result, response.status_code
 
 
