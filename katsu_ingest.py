@@ -102,9 +102,10 @@ def ingest_schemas(fields, batch_size=1000, results_path=None, result_dict=None,
                     if type == "programs" and "unique" in response.text:
                         # this is still okay to return 200:
                         return result, 200
-            result["results"].append(
-                f"Of {total_count} {type}, {created_count} were created"
-            )
+            if type != "programs": # don't update about program; this seems redundant
+                result["results"].append(
+                    f"Of {total_count} {type}, {created_count} were created"
+                )
         if results_path is not None and result_dict is not None:
             with open(results_path, "w") as f:
                 json.dump(result_dict, f)
