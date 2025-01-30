@@ -229,9 +229,6 @@ def prepare_clinical_data_for_ingest(ingest_json):
         errors = by_program[program_id]["errors"]
         logger.info(f"Validating input for program {program_id}")
         schema.validate_ingest_map(by_program[program_id])
-        if len(schema.validation_warnings) > 0:
-            logger.info("Validation returned warnings:")
-            logger.info("\n".join(schema.validation_warnings))
         if len(schema.validation_errors) > 0:
             errors.append([str(line) for line in schema.validation_errors])
             continue
