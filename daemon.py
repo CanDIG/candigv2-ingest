@@ -43,6 +43,7 @@ def ingest_file(file_path):
                         results[program_id] = ingest_results
                     except Exception as e:
                         results[program_id] = f"Exception: {type(e)} {str(e)}"
+            results["complete"] = True
         os.remove(file_path)
     except Exception as e:
         message = f"Couldn't load data from {file_path}: {type(e)} {str(e)}"

@@ -470,7 +470,13 @@ paths:
       operationId: ingest_operations.get_ingest_status
       responses:
         200:
-          description: Success
+          description: Ingest in progress
+          content:
+            application/json:
+              schema:
+                type: object
+        201:
+          description: Ingest completed
           content:
             application/json:
               schema:

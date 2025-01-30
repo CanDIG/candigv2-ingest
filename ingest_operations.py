@@ -241,6 +241,9 @@ def get_ingest_status(queue_id):
         with open(results_path) as f:
             json_data = json.load(f)
             # os.remove(results_path)
+            if "complete" in json_data:
+                json_data.pop("complete")
+                return json_data, 201
             return json_data, 200
     except:
         return {"error": f"no such queue_id {queue_id}"}, 404
