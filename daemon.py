@@ -8,9 +8,6 @@ from katsu_ingest import ingest_schemas
 from htsget_ingest import htsget_ingest
 
 
-KATSU_URL = os.environ.get("KATSU_URL")
-
-
 logger = CanDIGLogger(__file__)
 
 initialize()
