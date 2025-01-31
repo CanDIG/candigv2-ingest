@@ -52,6 +52,8 @@ def link_genomic_data(sample, do_not_index=False):
 
     # add GenomicDataDrsObject to contents
     response = add_file_drs_object(genomic_drs_obj, sample["main"], sample["metadata"]["data_type"], headers)
+    result["name"] = response["name"]
+    result["id"] = response["id"]
     if "error" in response:
         result["errors"].append(response["error"])
         return result
@@ -146,16 +148,17 @@ def add_file_drs_object(genomic_drs_obj, file, type, headers):
         "program": genomic_drs_obj["program"],
         "version": "v1"
     }
-    access_method = get_access_method(file["access_method"])
-    if access_method is not None:
-        if "message" in access_method:
-            return {"error": access_method["message"]}
-        obj["access_methods"].append(access_method)
     contents_obj = {
         "name": file["name"],
         "id": type,
         "drs_uri": [f"{DRS_HOST_URL}/{file['name']}"]
     }
+    access_method = get_access_method(file["access_method"])
+    if access_method is not None:
+        if "message" in access_method:
+            contents_obj["error"] = access_method["message"]
+            return contents_obj
+        obj["access_methods"].append(access_method)
 
     # is this file already in the master object? If so, replace it:
     not_found = True
@@ -169,7 +172,7 @@ def add_file_drs_object(genomic_drs_obj, file, type, headers):
         genomic_drs_obj["contents"].append(contents_obj)
     response = requests.post(url, json=obj, headers=headers)
     if response.status_code > 200:
-        return {"error": f"error creating file drs object: {response.status_code} {response.text}"}
+        contents_obj["error"] =  f"error creating file drs object: {response.status_code} {response.text}"
     return contents_obj
 
 
@@ -223,7 +226,6 @@ def parse_s3_url(url):
 
 def htsget_ingest(ingest_json, do_not_index=False, results_path=None, result_dict=None):
     result = {
-        "errors": {},
         "results": []
     }
     program_ids = set()
@@ -235,18 +237,15 @@ def htsget_ingest(ingest_json, do_not_index=False, results_path=None, result_dic
 
         logger.debug(f"Ingesting {sample['genomic_file_id']}, do_not_index = {do_not_index}")
         program_ids.add(sample["program_id"])
-        result["results"].append(f"processing genomic file {sample["genomic_file_id"]}...")
+        result["results"].append(f"processing experiment {sample["genomic_file_id"]}...")
 
         if results_path is not None and result_dict is not None:
             with open(results_path, "w") as f:
                 json.dump(result_dict, f)
 
-        if sample["genomic_file_id"] not in result["errors"]:
-            result["errors"][sample["genomic_file_id"]] = []
-
         # create the corresponding DRS objects
         if "samples" not in sample or len(sample["samples"]) == 0:
-            result["errors"][sample["genomic_file_id"]].append("No samples were specified for the genomic file mapping")
+            result["results"][-1] = f"error processing experiment {sample["genomic_file_id"]}: No samples were specified"
             break
         response = link_genomic_data(sample, do_not_index)
 
@@ -255,18 +254,17 @@ def htsget_ingest(ingest_json, do_not_index=False, results_path=None, result_dic
 
         if len(response["errors"]) > 0:
             for err in response["errors"]:
-                result["errors"][sample["genomic_file_id"]].append(err)
                 if "403" in err:
                     status_code = 403
                     break
-        if len(result["errors"][sample["genomic_file_id"]]) == 0:
-            result["errors"].pop(sample["genomic_file_id"])
-        response.pop("errors")
+                result["results"].append(f"error processing {response["id"]} {response["name"]} in experiment {sample["genomic_file_id"]}: {err}")
+        else:
+            result["results"].append(f"processed {response["id"]} {response["name"]} for experiment {sample["genomic_file_id"]}")
+
         if "to_index" in response:
             to_index.extend(response.pop("to_index"))
-        if len(response) > 0:
-            for key in response.keys():
-                result["results"].append(f"wrote {key} to genomic file {sample["genomic_file_id"]}")
+
+    result["errors"] = []
     # Use service token to authenticate this with htsget
     headers = {}
     if not IS_TESTING:
@@ -296,7 +294,7 @@ def htsget_ingest(ingest_json, do_not_index=False, results_path=None, result_dic
                 if len(sample['transcriptomes']) > 0:
                     statistics[program_id]['transcriptomes'] += 1
         else:
-            result["errors"] = f"Could not collect completeness stats for program: {response.text}"
+            result["errors"].append(f"Could not collect completeness stats for program: {response.text}")
 
     for program_id in statistics:
         # get the program
@@ -307,9 +305,13 @@ def htsget_ingest(ingest_json, do_not_index=False, results_path=None, result_dic
             program["statistics"] = statistics[program_id]
             response = requests.post(url, headers=headers, json=program)
             if response.status_code != 200:
-                result["errors"] = f"Could not add statistics for program: {response.text}"
+                result["errors"].append(f"Could not add statistics for program: {response.text}")
         else:
-            result["errors"] = f"Could not add statistics for program: {response.text}"
+            result["errors"].append(f"Could not add statistics for program: {response.text}")
+
+    if len(result["errors"]) == 0:
+        result.pop("errors")
+
     return result, status_code
 
 
