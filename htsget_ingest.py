@@ -1,6 +1,6 @@
 import argparse
 
-from authx.auth import get_site_admin_token, is_action_allowed_for_program, create_service_token, get_program_in_opa
+from authx.auth import get_site_admin_token, is_action_allowed_for_program, create_service_token, get_program_in_opa, get_s3_url
 import os
 import re
 import json
@@ -208,11 +208,19 @@ def parse_s3_url(url):
         endpoint = s3_url_parse.group(1)
         bucket_parse = re.match(r"(.+?)\/(.+)", s3_url_parse.group(4))
         if bucket_parse is not None:
-            return {
+            data = {
                 "endpoint": endpoint,
                 "bucket": bucket_parse.group(1),
                 "object": bucket_parse.group(2)
             }
+            # check existence of credential for this:
+            response, status_code = get_s3_url(s3_endpoint=data["endpoint"], bucket=data["bucket"], object_id=data["object"], access_key=None, secret_key=None, region=None, public=False)
+            if status_code == 500:
+                # check to see if it is a public url
+                response2, status_code = get_s3_url(s3_endpoint=data["endpoint"], bucket=data["bucket"], object_id=data["object"], access_key=None, secret_key=None, region=None, public=True)
+                if status_code == 500:
+                    raise Exception(response["error"])
+            return data
         raise Exception(f"S3 URI {url} does not contain a bucket name")
     raise Exception(f"URI {url} cannot be parsed as an S3-style URI")
 
