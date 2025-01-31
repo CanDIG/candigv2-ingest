@@ -63,7 +63,6 @@ def link_genomic_data(sample, do_not_index=False):
             result["errors"].append(response["error"])
             return result
 
-    result["sample"] = []
     for clin_sample in sample["samples"]:
         # for each sample in the samples, get the SampleDrsObject or create it
         sample_drs_obj = {
@@ -97,8 +96,6 @@ def link_genomic_data(sample, do_not_index=False):
         if response.status_code != 200:
             result["errors"].append(f"error creating sample drs object {sample_drs_obj['id']}: {response.status_code} {response.text}")
             return result
-        else:
-            result["sample"].append(response.json())
 
         # then add the sample to the GenomicDrsObject's contents, if it's not already there:
         contents_obj = {
@@ -115,16 +112,12 @@ def link_genomic_data(sample, do_not_index=False):
                     break
         if not_found:
             genomic_drs_obj["contents"].append(contents_obj)
-    if len(result["sample"]) == 0:
-            result.pop("sample")
 
     # finally, post the genomic_drs_object
     response = requests.post(url, json=genomic_drs_obj, headers=headers)
     if response.status_code != 200:
         result["errors"].append(f"error posting genomic drs object {genomic_drs_obj['id']}: {response.status_code} {response.text}")
         return result
-    else:
-        result["genomic"] = response.json()
 
     # verify that the genomic file exists and is readable
     verify_url = f"{HTSGET_URL}/htsget/v1/{sample['metadata']['data_type']}s/{genomic_drs_obj['id']}/verify"
