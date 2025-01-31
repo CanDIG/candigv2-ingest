@@ -90,7 +90,11 @@ async def add_s3_credential():
     if not authx.auth.is_action_allowed_for_program(token, method="POST", path="/ingest/s3-credential", program=None):
         return {"error": "Not authorized to store aws credentials"}, 403
 
-    return authx.auth.store_aws_credential(endpoint=data["endpoint"], bucket=data["bucket"], access=data["access_key"], secret=data["secret_key"])
+    # test endpoint before storing:
+    response, status_code = authx.auth.get_s3_url(object_id=None, s3_endpoint=data["endpoint"], bucket=data["bucket"], access_key=data["access_key"], secret_key=data["secret_key"])
+    if status_code == 200:
+        response, status_code = authx.auth.store_aws_credential(endpoint=data["endpoint"], bucket=data["bucket"], access=data["access_key"], secret=data["secret_key"])
+    return response, 400
 
 
 @app.route('/s3-credential/endpoint/<path:endpoint_id>/bucket/<path:bucket_id>')
