@@ -25,8 +25,7 @@ IS_TESTING = os.getenv("IS_TESTING", False)
 def link_genomic_data(sample, do_not_index=False):
     url = f"{HTSGET_URL}/ga4gh/drs/v1/objects"
     result = {
-        "errors": [],
-        "to_index": []
+        "errors": []
     }
 
     # Use service token to authenticate this with htsget
@@ -129,7 +128,6 @@ def link_genomic_data(sample, do_not_index=False):
 
     # verify that the genomic file exists and is readable
     verify_url = f"{HTSGET_URL}/htsget/v1/{sample['metadata']['data_type']}s/{genomic_drs_obj['id']}/verify"
-    logger.debug(f"{sample['genomic_file_id']} Are we indexing? do_not_index = {do_not_index}")
 
     response = requests.get(verify_url, headers=headers)
     if response.status_code != 200:
@@ -140,9 +138,8 @@ def link_genomic_data(sample, do_not_index=False):
         return result
     else:
         # flag the genomic_drs_object for indexing:
-        logger.debug(f"Are we indexing? do_not_index = {do_not_index}")
         url =f"{HTSGET_URL}/htsget/v1/{sample['metadata']['data_type']}s/{genomic_drs_obj['id']}/index"
-        result["to_index"].append(url)
+        result["to_index"] = [url]
     return result
 
 
@@ -268,7 +265,8 @@ def htsget_ingest(ingest_json, do_not_index=False, results_path=None, result_dic
         if len(result["errors"][sample["genomic_file_id"]]) == 0:
             result["errors"].pop(sample["genomic_file_id"])
         response.pop("errors")
-        to_index.extend(response["to_index"])
+        if "to_index" in response:
+            to_index.extend(response.pop("to_index"))
         if len(response) > 0:
             result["results"][-1] = f"created genomic file {sample["genomic_file_id"]}"
     # Use service token to authenticate this with htsget
