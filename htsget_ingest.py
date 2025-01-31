@@ -242,7 +242,7 @@ def htsget_ingest(ingest_json, do_not_index=False, results_path=None, result_dic
 
         logger.debug(f"Ingesting {sample['genomic_file_id']}, do_not_index = {do_not_index}")
         program_ids.add(sample["program_id"])
-        result["results"].append(f"creating genomic file {sample["genomic_file_id"]}...")
+        result["results"].append(f"processing genomic file {sample["genomic_file_id"]}...")
 
         if results_path is not None and result_dict is not None:
             with open(results_path, "w") as f:
@@ -256,6 +256,10 @@ def htsget_ingest(ingest_json, do_not_index=False, results_path=None, result_dic
             result["errors"][sample["genomic_file_id"]].append("No samples were specified for the genomic file mapping")
             break
         response = link_genomic_data(sample, do_not_index)
+
+        # remove the temporary "processing..." message
+        result["results"].pop()
+
         if len(response["errors"]) > 0:
             for err in response["errors"]:
                 result["errors"][sample["genomic_file_id"]].append(err)
@@ -268,7 +272,8 @@ def htsget_ingest(ingest_json, do_not_index=False, results_path=None, result_dic
         if "to_index" in response:
             to_index.extend(response.pop("to_index"))
         if len(response) > 0:
-            result["results"][-1] = f"created genomic file {sample["genomic_file_id"]}"
+            for key in response.keys():
+                result["results"].append(f"wrote {key} to genomic file {sample["genomic_file_id"]}")
     # Use service token to authenticate this with htsget
     headers = {}
     if not IS_TESTING:
