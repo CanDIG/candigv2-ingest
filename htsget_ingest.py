@@ -220,7 +220,7 @@ def parse_s3_url(url):
 def htsget_ingest(ingest_json, do_not_index=False, results_path=None, result_dict=None):
     result = {
         "errors": {},
-        "results": {}
+        "results": []
     }
     program_ids = set()
     to_index = []
@@ -231,6 +231,8 @@ def htsget_ingest(ingest_json, do_not_index=False, results_path=None, result_dic
 
         logger.debug(f"Ingesting {sample['genomic_file_id']}, do_not_index = {do_not_index}")
         program_ids.add(sample["program_id"])
+        result["results"].append(f"creating genomic file {sample["genomic_file_id"]}...")
+
         if results_path is not None and result_dict is not None:
             with open(results_path, "w") as f:
                 json.dump(result_dict, f)
@@ -252,7 +254,7 @@ def htsget_ingest(ingest_json, do_not_index=False, results_path=None, result_dic
         response.pop("errors")
         to_index.extend(response["to_index"])
         if len(response) > 0:
-            result["results"][sample["genomic_file_id"]] = response
+            result["results"][-1] = f"created genomic file {sample["genomic_file_id"]}"
     # Use service token to authenticate this with htsget
     headers = {}
     if not IS_TESTING:
