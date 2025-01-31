@@ -94,7 +94,7 @@ def link_genomic_data(sample, do_not_index=False):
         # update the sample_drs_object in the database:
         response = requests.post(f"{url}", json=sample_drs_obj, headers=headers)
         if response.status_code != 200:
-            result["errors"].append({"error": f"error creating sample drs object {sample_drs_obj['id']}: {response.status_code} {response.text}"})
+            result["errors"].append(f"error creating sample drs object {sample_drs_obj['id']}: {response.status_code} {response.text}")
         else:
             result["sample"].append(response.json())
 
@@ -119,7 +119,7 @@ def link_genomic_data(sample, do_not_index=False):
     # finally, post the genomic_drs_object
     response = requests.post(url, json=genomic_drs_obj, headers=headers)
     if response.status_code != 200:
-        result["errors"].append({"error": f"error posting genomic drs object {genomic_drs_obj['id']}: {response.status_code} {response.text}"})
+        result["errors"].append(f"error posting genomic drs object {genomic_drs_obj['id']}: {response.status_code} {response.text}")
     else:
         result["genomic"] = response.json()
 
@@ -129,9 +129,9 @@ def link_genomic_data(sample, do_not_index=False):
 
     response = requests.get(verify_url, headers=headers)
     if response.status_code != 200:
-        result["errors"].append({"error": f"could not verify sample: {response.text}"})
+        result["errors"].append(f"could not verify sample: {response.text}")
     elif not response.json()['result']:
-        result["errors"].append({"error": f"could not verify sample: {response.json()['message']}"})
+        result["errors"].append(f"could not verify sample: {response.json()['message']}")
     else:
         # flag the genomic_drs_object for indexing:
         logger.debug(f"Are we indexing? do_not_index = {do_not_index}")
@@ -217,7 +217,7 @@ def parse_s3_url(url):
     raise Exception(f"URI {url} cannot be parsed as an S3-style URI")
 
 
-def htsget_ingest(ingest_json, do_not_index=False):
+def htsget_ingest(ingest_json, do_not_index=False, results_path=None, result_dict=None):
     result = {
         "errors": {},
         "results": {}
@@ -226,9 +226,17 @@ def htsget_ingest(ingest_json, do_not_index=False):
     to_index = []
     status_code = 200
     for sample in ingest_json:
+        if result_dict is not None and sample["program_id"] not in result_dict:
+            result_dict[sample["program_id"]] = result
+
         logger.debug(f"Ingesting {sample['genomic_file_id']}, do_not_index = {do_not_index}")
         program_ids.add(sample["program_id"])
+        if results_path is not None and result_dict is not None:
+            with open(results_path, "w") as f:
+                json.dump(result_dict, f)
+
         result["errors"][sample["genomic_file_id"]] = []
+
         # create the corresponding DRS objects
         if "samples" not in sample or len(sample["samples"]) == 0:
             result["errors"][sample["genomic_file_id"]].append("No samples were specified for the genomic file mapping")

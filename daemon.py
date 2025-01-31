@@ -39,7 +39,7 @@ def ingest_file(file_path):
                 programs = list(json_data.keys())
                 for program_id in programs:
                     try:
-                        ingest_results, status_code = htsget_ingest(json_data[program_id], do_not_index)
+                        ingest_results, status_code = htsget_ingest(json_data[program_id], do_not_index=do_not_index, results_path=results_path, result_dict=results)
                         results[program_id] = ingest_results
                     except Exception as e:
                         results[program_id] = f"Exception: {type(e)} {str(e)}"
