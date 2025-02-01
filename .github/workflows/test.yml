@@ -11,7 +11,12 @@ jobs:
         python-version: ["3.12"]
     env:
       CANDIG_URL: "http://localhost"
+      HTSGET_URL: "http://localhost/genomics"
+      VAULT_URL: "http://localhost/vault"
       IS_TESTING: true
+      SERVICE_NAME: "candig-ingest"
+      APPROLE_TOKEN_FILE: ${{github.workspace}}/approle-token
+      ROLE_ID_FILE: ${{github.workspace}}/roleid
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python-version }}
@@ -21,6 +26,10 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
+      - name: Add files
+        run: |
+          echo "sdfsdfs" > ${{ env.APPROLE_TOKEN_FILE }}
+          echo "sdfsdfs" > ${{ env.ROLE_ID_FILE }}
       - name: Test with pytest
         run: |
           pytest
