@@ -120,6 +120,8 @@ def link_genomic_data(sample, do_not_index=False):
     if response.status_code != 200:
         result["errors"].append(f"error posting genomic drs object {genomic_drs_obj['id']}: {response.status_code} {response.text}")
         return result
+    else:
+        result["sample"] = f"connected submitter_sample_id {contents_obj["name"]} to genomic_file_sample_id {contents_obj["id"]}"
 
     # verify that the genomic file exists and is readable
     verify_url = f"{HTSGET_URL}/htsget/v1/{sample['metadata']['data_type']}s/{genomic_drs_obj['id']}/verify"
@@ -260,6 +262,8 @@ def htsget_ingest(ingest_json, do_not_index=False, results_path=None, result_dic
                 result["results"].append(f"error processing {response["id"]} {response["name"]} in experiment {sample["genomic_file_id"]}: {err}")
         else:
             result["results"].append(f"processed {response["id"]} {response["name"]} for experiment {sample["genomic_file_id"]}")
+            if "sample" in response:
+                result["results"].append(response["sample"])
 
         if "to_index" in response:
             to_index.extend(response.pop("to_index"))
