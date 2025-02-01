@@ -91,9 +91,12 @@ async def add_s3_credential():
         return {"error": "Not authorized to store aws credentials"}, 403
 
     # test endpoint before storing:
-    response, status_code = authx.auth.get_s3_url(object_id=None, s3_endpoint=data["endpoint"], bucket=data["bucket"], access_key=data["access_key"], secret_key=data["secret_key"])
-    if status_code == 200:
+    response, status_code = authx.auth.get_s3_url(object_id="None", s3_endpoint=data["endpoint"], bucket=data["bucket"], access_key=data["access_key"], secret_key=data["secret_key"])
+    # we won't actually get an s3 url because we have no object:
+    # we should expect the error to be a KeyError on the object_id of None.
+    if status_code == 500 and "object_name: None" in response["error"]:
         response, status_code = authx.auth.store_aws_credential(endpoint=data["endpoint"], bucket=data["bucket"], access=data["access_key"], secret=data["secret_key"])
+        return response, status_code
     return response, 400
 
 
