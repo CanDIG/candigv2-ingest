@@ -69,6 +69,7 @@ paths:
     parameters:
       - in: path
         name: role_type
+        description: Defined site roles for this CanDIG node. By default, admin and curator are defined.
         schema:
           type: string
         required: true
@@ -104,6 +105,7 @@ paths:
     parameters:
       - in: path
         name: role_type
+        description: Defined site roles for this CanDIG node. By default, admin and curator are defined.
         schema:
           type: string
         required: true
