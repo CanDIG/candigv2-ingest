@@ -524,7 +524,7 @@ def list_authz_for_user(user_id):
                 user_result["site_roles"].append(role_type)
 
     user_result["program_authorizations"] = {}
-    opa_permissions, status_code = authx.auth.get_opa_permissions(bearer_token=token, user_token=user_result["userinfo"]["sample_jwt"])
+    opa_permissions, opa_status_code = authx.auth.get_opa_permissions(bearer_token=token, user_token=user_result["userinfo"]["sample_jwt"])
     if status_code == 200:
         user_result["program_authorizations"]["team_member"] = opa_permissions["team_member_programs"]
         user_result["program_authorizations"]["program_curator"] = opa_permissions["curator_programs"]
