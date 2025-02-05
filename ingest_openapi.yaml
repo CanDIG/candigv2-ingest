@@ -69,6 +69,7 @@ paths:
     parameters:
       - in: path
         name: role_type
+        description: Defined site roles for this CanDIG node. By default, admin and curator are defined.
         schema:
           type: string
         required: true
@@ -85,25 +86,11 @@ paths:
                 type: array
                 items:
                   type: string
-    post:
-      summary: Assign users to role
-      description: Assign users to role
-      operationId: ingest_operations.update_role
-      requestBody:
-        $ref: "#/components/requestBodies/RoleTypeRequest"
-      responses:
-        200:
-          description: Success
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: string
   /site-role/{role_type}/user_id/{user_id}:
     parameters:
       - in: path
         name: role_type
+        description: Defined site roles for this CanDIG node. By default, admin and curator are defined.
         schema:
           type: string
         required: true
@@ -470,7 +457,13 @@ paths:
       operationId: ingest_operations.get_ingest_status
       responses:
         200:
-          description: Success
+          description: Ingest in progress
+          content:
+            application/json:
+              schema:
+                type: object
+        201:
+          description: Ingest completed
           content:
             application/json:
               schema:

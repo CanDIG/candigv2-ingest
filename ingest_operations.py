@@ -90,7 +90,14 @@ async def add_s3_credential():
     if not authx.auth.is_action_allowed_for_program(token, method="POST", path="/ingest/s3-credential", program=None):
         return {"error": "Not authorized to store aws credentials"}, 403
 
-    return authx.auth.store_aws_credential(endpoint=data["endpoint"], bucket=data["bucket"], access=data["access_key"], secret=data["secret_key"])
+    # test endpoint before storing:
+    response, status_code = authx.auth.get_s3_url(object_id="None", s3_endpoint=data["endpoint"], bucket=data["bucket"], access_key=data["access_key"], secret_key=data["secret_key"])
+    # we won't actually get an s3 url because we have no object:
+    # we should expect the error to be a KeyError on the object_id of None.
+    if status_code == 500 and "object_name: None" in response["error"]:
+        response, status_code = authx.auth.store_aws_credential(endpoint=data["endpoint"], bucket=data["bucket"], access=data["access_key"], secret=data["secret_key"])
+        return response, status_code
+    return response, 400
 
 
 @app.route('/s3-credential/endpoint/<path:endpoint_id>/bucket/<path:bucket_id>')
@@ -123,20 +130,6 @@ def list_role(role_type):
             return {"error": f"User not authorized to list site roles"}, 403
 
         result, status_code = authx.auth.get_role_type_in_opa(role_type)
-        return result, status_code
-    except Exception as e:
-        return {"error": str(e)}, 500
-
-
-@app.route('/site-role/<path:role_type>')
-async def update_role(role_type):
-    role_members = await connexion.request.json()
-    try:
-        token = connexion.request.headers['Authorization'].split("Bearer ")[1]
-        if not authx.auth.is_action_allowed_for_program(token, method="POST", path="/ingest/site-role", program=None):
-            return {"error": f"User not authorized to update site roles"}, 403
-
-        result, status_code = authx.auth.set_role_type_in_opa(role_type, role_members)
         return result, status_code
     except Exception as e:
         return {"error": str(e)}, 500
@@ -185,6 +178,8 @@ def remove_user_from_role(role_type, user_id):
         result, status_code = authx.auth.get_role_type_in_opa(role_type)
         if status_code == 200:
             if user_id in result[role_type]:
+                if role_type == "admin" and len(result[role_type]) == 1:
+                    return {"error": "You cannot remove the only site administrator. Add a new site admin before removing this user from the role."}
                 result[role_type].remove(user_id)
                 result, status_code = authx.auth.set_role_type_in_opa(role_type, result[role_type])
             else:
@@ -241,6 +236,9 @@ def get_ingest_status(queue_id):
         with open(results_path) as f:
             json_data = json.load(f)
             # os.remove(results_path)
+            if "complete" in json_data:
+                json_data.pop("complete")
+                return json_data, 201
             return json_data, 200
     except:
         return {"error": f"no such queue_id {queue_id}"}, 404
@@ -514,7 +512,7 @@ def list_authz_for_user(user_id):
                 user_result["site_roles"].append(role_type)
 
     user_result["program_authorizations"] = {}
-    opa_permissions, status_code = authx.auth.get_opa_permissions(bearer_token=token, user_token=user_result["userinfo"]["sample_jwt"])
+    opa_permissions, opa_status_code = authx.auth.get_opa_permissions(bearer_token=token, user_token=user_result["userinfo"]["sample_jwt"])
     if status_code == 200:
         user_result["program_authorizations"]["team_member"] = opa_permissions["team_member_programs"]
         user_result["program_authorizations"]["program_curator"] = opa_permissions["curator_programs"]

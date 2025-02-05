@@ -8,9 +8,6 @@ from katsu_ingest import ingest_schemas
 from htsget_ingest import htsget_ingest
 
 
-KATSU_URL = os.environ.get("KATSU_URL")
-
-
 logger = CanDIGLogger(__file__)
 
 initialize()
@@ -30,7 +27,7 @@ def ingest_file(file_path):
                 programs = list(json_data.keys())
                 for program_id in programs:
                     try:
-                        ingest_results, status_code = ingest_schemas(json_data[program_id]["schemas"])
+                        ingest_results, status_code = ingest_schemas(json_data[program_id]["schemas"], results_path=results_path, result_dict=results, program_id=program_id)
                         results[program_id] = ingest_results
                     except Exception as e:
                         results[program_id] = f"Exception: {type(e)} {str(e)}"
@@ -42,10 +39,11 @@ def ingest_file(file_path):
                 programs = list(json_data.keys())
                 for program_id in programs:
                     try:
-                        ingest_results, status_code = htsget_ingest(json_data[program_id], do_not_index)
+                        ingest_results, status_code = htsget_ingest(json_data[program_id], do_not_index=do_not_index, results_path=results_path, result_dict=results)
                         results[program_id] = ingest_results
                     except Exception as e:
                         results[program_id] = f"Exception: {type(e)} {str(e)}"
+            results["complete"] = True
         os.remove(file_path)
     except Exception as e:
         message = f"Couldn't load data from {file_path}: {type(e)} {str(e)}"
