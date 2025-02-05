@@ -135,20 +135,6 @@ def list_role(role_type):
         return {"error": str(e)}, 500
 
 
-@app.route('/site-role/<path:role_type>')
-async def update_role(role_type):
-    role_members = await connexion.request.json()
-    try:
-        token = connexion.request.headers['Authorization'].split("Bearer ")[1]
-        if not authx.auth.is_action_allowed_for_program(token, method="POST", path="/ingest/site-role", program=None):
-            return {"error": f"User not authorized to update site roles"}, 403
-
-        result, status_code = authx.auth.set_role_type_in_opa(role_type, role_members)
-        return result, status_code
-    except Exception as e:
-        return {"error": str(e)}, 500
-
-
 @app.route('/site-role/<path:role_type>/user_id/<path:user_id>')
 def is_user_in_role(role_type, user_id):
     try:

@@ -86,21 +86,6 @@ paths:
                 type: array
                 items:
                   type: string
-    post:
-      summary: Assign users to role
-      description: Assign users to role
-      operationId: ingest_operations.update_role
-      requestBody:
-        $ref: "#/components/requestBodies/RoleTypeRequest"
-      responses:
-        200:
-          description: Success
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: string
   /site-role/{role_type}/user_id/{user_id}:
     parameters:
       - in: path
