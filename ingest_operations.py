@@ -192,6 +192,8 @@ def remove_user_from_role(role_type, user_id):
         result, status_code = authx.auth.get_role_type_in_opa(role_type)
         if status_code == 200:
             if user_id in result[role_type]:
+                if role_type == "admin" and len(result[role_type]) == 1:
+                    return {"error": "You cannot remove the only site administrator. Add a new site admin before removing this user from the role."}
                 result[role_type].remove(user_id)
                 result, status_code = authx.auth.set_role_type_in_opa(role_type, result[role_type])
             else:
