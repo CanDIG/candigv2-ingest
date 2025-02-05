@@ -13,9 +13,11 @@ import pprint
 def parse_args():
     parser = argparse.ArgumentParser(description="A script that copies and converts data from mohccn-synthetic-data for "
                                                  "ingest into CanDIG platform.")
-    parser.add_argument("--katsu-repo", default="lib/katsu/katsu_service/chord_metadata_service/mohpackets/data",
+    parser.add_argument("--katsu-repo", default="lib/katsu/katsu_service",
                         help="Path to the katsu repo that contains jsons that should be used to generate the synth data."
                              "Default is the standard katsu repo that is part of the stack")
+    parser.add_argument("--branch", default="develop",
+                        help="branch of the synthetic data repo to check out.")
     parser.add_argument("--prefix", help="optional prefix to apply to all identifiers")
     parser.add_argument("--tmp", help="Directory to temporarily clone the mohccn-synthetic-data repo.",
                         default="tmp-data")
@@ -41,11 +43,11 @@ def main(args):
                       "destination.")
                 sys.exit()
     print(f"Cloning mohccn-synthetic-data repo into {args.tmp}")
-    synth_repo = Repo.clone_from("https://github.com/CanDIG/mohccn-synthetic-data.git", args.tmp)
+    synth_repo = Repo.clone_from("https://github.com/CanDIG/mohccn-synthetic-data.git", args.tmp, branch=args.branch)
 
     try:
         if args.prefix:
-            process = subprocess.run([f'python {args.tmp}/src/json_to_csv.py --input {args.katsu_repo} --size s'],
+            process = subprocess.run([f'python {args.tmp}/src/json_to_csv.py --input {args.katsu_repo}/chord_metadata_service/mohpackets/data --size s'],
                                      shell=True, check=True, capture_output=True)
             process = subprocess.run([f'python {args.tmp}/src/csv_to_ingest.py --size s --prefix {args.prefix}'],
                                      shell=True, check=True, capture_output=True)
