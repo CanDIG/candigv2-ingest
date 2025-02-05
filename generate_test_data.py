@@ -42,7 +42,8 @@ def main(args):
 
     try:
         if args.prefix:
-
+            process = subprocess.run([f'python {args.tmp}/src/json_to_csv.py --input lib/katsu/katsu_service/chord_metadata_service/mohpackets/data --size s'],
+                                     shell=True, check=True, capture_output=True)
             process = subprocess.run([f'python {args.tmp}/src/csv_to_ingest.py --size s --prefix {args.prefix}'],
                                      shell=True, check=True, capture_output=True)
             output_dir = f"{args.tmp}/custom_dataset_csv-{args.prefix}"
