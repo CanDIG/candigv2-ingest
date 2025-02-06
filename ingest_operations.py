@@ -363,8 +363,8 @@ def authorize_program_for_user(user_id):
 
     # we need to check to see if the program even exists in the system
     all_programs = auth.list_programs_in_opa(token)
-    if program_dict["program_id"] not in all_programs:
-        return {"error": f"Program {program_dict['program_id']} does not exist in {all_programs}"}
+    if program_dict["program_id"] not in all_programs[0]:
+        return {"error": f"Program {program_dict['program_id']} does not exist in {all_programs[0]}"}
     response["programs"][program_dict["program_id"]] = program_dict
     response, status_code = auth.write_user_in_opa(response, token)
     return response, status_code
