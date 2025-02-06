@@ -252,12 +252,12 @@
       "primary_diagnoses": [
         {
           "clinical_stage_group": "Stage IAE",
-          "clinical_tumour_staging_system": "Revised International staging system (RISS)",
+          "clinical_tumour_staging_system": "Revised International staging system (R-ISS)",
           "laterality": "Not a paired site",
           "pathological_m_category": "M1a(1)",
           "pathological_n_category": "N0(mol+)",
           "pathological_stage_group": "Stage IC",
-          "pathological_tumour_staging_system": "AJCC 6th edition",
+          "pathological_tumour_staging_system": "AJCC cancer staging system",
           "primary_site": "Bronchus and lung",
           "submitter_primary_diagnosis_id": "DIAG_0002",
           "specimens": [
