@@ -491,11 +491,11 @@ def remove_preapproved_user(user_id):
 def list_authz_for_user(user_id):
     token = connexion.request.headers['Authorization'].split("Bearer ")[1]
 
-    response = ""
     status_code = 0
     if not authx.auth.is_action_allowed_for_program(token, method="GET", path=f"/ingest/user/{user_id}", program=None):
         return {"error": "User not authorized to list programs for user"}, 403
 
+    self_checkup = user_id == "me"
     if user_id == "me":
         user_id = authx.auth.get_user_id(connexion.request)
 
@@ -512,8 +512,10 @@ def list_authz_for_user(user_id):
                 user_result["site_roles"].append(role_type)
 
     user_result["program_authorizations"] = {}
-    opa_permissions, opa_status_code = authx.auth.get_opa_permissions(bearer_token=token, user_token=user_result["userinfo"]["sample_jwt"])
-    if status_code == 200:
+    opa_permissions, opa_status_code = authx.auth.get_opa_permissions(
+        bearer_token=token,
+        user_token=user_result["userinfo"]["sample_jwt"] if not self_checkup else token)
+    if opa_status_code == 200:
         user_result["program_authorizations"]["team_member"] = opa_permissions["team_member_programs"]
         user_result["program_authorizations"]["program_curator"] = opa_permissions["curator_programs"]
 
