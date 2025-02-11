@@ -3,7 +3,7 @@ import argparse
 import json
 import requests
 import os
-import auth
+import authx.auth
 from pathlib import Path
 
 
@@ -65,7 +65,7 @@ def main():
     else:
         raise Exception("Either awsfile or access/secret need to be provided.")
 
-    client = authx.auth.get_minio_client(token=auth.get_site_admin_token(), s3_endpoint=args.endpoint, bucket=args.bucket, access_key=access_key, secret_key=secret_key)
+    client = authx.auth.get_minio_client(token=authx.auth.get_site_admin_token(), s3_endpoint=args.endpoint, bucket=args.bucket, access_key=access_key, secret_key=secret_key)
 
     for sample in samples:
         file = Path(sample)
