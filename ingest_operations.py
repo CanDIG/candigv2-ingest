@@ -4,7 +4,7 @@ import os
 import re
 import traceback
 import urllib.parse
-
+from datetime import datetime
 import auth
 import authx.auth
 import katsu_ingest
@@ -546,6 +546,12 @@ async def add_dac_authz_for_user(user_id):
         return all_programs, status_code
     if program_dict["program_id"] not in all_programs:
         return {"error": f"Program {program_dict['program_id']} does not exist in {all_programs}"}
+
+    try:
+        if datetime.fromisoformat(program_dict['end_date']) < datetime.fromisoformat(program_dict['start_date']):
+            return {"error": f"Start date {program_dict['start_date']} cannot be later than end date {program_dict['end_date']}"}
+    except Exception as e:
+        return {"error": f"Date format error: {type(e)} {str(e)}"}
     response["dac_authorizations"][program_dict["program_id"]] = program_dict
     response, status_code = auth.write_user(response)
     return response, status_code
