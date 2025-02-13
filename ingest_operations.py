@@ -381,13 +381,13 @@ async def approve_pending_users():
 
     rejected = []
     approved = []
-    response = {}
     for user_id in users:
         response, status_code = auth.approve_pending_user(user_id)
         if status_code != 200:
             rejected.append(user_id)
         else:
             approved.append(user_id)
+    response = {}
     if len(approved) > 0:
         response["approved"] = approved
     if len(rejected) > 0:
