@@ -197,7 +197,7 @@ def remove_user(user_name):
             if user_name in program["team_members"]:
                 program["team_members"].remove(user_name)
             add_program(program)
-        return {"message": f"User {safe_name} was removed"}, 200
+        return {"message": f"User {user_name} was removed"}, 200
     return {"error": f"User {user_name} could not be removed"}, status_code
 
 
