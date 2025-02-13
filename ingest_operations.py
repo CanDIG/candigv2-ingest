@@ -328,7 +328,7 @@ def add_pending_user():
 
 
 def list_pending_users():
-    if not auth.is_site_admin(connexion.request):
+    if not authx.auth.is_site_admin(connexion.request):
         return {"error": f"User not authorized to list pending users"}, 403
 
     response, status_code = auth.list_pending_users()
