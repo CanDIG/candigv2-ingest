@@ -380,14 +380,19 @@ async def approve_pending_users():
         return {"error": f"User not authorized to approve pending users"}, 403
 
     rejected = []
+    approved = []
+    response = {}
     for user_id in users:
         response, status_code = auth.approve_pending_user(user_id)
         if status_code != 200:
             rejected.append(user_id)
+        else:
+            approved.append(user_id)
+    if len(approved) > 0:
+        response["approved"] = approved
     if len(rejected) > 0:
         status_code = 401
-        response = {"message": f"The following requested user IDs could not be approved: {rejected}"}
-
+        response["rejected"] = rejected
     return response, status_code
 
 
