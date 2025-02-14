@@ -512,6 +512,7 @@ def list_authz_for_user(user_id):
         user_result["program_authorizations"]["program_curator"] = opa_permissions["curator_programs"]
 
     user_result["program_authorizations"]["dac_authorizations"] = user_result.pop("dac_authorizations")
+    user_result["userinfo"].pop("sample_jwt")
 
     return user_result, status_code
 
@@ -558,6 +559,7 @@ async def add_dac_authz_for_user(user_id):
         return {"error": f"Date format error: {type(e)} {str(e)}"}
     response["dac_authorizations"][program_dict["program_id"]] = program_dict
     response, status_code = auth.write_user(response)
+    response["userinfo"].pop("sample_jwt")
     return response, status_code
 
 
@@ -571,6 +573,7 @@ def get_dac_authz_for_user(user_id, program_id):
     response, status_code = auth.get_user(user_id)
     if status_code != 200:
         return response, status_code
+    response["userinfo"].pop("sample_jwt")
     for p in response["dac_authorizations"]:
         if p == program_id:
             return p, 200
@@ -591,6 +594,7 @@ def remove_dac_authz_for_user(user_id, program_id):
         if p == program_id:
             response["dac_authorizations"].pop(program_id)
             response, status_code = auth.write_user(response)
+            response["userinfo"].pop("sample_jwt")
             return response, status_code
     return {"error": f"No program {program_id} found for user"}, status_code
 
