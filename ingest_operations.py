@@ -549,7 +549,11 @@ async def add_dac_authz_for_user(user_id):
 
     try:
         if datetime.fromisoformat(program_dict['end_date']) < datetime.fromisoformat(program_dict['start_date']):
-            return {"error": f"Start date {program_dict['start_date']} cannot be later than end date {program_dict['end_date']}"}
+            return {"error": f"Start date {program_dict['start_date']} cannot be later than end date {program_dict['end_date']}"}, 400
+        elif datetime.fromisoformat(program_dict['end_date']) == datetime.fromisoformat(program_dict['start_date']):
+            return {"error": f"Start date {program_dict['start_date']} is the same as end date {program_dict['end_date']}"}, 400
+        elif datetime.fromisoformat(program_dict['end_date']) < datetime.now():
+            return {"error": f"Start date {program_dict['start_date']} and end date {program_dict['end_date']} are in the past"}, 400
     except Exception as e:
         return {"error": f"Date format error: {type(e)} {str(e)}"}
     response["dac_authorizations"][program_dict["program_id"]] = program_dict
