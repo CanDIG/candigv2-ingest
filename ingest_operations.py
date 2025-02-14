@@ -4,7 +4,7 @@ import os
 import re
 import traceback
 import urllib.parse
-
+from datetime import datetime
 import auth
 import authx.auth
 import katsu_ingest
@@ -380,14 +380,19 @@ async def approve_pending_users():
         return {"error": f"User not authorized to approve pending users"}, 403
 
     rejected = []
+    approved = []
     for user_id in users:
         response, status_code = auth.approve_pending_user(user_id)
         if status_code != 200:
             rejected.append(user_id)
+        else:
+            approved.append(user_id)
+    response = {}
+    if len(approved) > 0:
+        response["approved"] = approved
     if len(rejected) > 0:
         status_code = 401
-        response = {"message": f"The following requested user IDs could not be approved: {rejected}"}
-
+        response["rejected"] = rejected
     return response, status_code
 
 
@@ -507,6 +512,7 @@ def list_authz_for_user(user_id):
         user_result["program_authorizations"]["program_curator"] = opa_permissions["curator_programs"]
 
     user_result["program_authorizations"]["dac_authorizations"] = user_result.pop("dac_authorizations")
+    user_result["userinfo"].pop("sample_jwt")
 
     return user_result, status_code
 
@@ -541,8 +547,19 @@ async def add_dac_authz_for_user(user_id):
         return all_programs, status_code
     if program_dict["program_id"] not in all_programs:
         return {"error": f"Program {program_dict['program_id']} does not exist in {all_programs}"}
+
+    try:
+        if datetime.fromisoformat(program_dict['end_date']) < datetime.fromisoformat(program_dict['start_date']):
+            return {"error": f"Start date {program_dict['start_date']} cannot be later than end date {program_dict['end_date']}"}, 400
+        elif datetime.fromisoformat(program_dict['end_date']) == datetime.fromisoformat(program_dict['start_date']):
+            return {"error": f"Start date {program_dict['start_date']} is the same as end date {program_dict['end_date']}"}, 400
+        elif datetime.fromisoformat(program_dict['end_date']) < datetime.now():
+            return {"error": f"Start date {program_dict['start_date']} and end date {program_dict['end_date']} are in the past"}, 400
+    except Exception as e:
+        return {"error": f"Date format error: {type(e)} {str(e)}"}
     response["dac_authorizations"][program_dict["program_id"]] = program_dict
     response, status_code = auth.write_user(response)
+    response["userinfo"].pop("sample_jwt")
     return response, status_code
 
 
@@ -556,6 +573,7 @@ def get_dac_authz_for_user(user_id, program_id):
     response, status_code = auth.get_user(user_id)
     if status_code != 200:
         return response, status_code
+    response["userinfo"].pop("sample_jwt")
     for p in response["dac_authorizations"]:
         if p == program_id:
             return p, 200
@@ -576,6 +594,7 @@ def remove_dac_authz_for_user(user_id, program_id):
         if p == program_id:
             response["dac_authorizations"].pop(program_id)
             response, status_code = auth.write_user(response)
+            response["userinfo"].pop("sample_jwt")
             return response, status_code
     return {"error": f"No program {program_id} found for user"}, status_code
 

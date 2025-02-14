@@ -174,30 +174,31 @@ def get_self(token):
 
 def remove_user(user_name):
     safe_name = urllib.parse.quote_plus(user_name)
-    response, status_code = authx.auth.delete_service_store_secret("opa", key=f"users/{safe_name}")
+    response, status_code = authx.auth.get_service_store_secret("opa", key=f"users/{safe_name}")
+    if status_code == 200:
+        response, status_code = authx.auth.delete_service_store_secret("opa", key=f"users/{safe_name}")
+        # if the user was preapproved, take them out of that list
+        remove_preapproved_user(user_name)
 
-    # if the user was preapproved, take them out of that list
-    remove_preapproved_user(user_name)
+        # remove the user from any site roles:
+        site_roles, status_code = list_role_types()
+        for role_type in site_roles:
+            members, status_code = get_role_type(role_type)
+            if user_name in members:
+                members.remove(user_name)
+                set_role_type(role_type, members)
 
-    # remove the user from any site roles:
-    site_roles, status_code = list_role_types()
-    for role_type in site_roles:
-        members, status_code = get_role_type(role_type)
-        if user_name in members:
-            members.remove(user_name)
-            set_role_type(role_type, members)
-
-    # remove the user from any program roles:
-    programs, status_code = list_programs()
-    for program_id in programs:
-        program, status_code = get_program(program_id)
-        if user_name in program["program_curators"]:
-            program["program_curators"].remove(user_name)
-        if user_name in program["team_members"]:
-            program["team_members"].remove(user_name)
-        add_program(program)
-
-    return response, status_code
+        # remove the user from any program roles:
+        programs, status_code = list_programs()
+        for program_id in programs:
+            program, status_code = get_program(program_id)
+            if user_name in program["program_curators"]:
+                program["program_curators"].remove(user_name)
+            if user_name in program["team_members"]:
+                program["team_members"].remove(user_name)
+            add_program(program)
+        return {"message": f"User {user_name} was removed"}, 200
+    return {"error": f"User {user_name} could not be removed"}, status_code
 
 
 #####
