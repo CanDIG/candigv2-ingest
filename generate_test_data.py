@@ -13,6 +13,7 @@ import pprint
 def parse_args():
     parser = argparse.ArgumentParser(description="A script that copies and converts data from mohccn-synthetic-data for "
                                                  "ingest into CanDIG platform.")
+    parser.add_argument("--commit", help="Commit id from the MoHCCN Synthetic data repo that should be used")
     parser.add_argument("--prefix", help="optional prefix to apply to all identifiers")
     parser.add_argument("--tmp", help="Directory to temporarily clone the mohccn-synthetic-data repo.",
                         default="tmp-data")
@@ -39,6 +40,7 @@ def main(args):
                 sys.exit()
     print(f"Cloning mohccn-synthetic-data repo into {args.tmp}")
     synth_repo = Repo.clone_from("https://github.com/CanDIG/mohccn-synthetic-data.git", args.tmp)
+    synth_repo.git.checkout(args.commit)
 
     try:
         if args.prefix:
