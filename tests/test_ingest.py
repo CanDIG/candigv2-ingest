@@ -91,4 +91,6 @@ def test_htsget_ingest(requests_mock):
 
 
 def test_synth_data_generation():
-
+    args={
+        
+    }
