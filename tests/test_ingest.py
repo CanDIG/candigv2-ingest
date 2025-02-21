@@ -4,13 +4,11 @@ import requests
 import os
 import re
 import sys
-from argparse import Namespace
 
 REPO_DIR = os.path.abspath(f"{os.path.dirname(os.path.realpath(__file__))}/..")
 sys.path.insert(0, os.path.abspath(f"{REPO_DIR}"))
 import katsu_ingest
 import htsget_ingest
-import generate_test_data
 
 CANDIG_URL = os.getenv("CANDIG_URL", "http://localhost")
 HTSGET_URL = os.getenv("HTSGET_URL", f"{CANDIG_URL}/genomics")
@@ -90,4 +88,3 @@ def test_htsget_ingest(requests_mock):
     response = htsget_ingest.link_genomic_data(bad_s3_sample)
     print(json.dumps(response, indent=4))
     assert len(response["errors"]) == 1
-
