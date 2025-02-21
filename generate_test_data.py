@@ -13,7 +13,12 @@ import pprint
 def parse_args():
     parser = argparse.ArgumentParser(description="A script that copies and converts data from mohccn-synthetic-data for "
                                                  "ingest into CanDIG platform.")
-    parser.add_argument("--commit", help="Commit id from the MoHCCN Synthetic data repo that should be used")
+    parser.add_argument("--commit",
+                        help="The commit id of the mohccn-synthetic-data repo that should be checked out when generating"
+                             "test data")
+    parser.add_argument("--katsu-repo", default="lib/katsu/katsu_service",
+                        help="Path to the katsu repo that contains jsons that should be used to generate the synth data."
+                             "Default is the standard katsu repo that is part of the stack")
     parser.add_argument("--prefix", help="optional prefix to apply to all identifiers")
     parser.add_argument("--tmp", help="Directory to temporarily clone the mohccn-synthetic-data repo.",
                         default="tmp-data")
@@ -44,7 +49,8 @@ def main(args):
 
     try:
         if args.prefix:
-
+            process = subprocess.run([f'python {args.tmp}/src/json_to_csv.py --input {args.katsu_repo}/chord_metadata_service/mohpackets/data --size s'],
+                                     shell=True, check=True, capture_output=True)
             process = subprocess.run([f'python {args.tmp}/src/csv_to_ingest.py --size s --prefix {args.prefix}'],
                                      shell=True, check=True, capture_output=True)
             output_dir = f"{args.tmp}/custom_dataset_csv-{args.prefix}"
@@ -59,6 +65,9 @@ def main(args):
             print("Converting small_dataset_csvs to small_dataset_clinical_ingest.json")
             output_dir = f"{args.tmp}/small_dataset_csv"
             try:
+                process = subprocess.run([
+                                             f'python {args.tmp}/src/json_to_csv.py --input {args.katsu_repo}/chord_metadata_service/mohpackets/data --size s'],
+                                         shell=True, check=True, capture_output=True)
                 process = subprocess.run([f'python {args.tmp}/src/csv_to_ingest.py --size s'],
                                          shell=True, check=True, capture_output=True)
             except subprocess.CalledProcessError as e:
