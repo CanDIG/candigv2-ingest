@@ -14,6 +14,7 @@ CANDIG_URL = os.getenv("CANDIG_URL", "http://localhost")
 HTSGET_URL = os.getenv("HTSGET_URL", f"{CANDIG_URL}/genomics")
 VAULT_URL = os.getenv("VAULT_URL", f"{CANDIG_URL}/vault")
 
+
 def test_prepare_clinical_ingest():
     with open("tests/clinical_ingest.json", "r") as f:
         data = json.load(f)
