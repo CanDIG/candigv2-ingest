@@ -8,9 +8,6 @@ from katsu_ingest import ingest_schemas
 from htsget_ingest import htsget_ingest
 
 
-KATSU_URL = os.environ.get("KATSU_URL")
-
-
 logger = CanDIGLogger(__file__)
 
 initialize()
@@ -20,30 +17,42 @@ def ingest_file(file_path):
     json_data = None
     results = {}
     results_path = os.path.join(DAEMON_PATH, "results", os.path.basename(file_path))
-    with open(file_path) as f:
-        json_data = json.load(f)
-    if json_data is not None:
-        logger.info(f"Ingesting {file_path}")
-        if "katsu" in json_data:
-            json_data = json_data["katsu"]
-            programs = list(json_data.keys())
-            for program_id in programs:
-                ingest_results, status_code = ingest_schemas(json_data[program_id]["schemas"])
-                results[program_id] = ingest_results
-        elif "htsget" in json_data:
-            do_not_index = False
-            if "do_not_index" in json_data:
-                do_not_index = json_data["do_not_index"]
-            json_data = json_data["htsget"]
-            programs = list(json_data.keys())
-            for program_id in programs:
-                ingest_results, status_code = htsget_ingest(json_data[program_id], do_not_index)
-                results[program_id] = ingest_results
-        with open(results_path, "w") as f:
-            json.dump(results, f)
+    try:
+        with open(file_path) as f:
+            json_data = json.load(f)
+        if json_data is not None:
+            logger.info(f"Ingesting {file_path}")
+            if "katsu" in json_data:
+                json_data = json_data["katsu"]
+                programs = list(json_data.keys())
+                for program_id in programs:
+                    try:
+                        ingest_results, status_code = ingest_schemas(json_data[program_id]["schemas"], results_path=results_path, result_dict=results, program_id=program_id)
+                        results[program_id] = ingest_results
+                    except Exception as e:
+                        results[program_id] = f"Exception: {type(e)} {str(e)}"
+            elif "htsget" in json_data:
+                do_not_index = False
+                if "do_not_index" in json_data:
+                    do_not_index = json_data["do_not_index"]
+                json_data = json_data["htsget"]
+                programs = list(json_data.keys())
+                for program_id in programs:
+                    try:
+                        ingest_results, status_code = htsget_ingest(json_data[program_id], do_not_index=do_not_index, results_path=results_path, result_dict=results)
+                        results[program_id] = ingest_results
+                    except Exception as e:
+                        results[program_id] = f"Exception: {type(e)} {str(e)}"
+            results["complete"] = True
         os.remove(file_path)
-        return results, status_code
-    return {"error": f"No such file {file_path}"}, 404
+    except Exception as e:
+        message = f"Couldn't load data from {file_path}: {type(e)} {str(e)}"
+        logger.error(message)
+        results["error"] = message
+        status_code = 500
+    with open(results_path, "w") as f:
+        json.dump(results, f)
+    return results, status_code
 
 
 class DaemonHandler(watchdog.events.FileSystemEventHandler):

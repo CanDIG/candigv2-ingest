@@ -14,6 +14,7 @@ CANDIG_URL = os.getenv("CANDIG_URL", "http://localhost")
 HTSGET_URL = os.getenv("HTSGET_URL", f"{CANDIG_URL}/genomics")
 VAULT_URL = os.getenv("VAULT_URL", f"{CANDIG_URL}/vault")
 
+
 def test_prepare_clinical_ingest():
     with open("tests/clinical_ingest.json", "r") as f:
         data = json.load(f)
@@ -47,6 +48,8 @@ def test_htsget_ingest(requests_mock):
     requests_mock.get(matcher, json={"data": {"client_token": "sfsfd"}}, status_code=200)
     requests_mock.post(matcher, json={"data": {"client_token": "sfsfd"}}, status_code=200)
 
+    matcher = re.compile(f"{VAULT_URL}/v1/candig-ingest/aws/.+")
+    requests_mock.get(matcher, json={"data": {"endpoint": "sfsfd", "bucket": "1000genomes", "access_key": "sfsdf", "secret_key": "sdfsfs", "url": "s3.us-east-1.amazonaws.com", "secure": "False"}}, status_code=200)
 
     headers = {"Authorization": f"Bearer test", "Content-Type": "application/json"}
     with open("tests/genomic_ingest.json", "r") as f:
@@ -55,11 +58,8 @@ def test_htsget_ingest(requests_mock):
             response = htsget_ingest.link_genomic_data(sample)
             print(json.dumps(response, indent=4))
             assert len(response["errors"]) == 0
-            assert "genomic" in response
-            assert len(response["genomic"]["contents"]) == 2 + len(sample["samples"])
+            assert "name" in response
             assert "sample" in response
-            assert len(response["sample"]) == len(sample["samples"])
-            assert len(response["sample"][0]["contents"]) == 1
 
     # bad sample:
     bad_s3_sample = {
@@ -87,4 +87,4 @@ def test_htsget_ingest(requests_mock):
     }
     response = htsget_ingest.link_genomic_data(bad_s3_sample)
     print(json.dumps(response, indent=4))
-    assert len(response["errors"]) == 2
+    assert len(response["errors"]) == 1

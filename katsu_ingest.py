@@ -4,8 +4,8 @@ import os
 import traceback
 from http import HTTPStatus
 import requests
-import auth
 from authx.auth import get_site_admin_token, create_service_token, is_action_allowed_for_program
+from auth import get_program
 from clinical_etl.mohschemav3 import MoHSchemaV3
 from candigv2_logging.logging import initialize, CanDIGLogger
 
@@ -54,8 +54,11 @@ def read_json(file_path):
 
 
 ## This will be called by the daemon
-def ingest_schemas(fields, batch_size=1000):
+def ingest_schemas(fields, batch_size=1000, results_path=None, result_dict=None, program_id=None):
     result = {"errors": [], "results": []}
+
+    if result_dict is not None and program_id is not None:
+            result_dict[program_id] = result
 
     # Use service token to authenticate this with katsu
     headers = {
@@ -100,9 +103,14 @@ def ingest_schemas(fields, batch_size=1000):
                     if type == "programs" and "unique" in response.text:
                         # this is still okay to return 200:
                         return result, 200
-            result["results"].append(
-                f"Of {total_count} {type}, {created_count} were created"
-            )
+            if type != "programs": # don't update about program; this seems redundant
+                result["results"].append(
+                    f"Of {total_count} {type}, {created_count} were created"
+                )
+        if results_path is not None and result_dict is not None:
+            with open(results_path, "w") as f:
+                json.dump(result_dict, f)
+
     return result, response.status_code
 
 
@@ -223,9 +231,6 @@ def prepare_clinical_data_for_ingest(ingest_json):
         errors = by_program[program_id]["errors"]
         logger.info(f"Validating input for program {program_id}")
         schema.validate_ingest_map(by_program[program_id])
-        if len(schema.validation_warnings) > 0:
-            logger.info("Validation returned warnings:")
-            logger.info("\n".join(schema.validation_warnings))
         if len(schema.validation_errors) > 0:
             errors.append([str(line) for line in schema.validation_errors])
             continue
@@ -277,7 +282,7 @@ def prep_check_clinical_data(ingest_json, token, batch_size):
     for program_id in schemas_to_ingest.keys():
         result["errors"][program_id] = []
         program = schemas_to_ingest[program_id]
-        response, status_code = auth.get_program_in_opa(program_id, token)
+        response, status_code = get_program(program_id)
         if status_code > 300:
             result["errors"][program_id].append({"not found": "No program authorization exists"})
         if not is_action_allowed_for_program(token, method="POST", path="/v3/ingest/programs/", program=program_id):
@@ -291,6 +296,13 @@ def prep_check_clinical_data(ingest_json, token, batch_size):
     if len(result["errors"]) > 0:
         return result, 400
     return schemas_to_ingest, 200
+
+
+def delete_program(program_id, token):
+    headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
+    url = f"{KATSU_URL}/v3/ingest/program/{program_id}/"
+
+    return requests.delete(url, headers=headers)
 
 
 def main():

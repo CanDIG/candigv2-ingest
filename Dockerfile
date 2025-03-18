@@ -1,4 +1,4 @@
-ARG venv_python
+ARG venv_python=3.12
 FROM python:${venv_python}
 
 ARG prod_environment=FALSE
@@ -22,11 +22,11 @@ RUN pip install -r requirements-container.txt
 
 COPY . /ingest_app
 
-RUN chmod +x ./run.sh
+RUN chmod +x ./entrypoint.sh
 
 RUN chown -R candig:candig /ingest_app
 
 USER candig
 
-ENTRYPOINT ./run.sh
+ENTRYPOINT ./entrypoint.sh
 EXPOSE 1235
