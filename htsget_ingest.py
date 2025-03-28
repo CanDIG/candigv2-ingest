@@ -290,7 +290,7 @@ def htsget_ingest(ingest_json, do_not_index=False, results_path=None, result_dic
     # update completeness stats for program_ids with created samples
     statistics = {}
     for program_id in program_ids:
-        url = f"{HTSGET_URL}/htsget/v1/samples"
+        url = f"{HTSGET_URL}/htsget/v1/experiments"
         response = requests.get(url, headers=headers, params={"program": program_id})
         if response.status_code == 200:
             for sample in response.json():
