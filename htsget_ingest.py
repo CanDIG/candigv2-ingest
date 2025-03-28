@@ -37,22 +37,22 @@ def link_genomic_data(sample, do_not_index=False):
             "Content-Type": "application/json"
         }
 
-    # get the master genomic object, or create it:
-    genomic_drs_obj = {}
+    # get the master analysis object, or create it:
+    analysis_drs_obj = {}
     response = requests.get(f"{url}/{sample['genomic_file_id']}", headers=headers)
     if response.status_code == 200:
-        genomic_drs_obj = response.json()
-    genomic_drs_obj["id"] = sample["genomic_file_id"]
-    genomic_drs_obj["name"] = sample["genomic_file_id"]
-    genomic_drs_obj["description"] = sample["metadata"]["sequence_type"]
-    genomic_drs_obj["program"] = sample["program_id"]
-    genomic_drs_obj["reference_genome"] = sample["metadata"]["reference"]
-    genomic_drs_obj["version"] = "v1"
-    if "contents" not in genomic_drs_obj:
-        genomic_drs_obj["contents"] = []
+        analysis_drs_obj = response.json()
+    analysis_drs_obj["id"] = sample["genomic_file_id"]
+    analysis_drs_obj["name"] = sample["genomic_file_id"]
+    analysis_drs_obj["description"] = sample["metadata"]["sequence_type"]
+    analysis_drs_obj["program"] = sample["program_id"]
+    analysis_drs_obj["reference_genome"] = sample["metadata"]["reference"]
+    analysis_drs_obj["version"] = "v1"
+    if "contents" not in analysis_drs_obj:
+        analysis_drs_obj["contents"] = []
 
     # add GenomicDataDrsObject to contents
-    response = add_file_drs_object(genomic_drs_obj, sample["main"], sample["metadata"]["data_type"], headers)
+    response = add_file_drs_object(analysis_drs_obj, sample["main"], sample["metadata"]["data_type"], headers)
     result["name"] = response["name"]
     result["id"] = response["id"]
     if "error" in response:
@@ -61,7 +61,7 @@ def link_genomic_data(sample, do_not_index=False):
 
     if "index" in sample:
         # add GenomicIndexDrsObject to contents
-        response = add_file_drs_object(genomic_drs_obj, sample["index"], "index", headers)
+        response = add_file_drs_object(analysis_drs_obj, sample["index"], "index", headers)
         if "error" in response:
             result["errors"].append(response["error"])
             return result
@@ -107,25 +107,25 @@ def link_genomic_data(sample, do_not_index=False):
             "drs_uri": [f"{DRS_HOST_URL}/{clin_sample['submitter_sample_id']}"]
         }
         not_found = True
-        if len(genomic_drs_obj["contents"]) > 0:
-            for i in range(0, len(genomic_drs_obj["contents"])):
-                if genomic_drs_obj["contents"][i]["name"] == clin_sample["submitter_sample_id"]:
+        if len(analysis_drs_obj["contents"]) > 0:
+            for i in range(0, len(analysis_drs_obj["contents"])):
+                if analysis_drs_obj["contents"][i]["name"] == clin_sample["submitter_sample_id"]:
                     not_found = False
-                    genomic_drs_obj["contents"][i] = contents_obj
+                    analysis_drs_obj["contents"][i] = contents_obj
                     break
         if not_found:
-            genomic_drs_obj["contents"].append(contents_obj)
+            analysis_drs_obj["contents"].append(contents_obj)
 
-    # finally, post the genomic_drs_object
-    response = requests.post(url, json=genomic_drs_obj, headers=headers)
+    # finally, post the analysis_drs_object
+    response = requests.post(url, json=analysis_drs_obj, headers=headers)
     if response.status_code != 200:
-        result["errors"].append(f"error posting genomic drs object {genomic_drs_obj['id']}: {response.status_code} {response.text}")
+        result["errors"].append(f"error posting analysis drs object {analysis_drs_obj['id']}: {response.status_code} {response.text}")
         return result
     else:
         result["sample"] = f"connected submitter_sample_id {contents_obj["name"]} to genomic_file_sample_id {contents_obj["id"]}"
 
     # verify that the genomic file exists and is readable
-    verify_url = f"{HTSGET_URL}/htsget/v1/{sample['metadata']['data_type']}s/{genomic_drs_obj['id']}/verify"
+    verify_url = f"{HTSGET_URL}/htsget/v1/{sample['metadata']['data_type']}s/{analysis_drs_obj['id']}/verify"
 
     response = requests.get(verify_url, headers=headers)
     if response.status_code != 200:
@@ -135,20 +135,20 @@ def link_genomic_data(sample, do_not_index=False):
         result["errors"].append(f"could not verify sample: {response.json()['message']}")
         return result
     else:
-        # flag the genomic_drs_object for indexing:
-        url =f"{HTSGET_URL}/htsget/v1/{sample['metadata']['data_type']}s/{genomic_drs_obj['id']}/index"
+        # flag the analysis_drs_object for indexing:
+        url =f"{HTSGET_URL}/htsget/v1/{sample['metadata']['data_type']}s/{analysis_drs_obj['id']}/index"
         result["to_index"] = [url]
     return result
 
 
-def add_file_drs_object(genomic_drs_obj, file, type, headers):
+def add_file_drs_object(analysis_drs_obj, file, type, headers):
     url = f"{HTSGET_URL}/ga4gh/drs/v1/objects"
     obj = {
         "access_methods": [],
         "id": file['name'],
         "name": file['name'],
         "description": type,
-        "program": genomic_drs_obj["program"],
+        "program": analysis_drs_obj["program"],
         "version": "v1"
     }
     contents_obj = {
@@ -165,14 +165,14 @@ def add_file_drs_object(genomic_drs_obj, file, type, headers):
 
     # is this file already in the master object? If so, replace it:
     not_found = True
-    if len(genomic_drs_obj["contents"]) > 0:
-        for i in range(0, len(genomic_drs_obj["contents"])):
-            if genomic_drs_obj["contents"][i]["name"] == file["name"]:
-                genomic_drs_obj["contents"][i] = contents_obj
+    if len(analysis_drs_obj["contents"]) > 0:
+        for i in range(0, len(analysis_drs_obj["contents"])):
+            if analysis_drs_obj["contents"][i]["name"] == file["name"]:
+                analysis_drs_obj["contents"][i] = contents_obj
                 not_found = False
                 break
     if not_found:
-        genomic_drs_obj["contents"].append(contents_obj)
+        analysis_drs_obj["contents"].append(contents_obj)
     response = requests.post(url, json=obj, headers=headers)
     if response.status_code > 200:
         contents_obj["error"] =  f"error creating file drs object: {response.status_code} {response.text}"
