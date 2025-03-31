@@ -44,7 +44,7 @@ def link_genomic_data(sample, do_not_index=False):
         analysis_drs_obj = response.json()
     analysis_drs_obj["id"] = sample["genomic_file_id"]
     analysis_drs_obj["name"] = sample["genomic_file_id"]
-    analysis_drs_obj["description"] = sample["metadata"]["sequence_type"]
+    analysis_drs_obj["description"] = sample["metadata"]["data_type"]
     analysis_drs_obj["program"] = sample["program_id"]
     analysis_drs_obj["reference_genome"] = sample["metadata"]["reference"]
     analysis_drs_obj["version"] = "v1"
@@ -67,11 +67,11 @@ def link_genomic_data(sample, do_not_index=False):
             return result
 
     for clin_sample in sample["samples"]:
-        # for each sample in the samples, get the SampleDrsObject or create it
+        # for each sample in the samples, get the ExperimentDrsObject or create it
         sample_drs_obj = {
             "id": clin_sample["submitter_sample_id"],
             "name": clin_sample["submitter_sample_id"],
-            "description": "sample",
+            "description": sample["metadata"]["sequence_type"],
             "program": sample["program_id"],
             "version": "v1",
             "contents": []
@@ -365,7 +365,7 @@ def check_genomic_data(dataset, token):
             sample_errors = []
             # validate the json
             if sample["genomic_file_id"] == sample["main"]["name"] or sample["genomic_file_id"] == sample["index"]["name"]:
-                sample_errors = f"Sample {sample['genomic_file_id']} cannot have the same name as one of its files."
+                sample_errors = f"Experiment {sample['genomic_file_id']} cannot have the same name as one of its files."
             else:
                 for error in jsonschema.Draft202012Validator(json_schema).iter_errors(sample):
                     sample_errors.extend(f"{' > '.join(error.path)}: {error.message}")
