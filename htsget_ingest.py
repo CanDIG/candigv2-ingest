@@ -39,11 +39,11 @@ def link_genomic_data(sample, do_not_index=False):
 
     # get the master analysis object, or create it:
     analysis_drs_obj = {}
-    response = requests.get(f"{url}/{sample['genomic_file_id']}", headers=headers)
+    response = requests.get(f"{url}/{sample['analysis_id']}", headers=headers)
     if response.status_code == 200:
         analysis_drs_obj = response.json()
-    analysis_drs_obj["id"] = sample["genomic_file_id"]
-    analysis_drs_obj["name"] = sample["genomic_file_id"]
+    analysis_drs_obj["id"] = sample["analysis_id"]
+    analysis_drs_obj["name"] = sample["analysis_id"]
     analysis_drs_obj["description"] = sample["metadata"]["data_type"]
     analysis_drs_obj["program"] = sample["program_id"]
     analysis_drs_obj["reference_genome"] = sample["metadata"]["reference"]
@@ -51,7 +51,7 @@ def link_genomic_data(sample, do_not_index=False):
     if "contents" not in analysis_drs_obj:
         analysis_drs_obj["contents"] = []
 
-    # add GenomicDataDrsObject to contents
+    # add AnalysisDataDrsObject to contents
     response = add_file_drs_object(analysis_drs_obj, sample["main"], sample["metadata"]["data_type"], headers)
     result["name"] = response["name"]
     result["id"] = response["id"]
@@ -60,7 +60,7 @@ def link_genomic_data(sample, do_not_index=False):
         return result
 
     if "index" in sample:
-        # add GenomicIndexDrsObject to contents
+        # add AnalysisIndexDrsObject to contents
         response = add_file_drs_object(analysis_drs_obj, sample["index"], "index", headers)
         if "error" in response:
             result["errors"].append(response["error"])
@@ -80,17 +80,17 @@ def link_genomic_data(sample, do_not_index=False):
         if response.status_code == 200:
             sample_drs_obj = response.json()
 
-        # add the GenomicDrsObject to its contents, if it's not already there:
+        # add the AnalysisDrsObject to its contents, if it's not already there:
         not_found = True
         if len(sample_drs_obj["contents"]) > 0:
             for obj in sample_drs_obj["contents"]:
-                if obj["name"] == sample["genomic_file_id"]:
+                if obj["name"] == sample["analysis_id"]:
                     not_found = False
         if not_found:
             contents_obj = {
-                "name": sample["genomic_file_id"],
-                "id": sample["genomic_file_id"],
-                "drs_uri": [f"{DRS_HOST_URL}/{sample['genomic_file_id']}"]
+                "name": sample["analysis_id"],
+                "id": sample["analysis_id"],
+                "drs_uri": [f"{DRS_HOST_URL}/{sample['analysis_id']}"]
             }
             sample_drs_obj["contents"].append(contents_obj)
 
@@ -100,10 +100,10 @@ def link_genomic_data(sample, do_not_index=False):
             result["errors"].append(f"error creating sample drs object {sample_drs_obj['id']}: {response.status_code} {response.text}")
             return result
 
-        # then add the sample to the GenomicDrsObject's contents, if it's not already there:
+        # then add the sample to the AnalysisDrsObject's contents, if it's not already there:
         contents_obj = {
             "name": clin_sample["submitter_sample_id"],
-            "id": clin_sample["genomic_file_sample_id"],
+            "id": clin_sample["analysis_sample_id"],
             "drs_uri": [f"{DRS_HOST_URL}/{clin_sample['submitter_sample_id']}"]
         }
         not_found = True
@@ -122,7 +122,7 @@ def link_genomic_data(sample, do_not_index=False):
         result["errors"].append(f"error posting analysis drs object {analysis_drs_obj['id']}: {response.status_code} {response.text}")
         return result
     else:
-        result["sample"] = f"connected submitter_sample_id {contents_obj["name"]} to genomic_file_sample_id {contents_obj["id"]}"
+        result["sample"] = f"connected submitter_sample_id {contents_obj["name"]} to analysis_sample_id {contents_obj["id"]}"
 
     # verify that the genomic file exists and is readable
     verify_url = f"{HTSGET_URL}/htsget/v1/{sample['metadata']['data_type']}s/{analysis_drs_obj['id']}/verify"
@@ -242,9 +242,9 @@ def htsget_ingest(ingest_json, do_not_index=False, results_path=None, result_dic
         if result_dict is not None and sample["program_id"] not in result_dict:
             result_dict[sample["program_id"]] = result
 
-        logger.debug(f"Ingesting {sample['genomic_file_id']}, do_not_index = {do_not_index}")
+        logger.debug(f"Ingesting {sample['analysis_id']}, do_not_index = {do_not_index}")
         program_ids.add(sample["program_id"])
-        result["results"].append(f"processing experiment {sample["genomic_file_id"]}...")
+        result["results"].append(f"processing experiment {sample["analysis_id"]}...")
 
         if results_path is not None and result_dict is not None:
             with open(results_path, "w") as f:
@@ -252,7 +252,7 @@ def htsget_ingest(ingest_json, do_not_index=False, results_path=None, result_dic
 
         # create the corresponding DRS objects
         if "samples" not in sample or len(sample["samples"]) == 0:
-            result["results"][-1] = f"error processing experiment {sample["genomic_file_id"]}: No samples were specified"
+            result["results"][-1] = f"error processing experiment {sample["analysis_id"]}: No samples were specified"
             break
         response = link_genomic_data(sample, do_not_index)
 
@@ -264,9 +264,9 @@ def htsget_ingest(ingest_json, do_not_index=False, results_path=None, result_dic
                 if "403" in err:
                     status_code = 403
                     break
-                result["results"].append(f"error processing {response["id"]} {response["name"]} in experiment {sample["genomic_file_id"]}: {err}")
+                result["results"].append(f"error processing {response["id"]} {response["name"]} in experiment {sample["analysis_id"]}: {err}")
         else:
-            result["results"].append(f"processed {response["id"]} {response["name"]} for experiment {sample["genomic_file_id"]}")
+            result["results"].append(f"processed {response["id"]} {response["name"]} for experiment {sample["analysis_id"]}")
             if "sample" in response:
                 result["results"].append(response["sample"])
 
@@ -327,7 +327,7 @@ def htsget_ingest(ingest_json, do_not_index=False, results_path=None, result_dic
 def check_genomic_data(dataset, token):
     with open("ingest_openapi.yaml") as f:
         openapi_text = f.read()
-        json_schema = openapi_to_jsonschema(openapi_text, "GenomicSample")
+        json_schema = openapi_to_jsonschema(openapi_text, "AnalysisSample")
     result = {
         "errors": {},
     }
@@ -364,8 +364,8 @@ def check_genomic_data(dataset, token):
         for sample in by_program[program_id]:
             sample_errors = []
             # validate the json
-            if sample["genomic_file_id"] == sample["main"]["name"] or sample["genomic_file_id"] == sample["index"]["name"]:
-                sample_errors = f"Experiment {sample['genomic_file_id']} cannot have the same name as one of its files."
+            if sample["analysis_id"] == sample["main"]["name"] or sample["analysis_id"] == sample["index"]["name"]:
+                sample_errors = f"Experiment {sample['analysis_id']} cannot have the same name as one of its files."
             else:
                 for error in jsonschema.Draft202012Validator(json_schema).iter_errors(sample):
                     sample_errors.extend(f"{' > '.join(error.path)}: {error.message}")
@@ -376,7 +376,7 @@ def check_genomic_data(dataset, token):
                 if submitter_sample["submitter_sample_id"] not in samples_in_program:
                     sample_errors.append({"no such sample": f"sample {submitter_sample['submitter_sample_id']} does not exist in clinical data {samples_in_program}"})
             if len(sample_errors) > 0:
-                result["errors"][program_id].append({sample["genomic_file_id"]: sample_errors})
+                result["errors"][program_id].append({sample["analysis_id"]: sample_errors})
         if len(result["errors"][program_id]) == 0:
             result["errors"].pop(program_id)
     if len(result["errors"]) == 0:
