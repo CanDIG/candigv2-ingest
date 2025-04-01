@@ -64,7 +64,7 @@ def test_htsget_ingest(requests_mock):
     # bad sample:
     bad_s3_sample = {
         "program_id": "SYNTHETIC-2",
-        "genomic_file_id": "bad_sample.cnv.vcf",
+        "analysis_id": "bad_sample.cnv.vcf",
         "main": {
             "access_method": "s3://1000genomes/release/20130502/ALL.chr22.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz?public=true",
             "name": "bad_sample.cnv.vcf.gz"
@@ -80,7 +80,7 @@ def test_htsget_ingest(requests_mock):
         },
         "samples": [
             {
-                "genomic_file_sample_id": "bad_sample",
+                "analysis_sample_id": "bad_sample",
                 "submitter_sample_id": "SAMPLE_REGISTRATION_1"
             }
         ]
