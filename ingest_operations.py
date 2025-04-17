@@ -192,28 +192,25 @@ def remove_user_from_role(role_type, user_id):
 # Data ingest
 ####
 
-async def add_genomic_linkages():
+async def ingest():
     dataset = await connexion.request.json()
-    do_not_index = bool(connexion.request.query_params.get("do_not_index", False))
     headers = get_headers()
     token = connexion.request.headers['Authorization'].split("Bearer ")[1]
-    response, status_code = htsget_ingest.check_genomic_data(dataset, token)
-    if status_code == 200:
-        ingest_uuid = add_to_queue({"htsget": response, "do_not_index": do_not_index})
-        response = {"queue_id": ingest_uuid}
-    check_default_site_admin(response)
-    return response, status_code
-
-
-async def add_clinical_donors():
-    dataset = await connexion.request.json()
-    batch_size = int(connexion.request.query_params.get("batch_size", 1000))
-    headers = get_headers()
-    token = connexion.request.headers['Authorization'].split("Bearer ")[1]
-    response, status_code = katsu_ingest.prep_check_clinical_data(dataset, token, batch_size)
-    if status_code == 200:
-        ingest_uuid = add_to_queue({"katsu": response})
-        response = {"queue_id": ingest_uuid}
+    if "openapi_url" in dataset and "katsu" in dataset["openapi_url"]:
+        batch_size = int(connexion.request.query_params.get("batch_size", 1000))
+        response, status_code = katsu_ingest.prep_check_clinical_data(dataset, token, batch_size)
+        if status_code == 200:
+            ingest_uuid = add_to_queue({"katsu": response})
+            response = {"queue_id": ingest_uuid}
+    elif "experiments" in dataset and "analyses" in dataset:
+        do_not_index = bool(connexion.request.query_params.get("do_not_index", False))
+        response, status_code = htsget_ingest.check_genomic_data(dataset, token)
+        if status_code == 200:
+            ingest_uuid = add_to_queue({"htsget": response, "do_not_index": do_not_index})
+            response = {"queue_id": ingest_uuid}
+    else:
+        response = {"error": "dataset does not look like either clinical or sequencing data"}
+        status_code = 400
     check_default_site_admin(response)
     return response, status_code
 
