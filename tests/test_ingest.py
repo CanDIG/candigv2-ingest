@@ -33,10 +33,10 @@ def verify_callback(request, context):
 def test_htsget_ingest(requests_mock):
     matcher = re.compile(f"{HTSGET_URL}/ga4gh/drs/v1/objects/.+")
     requests_mock.post(f"{HTSGET_URL}/ga4gh/drs/v1/objects", json=callback, status_code=200)
-    requests_mock.get(matcher, status_code=404)
-    matcher = re.compile(f"{HTSGET_URL}/htsget/v1/variants/.+/index")
+    requests_mock.get(matcher, status_code=200, json={"id": "sdfs", "contents": []})
+    matcher = re.compile(f"{HTSGET_URL}/htsget/v1/.+/index")
     requests_mock.get(matcher, status_code=200)
-    matcher = re.compile(f"{HTSGET_URL}/htsget/v1/variants/.+/verify")
+    matcher = re.compile(f"{HTSGET_URL}/htsget/v1/.+/verify")
     requests_mock.get(matcher, json=verify_callback, status_code=200)
     matcher = re.compile(f"{HTSGET_URL}/htsget/v1/reads/.+/index")
     requests_mock.get(matcher, status_code=200)
@@ -54,7 +54,7 @@ def test_htsget_ingest(requests_mock):
     headers = {"Authorization": f"Bearer test", "Content-Type": "application/json"}
     with open("tests/genomic_ingest.json", "r") as f:
         data = json.load(f)
-        for sample in data:
+        for sample in data["analyses"]:
             response = htsget_ingest.link_genomic_data(sample)
             print(json.dumps(response, indent=4))
             assert len(response["errors"]) == 0
@@ -74,8 +74,7 @@ def test_htsget_ingest(requests_mock):
             "name": "bad_sample.cnv.vcf.gz.tbi"
         },
         "metadata": {
-            "sequence_type": "wgs",
-            "data_type": "variant",
+            "analysis_type": "sequence_variation",
             "reference": "hg38"
         },
         "samples": [
