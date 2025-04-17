@@ -402,7 +402,7 @@ def check_genomic_data(dataset, token):
             if experiment["submitter_sample_id"] not in samples_in_program:
                 sample_errors.append({"no such sample": f"sample {experiment['submitter_sample_id']} does not exist in clinical data {samples_in_program}"})
             if len(sample_errors) > 0:
-                result["errors"][program_id].append({sample["experiment_id"]: sample_errors})
+                result["errors"][program_id].append({experiment["experiment_id"]: sample_errors})
         for analysis in by_program[program_id]["analyses"]:
             sample_errors = []
             # validate the json
