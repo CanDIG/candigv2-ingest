@@ -429,6 +429,49 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/IngestResponse"
+  /genomic:
+    post:
+      summary: Ingest CanDIG data
+      description: Ingest clinical or genomic data into CanDIG
+      operationId: ingest_operations.ingest_genomic
+      parameters:
+        - name: do_not_index
+          in: query
+          required: false
+          schema:
+            type: boolean
+          description: set to true to prevent indexing of genomic files
+      requestBody:
+        $ref: "#/components/requestBodies/IngestRequest"
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IngestResponse"
+  /clinical:
+    post:
+      summary: Ingest CanDIG data
+      description: Ingest clinical or genomic data into CanDIG
+      operationId: ingest_operations.ingest_clinical
+      parameters:
+        - name: batch_size
+          in: query
+          required: false
+          schema:
+            type: integer
+          description: Number of items to be processed in one batch
+      requestBody:
+        $ref: "#/components/requestBodies/IngestRequest"
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IngestResponse"
+
   /status/{queue_id}:
     parameters:
       - in: path

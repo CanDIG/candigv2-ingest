@@ -214,6 +214,14 @@ async def ingest():
     check_default_site_admin(response)
     return response, status_code
 
+## aliases to maintain backwards compatibility:
+async def ingest_genomic():
+    return await ingest()
+
+
+async def ingest_clinical():
+    return await ingest()
+
 
 def add_to_queue(ingest_json):
     queue_id = str(uuid.uuid1())
