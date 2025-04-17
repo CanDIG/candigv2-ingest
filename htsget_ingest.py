@@ -308,7 +308,7 @@ def htsget_ingest(ingest_json, do_not_index=False, results_path=None, result_dic
     # send off index calls
     if not do_not_index:
         for url in to_index:
-            response = requests.get(url, headers=headers, params={"do_not_index": do_not_index})
+            response = requests.get(url, headers=headers)
 
     # update completeness stats for program_ids with created samples
     statistics = {}
