@@ -402,11 +402,11 @@ paths:
       responses:
         200:
           description: Success
-  /genomic:
+  /ingest:
     post:
-      summary: Ingest Analysis data
-      description: Add linkages between clinical donors and genomic data.
-      operationId: ingest_operations.add_genomic_linkages
+      summary: Ingest CanDIG data
+      description: Ingest clinical or genomic data into CanDIG
+      operationId: ingest_operations.ingest
       parameters:
         - name: do_not_index
           in: query
@@ -414,21 +414,6 @@ paths:
           schema:
             type: boolean
           description: set to true to prevent indexing of genomic files
-      requestBody:
-        $ref: '#/components/requestBodies/AnalysisIngestRequest'
-      responses:
-        200:
-          description: Success
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/IngestResponse"
-  /clinical:
-    post:
-      summary: Ingest Clinical data
-      description: Add a list of donors with clinical data produced by the clinical ETL.
-      operationId: ingest_operations.add_clinical_donors
-      parameters:
         - name: batch_size
           in: query
           required: false
@@ -436,7 +421,7 @@ paths:
             type: integer
           description: Number of items to be processed in one batch
       requestBody:
-        $ref: "#/components/requestBodies/ClinicalDonorRequest"
+        $ref: "#/components/requestBodies/IngestRequest"
       responses:
         200:
           description: Success
@@ -490,18 +475,13 @@ components:
         'application/json':
           schema:
             $ref: "#/components/schemas/S3Credential"
-    AnalysisIngestRequest:
+    IngestRequest:
       content:
         'application/json':
           schema:
-            type: array
-            items:
-              $ref: "#/components/schemas/AnalysisSample"
-    ClinicalDonorRequest:
-      content:
-        'application/json':
-          schema:
-            $ref: "#/components/schemas/ClinicalDonor"
+            oneOf:
+            - $ref: "#/components/schemas/SequencingIngest"
+            - $ref: "#/components/schemas/ClinicalDonor"
     ProgramIngestRequest:
       content:
         'application/json':
