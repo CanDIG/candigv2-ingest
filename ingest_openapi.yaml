@@ -432,7 +432,7 @@ paths:
   /genomic:
     post:
       summary: Ingest CanDIG data
-      description: Ingest clinical or genomic data into CanDIG
+      description: Ingest genomic data into CanDIG (maintained for backwards compatibility)
       operationId: ingest_operations.ingest_genomic
       parameters:
         - name: do_not_index
@@ -453,7 +453,7 @@ paths:
   /clinical:
     post:
       summary: Ingest CanDIG data
-      description: Ingest clinical or genomic data into CanDIG
+      description: Ingest clinical data into CanDIG (maintained for backwards compatibility)
       operationId: ingest_operations.ingest_clinical
       parameters:
         - name: batch_size
@@ -875,7 +875,14 @@ components:
               enum:
                 - reference_alignment
                 - sequence_variation
-                - expression_counts
+                - sequence_annotation
+            analysis_attribute:
+              type: object
+              properties:
+                subtype:
+                  type: string
+                  description: specific subtype of analysis
+                  example: expression_count
             reference:
               type: string
               description: which reference genome was used for alignment (hg37 or hg38)
