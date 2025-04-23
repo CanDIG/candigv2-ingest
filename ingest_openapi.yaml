@@ -402,11 +402,38 @@ paths:
       responses:
         200:
           description: Success
+  /ingest:
+    post:
+      summary: Ingest CanDIG data
+      description: Ingest clinical or genomic data into CanDIG
+      operationId: ingest_operations.ingest
+      parameters:
+        - name: do_not_index
+          in: query
+          required: false
+          schema:
+            type: boolean
+          description: set to true to prevent indexing of genomic files
+        - name: batch_size
+          in: query
+          required: false
+          schema:
+            type: integer
+          description: Number of items to be processed in one batch
+      requestBody:
+        $ref: "#/components/requestBodies/IngestRequest"
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IngestResponse"
   /genomic:
     post:
-      summary: Ingest Analysis data
-      description: Add linkages between clinical donors and genomic data.
-      operationId: ingest_operations.add_genomic_linkages
+      summary: Ingest CanDIG data
+      description: Ingest genomic data into CanDIG (maintained for backwards compatibility)
+      operationId: ingest_operations.ingest_genomic
       parameters:
         - name: do_not_index
           in: query
@@ -415,7 +442,7 @@ paths:
             type: boolean
           description: set to true to prevent indexing of genomic files
       requestBody:
-        $ref: '#/components/requestBodies/AnalysisIngestRequest'
+        $ref: "#/components/requestBodies/IngestRequest"
       responses:
         200:
           description: Success
@@ -425,9 +452,9 @@ paths:
                 $ref: "#/components/schemas/IngestResponse"
   /clinical:
     post:
-      summary: Ingest Clinical data
-      description: Add a list of donors with clinical data produced by the clinical ETL.
-      operationId: ingest_operations.add_clinical_donors
+      summary: Ingest CanDIG data
+      description: Ingest clinical data into CanDIG (maintained for backwards compatibility)
+      operationId: ingest_operations.ingest_clinical
       parameters:
         - name: batch_size
           in: query
@@ -436,7 +463,7 @@ paths:
             type: integer
           description: Number of items to be processed in one batch
       requestBody:
-        $ref: "#/components/requestBodies/ClinicalDonorRequest"
+        $ref: "#/components/requestBodies/IngestRequest"
       responses:
         200:
           description: Success
@@ -444,6 +471,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/IngestResponse"
+
   /status/{queue_id}:
     parameters:
       - in: path
@@ -490,18 +518,13 @@ components:
         'application/json':
           schema:
             $ref: "#/components/schemas/S3Credential"
-    AnalysisIngestRequest:
+    IngestRequest:
       content:
         'application/json':
           schema:
-            type: array
-            items:
-              $ref: "#/components/schemas/AnalysisSample"
-    ClinicalDonorRequest:
-      content:
-        'application/json':
-          schema:
-            $ref: "#/components/schemas/ClinicalDonor"
+            oneOf:
+            - $ref: "#/components/schemas/SequencingIngest"
+            - $ref: "#/components/schemas/ClinicalDonor"
     ProgramIngestRequest:
       content:
         'application/json':
@@ -558,6 +581,10 @@ components:
         - secret_key
     ClinicalDonor:
       type: object
+      required:
+        - openapi_url
+        - donors
+        - schema_class
       properties:
         openapi_url:
           type: string
@@ -570,6 +597,9 @@ components:
         katsu_sha:
           type: string
           description: the SHA of the version of Katsu used to generate the schema.
+        schema_class:
+          type: string
+          description: name of the class that the Katsu openAPI schema represents
         statistics:
           $ref: "#/components/schemas/Statistics"
     Statistics:
@@ -613,53 +643,211 @@ components:
           type: array
           items:
             type: string
-    AnalysisSample:
+    SequencingIngest:
       type: object
+      required:
+        - experiments
+        - analyses
+      properties:
+        experiments:
+          type: array
+          items:
+            $ref: "#/components/schemas/Experiment"
+        analyses:
+          type: array
+          items:
+            $ref: "#/components/schemas/Analysis"
+    Experiment:
+      description: Describes the sequencing experiment performed on a specific specimen from a donor
+      type: object
+      required:
+        - program_id
+        - experiment_id
+        - submitter_sample_id
+        - metadata
       properties:
         program_id:
           type: string
-          description: Name of the program this sample belongs to. The user must be authorized to add data to this program.
-        analysis_id:
+          description: Name of the program this experiment belongs to. The user must be authorized to add data to this program.
+        experiment_id:
           type: string
-          description: A unique name for this downstream analysis
-          example: "HG00096.vcf"
+          description: Unique identifier given by the sequencing centre
+        submitter_sample_id:
+          type: string
+          description: Unique identifier for the sample submitted for sequencing. Equivalent to MoHCCN's submitter_sample_id in the Sample Registration schema.
         metadata:
           type: object
-          description: Additional data that describes the downstream analysis
+          description: Additional data that describes the sequencing experiment
+          required:
+            - library_strategy
           properties:
-            sequence_type:
+            library_description:
+              type: string
+              description: Free text description of the library
+            instrument:
+              type: string
+              description: sequencing instrument used
+              enum:
+                - ABI SOLID Models
+                - AB 5500 Genetic Analyzer
+                - AB 5500xl Genetic Analyzer
+                - AB 5500xl-W Genetic Analysis System
+                - AB SOLiD 3 Plus System
+                - AB SOLiD 4 System
+                - AB SOLiD 4hq System
+                - AB SOLiD PI System
+                - AB SOLiD System
+                - AB SOLiD System 2.0
+                - AB SOLiD System 3.0
+                - AB 310 Genetic Analyzer
+                - CAPILLARY Models
+                - AB 3130 Genetic Analyzer
+                - AB 3130xL Genetic Analyzer
+                - AB 3500 Genetic Analyzer
+                - AB 3500xL Genetic Analyzer
+                - AB 3730 Genetic Analyzer
+                - AB 3730xL Genetic Analyzer
+                - COMPLETE GENOMICS Models
+                - Complete Genomics
+                - HELICOS Models
+                - Helicos HeliScope
+                - ILLUMINA Models
+                - HiSeq X Five
+                - HiSeq X Ten
+                - Illumina Genome Analyzer
+                - Illumina Genome Analyzer II
+                - Illumina Genome Analyzer IIx
+                - Illumina HiScanSQ
+                - Illumina HiSeq 1000
+                - Illumina HiSeq 1500
+                - Illumina HiSeq 2000
+                - Illumina HiSeq 2500
+                - Illumina HiSeq 3000
+                - Illumina HiSeq 4000
+                - Illumina MiSeq
+                - Illumina MiniSeq
+                - Illumina NovaSeq 6000
+                - NextSeq 500
+                - NextSeq 550
+                - ION TORRENT Models
+                - Ion Torrent PGM
+                - Ion Torrent Proton
+                - Ion Torrent S5
+                - Ion Torrent S5 XL
+                - LS454 Models
+                - 454 GS
+                - 454 GS 20
+                - 454 GS FLX
+                - 454 GS FLX Titanium
+                - 454 GS FLX+
+                - 454 GS Junior
+                - OXFORD NANOPORE Models
+                - GridION
+                - MinION
+                - PromethION
+                - PACBIO SMRT Models
+                - PacBio RS
+                - PacBio RS II
+                - Sequel
+            library_selection:
+              type: string
+              description: method used to enrich target
+              enum:
+                - 5-methylcytidine antibody
+                - CAGE
+                - ChIP
+                - ChIP-Seq
+                - DNase
+                - HMPR
+                - Hybrid Selection
+                - Inverse rRNA
+                - Inverse rRNA selection
+                - MBD2 protein methyl-CpG binding domain
+                - MDA
+                - MF
+                - MNase
+                - MSLL
+                - Oligo-dT
+                - PCR
+                - PolyA
+                - RACE
+                - RANDOM
+                - RANDOM PCR
+                - RT-PCR
+                - Reduced Representation
+                - Restriction Digest
+                - cDNA
+                - cDNA_oligo_dT
+                - cDNA_randomPriming
+                - other
+                - padlock probes capture method
+                - repeat fractionation
+                - size fractionation
+                - unspecified
+            protocol:
+              type: string
+              description: optional link to protocol
+            library_source:
+              type: string
+              description: type of material
+              enum:
+                - genomic
+                - genomic single cell
+                - metagenomic
+                - metatranscriptomic
+                - other
+                - synthetic
+                - transcriptomic
+                - transcriptomic single cell
+                - viral RNA
+            library_strategy:
               type: string
               description: type of data sequenced (whole genome or whole transcriptome)
               enum:
-                - wgs
-                - wts
-              default: wgs
-            data_type:
+                - AMPLICON
+                - ATAC-seq
+                - Bisulfite-Seq
+                - CLONE
+                - CLONEEND
+                - CTS
+                - ChIA-PET
+                - ChIP-Seq
+                - DNase-Hypersensitivity
+                - EST
+                - FAIRE-seq
+                - FINISHING
+                - FL-cDNA
+                - Hi-C
+                - MBD-Seq
+                - MNase-Seq
+                - MRE-Seq
+                - MeDIP-Seq
+                - OTHER
+                - POOLCLONE
+                - RAD-Seq
+                - RIP-Seq
+                - RNA-Seq
+                - SELEX
+                - Synthetic-Long-Read
+                - Targeted-Capture
+                - Tethered Chromatin Conformation Capture
+                - Tn-Seq
+                - VALIDATION
+                - WCS
+                - WGA
+                - WGS
+                - WXS
+                - miRNA-Seq
+                - ncRNA-Seq
+                - ssRNA-seq
+            library_layout:
               type: string
-              description: type of data represented in the resource (variant or read)
+              description: Single or Paired
               enum:
-                - variant
-                - read
-            reference:
-              type: string
-              description: which reference genome was used for alignment (hg37 or hg38)
-              enum:
-                - hg37
-                - hg38
-              default: hg38
-          required:
-            - sequence_type
-            - data_type
-            - reference
-        main:
-          $ref: "#/components/schemas/File"
-        index:
-          $ref: "#/components/schemas/File"
-        samples:
-          type: array
-          description: An array of links between donor data (e.g. MoH Sample Registrations) and the samples in the genomic data resource
-          items:
-            $ref: "#/components/schemas/SampleLink"
+                - paired
+                - single
+    Analysis:
+      type: object
       required:
         - program_id
         - analysis_id
@@ -667,6 +855,79 @@ components:
         - main
         - index
         - samples
+      properties:
+        program_id:
+          type: string
+          description: Name of the program this sample belongs to. The user must be authorized to add data to this program.
+        analysis_id:
+          type: string
+          description: A unique name for this downstream analysis
+        metadata:
+          type: object
+          description: Additional data that describes the downstream analysis
+          required:
+            - analysis_type
+            - reference
+          properties:
+            analysis_type:
+              type: string
+              description: type of data represented in the Analysis
+              enum:
+                - reference_alignment
+                - sequence_variation
+                - sequence_annotation
+            analysis_attribute:
+              type: object
+              properties:
+                subtype:
+                  type: string
+                  description: specific subtype of analysis
+                  example: expression_count
+            reference:
+              type: string
+              description: which reference genome was used for alignment (hg37 or hg38)
+              enum:
+                - hg37
+                - hg38
+              default: hg38
+            reference_sequence_type:
+              type: string
+              enum:
+                - Whole genome sequencing
+                - Whole transcriptome sequencing
+                - Exome sequencing
+                - Genotyping by array
+                - transcriptomics
+                - Curation
+                - Genotyping by sequencing
+                - Target sequencing
+            reference_assembly_id:
+              type: string
+              description: if provided, the name of the exact assembly used for the reference genome
+            analysis_centre:
+              type: string
+              description: name of sequencing centre that performed the analysis
+        main:
+          $ref: "#/components/schemas/File"
+        index:
+          $ref: "#/components/schemas/File"
+        samples:
+          type: array
+          description: An array of links between Experiments and the samples in the analysis
+          items:
+            type: object
+            description: Link between Experiments and the samples in the analysis
+            properties:
+              experiment_id:
+                type: string
+                description: the ID of the sequencing experiment
+              analysis_sample_id:
+                type: string
+                description: the name of the sample as listed in the analysis results
+                example: TUMOUR/NORMAL/PROGRAM_EXPERIMENT_ID_1
+            required:
+              - experiment_id
+              - analysis_sample_id
     File:
       type: object
       description: Object describing a file
@@ -694,21 +955,6 @@ components:
         a description of an S3 URI. NB: even though the s3 prefix is incorrect, we allow it in parsing so that we can give better feedback to the user if a url is provided in that form.
       pattern: (https*|s3):\/\/(.+)\/(.+)\/(.+)
       example: http://s3.us-east-1.amazonaws.com/1000genomes/HG00096.vcf.gz
-    SampleLink:
-      type: object
-      description: Link between donor data (e.g. MoH Sample Registrations) and the samples in the genomic data resource
-      properties:
-        submitter_sample_id:
-          type: string
-          description: the name of the sample as listed in the linked donor data
-          example: sample_registration_id_1
-        analysis_sample_id:
-          type: string
-          description: the name of the sample in the analysis
-          example: TUMOUR/NORMAL/PROGRAM_SAMPLE_REGISTRATION_ID_1
-      required:
-        - submitter_sample_id
-        - analysis_sample_id
     Program:
       type: object
       description: Describes a program
