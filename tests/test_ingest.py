@@ -33,7 +33,7 @@ def verify_callback(request, context):
 def test_htsget_ingest(requests_mock):
     matcher = re.compile(f"{HTSGET_URL}/ga4gh/drs/v1/objects/.+")
     requests_mock.post(f"{HTSGET_URL}/ga4gh/drs/v1/objects", json=callback, status_code=200)
-    requests_mock.get(matcher, status_code=200, json={"id": "sdfs", "contents": []})
+    requests_mock.get(matcher, status_code=200, json={"id": "sdfs", "name": "sfdfs", "contents": []})
     matcher = re.compile(f"{HTSGET_URL}/htsget/v1/.+/index")
     requests_mock.get(matcher, status_code=200)
     matcher = re.compile(f"{HTSGET_URL}/htsget/v1/.+/verify")
