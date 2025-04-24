@@ -100,7 +100,7 @@ def link_genomic_data(sample, do_not_index=False):
 
         # then add the sample to the AnalysisDrsObject's contents, if it's not already there:
         contents_obj = {
-            "name": clin_sample["experiment_id"],
+            "name": experiment_drs_obj["name"],
             "id": clin_sample["analysis_sample_id"],
             "drs_uri": [f"{DRS_HOST_URL}/{clin_sample['experiment_id']}"]
         }
