@@ -18,6 +18,7 @@ logger = CanDIGLogger(__file__)
 
 CANDIG_URL = os.getenv("CANDIG_URL", "")
 HTSGET_URL = os.getenv("HTSGET_URL", f"{CANDIG_URL}/genomics")
+TAKUAN_URL = os.getenv("RNAGET_URL", f"{CANDIG_URL}/rnaget")
 DRS_HOST_URL = "drs://" + CANDIG_URL.replace(f"{urlparse(CANDIG_URL).scheme}://","") + "/genomics"
 KATSU_URL = os.environ.get("KATSU_URL")
 IS_TESTING = os.getenv("IS_TESTING", False)
@@ -122,22 +123,72 @@ def link_genomic_data(analysis, do_not_index=False):
     else:
         result["sample"] = f"connected submitter_sample_id {contents_obj["name"]} to analysis_sample_id {contents_obj["id"]}"
 
-    # verify that the genomic file exists and is readable
-    verify_url = f"{HTSGET_URL}/htsget/v1/{analysis_drs_obj['id']}/verify"
+    # send the data to the downstream service: either htsget or takuan
+    if analysis_drs_obj["metadata"]["analysis_type"] == "sequence_annotation":
+        if "analysis_attribute" in analysis_drs_obj["metadata"] and analysis_drs_obj["metadata"]["analysis_attribute"]["subtype"] == "expression_count":
+            # send it to takuan
+            # first, create experiment in Takuan:
+            experiment_json = {
+                "experiment_result_id": experiment_drs_obj["id"],
+                "assembly_id": "GCA_000001405.27",
+                "assembly_name": "GRCh38",
+                "extra_properties": {}
+            }
+            response = requests.post(f"{TAKUAN_URL}/experiment", json=experiment_json, headers=headers)
+            logger.debug(f"takuan experiment post {response.status_code}, {response.text}")
 
-    # TODO: ingest to Takuan, figure out how to check if Takuan has accepted the file
+            # ingest matrix
+            response = requests.get(f"{HTSGET_URL}/ga4gh/drs/v1/objects/{analysis["main"]["name"]}/download", headers=headers)
+            if response.status_code == 200:
+                raw_tsv_data = response.text.strip()
+                lines = raw_tsv_data.split("\n")
+                titles = lines.pop(0).split("\t")
+                tsv_dict = {}
+                for line in lines:
+                    values = line.split("\t")
+                    for v in range(len(values)):
+                        if titles[v] not in tsv_dict:
+                            tsv_dict[titles[v]] = []
+                        tsv_dict[titles[v]].append(values[v])
 
-    response = requests.get(verify_url, headers=headers)
-    if response.status_code != 200:
-        result["errors"].append(f"could not verify sample: {response.text}")
-        return result
-    elif not response.json()['result']:
-        result["errors"].append(f"could not verify sample: {response.json()['message']}")
-        return result
+                input_dict = {
+                    "gene_id": tsv_dict['gene_id'],
+                    "abundance": tsv_dict['TPM'],
+                    "counts": tsv_dict['expected_count'],
+                    "length": tsv_dict['length']
+                }
+                titles = list(input_dict.keys())
+                tsv_string_data =  "\t".join(titles)
+                for i in range(len(input_dict[titles[0]])):
+                    tsv_string_data += "\n"
+                    for key in input_dict.keys():
+                        tsv_string_data += input_dict[key][i] + "\t"
+                tsv_string_data = tsv_string_data.strip()
+                string_data = bytes(tsv_string_data, "utf-8")
+                response = requests.post(
+                    f"{TAKUAN_URL}/experiment/{experiment_drs_obj["id"]}/ingest/single?sample_id={experiment_drs_obj["id"]}&norm_type=tpm",
+                    data=dict(data=string_data),
+                )
+                if response.status_code != 200:
+                    result["errors"].append(f"takuan: {response.status_code} {response.text}")
+            else:
+                result["errors"].append(f"could not load analysis: {response.text}")
     else:
-        # flag the analysis_drs_object for indexing:
-        url =f"{HTSGET_URL}/htsget/v1/{analysis_drs_obj['id']}/index"
-        result["to_index"] = [url]
+        # send it to htsget
+        # verify that the genomic file exists and is readable
+        verify_url = f"{HTSGET_URL}/htsget/v1/{analysis_drs_obj['id']}/verify"
+
+        response = requests.get(verify_url, headers=headers)
+        if response.status_code != 200:
+            result["errors"].append(f"could not verify analysis: {response.text}")
+            return result
+        elif not response.json()['result']:
+            result["errors"].append(f"could not verify analysis: {response.json()['message']}")
+            return result
+        else:
+            # flag the analysis_drs_object for indexing:
+            url =f"{HTSGET_URL}/htsget/v1/{analysis_drs_obj['id']}/index"
+            result["to_index"] = [url]
     return result
 
 

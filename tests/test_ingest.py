@@ -13,6 +13,8 @@ import htsget_ingest
 CANDIG_URL = os.getenv("CANDIG_URL", "http://localhost")
 HTSGET_URL = os.getenv("HTSGET_URL", f"{CANDIG_URL}/genomics")
 VAULT_URL = os.getenv("VAULT_URL", f"{CANDIG_URL}/vault")
+RNAGET_URL = os.getenv("RNAGET_URL", f"{CANDIG_URL}/rnaget")
+
 
 
 def test_prepare_clinical_ingest():
@@ -48,8 +50,13 @@ def test_htsget_ingest(requests_mock):
     requests_mock.get(matcher, json={"data": {"client_token": "sfsfd"}}, status_code=200)
     requests_mock.post(matcher, json={"data": {"client_token": "sfsfd"}}, status_code=200)
 
-    matcher = re.compile(f"{VAULT_URL}/v1/candig-ingest/aws/.+")
-    requests_mock.get(matcher, json={"data": {"endpoint": "sfsfd", "bucket": "1000genomes", "access_key": "sfsdf", "secret_key": "sdfsfs", "url": "s3.us-east-1.amazonaws.com", "secure": "False"}}, status_code=200)
+    matcher = re.compile(f"{RNAGET_URL}/.+")
+    requests_mock.post(matcher, status_code=200)
+    matcher = re.compile(f"{HTSGET_URL}/ga4gh/drs/v1/objects/.+/download")
+    tsv_string_data = """gene_id	length	effective_length	expected_count	TPM	FPKM
+    ENSG00000000003.14	2000.22	1008.6	150.00	6.24	7.32
+    """
+    requests_mock.get(matcher, text=tsv_string_data, status_code=200)
 
     headers = {"Authorization": f"Bearer test", "Content-Type": "application/json"}
     with open("tests/genomic_ingest.json", "r") as f:
