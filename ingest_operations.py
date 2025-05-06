@@ -513,8 +513,8 @@ def list_authz_for_user(user_id):
         bearer_token=token,
         user_token=user_result["userinfo"]["sample_jwt"] if not self_checkup else token)
     if opa_status_code == 200:
-        user_result["program_authorizations"]["team_member"] = opa_permissions["team_member_programs"]
-        user_result["program_authorizations"]["program_curator"] = opa_permissions["curator_programs"]
+        user_result["program_authorizations"]["team_member"] = opa_permissions["debug"]["user_key_has_team_member_programs"]
+        user_result["program_authorizations"]["program_curator"] = opa_permissions["debug"]["user_key_has_curator_programs"]
 
     user_result["program_authorizations"]["dac_authorizations"] = user_result.pop("dac_authorizations")
     user_result["userinfo"].pop("sample_jwt")
