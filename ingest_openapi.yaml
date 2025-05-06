@@ -836,6 +836,7 @@ components:
                 - WCS
                 - WGA
                 - WGS
+                - WTS
                 - WXS
                 - miRNA-Seq
                 - ncRNA-Seq
@@ -853,7 +854,6 @@ components:
         - analysis_id
         - metadata
         - main
-        - index
         - samples
       properties:
         program_id:
@@ -882,7 +882,12 @@ components:
                 subtype:
                   type: string
                   description: specific subtype of analysis
-                  example: expression_count
+                  enum:
+                    - mutation
+                    - copynumber
+                    - expression_count
+                    - fusion
+                    - structural_variation
             reference:
               type: string
               description: which reference genome was used for alignment (hg37 or hg38)

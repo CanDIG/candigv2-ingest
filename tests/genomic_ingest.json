@@ -95,6 +95,14 @@
             "metadata": {
                 "library_strategy": "WGS"
             }
+        },
+        {
+            "program_id": "LOCAL-SYNTH_01",
+            "experiment_id": "LOCAL-SEQ_0009",
+            "submitter_sample_id": "LOCAL-SAMPLE_0009",
+            "metadata": {
+                "library_strategy": "WTS"
+            }
         }
     ],
     "analyses": [
@@ -305,6 +313,27 @@
                 {
                     "analysis_sample_id": "NA18537",
                     "experiment_id": "LOCAL-SEQ_0090"
+                }
+            ]
+        },
+        {
+            "program_id": "LOCAL-SYNTH_01",
+            "analysis_id": "LOCAL-NA18537-counts",
+            "main": {
+                "access_method": "file:////app/htsget_server/data/files/counts.tsv",
+                "name": "counts.tsv"
+            },
+            "metadata": {
+                "analysis_type": "sequence_annotation",
+                "analysis_attribute": {
+                    "subtype": "expression_count"
+                },
+                "reference": "hg38"
+            },
+            "samples": [
+                {
+                    "analysis_sample_id": "LOCAL-SEQ_0009",
+                    "experiment_id": "LOCAL-SEQ_0009"
                 }
             ]
         }
