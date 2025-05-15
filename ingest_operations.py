@@ -236,8 +236,11 @@ def add_to_queue(ingest_json):
 
 @app.route('/status/<path:queue_id>')
 def get_ingest_status(queue_id):
+    uuid_match = re.match(r"^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$", queue_id)
+    if uuid_match is None:
+        return {"error": f"queue_id {queue_id} is not a UUID"}
     try:
-        results_path = os.path.join(config.DAEMON_PATH, "results", queue_id)
+        results_path = os.path.join(config.DAEMON_PATH, "results", uuid_match.group(0))
         with open(results_path) as f:
             json_data = json.load(f)
             # os.remove(results_path)
