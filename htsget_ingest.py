@@ -150,12 +150,56 @@ def link_genomic_data(analysis, do_not_index=False):
                             tsv_dict[titles[v]] = []
                         tsv_dict[titles[v]].append(values[v])
 
+                # verify that all required columns are present:
+                if "gene_id_column" not in analysis_drs_obj["metadata"]["analysis_attribute"]:
+                    result["errors"].append(f"no gene_id column present")
+                    return result
+                if "length_column" not in analysis_drs_obj["metadata"]["analysis_attribute"]:
+                    result["errors"].append(f"no length column present")
+                    return result
+                if "count_column" not in analysis_drs_obj["metadata"]["analysis_attribute"]:
+                    result["errors"].append(f"no count column present")
+                    return result
+
+                norm_method = None
+                if "norm_column" in analysis_drs_obj["metadata"]["analysis_attribute"]:
+                    if "norm_method" not in analysis_drs_obj["metadata"]["analysis_attribute"]:
+                        result["errors"].append(f"norm_column present but no norm_method specified")
+                        return result
+                    norm_method = analysis_drs_obj["metadata"]["analysis_attribute"]["norm_method"]
+                    norm_title = analysis_drs_obj["metadata"]["analysis_attribute"]["norm_column"]
+
+                gene_id_title = analysis_drs_obj["metadata"]["analysis_attribute"]["gene_id_column"]
+                count_title = analysis_drs_obj["metadata"]["analysis_attribute"]["count_column"]
+                length_title = analysis_drs_obj["metadata"]["analysis_attribute"]["length_column"]
+                if gene_id_title not in tsv_dict:
+                    result["errors"].append(f"column {gene_id_title} not present in ingest file")
+                    return result
+                if count_title not in tsv_dict:
+                    result["errors"].append(f"column {count_title} not present in ingest file")
+                    return result
+                if length_title not in tsv_dict:
+                    result["errors"].append(f"column {length_title} not present in ingest file")
+                    return result
+
                 input_dict = {
-                    "gene_id": tsv_dict['gene_id'],
-                    "abundance": tsv_dict['TPM'],
-                    "counts": tsv_dict['expected_count'],
-                    "length": tsv_dict['length']
+                    "gene_id": tsv_dict[gene_id_title],
+                    "counts": tsv_dict[count_title],
+                    "length": tsv_dict[length_title]
                 }
+
+                if norm_method is not None:
+                    if norm_title not in tsv_dict:
+                        result["errors"].append(f"column {norm_title} not present in ingest file")
+                        return result
+                    input_dict[norm_method] = tsv_dict[norm_title]
+                else:
+                    if "TPM" in tsv_dict or "tpm" in tsv_dict:
+                        input_dict["tpm"] = tsv_dict["TPM"]
+                    if "FPKM" in tsv_dict or "fpkm" in tsv_dict:
+                        input_dict["fpkm"] = tsv_dict["FPKM"]
+                    if "GETMM" in tsv_dict or "getmm" in tsv_dict:
+                        input_dict["getmm"] = tsv_dict["GETMM"]
                 titles = list(input_dict.keys())
                 tsv_string_data =  "\t".join(titles)
                 for i in range(len(input_dict[titles[0]])):
@@ -164,17 +208,22 @@ def link_genomic_data(analysis, do_not_index=False):
                         tsv_string_data += input_dict[key][i] + "\t"
                 tsv_string_data = tsv_string_data.strip()
                 string_data = bytes(tsv_string_data, "utf-8")
+                mapping = {
+                    "sample_id": experiment_drs_obj["id"],
+                }
+                if "tpm" in input_dict:
+                    mapping["tpm_count_col"] = "tpm"
+                if "fpkm" in input_dict:
+                    mapping["fpkm_count_col"] = "fpkm"
+                if "getmm" in input_dict:
+                    mapping["getmm_count_col"] = "getmm"
+
                 response = requests.post(
                     f"{TAKUAN_URL}/experiment/{experiment_drs_obj["id"]}/ingest/single",
-                    files={"data": string_data}, data={
-                        "sample_id": experiment_drs_obj["id"],
-                        # column mappings
-                        "raw_count_col": "counts",
-                        "tpm_count_col": "abundance"
-                    }
+                    files={"data": string_data}, data=mapping
                 )
                 if response.status_code != 200:
-                    result["errors"].append(f"takuan: {response.status_code} {response.text}")
+                    result["errors"].append(f"takuan ingest error: {response.status_code} {response.text}")
             else:
                 result["errors"].append(f"could not load analysis: {response.text}")
     else:
