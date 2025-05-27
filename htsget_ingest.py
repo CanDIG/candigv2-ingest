@@ -126,11 +126,14 @@ def link_genomic_data(analysis, do_not_index=False):
     # send the data to the downstream service: either htsget or takuan
     if analysis_drs_obj["metadata"]["analysis_type"] == "sequence_annotation":
         if "analysis_attribute" in analysis_drs_obj["metadata"] and analysis_drs_obj["metadata"]["analysis_attribute"]["subtype"] == "expression_count":
+            assembly_id = "GCA_000001405.27"
+            if "reference_assembly_id" in analysis_drs_obj["metadata"]:
+                assembly_id = analysis_drs_obj["metadata"]["reference_assembly_id"]
             # first, create experiment in Takuan:
             experiment_json = {
                 "experiment_result_id": experiment_drs_obj["id"],
-                "assembly_id": "GCA_000001405.27",
-                "assembly_name": "GRCh38",
+                "assembly_id": assembly_id,
+                "assembly_name": analysis_drs_obj["metadata"]["reference"],
                 "extra_properties": {}
             }
             response = requests.post(f"{TAKUAN_URL}/experiment", json=experiment_json, headers=headers)
@@ -177,8 +180,10 @@ def link_genomic_data(analysis, do_not_index=False):
 
                 mapping = {
                     "sample_id": experiment_drs_obj["id"],
+                    "file_type": "tsv",
                     "feature_col": gene_id_title,
-                    "raw_count_col": count_title
+                    "raw_count_col": count_title,
+                    "length_col": length_title
                 }
                 if norm_method is not None:
                     if norm_title not in titles:
