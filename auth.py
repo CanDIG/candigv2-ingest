@@ -56,6 +56,9 @@ def add_program(program_auth):
     response, status_code = get_program(program_id)
     if status_code < 300 or status_code == 404:
         # create or update the program itself
+        program_auth["program_curators"] = list(map(lambda x: x.lower(), program_auth["program_curators"]))
+        program_auth["team_members"] = list(map(lambda x: x.lower(), program_auth["team_members"]))
+
         if "date_created" not in program_auth:
             from datetime import datetime
             program_auth["date_created"] = datetime.today().strftime('%Y-%m-%d')
@@ -133,6 +136,7 @@ def set_role_type(role_type, members):
     result, status_code = authx.auth.get_service_store_secret("opa", key=f"site_roles")
     if status_code == 200:
         if role_type in result['site_roles']:
+            members = list(map(lambda x: x.lower(), members))
             for user_id in members:
                 # if the user isn't already approved, make sure they will be:
                 response, status_code = add_preapproved_user(user_id)
