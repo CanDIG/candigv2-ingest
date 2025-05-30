@@ -326,7 +326,10 @@
             "metadata": {
                 "analysis_type": "sequence_annotation",
                 "analysis_attribute": {
-                    "subtype": "expression_count"
+                    "subtype": "expression_count",
+                    "gene_id_column": "gene_id",
+                    "length_column": "length",
+                    "count_column": "expected_count"
                 },
                 "reference": "hg38"
             },

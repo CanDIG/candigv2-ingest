@@ -888,6 +888,25 @@ components:
                     - expression_count
                     - fusion
                     - structural_variation
+                gene_id_column:
+                  type: string
+                  description: name of column containing gene ids, if subtype is expression_count
+                length_column:
+                  type: string
+                  description: name of column containing gene lengths, if subtype is expression_count
+                count_column:
+                  type: string
+                  description: name of column containing counts, if subtype is expression_count
+                norm_column:
+                  type: string
+                  description: name of column containing normalized values, if subtype is expression_count and a single column contains normalized values but is not named after the normalization method
+                norm_method:
+                  type: string
+                  description: normalization method used to calculate values in norm_column
+                  enum:
+                    - tpm
+                    - fpkm
+                    - getmm
             reference:
               type: string
               description: which reference genome was used for alignment (hg37 or hg38)
