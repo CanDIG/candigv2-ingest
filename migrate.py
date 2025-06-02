@@ -1,6 +1,10 @@
-import authx.auth
 import auth
 
+
+### Re-sets previously existing site roles and program roles:
+### they may have been saved with mixed-case names before DIG-1974
+### so will be re-saved by the updated set_role_type and add_program
+### to be all lower-case.
 
 def main():
     role_types, status_code = auth.list_role_types()
