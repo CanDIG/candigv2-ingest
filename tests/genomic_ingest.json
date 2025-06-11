@@ -1,102 +1,344 @@
-[
-    {
-        "program_id": "SYNTH_02",
-        "genomic_file_id": "HG00096.cnv.vcf",
-        "main": {
-            "access_method": "http://s3.us-east-1.amazonaws.com/1000genomes/release/20130502/ALL.chr22.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz?public=true",
-            "name": "HG00096.cnv.vcf.gz"
-        },
-        "index": {
-            "access_method": "http://s3.us-east-1.amazonaws.com/1000genomes/release/20130502/ALL.chr22.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz.tbi?public=true",
-            "name": "HG00096.cnv.vcf.gz.tbi"
-        },
-        "metadata": {
-            "sequence_type": "wgs",
-            "data_type": "variant",
-            "reference": "hg38"
-        },
-        "samples": [
-            {
-                "genomic_file_sample_id": "HG00096",
-                "submitter_sample_id": "SAMPLE_0017"
+{
+    "experiments": [
+        {
+            "program_id": "LOCAL-SYNTH_01",
+            "experiment_id": "LOCAL-SEQ_0001",
+            "submitter_sample_id": "LOCAL-SAMPLE_0001",
+            "metadata": {
+                "library_strategy": "WGS"
             }
-        ]
-    },
-    {
-        "program_id": "SYNTH_01",
-        "genomic_file_id": "multisample_1",
-        "main": {
-            "access_method": "file:////app/htsget_server/data/files/multisample_1.vcf.gz",
-            "name": "multisample_1.vcf.gz"
         },
-        "index": {
-            "access_method": "file:////app/htsget_server/data/files/multisample_1.vcf.gz.tbi",
-            "name": "multisample_1.vcf.gz.tbi"
+        {
+            "program_id": "LOCAL-SYNTH_01",
+            "experiment_id": "LOCAL-SEQ_0002",
+            "submitter_sample_id": "LOCAL-SAMPLE_0002",
+            "metadata": {
+                "library_strategy": "WGS"
+            }
         },
-        "metadata": {
-            "sequence_type": "wgs",
-            "data_type": "variant",
-            "reference": "hg38"
+        {
+            "program_id": "LOCAL-SYNTH_02",
+            "experiment_id": "LOCAL-SEQ_0062",
+            "submitter_sample_id": "LOCAL-SAMPLE_0062",
+            "metadata": {
+                "library_strategy": "WGS"
+            }
         },
-        "samples": [
-            {
-                "genomic_file_sample_id": "TUMOR",
-                "submitter_sample_id": "SAMPLE_0002"
+        {
+            "program_id": "LOCAL-SYNTH_02",
+            "experiment_id": "LOCAL-SEQ_0061",
+            "submitter_sample_id": "LOCAL-SAMPLE_0061",
+            "metadata": {
+                "library_strategy": "WGS"
+            }
+        },
+        {
+            "program_id": "LOCAL-SYNTH_01",
+            "experiment_id": "LOCAL-SEQ_NULL_0001",
+            "submitter_sample_id": "LOCAL-SAMPLE_NULL_0001",
+            "metadata": {
+                "library_strategy": "WGS"
+            }
+        },
+        {
+            "program_id": "LOCAL-SYNTH_01",
+            "experiment_id": "LOCAL-SEQ_NULL_0002",
+            "submitter_sample_id": "LOCAL-SAMPLE_NULL_0002",
+            "metadata": {
+                "library_strategy": "WGS"
+            }
+        },
+        {
+            "program_id": "LOCAL-SYNTH_01",
+            "experiment_id": "LOCAL-SEQ_ALL_0002",
+            "submitter_sample_id": "LOCAL-SAMPLE_ALL_0002",
+            "metadata": {
+                "library_strategy": "WGS"
+            }
+        },
+        {
+            "program_id": "LOCAL-SYNTH_01",
+            "experiment_id": "LOCAL-SEQ_0004",
+            "submitter_sample_id": "LOCAL-SAMPLE_0004",
+            "metadata": {
+                "library_strategy": "WGS"
+            }
+        },
+        {
+            "program_id": "LOCAL-SYNTH_01",
+            "experiment_id": "LOCAL-SEQ_0004",
+            "submitter_sample_id": "LOCAL-SAMPLE_0004",
+            "metadata": {
+                "library_strategy": "WGS"
+            }
+        },
+        {
+            "program_id": "LOCAL-SYNTH_02",
+            "experiment_id": "LOCAL-SEQ_0072",
+            "submitter_sample_id": "LOCAL-SAMPLE_0072",
+            "metadata": {
+                "library_strategy": "WGS"
+            }
+        },
+        {
+            "program_id": "LOCAL-SYNTH_02",
+            "experiment_id": "LOCAL-SEQ_0083",
+            "submitter_sample_id": "LOCAL-SAMPLE_0083",
+            "metadata": {
+                "library_strategy": "WGS"
+            }
+        },
+        {
+            "program_id": "LOCAL-SYNTH_02",
+            "experiment_id": "LOCAL-SEQ_0090",
+            "submitter_sample_id": "LOCAL-SAMPLE_0090",
+            "metadata": {
+                "library_strategy": "WGS"
+            }
+        },
+        {
+            "program_id": "LOCAL-SYNTH_01",
+            "experiment_id": "LOCAL-SEQ_0009",
+            "submitter_sample_id": "LOCAL-SAMPLE_0009",
+            "metadata": {
+                "library_strategy": "WTS"
+            }
+        }
+    ],
+    "analyses": [
+        {
+            "program_id": "LOCAL-SYNTH_01",
+            "analysis_id": "LOCAL-test",
+            "main": {
+                "access_method": "file:////app/htsget_server/data/files/test.vcf.gz",
+                "name": "test.vcf.gz"
             },
-            {
-              "genomic_file_sample_id": "NORMAL",
-              "submitter_sample_id": "SAMPLE_0003"
-            }
-        ]
-    },
-    {
-        "program_id": "SYNTH_02",
-        "genomic_file_id": "multisample_2",
-        "main": {
-            "access_method": "file:////app/htsget_server/data/files/multisample_2.vcf.gz",
-            "name": "multisample_2.vcf.gz"
-        },
-        "index": {
-            "access_method": "file:////app/htsget_server/data/files/multisample_2.vcf.gz.tbi",
-            "name": "multisample_2.vcf.gz.tbi"
-        },
-        "metadata": {
-            "sequence_type": "wgs",
-            "data_type": "variant",
-            "reference": "hg38"
-        },
-        "samples": [
-            {
-                "genomic_file_sample_id": "TUMOR",
-                "submitter_sample_id": "SAMPLE_0020"
+            "index": {
+                "access_method": "file:////app/htsget_server/data/files/test.vcf.gz.tbi",
+                "name": "test.vcf.gz.tbi"
             },
-            {
-                "genomic_file_sample_id": "NORMAL",
-                "submitter_sample_id": "SAMPLE_0019"
-            }
-        ]
-    },
-    {
-        "program_id": "SYNTH_01",
-        "genomic_file_id": "NA02102",
-        "main": {
-            "access_method": "file:////app/htsget_server/data/files/NA02102.bam",
-            "name": "NA02102.bam"
+            "metadata": {
+                "analysis_type": "sequence_variation",
+                "reference": "hg38"
+            },
+            "samples": [
+                {
+                    "analysis_sample_id": "sample_tumour",
+                    "experiment_id": "LOCAL-SEQ_0002"
+                },
+                {
+                    "analysis_sample_id": "sample_normal",
+                    "experiment_id": "LOCAL-SEQ_0001"
+                }
+            ]
         },
-        "index": {
-            "access_method": "file:////app/htsget_server/data/files/NA02102.bam.bai",
-            "name": "NA02102.bam.bai"
+        {
+            "program_id": "LOCAL-SYNTH_02",
+            "analysis_id": "LOCAL-multisample_1",
+            "main": {
+                "access_method": "file:////app/htsget_server/data/files/multisample_1.vcf.gz",
+                "name": "multisample_1.vcf.gz"
+            },
+            "index": {
+                "access_method": "file:////app/htsget_server/data/files/multisample_1.vcf.gz.tbi",
+                "name": "multisample_1.vcf.gz.tbi"
+            },
+            "metadata": {
+                "analysis_type": "sequence_variation",
+                "reference": "hg38"
+            },
+            "samples": [
+                {
+                    "analysis_sample_id": "TUMOR",
+                    "experiment_id": "LOCAL-SEQ_0062"
+                },
+                {
+                    "analysis_sample_id": "NORMAL",
+                    "experiment_id": "LOCAL-SEQ_0061"
+                }
+            ]
         },
-        "metadata": {
-            "sequence_type": "wgs",
-            "data_type": "read",
-            "reference": "hg38"
+        {
+            "program_id": "LOCAL-SYNTH_01",
+            "analysis_id": "LOCAL-multisample_2",
+            "main": {
+                "access_method": "file:////app/htsget_server/data/files/multisample_2.vcf.gz",
+                "name": "multisample_2.vcf.gz"
+            },
+            "index": {
+                "access_method": "file:////app/htsget_server/data/files/multisample_2.vcf.gz.tbi",
+                "name": "multisample_2.vcf.gz.tbi"
+            },
+            "metadata": {
+                "analysis_type": "sequence_variation",
+                "reference": "hg38"
+            },
+            "samples": [
+                {
+                    "analysis_sample_id": "TUMOR",
+                    "experiment_id": "LOCAL-SEQ_NULL_0001"
+                },
+                {
+                    "analysis_sample_id": "NORMAL",
+                    "experiment_id": "LOCAL-SEQ_NULL_0002"
+                }
+            ]
         },
-        "samples": [
-            {
-                "genomic_file_sample_id": "NA02102",
-                "submitter_sample_id": "SAMPLE_0004"
-            }
-        ]
-    }
-]
+        {
+            "program_id": "LOCAL-SYNTH_01",
+            "analysis_id": "LOCAL-HG02102-all",
+            "main": {
+                "access_method": "file:////app/htsget_server/data/files/HG02102.vcf.gz",
+                "name": "HG02102.vcf.gz"
+            },
+            "index": {
+                "access_method": "file:////app/htsget_server/data/files/HG02102.vcf.gz.tbi",
+                "name": "HG02102.vcf.gz.tbi"
+            },
+            "metadata": {
+                "analysis_type": "sequence_variation",
+                "reference": "hg38"
+            },
+            "samples": [
+                {
+                    "analysis_sample_id": "HG02102",
+                    "experiment_id": "LOCAL-SEQ_ALL_0002"
+                }
+            ]
+        },
+        {
+            "program_id": "LOCAL-SYNTH_01",
+            "analysis_id": "LOCAL-NA02102-bam",
+            "main": {
+                "access_method": "file:////app/htsget_server/data/files/NA02102.bam",
+                "name": "NA02102.bam"
+            },
+            "index": {
+                "access_method": "file:////app/htsget_server/data/files/NA02102.bam.bai",
+                "name": "NA02102.bam.bai"
+            },
+            "metadata": {
+                "analysis_type": "reference_alignment",
+                "reference": "hg38"
+            },
+            "samples": [
+                {
+                    "analysis_sample_id": "NA02102",
+                    "experiment_id": "LOCAL-SEQ_0004"
+                }
+            ]
+        },
+        {
+            "program_id": "LOCAL-SYNTH_01",
+            "analysis_id": "LOCAL-NA02102-cram",
+            "main": {
+                "access_method": "file:////app/htsget_server/data/files/NA02102.chr1.cram",
+                "name": "NA02102.chr1.cram"
+            },
+            "index": {
+                "access_method": "file:////app/htsget_server/data/files/NA02102.chr1.cram.crai",
+                "name": "NA02102.chr1.cram.crai"
+            },
+            "metadata": {
+                "analysis_type": "reference_alignment",
+                "reference": "hg38"
+            },
+            "samples": [
+                {
+                    "analysis_sample_id": "NA02102",
+                    "experiment_id": "LOCAL-SEQ_0004"
+                }
+            ]
+        },
+        {
+            "program_id": "LOCAL-SYNTH_02",
+            "analysis_id": "LOCAL-HG00100-cram",
+            "main": {
+                "access_method": "http://s3.us-east-1.amazonaws.com/1000genomes/phase3/data/HG00100/exome_alignment/HG00100.mapped.ILLUMINA.bwa.GBR.exome.20121211.bam.cram?public=true",
+                "name": "HG00100.mapped.ILLUMINA.bwa.GBR.exome.20121211.bam.cram"
+            },
+            "index": {
+                "access_method": "http://s3.us-east-1.amazonaws.com/1000genomes/phase3/data/HG00100/exome_alignment/HG00100.mapped.ILLUMINA.bwa.GBR.exome.20121211.bam.cram.crai?public=true",
+                "name": "HG00100.mapped.ILLUMINA.bwa.GBR.exome.20121211.bam.cram.crai"
+            },
+            "metadata": {
+                "analysis_type": "reference_alignment",
+                "reference": "hg38"
+            },
+            "samples": [
+                {
+                    "analysis_sample_id": "HG00100",
+                    "experiment_id": "LOCAL-SEQ_0072"
+                }
+            ]
+        },
+        {
+            "program_id": "LOCAL-SYNTH_02",
+            "analysis_id": "LOCAL-HG00100-chrom20-bam",
+            "main": {
+                "access_method": "http://s3.us-east-1.amazonaws.com/1000genomes/phase3/data/HG00100/exome_alignment/HG00100.chrom20.ILLUMINA.bwa.GBR.exome.20121211.bam?public=true",
+                "name": "HG00100.chrom20.ILLUMINA.bwa.GBR.exome.20121211.bam"
+            },
+            "index": {
+                "access_method": "http://s3.us-east-1.amazonaws.com/1000genomes/phase3/data/HG00100/exome_alignment/HG00100.chrom20.ILLUMINA.bwa.GBR.exome.20121211.bam.bai?public=true",
+                "name": "HG00100.chrom20.ILLUMINA.bwa.GBR.exome.20121211.bam.bai"
+            },
+            "metadata": {
+                "analysis_type": "reference_alignment",
+                "reference": "hg38"
+            },
+            "samples": [
+                {
+                    "analysis_sample_id": "HG00100",
+                    "experiment_id": "LOCAL-SEQ_0083"
+                }
+            ]
+        },
+        {
+            "program_id": "LOCAL-SYNTH_02",
+            "analysis_id": "LOCAL-NA18537-vcf",
+            "main": {
+                "access_method": "file:////app/htsget_server/data/files/NA18537.vcf.gz",
+                "name": "NA18537.vcf.gz"
+            },
+            "index": {
+                "access_method": "file:////app/htsget_server/data/files/NA18537.vcf.gz.tbi",
+                "name": "NA18537.vcf.gz.tbi"
+            },
+            "metadata": {
+                "analysis_type": "sequence_variation",
+                "reference": "hg38"
+            },
+            "samples": [
+                {
+                    "analysis_sample_id": "NA18537",
+                    "experiment_id": "LOCAL-SEQ_0090"
+                }
+            ]
+        },
+        {
+            "program_id": "LOCAL-SYNTH_01",
+            "analysis_id": "LOCAL-NA18537-counts",
+            "main": {
+                "access_method": "file:////app/htsget_server/data/files/counts.tsv",
+                "name": "counts.tsv"
+            },
+            "metadata": {
+                "analysis_type": "sequence_annotation",
+                "analysis_attribute": {
+                    "subtype": "expression_count",
+                    "gene_id_column": "gene_id",
+                    "length_column": "length",
+                    "count_column": "expected_count"
+                },
+                "reference": "hg38"
+            },
+            "samples": [
+                {
+                    "analysis_sample_id": "LOCAL-SEQ_0009",
+                    "experiment_id": "LOCAL-SEQ_0009"
+                }
+            ]
+        }
+    ]
+}

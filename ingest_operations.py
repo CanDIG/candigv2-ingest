@@ -192,30 +192,35 @@ def remove_user_from_role(role_type, user_id):
 # Data ingest
 ####
 
-async def add_genomic_linkages():
+async def ingest():
     dataset = await connexion.request.json()
-    do_not_index = bool(connexion.request.query_params.get("do_not_index", False))
     headers = get_headers()
     token = connexion.request.headers['Authorization'].split("Bearer ")[1]
-    response, status_code = htsget_ingest.check_genomic_data(dataset, token)
-    if status_code == 200:
-        ingest_uuid = add_to_queue({"htsget": response, "do_not_index": do_not_index})
-        response = {"queue_id": ingest_uuid}
+    if "openapi_url" in dataset and "katsu" in dataset["openapi_url"]:
+        batch_size = int(connexion.request.query_params.get("batch_size", 1000))
+        response, status_code = katsu_ingest.prep_check_clinical_data(dataset, token, batch_size)
+        if status_code == 200:
+            ingest_uuid = add_to_queue({"katsu": response})
+            response = {"queue_id": ingest_uuid}
+    elif "experiments" in dataset and "analyses" in dataset:
+        do_not_index = bool(connexion.request.query_params.get("do_not_index", False))
+        response, status_code = htsget_ingest.check_genomic_data(dataset, token)
+        if status_code == 200:
+            ingest_uuid = add_to_queue({"htsget": response, "do_not_index": do_not_index})
+            response = {"queue_id": ingest_uuid}
+    else:
+        response = {"error": "dataset does not look like either clinical or sequencing data"}
+        status_code = 400
     check_default_site_admin(response)
     return response, status_code
 
+## aliases to maintain backwards compatibility:
+async def ingest_genomic():
+    return await ingest()
 
-async def add_clinical_donors():
-    dataset = await connexion.request.json()
-    batch_size = int(connexion.request.query_params.get("batch_size", 1000))
-    headers = get_headers()
-    token = connexion.request.headers['Authorization'].split("Bearer ")[1]
-    response, status_code = katsu_ingest.prep_check_clinical_data(dataset, token, batch_size)
-    if status_code == 200:
-        ingest_uuid = add_to_queue({"katsu": response})
-        response = {"queue_id": ingest_uuid}
-    check_default_site_admin(response)
-    return response, status_code
+
+async def ingest_clinical():
+    return await ingest()
 
 
 def add_to_queue(ingest_json):
@@ -231,8 +236,11 @@ def add_to_queue(ingest_json):
 
 @app.route('/status/<path:queue_id>')
 def get_ingest_status(queue_id):
+    uuid_match = re.match(r"^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$", queue_id)
+    if uuid_match is None:
+        return {"error": f"queue_id {queue_id} is not a UUID"}
     try:
-        results_path = os.path.join(config.DAEMON_PATH, "results", queue_id)
+        results_path = os.path.join(config.DAEMON_PATH, "results", uuid_match.group(0))
         with open(results_path) as f:
             json_data = json.load(f)
             # os.remove(results_path)
@@ -508,8 +516,8 @@ def list_authz_for_user(user_id):
         bearer_token=token,
         user_token=user_result["userinfo"]["sample_jwt"] if not self_checkup else token)
     if opa_status_code == 200:
-        user_result["program_authorizations"]["team_member"] = opa_permissions["team_member_programs"]
-        user_result["program_authorizations"]["program_curator"] = opa_permissions["curator_programs"]
+        user_result["program_authorizations"]["team_member"] = opa_permissions["debug"]["user_key_has_team_member_programs"]
+        user_result["program_authorizations"]["program_curator"] = opa_permissions["debug"]["user_key_has_curator_programs"]
 
     user_result["program_authorizations"]["dac_authorizations"] = user_result.pop("dac_authorizations")
     user_result["userinfo"].pop("sample_jwt")

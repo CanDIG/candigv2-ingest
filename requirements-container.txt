@@ -1,6 +1,6 @@
 -r requirements.txt
-Flask==3.1.0
-Flask-Cors==5.0.0
+Flask==3.1.1
+Flask-Cors==6.0.0
 connexion==3.1.0
 connexion[swagger-ui]
 connexion[flask]

@@ -28,5 +28,7 @@ RUN chown -R candig:candig /ingest_app
 
 USER candig
 
+RUN touch initial_setup
+
 ENTRYPOINT ./entrypoint.sh
 EXPOSE 1235

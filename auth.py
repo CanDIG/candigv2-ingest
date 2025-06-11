@@ -8,11 +8,12 @@ import urllib
 
 
 def is_default_site_admin_set():
-    if os.getenv("DEFAULT_SITE_ADMIN_USER") is not None:
+    default_site_admin = os.getenv("DEFAULT_SITE_ADMIN_USER", "")
+    if default_site_admin != "":
         result, status_code = authx.auth.get_service_store_secret("opa", key=f"site_roles")
         if status_code == 200:
             if 'admin' in result['site_roles']:
-                return os.getenv("DEFAULT_SITE_ADMIN_USER") in ",".join(result['site_roles']['admin'])
+                return default_site_admin in ",".join(result['site_roles']['admin'])
         raise Exception(f"ERROR: Unable to list site administrators {result} {status_code}")
     return False
 
@@ -56,6 +57,9 @@ def add_program(program_auth):
     response, status_code = get_program(program_id)
     if status_code < 300 or status_code == 404:
         # create or update the program itself
+        program_auth["program_curators"] = list(map(lambda x: x.lower(), program_auth["program_curators"]))
+        program_auth["team_members"] = list(map(lambda x: x.lower(), program_auth["team_members"]))
+
         if "date_created" not in program_auth:
             from datetime import datetime
             program_auth["date_created"] = datetime.today().strftime('%Y-%m-%d')
@@ -133,6 +137,7 @@ def set_role_type(role_type, members):
     result, status_code = authx.auth.get_service_store_secret("opa", key=f"site_roles")
     if status_code == 200:
         if role_type in result['site_roles']:
+            members = list(map(lambda x: x.lower(), members))
             for user_id in members:
                 # if the user isn't already approved, make sure they will be:
                 response, status_code = add_preapproved_user(user_id)
