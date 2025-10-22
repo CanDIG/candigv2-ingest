@@ -220,15 +220,19 @@ def add_pending_user(token):
     if user_name is None:
         return {"error": "Could not verify jwt or obtain user ID"}, 403
 
-    user, status_code = get_user(user_name)
+    user_dict, status_code = get_user(user_name)
     if status_code != 404:
-        return {"message": f"User {user_name} is already a CanDIG authorized user"}, 200
-    user_dict = {
-        "userinfo": {
-            "user_name": user_name,
-            "sample_jwt": token
+        if "sample_jwt" not in user_dict["userinfo"]:
+            user_dict["userinfo"]["sample_jwt"] = token
+        else:
+            return {"message": f"User {user_name} is already a CanDIG authorized user"}, 200
+    else:
+        user_dict = {
+            "userinfo": {
+                "user_name": user_name,
+                "sample_jwt": token
+            }
         }
-    }
     if user_name not in response["pending_users"]:
         response["pending_users"][user_name] = user_dict
 
@@ -270,7 +274,8 @@ def approve_pending_user(user_name):
     pending_users = response["pending_users"]
     if user_name in pending_users:
         user_dict = pending_users[user_name]
-        user_dict["dac_authorizations"] = {}
+        if "dac_authorizations" not in user_dict:
+            user_dict["dac_authorizations"] = {}
         response2, status_code = write_user(user_dict)
         if status_code == 200:
             pending_users.pop(user_name)
