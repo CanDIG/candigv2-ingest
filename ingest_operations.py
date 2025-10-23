@@ -512,16 +512,26 @@ def list_authz_for_user(user_id):
                 user_result["site_roles"].append(role_type)
 
     user_result["program_authorizations"] = {}
+
+    user_token = None
+    user_key = None
+    if self_checkup:
+        user_token = token
+    elif "sample_jwt" in user_result["userinfo"]:
+        user_token = user_result["userinfo"].pop("sample_jwt")
+    else:
+        user_key = user_id
     opa_permissions, opa_status_code = authx.auth.get_opa_permissions(
         bearer_token=token,
-        user_token=user_result["userinfo"]["sample_jwt"] if not self_checkup else token)
+        user_token=user_token,
+        user_key=user_key
+    )
     if opa_status_code == 200:
         user_result["program_authorizations"]["team_member"] = opa_permissions["debug"]["user_key_has_team_member_programs"]
         user_result["program_authorizations"]["program_curator"] = opa_permissions["debug"]["user_key_has_curator_programs"]
 
     user_result["program_authorizations"]["dac_authorizations"] = user_result.pop("dac_authorizations")
-    user_result["userinfo"].pop("sample_jwt")
-
+    user_result["userinfo"]["is_candig_authorized"] = opa_permissions["user_is_candig_authorized"]
     return user_result, status_code
 
 
@@ -544,10 +554,15 @@ async def add_dac_authz_for_user(user_id):
     if not authx.auth.is_action_allowed_for_program(token, method="POST", path="/ingest/user", program=program_dict["program_id"]):
         return {"error": "User not authorized to authorize programs for user"}, 403
 
-    response, status_code = auth.get_user(user_id)
+    user_dict, status_code = auth.get_user(user_id)
     if status_code != 200:
-        # will return 404 if user is not authorized for CanDIG
-        return response, status_code
+        user_dict = {
+            "userinfo": {
+                "user_name": user_id
+            },
+            "dac_authorizations": {}
+        }
+
 
     # we need to check to see if the program even exists in the system
     all_programs, status_code = auth.list_programs()
@@ -565,10 +580,11 @@ async def add_dac_authz_for_user(user_id):
             return {"error": f"Start date {program_dict['start_date']} and end date {program_dict['end_date']} are in the past"}, 400
     except Exception as e:
         return {"error": f"Date format error: {type(e)} {str(e)}"}
-    response["dac_authorizations"][program_dict["program_id"]] = program_dict
-    response, status_code = auth.write_user(response)
-    response["userinfo"].pop("sample_jwt")
-    return response, status_code
+    user_dict["dac_authorizations"][program_dict["program_id"]] = program_dict
+    user_dict, status_code = auth.write_user(user_dict)
+    if "sample_jwt" in user_dict["userinfo"]:
+        user_dict["userinfo"].pop("sample_jwt")
+    return user_dict, status_code
 
 
 @app.route('/user/<path:user_id>/dac_authorization/<path:program_id>')
@@ -578,11 +594,12 @@ def get_dac_authz_for_user(user_id, program_id):
     if not authx.auth.is_action_allowed_for_program(token, method="GET", path="/ingest/user", program=None):
         return {"error": "User not authorized to get programs for user"}, 403
 
-    response, status_code = auth.get_user(user_id)
+    user_dict, status_code = auth.get_user(user_id)
     if status_code != 200:
-        return response, status_code
-    response["userinfo"].pop("sample_jwt")
-    for p in response["dac_authorizations"]:
+        return user_dict, status_code
+    if "sample_jwt" in user_dict["userinfo"]:
+        user_dict["userinfo"].pop("sample_jwt")
+    for p in user_dict["dac_authorizations"]:
         if p == program_id:
             return p, 200
     return {"error": f"No program {program_id} found for user"}, status_code
@@ -595,15 +612,16 @@ def remove_dac_authz_for_user(user_id, program_id):
     if not authx.auth.is_action_allowed_for_program(token, method="DELETE", path="/ingest/user", program=program_id):
         return {"error": "User not authorized to remove programs for user"}, 403
 
-    response, status_code = auth.get_user(user_id)
+    user_dict, status_code = auth.get_user(user_id)
     if status_code != 200:
-        return response, status_code
-    for p in response["dac_authorizations"]:
+        return user_dict, status_code
+    for p in user_dict["dac_authorizations"]:
         if p == program_id:
-            response["dac_authorizations"].pop(program_id)
-            response, status_code = auth.write_user(response)
-            response["userinfo"].pop("sample_jwt")
-            return response, status_code
+            user_dict["dac_authorizations"].pop(program_id)
+            user_dict, status_code = auth.write_user(user_dict)
+            if "sample_jwt" in user_dict["userinfo"]:
+                user_dict["userinfo"].pop("sample_jwt")
+            return user_dict, status_code
     return {"error": f"No program {program_id} found for user"}, status_code
 
 
