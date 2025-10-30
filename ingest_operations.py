@@ -548,12 +548,13 @@ def revoke_authz_for_user(user_id):
 
 @app.route('/user/<path:user_id>/dac_authorization')
 async def add_dac_authz_for_user(user_id):
-    program_dict = await connexion.request.json()
+    program_body = await connexion.request.json()
+
+    if "dict" in str(type(program_body)):
+        # if the body was a dict, make it an array
+        program_body = [program_body]
+
     token = connexion.request.headers['Authorization'].split("Bearer ")[1]
-
-    if not authx.auth.is_action_allowed_for_program(token, method="POST", path="/ingest/user", program=program_dict["program_id"]):
-        return {"error": "User not authorized to authorize programs for user"}, 403
-
     user_dict, status_code = auth.get_user(user_id)
     if status_code != 200:
         user_dict = {
@@ -563,28 +564,41 @@ async def add_dac_authz_for_user(user_id):
             "dac_authorizations": {}
         }
 
-
-    # we need to check to see if the program even exists in the system
     all_programs, status_code = auth.list_programs()
     if status_code != 200:
         return all_programs, status_code
-    if program_dict["program_id"] not in all_programs:
-        return {"error": f"Program {program_dict['program_id']} does not exist in {all_programs}"}
 
-    try:
-        if datetime.fromisoformat(program_dict['end_date']) < datetime.fromisoformat(program_dict['start_date']):
-            return {"error": f"Start date {program_dict['start_date']} cannot be later than end date {program_dict['end_date']}"}, 400
-        elif datetime.fromisoformat(program_dict['end_date']) == datetime.fromisoformat(program_dict['start_date']):
-            return {"error": f"Start date {program_dict['start_date']} is the same as end date {program_dict['end_date']}"}, 400
-        elif datetime.fromisoformat(program_dict['end_date']) < datetime.now():
-            return {"error": f"Start date {program_dict['start_date']} and end date {program_dict['end_date']} are in the past"}, 400
-    except Exception as e:
-        return {"error": f"Date format error: {type(e)} {str(e)}"}
-    user_dict["dac_authorizations"][program_dict["program_id"]] = program_dict
-    user_dict, status_code = auth.write_user(user_dict)
-    if "sample_jwt" in user_dict["userinfo"]:
-        user_dict["userinfo"].pop("sample_jwt")
-    return user_dict, status_code
+    errors = []
+
+    # check to see if any of the programs are listed more than once
+    programs = list(map(lambda x: x['program_id'], program_body))
+    if len(programs) > len(set((programs))):
+        return {"error": "Duplicate programs in request"}, 400
+
+    for program_dict in program_body:
+        if not authx.auth.is_action_allowed_for_program(token, method="POST", path="/ingest/user", program=program_dict["program_id"]):
+            errors.append({program_dict['program_id']: "User not authorized to authorize programs for user"})
+
+        # we need to check to see if the program even exists in the system
+        if program_dict["program_id"] not in all_programs:
+            errors.append({program_dict['program_id']: f"Program {program_dict['program_id']} does not exist in {all_programs}"})
+
+        try:
+            if datetime.fromisoformat(program_dict['end_date']) < datetime.fromisoformat(program_dict['start_date']):
+                errors.append({program_dict['program_id']: f"Start date {program_dict['start_date']} cannot be later than end date {program_dict['end_date']}"})
+            elif datetime.fromisoformat(program_dict['end_date']) == datetime.fromisoformat(program_dict['start_date']):
+                errors.append({program_dict['program_id']: f"Start date {program_dict['start_date']} is the same as end date {program_dict['end_date']}"})
+            elif datetime.fromisoformat(program_dict['end_date']) < datetime.now():
+                errors.append({program_dict['program_id']: f"Start date {program_dict['start_date']} and end date {program_dict['end_date']} are in the past"})
+        except Exception as e:
+            errors.append({program_dict['program_id']: f"Date format error: {type(e)} {str(e)}"})
+        user_dict["dac_authorizations"][program_dict["program_id"]] = program_dict
+    if len(errors) == 0:
+        user_dict, status_code = auth.write_user(user_dict)
+        if "sample_jwt" in user_dict["userinfo"]:
+            user_dict["userinfo"].pop("sample_jwt")
+        return user_dict, status_code
+    return errors, 400
 
 
 @app.route('/user/<path:user_id>/dac_authorization/<path:program_id>')

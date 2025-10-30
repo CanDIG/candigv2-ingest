@@ -555,7 +555,11 @@ components:
       content:
         'application/json':
           schema:
-            $ref: "#/components/schemas/DACAuthorization"
+            oneOf:
+              - $ref: "#/components/schemas/DACAuthorization"
+              - type: array
+                items:
+                  $ref: "#/components/schemas/DACAuthorization"
   schemas:
     S3Credential:
       type: object
