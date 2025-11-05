@@ -594,6 +594,18 @@ async def add_dac_authz_for_user(user_id):
         except Exception as e:
             errors.append({program_id: f"Date format error: {type(e)} {str(e)}"})
         user_dict["dac_authorizations"][program_id] = program_dict
+
+        # add this dac to the program's authz
+        program, status_code = auth.get_program(program_id)
+        if status_code == 200:
+            if "dac_authorizations" not in program:
+                program["dac_authorizations"] = {}
+            program["dac_authorizations"][user_id] = program_dict
+            response, status_code = auth.add_program(program)
+            logger.debug(response, status_code)
+            if status_code != 200:
+                errors.append({program_id: response})
+
     if len(errors) == 0:
         user_dict, status_code = auth.write_user(user_dict)
         if "sample_jwt" in user_dict["userinfo"]:
