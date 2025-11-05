@@ -576,23 +576,24 @@ async def add_dac_authz_for_user(user_id):
         return {"error": "Duplicate programs in request"}, 400
 
     for program_dict in program_body:
-        if not authx.auth.is_action_allowed_for_program(token, method="POST", path="/ingest/user", program=program_dict["program_id"]):
-            errors.append({program_dict['program_id']: "User not authorized to authorize programs for user"})
+        program_id = program_dict.pop("program_id")
+        if not authx.auth.is_action_allowed_for_program(token, method="POST", path="/ingest/user", program=program_id):
+            errors.append({program_id: "User not authorized to authorize programs for user"})
 
         # we need to check to see if the program even exists in the system
-        if program_dict["program_id"] not in all_programs:
-            errors.append({program_dict['program_id']: f"Program {program_dict['program_id']} does not exist in {all_programs}"})
+        if program_id not in all_programs:
+            errors.append({program_id: f"Program {program_id} does not exist in {all_programs}"})
 
         try:
             if datetime.fromisoformat(program_dict['end_date']) < datetime.fromisoformat(program_dict['start_date']):
-                errors.append({program_dict['program_id']: f"Start date {program_dict['start_date']} cannot be later than end date {program_dict['end_date']}"})
+                errors.append({program_id: f"Start date {program_dict['start_date']} cannot be later than end date {program_dict['end_date']}"})
             elif datetime.fromisoformat(program_dict['end_date']) == datetime.fromisoformat(program_dict['start_date']):
-                errors.append({program_dict['program_id']: f"Start date {program_dict['start_date']} is the same as end date {program_dict['end_date']}"})
+                errors.append({program_id: f"Start date {program_dict['start_date']} is the same as end date {program_dict['end_date']}"})
             elif datetime.fromisoformat(program_dict['end_date']) < datetime.now():
-                errors.append({program_dict['program_id']: f"Start date {program_dict['start_date']} and end date {program_dict['end_date']} are in the past"})
+                errors.append({program_id: f"Start date {program_dict['start_date']} and end date {program_dict['end_date']} are in the past"})
         except Exception as e:
-            errors.append({program_dict['program_id']: f"Date format error: {type(e)} {str(e)}"})
-        user_dict["dac_authorizations"][program_dict["program_id"]] = program_dict
+            errors.append({program_id: f"Date format error: {type(e)} {str(e)}"})
+        user_dict["dac_authorizations"][program_id] = program_dict
     if len(errors) == 0:
         user_dict, status_code = auth.write_user(user_dict)
         if "sample_jwt" in user_dict["userinfo"]:
