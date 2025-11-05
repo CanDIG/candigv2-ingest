@@ -137,7 +137,7 @@ paths:
   /program:
     post:
       summary: Add authorization information for a new program (or overwrite authorization information for an existing program).
-      description: Add authorization information for a new program (or overwrite authorization information for an existing program).
+      description: Add authorization information for a new program (or overwrite authorization information for an existing program). Information in the request body replaces any existing information for the program.
       operationId: ingest_operations.add_program
       requestBody:
         $ref: '#/components/requestBodies/ProgramIngestRequest'
