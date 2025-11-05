@@ -576,7 +576,7 @@ async def add_dac_authz_for_user(user_id):
         return {"error": "Duplicate programs in request"}, 400
 
     for program_dict in program_body:
-        program_id = program_dict.pop("program_id")
+        program_id = program_dict["program_id"]
         if not authx.auth.is_action_allowed_for_program(token, method="POST", path="/ingest/user", program=program_id):
             errors.append({program_id: "User not authorized to authorize programs for user"})
 

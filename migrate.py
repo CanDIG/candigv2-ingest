@@ -58,10 +58,6 @@ def main():
 
         if "dac_authorizations" in user_dict:
             for program_id in user_dict["dac_authorizations"]:
-                # remove the program_id key from the user's dac_authorization
-                if "program_id" in user_dict["dac_authorizations"][program_id]:
-                    user_dict["dac_authorizations"][program_id].pop("program_id")
-
                 # add the user's dac authz to the program
                 programs_dict[program_id]["dac_authorizations"][user_id] = user_dict["dac_authorizations"][program_id]
 
