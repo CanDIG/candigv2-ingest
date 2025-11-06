@@ -286,7 +286,28 @@ def get_program(program_id):
         return {"error": f"User not authorized to get program {program_id}"}, 403
 
     response, status_code = auth.get_program(program_id)
+    if status_code == 200:
+        if "dac_authorizations" in response:
+            response.pop("dac_authorizations")
+
     return response, status_code
+
+
+@app.route('/program/<path:program_id>/dac_authorization')
+def get_program_dacs(program_id):
+    token = connexion.request.headers['Authorization'].split("Bearer ")[1]
+
+    if not authx.auth.is_action_allowed_for_program(token, method="GET", path="/ingest/program", program=program_id):
+        return {"error": f"User not authorized to get program {program_id}"}, 403
+
+    response, status_code = auth.get_program(program_id)
+    dac_authz = {}
+
+    if status_code == 200:
+        if "dac_authorizations" in response:
+            dac_authz = response.pop("dac_authorizations")
+
+    return dac_authz, status_code
 
 
 @app.route('/program/<path:program_id>')
