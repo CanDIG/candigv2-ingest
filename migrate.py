@@ -49,12 +49,12 @@ def main():
         print(f"Couldn't list users: {response.text} {response.status_code}")
         sys.exit(1)
 
+    errors = []
     result = response.json()["data"]["keys"]
     for user_id in result:
         user_dict, status_code = auth.get_user(user_id)
         if status_code != 200:
-            print(f"Couldn't get user {user_id}: {user_dict} {status_code}")
-            sys.exit(1)
+            errors.append(f"Couldn't get user {user_id}: {user_dict} {status_code}")
 
         if "dac_authorizations" in user_dict:
             for program_id in user_dict["dac_authorizations"]:
@@ -64,17 +64,18 @@ def main():
         # write the user back
         response, status_code = auth.write_user(user_dict)
         if status_code != 200:
-            print(f"Couldn't write user {user_id}: {response} {status_code}")
-            sys.exit(1)
+            errors.append(f"Couldn't write user {user_id}: {response} {status_code}")
         # print(response)
 
     for program_id in programs_dict:
         response, status_code = auth.add_program(programs_dict[program_id])
         if status_code != 200:
-            print(f"Couldn't write program {program_id}: {response} {status_code}")
-            sys.exit(1)
+            errors.append(f"Couldn't write program {program_id}: {response} {status_code}")
         # print(response)
 
+    if len(errors) > 0:
+        print(errors)
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()
