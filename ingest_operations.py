@@ -286,7 +286,28 @@ def get_program(program_id):
         return {"error": f"User not authorized to get program {program_id}"}, 403
 
     response, status_code = auth.get_program(program_id)
+    if status_code == 200:
+        if "dac_authorizations" in response:
+            response.pop("dac_authorizations")
+
     return response, status_code
+
+
+@app.route('/program/<path:program_id>/dac_authorization')
+def get_program_dacs(program_id):
+    token = connexion.request.headers['Authorization'].split("Bearer ")[1]
+
+    if not authx.auth.is_action_allowed_for_program(token, method="GET", path="/ingest/program", program=program_id):
+        return {"error": f"User not authorized to get program {program_id}"}, 403
+
+    response, status_code = auth.get_program(program_id)
+    dac_authz = {}
+
+    if status_code == 200:
+        if "dac_authorizations" in response:
+            dac_authz = response.pop("dac_authorizations")
+
+    return dac_authz, status_code
 
 
 @app.route('/program/<path:program_id>')
@@ -576,23 +597,36 @@ async def add_dac_authz_for_user(user_id):
         return {"error": "Duplicate programs in request"}, 400
 
     for program_dict in program_body:
-        if not authx.auth.is_action_allowed_for_program(token, method="POST", path="/ingest/user", program=program_dict["program_id"]):
-            errors.append({program_dict['program_id']: "User not authorized to authorize programs for user"})
+        program_id = program_dict["program_id"]
+        if not authx.auth.is_action_allowed_for_program(token, method="POST", path="/ingest/user", program=program_id):
+            errors.append({program_id: "User not authorized to authorize programs for user"})
 
         # we need to check to see if the program even exists in the system
-        if program_dict["program_id"] not in all_programs:
-            errors.append({program_dict['program_id']: f"Program {program_dict['program_id']} does not exist in {all_programs}"})
+        if program_id not in all_programs:
+            errors.append({program_id: f"Program {program_id} does not exist in {all_programs}"})
 
         try:
             if datetime.fromisoformat(program_dict['end_date']) < datetime.fromisoformat(program_dict['start_date']):
-                errors.append({program_dict['program_id']: f"Start date {program_dict['start_date']} cannot be later than end date {program_dict['end_date']}"})
+                errors.append({program_id: f"Start date {program_dict['start_date']} cannot be later than end date {program_dict['end_date']}"})
             elif datetime.fromisoformat(program_dict['end_date']) == datetime.fromisoformat(program_dict['start_date']):
-                errors.append({program_dict['program_id']: f"Start date {program_dict['start_date']} is the same as end date {program_dict['end_date']}"})
+                errors.append({program_id: f"Start date {program_dict['start_date']} is the same as end date {program_dict['end_date']}"})
             elif datetime.fromisoformat(program_dict['end_date']) < datetime.now():
-                errors.append({program_dict['program_id']: f"Start date {program_dict['start_date']} and end date {program_dict['end_date']} are in the past"})
+                errors.append({program_id: f"Start date {program_dict['start_date']} and end date {program_dict['end_date']} are in the past"})
         except Exception as e:
-            errors.append({program_dict['program_id']: f"Date format error: {type(e)} {str(e)}"})
-        user_dict["dac_authorizations"][program_dict["program_id"]] = program_dict
+            errors.append({program_id: f"Date format error: {type(e)} {str(e)}"})
+        user_dict["dac_authorizations"][program_id] = program_dict
+
+        # add this dac to the program's authz
+        program, status_code = auth.get_program(program_id)
+        if status_code == 200:
+            if "dac_authorizations" not in program:
+                program["dac_authorizations"] = {}
+            program["dac_authorizations"][user_id] = program_dict
+            response, status_code = auth.add_program(program)
+            logger.debug(response, status_code)
+            if status_code != 200:
+                errors.append({program_id: response})
+
     if len(errors) == 0:
         user_dict, status_code = auth.write_user(user_dict)
         if "sample_jwt" in user_dict["userinfo"]:

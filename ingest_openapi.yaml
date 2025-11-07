@@ -160,7 +160,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/Program"
+                  type: string
   /program/{program_id}:
     parameters:
       - in: path
@@ -189,6 +189,24 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Program"
+  /program/{program_id}/dac_authorization:
+    parameters:
+      - in: path
+        name: program_id
+        schema:
+          type: string
+        required: true
+    get:
+      summary: Get a program's DAC authorizations
+      description: Get a program's DAC authorizations
+      operationId: ingest_operations.get_program_dacs
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
   /user/pending/request:
     post:
       summary: Add pending user
