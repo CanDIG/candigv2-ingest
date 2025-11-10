@@ -12,6 +12,7 @@ import htsget_ingest
 
 CANDIG_URL = os.getenv("CANDIG_URL", "http://localhost")
 HTSGET_URL = os.getenv("HTSGET_URL", f"{CANDIG_URL}/genomics")
+DRS_URL = os.getenv("DRS_URL", f"{CANDIG_URL}/drs")
 VAULT_URL = os.getenv("VAULT_URL", f"{CANDIG_URL}/vault")
 RNAGET_URL = os.getenv("RNAGET_URL", f"{CANDIG_URL}/rnaget")
 
@@ -33,8 +34,8 @@ def verify_callback(request, context):
     return {"result": True}
 
 def test_htsget_ingest(requests_mock):
-    matcher = re.compile(f"{HTSGET_URL}/ga4gh/drs/v1/objects/.+")
-    requests_mock.post(f"{HTSGET_URL}/ga4gh/drs/v1/objects", json=callback, status_code=200)
+    matcher = re.compile(f"{DRS_URL}/ga4gh/drs/v1/objects/.+")
+    requests_mock.post(f"{DRS_URL}/ga4gh/drs/v1/objects", json=callback, status_code=200)
     requests_mock.get(matcher, status_code=200, json={"id": "sdfs", "name": "sfdfs", "contents": []})
     matcher = re.compile(f"{HTSGET_URL}/htsget/v1/.+/index")
     requests_mock.get(matcher, status_code=200)
@@ -52,7 +53,7 @@ def test_htsget_ingest(requests_mock):
 
     matcher = re.compile(f"{RNAGET_URL}/.+")
     requests_mock.post(matcher, status_code=200)
-    matcher = re.compile(f"{HTSGET_URL}/ga4gh/drs/v1/objects/.+/download")
+    matcher = re.compile(f"{DRS_URL}/ga4gh/drs/v1/objects/.+/download")
     tsv_string_data = """gene_id	length	effective_length	expected_count	TPM	FPKM
     ENSG00000000003.14	2000.22	1008.6	150.00	6.24	7.32
     """

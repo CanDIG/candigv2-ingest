@@ -18,14 +18,15 @@ logger = CanDIGLogger(__file__)
 
 CANDIG_URL = os.getenv("CANDIG_URL", "")
 HTSGET_URL = os.getenv("HTSGET_URL", f"{CANDIG_URL}/genomics")
+DRS_URL = os.getenv("DRS_URL", f"{CANDIG_URL}/drs")
 TAKUAN_URL = os.getenv("RNAGET_URL", f"{CANDIG_URL}/rnaget")
-DRS_HOST_URL = "drs://" + CANDIG_URL.replace(f"{urlparse(CANDIG_URL).scheme}://","") + "/genomics"
+DRS_HOST_URL = "drs://" + CANDIG_URL.replace(f"{urlparse(CANDIG_URL).scheme}://","") + "/drs"
 KATSU_URL = os.environ.get("KATSU_URL")
 IS_TESTING = os.getenv("IS_TESTING", False)
 
 
 def link_genomic_data(analysis, do_not_index=False):
-    url = f"{HTSGET_URL}/ga4gh/drs/v1/objects"
+    url = f"{DRS_URL}/ga4gh/drs/v1/objects"
     result = {
         "errors": []
     }
@@ -140,7 +141,7 @@ def link_genomic_data(analysis, do_not_index=False):
             logger.debug(f"takuan experiment post {response.status_code}, {response.text}")
 
             # ingest matrix
-            response = requests.get(f"{HTSGET_URL}/ga4gh/drs/v1/objects/{analysis["main"]["name"]}/download", headers=headers)
+            response = requests.get(f"{DRS_URL}/ga4gh/drs/v1/objects/{analysis["main"]["name"]}/download", headers=headers)
             if response.status_code == 200:
                 raw_tsv_data = response.text.strip()
                 lines = raw_tsv_data.split("\n")
@@ -232,7 +233,7 @@ def link_genomic_data(analysis, do_not_index=False):
 
 
 def add_file_drs_object(analysis_drs_obj, file, type, headers):
-    url = f"{HTSGET_URL}/ga4gh/drs/v1/objects"
+    url = f"{DRS_URL}/ga4gh/drs/v1/objects"
     obj = {
         "access_methods": [],
         "id": file['name'],
@@ -325,7 +326,7 @@ def htsget_ingest(ingest_json, do_not_index=False, results_path=None, result_dic
     result = {
         "results": []
     }
-    url = f"{HTSGET_URL}/ga4gh/drs/v1/objects"
+    url = f"{DRS_URL}/ga4gh/drs/v1/objects"
     # Use service token to authenticate this with htsget
     headers = {}
     if not IS_TESTING:
@@ -421,7 +422,7 @@ def htsget_ingest(ingest_json, do_not_index=False, results_path=None, result_dic
 
     for program_id in statistics:
         # get the program
-        url = f"{HTSGET_URL}/ga4gh/drs/v1/programs"
+        url = f"{DRS_URL}/ga4gh/drs/v1/programs"
         response = requests.get(f"{url}/{program_id}", headers=headers)
         if response.status_code == 200:
             program = response.json()
@@ -515,7 +516,7 @@ def check_genomic_data(dataset, token):
 
 def delete_program(program_id, token):
     headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
-    url = f"{HTSGET_URL}/ga4gh/drs/v1/programs/{program_id}"
+    url = f"{DRS_URL}/ga4gh/drs/v1/programs/{program_id}"
 
     return requests.delete(url, headers=headers)
 

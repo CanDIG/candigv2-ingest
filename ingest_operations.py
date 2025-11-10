@@ -286,7 +286,28 @@ def get_program(program_id):
         return {"error": f"User not authorized to get program {program_id}"}, 403
 
     response, status_code = auth.get_program(program_id)
+    if status_code == 200:
+        if "dac_authorizations" in response:
+            response.pop("dac_authorizations")
+
     return response, status_code
+
+
+@app.route('/program/<path:program_id>/dac_authorization')
+def get_program_dacs(program_id):
+    token = connexion.request.headers['Authorization'].split("Bearer ")[1]
+
+    if not authx.auth.is_action_allowed_for_program(token, method="GET", path="/ingest/program", program=program_id):
+        return {"error": f"User not authorized to get program {program_id}"}, 403
+
+    response, status_code = auth.get_program(program_id)
+    dac_authz = {}
+
+    if status_code == 200:
+        if "dac_authorizations" in response:
+            dac_authz = response.pop("dac_authorizations")
+
+    return dac_authz, status_code
 
 
 @app.route('/program/<path:program_id>')
@@ -512,16 +533,26 @@ def list_authz_for_user(user_id):
                 user_result["site_roles"].append(role_type)
 
     user_result["program_authorizations"] = {}
+
+    user_token = None
+    user_key = None
+    if self_checkup:
+        user_token = token
+    elif "sample_jwt" in user_result["userinfo"]:
+        user_token = user_result["userinfo"].pop("sample_jwt")
+    else:
+        user_key = user_id
     opa_permissions, opa_status_code = authx.auth.get_opa_permissions(
         bearer_token=token,
-        user_token=user_result["userinfo"]["sample_jwt"] if not self_checkup else token)
+        user_token=user_token,
+        user_key=user_key
+    )
     if opa_status_code == 200:
         user_result["program_authorizations"]["team_member"] = opa_permissions["debug"]["user_key_has_team_member_programs"]
         user_result["program_authorizations"]["program_curator"] = opa_permissions["debug"]["user_key_has_curator_programs"]
 
     user_result["program_authorizations"]["dac_authorizations"] = user_result.pop("dac_authorizations")
-    user_result["userinfo"].pop("sample_jwt")
-
+    user_result["userinfo"]["is_candig_authorized"] = opa_permissions["user_is_candig_authorized"]
     return user_result, status_code
 
 
@@ -538,37 +569,70 @@ def revoke_authz_for_user(user_id):
 
 @app.route('/user/<path:user_id>/dac_authorization')
 async def add_dac_authz_for_user(user_id):
-    program_dict = await connexion.request.json()
+    program_body = await connexion.request.json()
+
+    if "dict" in str(type(program_body)):
+        # if the body was a dict, make it an array
+        program_body = [program_body]
+
     token = connexion.request.headers['Authorization'].split("Bearer ")[1]
-
-    if not authx.auth.is_action_allowed_for_program(token, method="POST", path="/ingest/user", program=program_dict["program_id"]):
-        return {"error": "User not authorized to authorize programs for user"}, 403
-
-    response, status_code = auth.get_user(user_id)
+    user_dict, status_code = auth.get_user(user_id)
     if status_code != 200:
-        # will return 404 if user is not authorized for CanDIG
-        return response, status_code
+        user_dict = {
+            "userinfo": {
+                "user_name": user_id
+            },
+            "dac_authorizations": {}
+        }
 
-    # we need to check to see if the program even exists in the system
     all_programs, status_code = auth.list_programs()
     if status_code != 200:
         return all_programs, status_code
-    if program_dict["program_id"] not in all_programs:
-        return {"error": f"Program {program_dict['program_id']} does not exist in {all_programs}"}
 
-    try:
-        if datetime.fromisoformat(program_dict['end_date']) < datetime.fromisoformat(program_dict['start_date']):
-            return {"error": f"Start date {program_dict['start_date']} cannot be later than end date {program_dict['end_date']}"}, 400
-        elif datetime.fromisoformat(program_dict['end_date']) == datetime.fromisoformat(program_dict['start_date']):
-            return {"error": f"Start date {program_dict['start_date']} is the same as end date {program_dict['end_date']}"}, 400
-        elif datetime.fromisoformat(program_dict['end_date']) < datetime.now():
-            return {"error": f"Start date {program_dict['start_date']} and end date {program_dict['end_date']} are in the past"}, 400
-    except Exception as e:
-        return {"error": f"Date format error: {type(e)} {str(e)}"}
-    response["dac_authorizations"][program_dict["program_id"]] = program_dict
-    response, status_code = auth.write_user(response)
-    response["userinfo"].pop("sample_jwt")
-    return response, status_code
+    errors = []
+
+    # check to see if any of the programs are listed more than once
+    programs = list(map(lambda x: x['program_id'], program_body))
+    if len(programs) > len(set((programs))):
+        return {"error": "Duplicate programs in request"}, 400
+
+    for program_dict in program_body:
+        program_id = program_dict["program_id"]
+        if not authx.auth.is_action_allowed_for_program(token, method="POST", path="/ingest/user", program=program_id):
+            errors.append({program_id: "User not authorized to authorize programs for user"})
+
+        # we need to check to see if the program even exists in the system
+        if program_id not in all_programs:
+            errors.append({program_id: f"Program {program_id} does not exist in {all_programs}"})
+
+        try:
+            if datetime.fromisoformat(program_dict['end_date']) < datetime.fromisoformat(program_dict['start_date']):
+                errors.append({program_id: f"Start date {program_dict['start_date']} cannot be later than end date {program_dict['end_date']}"})
+            elif datetime.fromisoformat(program_dict['end_date']) == datetime.fromisoformat(program_dict['start_date']):
+                errors.append({program_id: f"Start date {program_dict['start_date']} is the same as end date {program_dict['end_date']}"})
+            elif datetime.fromisoformat(program_dict['end_date']) < datetime.now():
+                errors.append({program_id: f"Start date {program_dict['start_date']} and end date {program_dict['end_date']} are in the past"})
+        except Exception as e:
+            errors.append({program_id: f"Date format error: {type(e)} {str(e)}"})
+        user_dict["dac_authorizations"][program_id] = program_dict
+
+        # add this dac to the program's authz
+        program, status_code = auth.get_program(program_id)
+        if status_code == 200:
+            if "dac_authorizations" not in program:
+                program["dac_authorizations"] = {}
+            program["dac_authorizations"][user_id] = program_dict
+            response, status_code = auth.add_program(program)
+            logger.debug(response, status_code)
+            if status_code != 200:
+                errors.append({program_id: response})
+
+    if len(errors) == 0:
+        user_dict, status_code = auth.write_user(user_dict)
+        if "sample_jwt" in user_dict["userinfo"]:
+            user_dict["userinfo"].pop("sample_jwt")
+        return user_dict, status_code
+    return errors, 400
 
 
 @app.route('/user/<path:user_id>/dac_authorization/<path:program_id>')
@@ -578,11 +642,12 @@ def get_dac_authz_for_user(user_id, program_id):
     if not authx.auth.is_action_allowed_for_program(token, method="GET", path="/ingest/user", program=None):
         return {"error": "User not authorized to get programs for user"}, 403
 
-    response, status_code = auth.get_user(user_id)
+    user_dict, status_code = auth.get_user(user_id)
     if status_code != 200:
-        return response, status_code
-    response["userinfo"].pop("sample_jwt")
-    for p in response["dac_authorizations"]:
+        return user_dict, status_code
+    if "sample_jwt" in user_dict["userinfo"]:
+        user_dict["userinfo"].pop("sample_jwt")
+    for p in user_dict["dac_authorizations"]:
         if p == program_id:
             return p, 200
     return {"error": f"No program {program_id} found for user"}, status_code
@@ -595,15 +660,16 @@ def remove_dac_authz_for_user(user_id, program_id):
     if not authx.auth.is_action_allowed_for_program(token, method="DELETE", path="/ingest/user", program=program_id):
         return {"error": "User not authorized to remove programs for user"}, 403
 
-    response, status_code = auth.get_user(user_id)
+    user_dict, status_code = auth.get_user(user_id)
     if status_code != 200:
-        return response, status_code
-    for p in response["dac_authorizations"]:
+        return user_dict, status_code
+    for p in user_dict["dac_authorizations"]:
         if p == program_id:
-            response["dac_authorizations"].pop(program_id)
-            response, status_code = auth.write_user(response)
-            response["userinfo"].pop("sample_jwt")
-            return response, status_code
+            user_dict["dac_authorizations"].pop(program_id)
+            user_dict, status_code = auth.write_user(user_dict)
+            if "sample_jwt" in user_dict["userinfo"]:
+                user_dict["userinfo"].pop("sample_jwt")
+            return user_dict, status_code
     return {"error": f"No program {program_id} found for user"}, status_code
 
 

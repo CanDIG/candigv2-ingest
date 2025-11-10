@@ -136,8 +136,8 @@ paths:
           description: Can't remove user from role
   /program:
     post:
-      summary: Add authorization information for a new program
-      description: Add authorization information for a new program
+      summary: Add authorization information for a new program (or overwrite authorization information for an existing program).
+      description: Add authorization information for a new program (or overwrite authorization information for an existing program). Information in the request body replaces any existing information for the program.
       operationId: ingest_operations.add_program
       requestBody:
         $ref: '#/components/requestBodies/ProgramIngestRequest'
@@ -160,7 +160,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/Program"
+                  type: string
   /program/{program_id}:
     parameters:
       - in: path
@@ -189,6 +189,24 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Program"
+  /program/{program_id}/dac_authorization:
+    parameters:
+      - in: path
+        name: program_id
+        schema:
+          type: string
+        required: true
+    get:
+      summary: Get a program's DAC authorizations
+      description: Get a program's DAC authorizations
+      operationId: ingest_operations.get_program_dacs
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
   /user/pending/request:
     post:
       summary: Add pending user
@@ -555,7 +573,11 @@ components:
       content:
         'application/json':
           schema:
-            $ref: "#/components/schemas/DACAuthorization"
+            oneOf:
+              - $ref: "#/components/schemas/DACAuthorization"
+              - type: array
+                items:
+                  $ref: "#/components/schemas/DACAuthorization"
   schemas:
     S3Credential:
       type: object
