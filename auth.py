@@ -155,13 +155,13 @@ def set_role_type(role_type, members):
 #####
 
 def write_user(user_dict):
-    safe_name = urllib.parse.quote_plus(user_dict['userinfo']['user_name'])
+    safe_name = urllib.parse.quote_plus(user_dict['userinfo']['user_name']).lower()
     response, status_code = authx.auth.set_service_store_secret("opa", key=f"users/{safe_name}", value=json.dumps(user_dict))
     return response, status_code
 
 
 def get_user(user_name):
-    safe_name = urllib.parse.quote_plus(user_name)
+    safe_name = urllib.parse.quote_plus(user_name).lower()
     response, status_code = authx.auth.get_service_store_secret("opa", key=f"users/{safe_name}")
     # return 404 if the user is not found
     if status_code == 404:
@@ -178,32 +178,33 @@ def get_self(token):
 
 
 def remove_user(user_name):
-    safe_name = urllib.parse.quote_plus(user_name)
+    safe_name = urllib.parse.quote_plus(user_name).lower()
+    lower_name = user_name.lower()
     response, status_code = authx.auth.get_service_store_secret("opa", key=f"users/{safe_name}")
     if status_code == 200:
         response, status_code = authx.auth.delete_service_store_secret("opa", key=f"users/{safe_name}")
         # if the user was preapproved, take them out of that list
-        remove_preapproved_user(user_name)
+        remove_preapproved_user(lower_name)
 
         # remove the user from any site roles:
         site_roles, status_code = list_role_types()
         for role_type in site_roles:
             members, status_code = get_role_type(role_type)
-            if user_name in members:
-                members.remove(user_name)
+            if lower_name in members:
+                members.remove(lower_name)
                 set_role_type(role_type, members)
 
         # remove the user from any program roles:
         programs, status_code = list_programs()
         for program_id in programs:
             program, status_code = get_program(program_id)
-            if user_name in program["program_curators"]:
-                program["program_curators"].remove(user_name)
-            if user_name in program["team_members"]:
-                program["team_members"].remove(user_name)
+            if lower_name in program["program_curators"]:
+                program["program_curators"].remove(lower_name)
+            if lower_name in program["team_members"]:
+                program["team_members"].remove(lower_name)
             add_program(program)
-        return {"message": f"User {user_name} was removed"}, 200
-    return {"error": f"User {user_name} could not be removed"}, status_code
+        return {"message": f"User {lower_name} was removed"}, 200
+    return {"error": f"User {lower_name} could not be removed"}, status_code
 
 
 #####
@@ -219,34 +220,35 @@ def add_pending_user(token):
     user_name = authx.auth.get_user_id(None, token=token)
     if user_name is None:
         return {"error": "Could not verify jwt or obtain user ID"}, 403
+    lower_name = user_name.lower()
 
-    user_dict, status_code = get_user(user_name)
+    user_dict, status_code = get_user(lower_name)
     if status_code != 404:
         if "sample_jwt" not in user_dict["userinfo"]:
             user_dict["userinfo"]["sample_jwt"] = token
         else:
-            return {"message": f"User {user_name} is already a CanDIG authorized user"}, 200
+            return {"message": f"User {lower_name} is already a CanDIG authorized user"}, 200
     else:
         user_dict = {
             "userinfo": {
-                "user_name": user_name,
+                "user_name": lower_name,
                 "sample_jwt": token
             }
         }
-    if user_name not in response["pending_users"]:
-        response["pending_users"][user_name] = user_dict
+    if lower_name not in response["pending_users"]:
+        response["pending_users"][lower_name] = user_dict
 
         response, status_code = authx.auth.set_service_store_secret("opa", key=f"pending_users", value=json.dumps(response))
 
         if status_code == 200:
             preapproved_users, status_code = list_preapproved_users()
             if status_code == 200:
-                if user_name in preapproved_users:
-                    return approve_pending_user(user_name)
+                if lower_name in preapproved_users:
+                    return approve_pending_user(lower_name)
             return response, 201 # return 201 to indicate that the user was added to the list
     else:
         # return 200 to indicate OK but nothing was added
-        return {"message": f"User {user_name} already pending"}, 200
+        return {"message": f"User {lower_name} already pending"}, 200
     return response, status_code
 
 
@@ -272,32 +274,34 @@ def approve_pending_user(user_name):
     if status_code != 200:
         return response, status_code
     pending_users = response["pending_users"]
-    if user_name in pending_users:
-        user_dict = pending_users[user_name]
+    lower_name = user_name.lower()
+    if lower_name in pending_users:
+        user_dict = pending_users[lower_name]
         if "dac_authorizations" not in user_dict:
             user_dict["dac_authorizations"] = {}
         response2, status_code = write_user(user_dict)
         if status_code == 200:
-            pending_users.pop(user_name)
+            pending_users.pop(lower_name)
             response3, status_code = authx.auth.set_service_store_secret("opa", key=f"pending_users", value=json.dumps(response))
-            return {"message": f"User {user_name} has been approved"}, status_code
+            return {"message": f"User {lower_name} has been approved"}, status_code
         return response2, status_code
     else:
-        return {"error": f"no pending user with ID {user_name}"}, 404
+        return {"error": f"no pending user with ID {lower_name}"}, 404
 
 
 def reject_pending_user(user_name):
     response, status_code = authx.auth.get_service_store_secret("opa", key=f"pending_users")
+    lower_name = user_name.lower()
     if status_code != 200:
         return response, status_code
     pending_users = response["pending_users"]
 
-    if user_name in pending_users:
-        pending_users.pop(user_name)
+    if lower_name in pending_users:
+        pending_users.pop(lower_name)
         response, status_code = authx.auth.set_service_store_secret("opa", key=f"pending_users", value=json.dumps({"pending_users": pending_users}))
 
     else:
-        return {"error": f"no pending user with ID {user_name}"}, 404
+        return {"error": f"no pending user with ID {lower_name}"}, 404
     return response, status_code
 
 
@@ -324,8 +328,9 @@ def clear_preapproved_users():
 
 def get_preapproved_user(user_name):
     response, status_code = authx.auth.get_service_store_secret("opa", key=f"preapproved_users")
+    lower_name = user_name.lower()
     if status_code == 200:
-        response = user_name in response["preapproved_users"]
+        response = lower_name in response["preapproved_users"]
     else:
         response = False
     return response, status_code
@@ -333,12 +338,13 @@ def get_preapproved_user(user_name):
 
 def add_preapproved_user(user_name):
     response, status_code = authx.auth.get_service_store_secret("opa", key=f"preapproved_users")
+    lower_name = user_name.lower()
 
-    if user_name in response["preapproved_users"]:
+    if lower_name in response["preapproved_users"]:
         # return 200 to indicate OK but nothing was added
-        return {"message": f"User {user_name} already preapproved"}, 200
+        return {"message": f"User {lower_name} already preapproved"}, 200
 
-    response["preapproved_users"].append(user_name)
+    response["preapproved_users"].append(lower_name)
 
     response, status_code = authx.auth.set_service_store_secret("opa", key=f"preapproved_users", value=json.dumps(response))
     if status_code == 200:
@@ -348,14 +354,15 @@ def add_preapproved_user(user_name):
 
 def remove_preapproved_user(user_name):
     response, status_code = authx.auth.get_service_store_secret("opa", key=f"preapproved_users")
+    lower_name = user_name.lower()
     if status_code != 200:
         return response, status_code
     preapproved_users = response["preapproved_users"]
 
-    if user_name in preapproved_users:
-        preapproved_users.remove(user_name)
+    if lower_name in preapproved_users:
+        preapproved_users.remove(lower_name)
         response, status_code = authx.auth.set_service_store_secret("opa", key=f"preapproved_users", value=json.dumps({"preapproved_users": preapproved_users}))
 
     else:
-        return {"error": f"no preapproved user with ID {user_name}"}, 404
+        return {"error": f"no preapproved user with ID {lower_name}"}, 404
     return response, status_code
