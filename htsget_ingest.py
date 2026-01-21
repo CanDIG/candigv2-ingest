@@ -223,12 +223,17 @@ def link_genomic_data(analysis, do_not_index=False):
             result["errors"].append(f"could not verify analysis: {response.text}")
             return result
         elif not response.json()['result']:
-            result["errors"].append(f"could not verify analysis: {response.json()['message']}")
-            return result
-        else:
-            # flag the analysis_drs_object for indexing:
-            url =f"{HTSGET_URL}/htsget/v1/{analysis_drs_obj['id']}/index"
-            result["to_index"] = [url]
+            # was an analysis_date specified? if so, it's not an error if the verification fails because it doesn't have one
+            if 'does not have any associated analysis date' in response.json()['message']:
+                if 'analysis_date' not in analysis_drs_obj['metadata']:
+                    result["errors"].append(f"could not verify analysis: {response.text}")
+                    return result
+            else:
+                result["errors"].append(f"could not verify analysis: {response.json()['message']}")
+                return result
+        # flag the analysis_drs_object for indexing:
+        url =f"{HTSGET_URL}/htsget/v1/{analysis_drs_obj['id']}/index"
+        result["to_index"] = [url]
     return result
 
 

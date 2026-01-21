@@ -898,6 +898,9 @@ components:
                 - reference_alignment
                 - sequence_variation
                 - sequence_annotation
+            analysis_date:
+              type: string
+              description: date analysis was performed. If not specified, it will be taken either from the fileDate header or derived from another date-containing header.
             analysis_attribute:
               type: object
               properties:
