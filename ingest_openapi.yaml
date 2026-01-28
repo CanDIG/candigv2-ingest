@@ -902,7 +902,7 @@ components:
               type: string
               format: date
               example: "2024-01-24"
-              description: date analysis was performed. If not specified, it will be taken either from the fileDate header or derived from another date-containing header.
+              description: date analysis was performed in the format YYYY-MM-DD. If not specified, it will be taken either from the fileDate header or derived from another date-containing header. 
             analysis_attribute:
               type: object
               properties:
