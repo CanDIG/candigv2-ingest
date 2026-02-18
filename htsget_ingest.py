@@ -406,21 +406,21 @@ def htsget_ingest(ingest_json, do_not_index=False, results_path=None, result_dic
         for url in to_index:
             response = requests.get(url, headers=headers)
 
-    # update completeness stats for program_ids with created experiments
+    # update completeness stats for program_ids with created biosamples
     statistics = {}
     for program_id in program_ids:
-        url = f"{HTSGET_URL}/htsget/v1/experiments"
+        url = f"{HTSGET_URL}/htsget/v1/biosamples"
         response = requests.get(url, headers=headers, params={"program": program_id})
         if response.status_code == 200:
-            for experiment in response.json():
-                logger.debug(experiment)
+            for biosample in response.json():
+                logger.debug(biosample)
                 if program_id not in statistics:
                     statistics[program_id] = { 'genomes': 0, 'transcriptomes': 0, 'all': 0 }
-                if len(experiment['genomes']) > 0 and len(experiment['transcriptomes']) > 0:
+                if len(biosample["experiments"]["wgs"]) > 0 and len(biosample["experiments"]["wts"]) > 0:
                     statistics[program_id]['all'] += 1
-                if len(experiment['genomes']) > 0:
+                if len(biosample["experiments"]["wgs"]) > 0:
                     statistics[program_id]['genomes'] += 1
-                if len(experiment['transcriptomes']) > 0:
+                if len(biosample["experiments"]["wts"]) > 0:
                     statistics[program_id]['transcriptomes'] += 1
         else:
             result["errors"].append(f"Could not collect completeness stats for program: {response.text}")
