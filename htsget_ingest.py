@@ -273,11 +273,22 @@ def create_run(run):
             result["errors"].append(response["error"])
             return result
 
-        # verify files
-#         response = requests.get(f"{DRS_URL}/ga4gh/drs/v1/objects/{result["id"]}/download", headers=headers)
-#         if response.status_code == 200:
-#             response.text
-
+        # verify fastq files
+        if response["id"] == "fastq":
+            try:
+                with requests.get(f"{DRS_URL}/ga4gh/drs/v1/objects/{response["name"]}/download", headers=headers, stream=True) as response:
+                    if response.status_code == 200:
+                        snippet = []
+                        for line in response.iter_lines():
+                            snippet.append(line)
+                            if len(snippet) > 3:
+                                break
+                        if not snippet[0].startswith("@".encode()) or not snippet[2].startswith("+".encode()):
+                            raise Exception(f"{response["name"]} is not a fastq file")
+                    else:
+                        raise Exception(f"{response.status_code} {response.text}")
+            except Exception as e:
+                result["errors"].append(f"Error verifying file: {str(e)}")
 
     response = requests.get(f"{url}/{run['experiment_id']}", headers=headers)
     if response.status_code == 200:
