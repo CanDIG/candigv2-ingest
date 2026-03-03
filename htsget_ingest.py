@@ -25,7 +25,7 @@ KATSU_URL = os.environ.get("KATSU_URL")
 IS_TESTING = os.getenv("IS_TESTING", False)
 
 
-def link_genomic_data(analysis, do_not_index=False):
+def create_analysis(analysis, do_not_index=False):
     url = f"{DRS_URL}/ga4gh/drs/v1/objects"
     result = {
         "errors": []
@@ -237,14 +237,109 @@ def link_genomic_data(analysis, do_not_index=False):
     return result
 
 
-def add_file_drs_object(analysis_drs_obj, file, type, headers):
+def create_run(run):
+    url = f"{DRS_URL}/ga4gh/drs/v1/objects"
+    result = {
+        "errors": []
+    }
+
+    # Use service token to authenticate this with htsget
+    headers = {}
+    if not IS_TESTING:
+        headers = {
+            "X-Service-Token": create_service_token(),
+            "Content-Type": "application/json"
+        }
+
+    run_drs_obj = {}
+    response = requests.get(f"{url}/{run['run_id']}", headers=headers)
+    if response.status_code == 200:
+        run_drs_obj = response.json()
+    run_drs_obj["id"] = run["run_id"]
+    run_drs_obj["name"] = run["experiment_id"]
+    run_drs_obj["description"] = "raw_reads"
+    run_drs_obj["program"] = run["program_id"]
+    run_drs_obj["version"] = "v1"
+    run_drs_obj["metadata"] = run["metadata"]
+    if "contents" not in run_drs_obj:
+        run_drs_obj["contents"] = []
+
+    # add files to contents
+    for file in run["files"]:
+        response = add_file_drs_object(run_drs_obj, file, run["metadata"]["filetype"], headers)
+        result["name"] = response["name"]
+        result["id"] = response["id"]
+        if "error" in response:
+            result["errors"].append(response["error"])
+            return result
+
+        # verify files
+#         response = requests.get(f"{DRS_URL}/ga4gh/drs/v1/objects/{result["id"]}/download", headers=headers)
+#         if response.status_code == 200:
+#             response.text
+
+
+    response = requests.get(f"{url}/{run['experiment_id']}", headers=headers)
+    if response.status_code == 200:
+        experiment_drs_obj = response.json()
+    else:
+        result["errors"].append(f"couldn't find experiment drs object {run['experiment_id']}: {response.status_code} {response.text}")
+        return result
+
+    # add the RunDrsObject to its contents, if it's not already there:
+    not_found = True
+    if len(experiment_drs_obj["contents"]) > 0:
+        for obj in experiment_drs_obj["contents"]:
+            if obj["name"] == run["run_id"]:
+                not_found = False
+    if not_found:
+        contents_obj = {
+            "name": run["run_id"],
+            "id": run["run_id"],
+            "drs_uri": [f"{DRS_HOST_URL}/{run['run_id']}"]
+        }
+        experiment_drs_obj["contents"].append(contents_obj)
+
+    # update the experiment_drs_object in the database:
+    response = requests.post(f"{url}", json=experiment_drs_obj, headers=headers)
+    if response.status_code != 200:
+        result["errors"].append(f"error updating experiment drs object {experiment_drs_obj['id']}: {response.status_code} {response.text}")
+        return result
+
+    # then add the experiment to the RunDrsObject's contents, if it's not already there:
+    contents_obj = {
+        "name": experiment_drs_obj["name"],
+        "id": run["experiment_id"],
+        "drs_uri": [f"{DRS_HOST_URL}/{run['experiment_id']}"]
+    }
+    not_found = True
+    if len(run_drs_obj["contents"]) > 0:
+        for i in range(0, len(run_drs_obj["contents"])):
+            if run_drs_obj["contents"][i]["name"] == run["experiment_id"]:
+                not_found = False
+                run_drs_obj["contents"][i] = contents_obj
+                break
+    if not_found:
+        run_drs_obj["contents"].append(contents_obj)
+
+    # finally, post the run_drs_object
+    response = requests.post(url, json=run_drs_obj, headers=headers)
+    if response.status_code != 200:
+        result["errors"].append(f"error posting run drs object {run_drs_obj['id']}: {response.status_code} {response.text}")
+        return result
+
+    result["sample"] = f"connected experiment {run["experiment_id"]} to run {run["run_id"]}"
+    return result
+
+
+def add_file_drs_object(drs_obj, file, type, headers):
     url = f"{DRS_URL}/ga4gh/drs/v1/objects"
     obj = {
         "access_methods": [],
         "id": file['name'],
         "name": file['name'],
         "description": type,
-        "program": analysis_drs_obj["program"],
+        "program": drs_obj["program"],
         "version": "v1"
     }
     contents_obj = {
@@ -261,14 +356,14 @@ def add_file_drs_object(analysis_drs_obj, file, type, headers):
 
     # is this file already in the master object? If so, replace it:
     not_found = True
-    if len(analysis_drs_obj["contents"]) > 0:
-        for i in range(0, len(analysis_drs_obj["contents"])):
-            if analysis_drs_obj["contents"][i]["name"] == file["name"]:
-                analysis_drs_obj["contents"][i] = contents_obj
+    if len(drs_obj["contents"]) > 0:
+        for i in range(0, len(drs_obj["contents"])):
+            if drs_obj["contents"][i]["name"] == file["name"]:
+                drs_obj["contents"][i] = contents_obj
                 not_found = False
                 break
     if not_found:
-        analysis_drs_obj["contents"].append(contents_obj)
+        drs_obj["contents"].append(contents_obj)
     response = requests.post(url, json=obj, headers=headers)
     if response.status_code > 200:
         contents_obj["error"] =  f"error creating file drs object: {response.status_code} {response.text}"
@@ -358,6 +453,23 @@ def htsget_ingest(ingest_json, do_not_index=False, results_path=None, result_dic
         if response.status_code != 200:
             result["errors"].append(f"error creating experiment drs object {experiment_drs_obj['id']}: {response.status_code} {response.text}")
 
+    if "runs" in ingest_json:
+        for run in ingest_json["runs"]:
+            result["results"].append(f"processing run {run["run_id"]}...")
+            response = create_run(run)
+            result["results"].pop()
+            if len(response["errors"]) > 0:
+                for err in response["errors"]:
+                    if "403" in err:
+                        status_code = 403
+                        break
+                    result["results"].append(f"error processing {response["id"]} {response["name"]} in experiment {run["experiment_id"]}: {err}")
+            else:
+                result["results"].append(f"processed {response["id"]} {response["name"]} for experiment {run["experiment_id"]}")
+                if "sample" in response:
+                    result["results"].append(response["sample"])
+
+
     for analysis in ingest_json["analyses"]:
         if result_dict is not None and analysis["program_id"] not in result_dict:
             result_dict[analysis["program_id"]] = result
@@ -374,7 +486,7 @@ def htsget_ingest(ingest_json, do_not_index=False, results_path=None, result_dic
         if "samples" not in analysis or len(analysis["samples"]) == 0:
             result["results"][-1] = f"error processing analysis {analysis["analysis_id"]}: No samples were specified"
             break
-        response = link_genomic_data(analysis, do_not_index)
+        response = create_analysis(analysis, do_not_index)
 
         # remove the temporary "processing..." message
         result["results"].pop()
@@ -458,12 +570,17 @@ def check_genomic_data(dataset, token):
     for experiment in dataset["experiments"]:
         program_id = experiment["program_id"]
         if program_id not in by_program:
-            by_program[program_id] = {"experiments": [], "analyses": []}
+            by_program[program_id] = {"experiments": [], "runs": [], "analyses": []}
         by_program[program_id]["experiments"].append(experiment)
+    for run in dataset["runs"]:
+        program_id = run["program_id"]
+        if program_id not in by_program:
+            by_program[program_id] = {"experiments": [], "runs": [], "analyses": []}
+        by_program[program_id]["runs"].append(run)
     for analysis in dataset["analyses"]:
         program_id = analysis["program_id"]
         if program_id not in by_program:
-            by_program[program_id] = {"experiments": [], "analyses": []}
+            by_program[program_id] = {"experiments": [], "runs": [], "analyses": []}
         by_program[program_id]["analyses"].append(analysis)
 
 
