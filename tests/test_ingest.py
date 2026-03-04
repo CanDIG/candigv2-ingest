@@ -63,7 +63,7 @@ def test_htsget_ingest(requests_mock):
     with open("tests/genomic_ingest.json", "r") as f:
         data = json.load(f)
         for sample in data["analyses"]:
-            response = htsget_ingest.link_genomic_data(sample)
+            response = htsget_ingest.create_analysis(sample)
             print(json.dumps(response, indent=4))
             assert len(response["errors"]) == 0
             assert "name" in response
@@ -92,6 +92,6 @@ def test_htsget_ingest(requests_mock):
             }
         ]
     }
-    response = htsget_ingest.link_genomic_data(bad_s3_sample)
+    response = htsget_ingest.create_analysis(bad_s3_sample)
     print(json.dumps(response, indent=4))
     assert len(response["errors"]) == 1

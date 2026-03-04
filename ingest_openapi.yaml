@@ -869,6 +869,66 @@ components:
               enum:
                 - paired
                 - single
+    Run:
+      description: A run contains a group of reads generated for a particular experiment.
+      type: object
+      required:
+        - run_id
+        - program_id
+        - experiment_id
+        - files
+        - metadata
+      properties:
+        run_id:
+          type: string
+          description: The descriptor for the run files, typically the base filename.
+        program_id:
+          type: string
+          description: Name of the program this experiment belongs to. The user must be authorized to add data to this program.
+        experiment_id:
+          type: string
+          description: Unique identifier for the experiment this run relates to
+        files:
+          type: array
+          items:
+            $ref: "#/components/schemas/File"
+        metadata:
+          type: object
+          description: Additional data that describes the run
+          required:
+            - run_date
+            - filetype
+          properties:
+            run_date:
+              type: string
+              format: date
+            filetype:
+              type: string
+              enum:
+                - sra
+                - srf
+                - sff
+                - fastq
+                - fasta
+                - tab
+                - 454_native
+                - 454_native_seq
+                - 454_native_qual
+                - Helicos_native
+                - Illumina_native
+                - Illumina_native_seq
+                - Illumina_native_prb
+                - Illumina_native_int
+                - Illumina_native_qseq
+                - Illumina_native_scarf
+                - SOLiD_native
+                - SOLiD_native_csfasta
+                - SOLiD_native_qual
+                - PacBio_HDF5
+                - bam
+                - cram
+                - CompleteGenomics_native
+                - OxfordNanopore_native
     Analysis:
       type: object
       required:
@@ -902,7 +962,7 @@ components:
               type: string
               format: date
               example: "2024-01-24"
-              description: date analysis was performed in the format YYYY-MM-DD. If not specified, it will be taken either from the fileDate header or derived from another date-containing header. 
+              description: date analysis was performed in the format YYYY-MM-DD. If not specified, it will be taken either from the fileDate header or derived from another date-containing header.
             analysis_attribute:
               type: object
               properties:
