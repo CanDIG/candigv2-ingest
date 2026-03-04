@@ -273,23 +273,6 @@ def create_run(run):
             result["errors"].append(response["error"])
             return result
 
-#         # verify fastq files
-#         if response["id"] == "fastq":
-#             try:
-#                 with requests.get(f"{DRS_URL}/ga4gh/drs/v1/objects/{response["name"]}/download", headers=headers, stream=True) as response:
-#                     if response.status_code == 200:
-#                         snippet = []
-#                         for line in response.iter_lines():
-#                             snippet.append(line)
-#                             if len(snippet) > 3:
-#                                 break
-#                         if not snippet[0].startswith("@".encode()) or not snippet[2].startswith("+".encode()):
-#                             raise Exception(f"{response["name"]} is not a fastq file")
-#                     else:
-#                         raise Exception(f"{response.status_code} {response.text}")
-#             except Exception as e:
-#                 result["errors"].append(f"Error verifying file: {str(e)}")
-
     response = requests.get(f"{url}/{run['experiment_id']}", headers=headers)
     if response.status_code == 200:
         experiment_drs_obj = response.json()
@@ -337,6 +320,13 @@ def create_run(run):
     response = requests.post(url, json=run_drs_obj, headers=headers)
     if response.status_code != 200:
         result["errors"].append(f"error posting run drs object {run_drs_obj['id']}: {response.status_code} {response.text}")
+        return result
+
+    verify_url = f"{HTSGET_URL}/htsget/v1/{run_drs_obj['id']}/verify"
+
+    response = requests.get(verify_url, headers=headers)
+    if response.status_code != 200:
+        result["errors"].append(f"could not verify run: {response.text}")
         return result
 
     result["sample"] = f"connected experiment {run["experiment_id"]} to run {run["run_id"]}"
