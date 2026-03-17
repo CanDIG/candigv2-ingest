@@ -472,53 +472,50 @@ def check_genomic_data(dataset, token):
     for program_id in by_program.keys():
         if program_id not in result["errors"]:
             result["errors"][program_id] = []
-        try:
-            response, status_code = get_program(program_id)
-            if status_code > 300:
-                result["errors"][program_id].append({"not found": "No program authorization exists"})
-            elif not is_action_allowed_for_program(token, method="POST", path="/ga4gh/drs/v1/objects", program=program_id):
-                result["errors"][program_id].append({"unauthorized": "user is not allowed to ingest to program"})
+        response, status_code = get_program(program_id)
+        if status_code > 300:
+            result["errors"][program_id].append({"not found": "No program authorization exists"})
+        elif not is_action_allowed_for_program(token, method="POST", path="/ga4gh/drs/v1/objects", program=program_id):
+            result["errors"][program_id].append({"unauthorized": "user is not allowed to ingest to program"})
+            continue
+        # look for program in katsu
+        response = requests.get(f"{KATSU_URL}/v3/authorized/programs", params={"program_id": program_id}, headers=headers)
+        if response.status_code == 200:
+            if "items" in response.json() and len(response.json()["items"]) == 0:
+                result["errors"][program_id].append({"no such program": "program does not exist in clinical data"})
                 continue
-            # look for program in katsu
-            response = requests.get(f"{KATSU_URL}/v3/authorized/programs", params={"program_id": program_id}, headers=headers)
-            if response.status_code == 200:
-                if "items" in response.json() and len(response.json()["items"]) == 0:
-                    result["errors"][program_id].append({"no such program": "program does not exist in clinical data"})
-                    continue
 
-            # get all sample_registrations for this program
-            samples_in_program = []
-            response = requests.get(f"{KATSU_URL}/v3/authorized/sample_registrations", params={"program_id": program_id, "page_size": 10000000}, headers=headers)
-            if response.status_code == 200:
-                samples_in_program.extend(list(map(lambda x: x["submitter_sample_id"], response.json()["items"])))
-            for experiment in by_program[program_id]["experiments"]:
-                sample_errors = []
-                # validate the json
-                for error in jsonschema.Draft202012Validator(experiment_schema).iter_errors(experiment):
+        # get all sample_registrations for this program
+        samples_in_program = []
+        response = requests.get(f"{KATSU_URL}/v3/authorized/sample_registrations", params={"program_id": program_id, "page_size": 10000000}, headers=headers)
+        if response.status_code == 200:
+            samples_in_program.extend(list(map(lambda x: x["submitter_sample_id"], response.json()["items"])))
+        for experiment in by_program[program_id]["experiments"]:
+            sample_errors = []
+            # validate the json
+            for error in jsonschema.Draft202012Validator(experiment_schema).iter_errors(experiment):
+                sample_errors.extend(f"{' > '.join(error.path)}: {error.message}")
+            if len(sample_errors) > 0:
+                continue
+            # check to see if the samples exist in katsu
+            if experiment["submitter_sample_id"] not in samples_in_program:
+                sample_errors.append({"no such sample": f"sample {experiment['submitter_sample_id']} does not exist in clinical data {samples_in_program}"})
+            if len(sample_errors) > 0:
+                result["errors"][program_id].append({experiment["experiment_id"]: sample_errors})
+        for analysis in by_program[program_id]["analyses"]:
+            sample_errors = []
+            # validate the json
+            if analysis["analysis_id"] == analysis["main"]["name"]:
+                sample_errors = f"Experiment {analysis['analysis_id']} cannot have the same name as one of its files."
+            if "index" in analysis and analysis["analysis_id"] == analysis["index"]["name"]:
+                sample_errors = f"Experiment {analysis['analysis_id']} cannot have the same name as one of its files."
+            else:
+                for error in jsonschema.Draft202012Validator(analysis_schema).iter_errors(analysis):
                     sample_errors.extend(f"{' > '.join(error.path)}: {error.message}")
-                if len(sample_errors) > 0:
-                    continue
-                # check to see if the samples exist in katsu
-                if experiment["submitter_sample_id"] not in samples_in_program:
-                    sample_errors.append({"no such sample": f"sample {experiment['submitter_sample_id']} does not exist in clinical data {samples_in_program}"})
-                if len(sample_errors) > 0:
-                    result["errors"][program_id].append({experiment["experiment_id"]: sample_errors})
-            for analysis in by_program[program_id]["analyses"]:
-                sample_errors = []
-                # validate the json
-                if analysis["analysis_id"] == analysis["main"]["name"]:
-                    sample_errors = f"Experiment {analysis['analysis_id']} cannot have the same name as one of its files."
-                if "index" in analysis and analysis["analysis_id"] == analysis["index"]["name"]:
-                    sample_errors = f"Experiment {analysis['analysis_id']} cannot have the same name as one of its files."
-                else:
-                    for error in jsonschema.Draft202012Validator(analysis_schema).iter_errors(analysis):
-                        sample_errors.extend(f"{' > '.join(error.path)}: {error.message}")
-                if len(sample_errors) > 0:
-                    result["errors"][program_id].append({analysis["analysis_id"]: sample_errors})
-            if len(result["errors"][program_id]) == 0:
-                result["errors"].pop(program_id)
-        except ConnectTimeout as e:
-            logger.debug(f"Problem processing {program_id} with error: {e}")
+            if len(sample_errors) > 0:
+                result["errors"][program_id].append({analysis["analysis_id"]: sample_errors})
+        if len(result["errors"][program_id]) == 0:
+            result["errors"].pop(program_id)
 
     if len(result["errors"]) == 0:
         return by_program, 200
