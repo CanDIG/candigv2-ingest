@@ -285,10 +285,6 @@ def get_access_method(url):
         return {
             "message": str(e)
         }
-    if len(result['errors']) > 0:
-        return {
-            "message": str(result["errors"])
-        }
     return {
         "type": "s3",
         "access_id": url
