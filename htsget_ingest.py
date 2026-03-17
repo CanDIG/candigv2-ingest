@@ -285,6 +285,10 @@ def get_access_method(url):
         return {
             "message": str(e)
         }
+    if len(result['errors']) > 0:
+        return {
+            "message": str(result["errors"])
+        }
     return {
         "type": "s3",
         "access_id": url
@@ -315,12 +319,12 @@ def parse_s3_url(url):
                 try:
                     response, status_code = get_s3_url(s3_endpoint=data["endpoint"], bucket=data["bucket"], object_id=data["object"], access_key=None, secret_key=None, region=None, public=True)
                 except ConnectTimeout as e:
-                    logger.debug(f"Error processing {data["object"]} with error {e}")
+                    raise Exception(f"Could not read {data["object"]}: {e}")
             else:
                 try:
                     response, status_code = get_s3_url(s3_endpoint=data["endpoint"], bucket=data["bucket"], object_id=data["object"], access_key=None, secret_key=None, region=None, public=False)
                 except ConnectTimeout as e:
-                    logger.debug(f"Error processing {data["object"]} with error {e}")
+                    raise Exception(f"Could not read {data["object"]}: {e}")
 
             if status_code == 500:
                     raise Exception(response["error"])
