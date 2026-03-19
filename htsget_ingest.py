@@ -122,7 +122,7 @@ def create_analysis(analysis, do_not_index=False):
         result["errors"].append(f"error posting analysis drs object {analysis_drs_obj['id']}: {response.status_code} {response.text}")
         return result
     else:
-        result["sample"] = f"connected submitter_sample_id {contents_obj["name"]} to analysis_sample_id {contents_obj["id"]}"
+        result["sample"] = f"connected submitter_sample_id {contents_obj["name"]} to experiment_id {experiment_drs_obj["id"]} to analysis_sample_id {contents_obj["id"]}"
 
     # send the data to the downstream service: either htsget or takuan
     if analysis_drs_obj["metadata"]["analysis_type"] == "sequence_annotation":
