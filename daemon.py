@@ -43,7 +43,13 @@ def ingest_file(file_path):
                         ingest_results, status_code = htsget_ingest(json_data[program_id], do_not_index=do_not_index, results_path=results_path, result_dict=results)
                         results[program_id] = ingest_results
                     except Exception as e:
-                        results[program_id] = f"Exception: {type(e)} {str(e)}"
+                        results_json = None
+                        with open(results_path) as f:
+                            results_json = json.load(f)
+                        if results_json is not None and program_id in results_json:
+                            results[program_id].append(f"Exception during ingest: {type(e)} {str(e)}")
+                        else:
+                            results[program_id] = f"Exception: {type(e)} {str(e)}"
             results["complete"] = True
         os.remove(file_path)
     except Exception as e:
