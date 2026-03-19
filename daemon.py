@@ -39,7 +39,7 @@ def ingest_file(file_path):
                 json_data = json_data["htsget"]
                 programs = list(json_data.keys())
                 for program_id in programs:
-                    results[program_id] = {}
+                    results[program_id] = {"errors": []}
                 for program_id in programs:
                     try:
                         ingest_results, status_code = htsget_ingest(json_data[program_id], do_not_index=do_not_index, results_path=results_path, result_dict=results)
