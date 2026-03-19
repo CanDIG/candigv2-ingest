@@ -126,6 +126,15 @@ def create_analysis(analysis, do_not_index=False):
 
     # send the data to the downstream service: either htsget or takuan
     if analysis_drs_obj["metadata"]["analysis_type"] == "sequence_annotation":
+        # look to see if this is already ingested:
+        try:
+            response = requests.post(f"{TAKUAN_URL}/experiment/{experiment_drs_obj["id"]}/features", headers=headers)
+            if response.status_code == 200:
+                logger.info(f"experiment {experiment_drs_obj["id"]} already ingested")
+                return result
+        except Exception as e:
+            logger.info(f"exception looking up {TAKUAN_URL}/experiment/{experiment_drs_obj["id"]}/features: {type(e)} {str(e)}")
+
         try:
             if "analysis_attribute" in analysis_drs_obj["metadata"] and analysis_drs_obj["metadata"]["analysis_attribute"]["subtype"] == "expression_count":
                 assembly_id = "GCA_000001405.27"
