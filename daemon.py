@@ -6,6 +6,7 @@ from candigv2_logging.logging import initialize, CanDIGLogger
 import json
 from katsu_ingest import ingest_schemas
 from htsget_ingest import htsget_ingest
+from datetime import datetime
 
 
 logger = CanDIGLogger(__file__)
@@ -16,7 +17,9 @@ initialize()
 def ingest_file(file_path):
     json_data = None
     status_code = 500
-    results = {}
+    results = {
+        "last_updated": str(datetime.now())
+    }
     results_path = os.path.join(DAEMON_PATH, "results", os.path.basename(file_path))
     try:
         with open(file_path) as f:

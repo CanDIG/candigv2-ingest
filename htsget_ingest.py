@@ -10,6 +10,7 @@ import sys
 from urllib.parse import urlparse
 from clinical_etl.schema import openapi_to_jsonschema
 import jsonschema
+from datetime import datetime
 from candigv2_logging.logging import CanDIGLogger
 
 
@@ -499,6 +500,7 @@ def htsget_ingest(ingest_json, do_not_index=False, results_path=None, result_dic
         result["results"].append(f"processing analysis {analysis["analysis_id"]}...")
 
         if results_path is not None and result_dict is not None:
+            result_dict["last_updated"] = str(datetime.now())
             with open(results_path, "w") as f:
                 json.dump(result_dict, f)
 
