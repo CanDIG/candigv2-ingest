@@ -530,6 +530,11 @@ def htsget_ingest(ingest_json, do_not_index=False, results_path=None, result_dic
         if "to_index" in response:
             to_index.extend(response.pop("to_index"))
 
+    if results_path is not None and result_dict is not None:
+        result_dict["last_updated"] = str(datetime.now())
+        with open(results_path, "w") as f:
+            json.dump(result_dict, f)
+
     # Use service token to authenticate this with htsget
     headers = {}
     if not IS_TESTING:
