@@ -154,7 +154,6 @@ def create_analysis(analysis, do_not_index=False):
                 # ingest matrix
                 response = requests.get(f"{DRS_URL}/ga4gh/drs/v1/objects/{analysis["main"]["name"]}/download", headers=headers)
                 if response.status_code == 200:
-                    logger.info(f"takuan downloaded {analysis["main"]["name"]}")
                     raw_tsv_data = response.text.strip()
                     lines = raw_tsv_data.split("\n")
                     titles = lines.pop(0).split("\t")
@@ -216,12 +215,11 @@ def create_analysis(analysis, do_not_index=False):
                         mapping["getmm_count_col"] = "GETMM"
                     if "getmm" in titles:
                         mapping["getmm_count_col"] = "getmm"
-                    logger.info(f"takuan ingesting {experiment_drs_obj["id"]}")
+
                     response = requests.post(
                         f"{TAKUAN_URL}/experiment/{experiment_drs_obj["id"]}/ingest/single",
                         files={"data": raw_tsv_data}, data=mapping
                     )
-                    logger.info(f"takuan ingested {experiment_drs_obj["id"]}")
                     if response.status_code != 200:
                         result["errors"].append(f"takuan ingest error: {response.status_code} {response.text}")
                 else:
