@@ -18,7 +18,8 @@ def ingest_file(file_path):
     json_data = None
     status_code = 500
     results = {
-        "last_updated": str(datetime.now())
+        "last_updated": str(datetime.now()),
+        "complete": False
     }
     results_path = os.path.join(DAEMON_PATH, "results", os.path.basename(file_path))
     try:
