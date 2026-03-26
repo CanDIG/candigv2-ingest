@@ -244,7 +244,7 @@ def get_ingest_status(queue_id):
         with open(results_path) as f:
             json_data = json.load(f)
             # os.remove(results_path)
-            if "complete" in json_data:
+            if "complete" in json_data and json_data["complete"] == True:
                 return json_data, 201
             return json_data, 200
     except:
