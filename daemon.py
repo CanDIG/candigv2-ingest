@@ -17,6 +17,8 @@ initialize()
 def ingest_file(file_path):
     json_data = None
     status_code = 500
+
+    # this dictionary contains the current status/results of the ingest; it will be updated and written out to the results_path as the ingest progresses.
     results = {
         "last_updated": str(datetime.now()),
         "complete": False
