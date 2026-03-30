@@ -6,6 +6,7 @@ from candigv2_logging.logging import initialize, CanDIGLogger
 import json
 from katsu_ingest import ingest_schemas
 from htsget_ingest import htsget_ingest
+from datetime import datetime
 
 
 logger = CanDIGLogger(__file__)
@@ -16,7 +17,12 @@ initialize()
 def ingest_file(file_path):
     json_data = None
     status_code = 500
-    results = {}
+
+    # this dictionary contains the current status/results of the ingest; it will be updated and written out to the results_path as the ingest progresses.
+    results = {
+        "last_updated": str(datetime.now()),
+        "complete": False
+    }
     results_path = os.path.join(DAEMON_PATH, "results", os.path.basename(file_path))
     try:
         with open(file_path) as f:
@@ -39,11 +45,19 @@ def ingest_file(file_path):
                 json_data = json_data["htsget"]
                 programs = list(json_data.keys())
                 for program_id in programs:
+                    results[program_id] = {}
+                for program_id in programs:
                     try:
                         ingest_results, status_code = htsget_ingest(json_data[program_id], do_not_index=do_not_index, results_path=results_path, result_dict=results)
                         results[program_id] = ingest_results
                     except Exception as e:
-                        results[program_id] = f"Exception: {type(e)} {str(e)}"
+                        results_json = None
+                        with open(results_path) as f:
+                            results_json = json.load(f)
+                        if results_json is not None and program_id in results_json:
+                            results[program_id]["errors"].append(f"Exception during ingest: {type(e)} {str(e)}")
+                        else:
+                            results[program_id] = f"Exception: {type(e)} {str(e)}"
             results["complete"] = True
         os.remove(file_path)
     except Exception as e:
