@@ -425,7 +425,8 @@ def parse_s3_url(url):
 
 def htsget_ingest(ingest_json, do_not_index=False, results_path=None, result_dict=None):
     result = {
-        "results": []
+        "results": [],
+        "summary": {}
     }
     url = f"{DRS_URL}/ga4gh/drs/v1/objects"
     # Use service token to authenticate this with htsget
@@ -440,6 +441,8 @@ def htsget_ingest(ingest_json, do_not_index=False, results_path=None, result_dic
     to_index = []
     status_code = 200
     result["errors"] = []
+    if "experiments" in ingest_json:
+        result["summary"]["experiments"] = {"total": len(ingest_json["experiments"]), "ingested": 0}
     for experiment in ingest_json["experiments"]:
         experiment_drs_obj = {
             "id": experiment["experiment_id"],
@@ -453,6 +456,8 @@ def htsget_ingest(ingest_json, do_not_index=False, results_path=None, result_dic
         response = requests.post(f"{url}", json=experiment_drs_obj, headers=headers)
         if response.status_code != 200:
             result["errors"].append(f"error creating experiment drs object {experiment_drs_obj['id']}: {response.status_code} {response.text}")
+        else:
+            result["summary"]["experiments"]["ingested"] += 1
 
     if "runs" in ingest_json:
         for run in ingest_json["runs"]:
@@ -471,6 +476,8 @@ def htsget_ingest(ingest_json, do_not_index=False, results_path=None, result_dic
                     result["results"].append(response["sample"])
 
 
+    if "analyses" in ingest_json:
+        result["summary"]["analyses"] = {"total": len(ingest_json["analyses"]), "ingested": 0}
     for analysis in ingest_json["analyses"]:
         if result_dict is not None and analysis["program_id"] not in result_dict:
             result_dict[analysis["program_id"]] = result
@@ -502,6 +509,7 @@ def htsget_ingest(ingest_json, do_not_index=False, results_path=None, result_dic
             result["results"].append(f"processed {response["id"]} {response["name"]} for experiment {analysis["analysis_id"]}")
             if "sample" in response:
                 result["results"].append(response["sample"])
+            result["summary"]["analyses"]["ingested"] += 1
 
         if "to_index" in response:
             to_index.extend(response.pop("to_index"))
