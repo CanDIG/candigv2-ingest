@@ -426,12 +426,12 @@ paths:
       description: Ingest clinical or genomic data into CanDIG
       operationId: ingest_operations.ingest
       parameters:
-        - name: do_not_index
+        - name: overwrite
           in: query
           required: false
           schema:
             type: boolean
-          description: set to true to prevent indexing of genomic files
+          description: set to true to overwrite any entries that already exist. Only applicable to genomic ingest.
         - name: batch_size
           in: query
           required: false

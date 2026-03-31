@@ -26,6 +26,7 @@ KATSU_URL = os.environ.get("KATSU_URL")
 IS_TESTING = os.getenv("IS_TESTING", False)
 
 
+def create_analysis(analysis, overwrite=False):
     url = f"{DRS_URL}/ga4gh/drs/v1/objects"
     result = {
         "errors": []
@@ -435,6 +436,7 @@ def parse_s3_url(url):
     raise Exception(f"URI {url} cannot be parsed as an S3-style URI")
 
 
+def htsget_ingest(ingest_json, overwrite=False, results_path=None, result_dict=None):
     result = {
         "results": [],
         "summary": {}
@@ -493,6 +495,7 @@ def parse_s3_url(url):
         if result_dict is not None and analysis["program_id"] not in result_dict:
             result_dict[analysis["program_id"]] = result
 
+        logger.debug(f"Ingesting {analysis['analysis_id']}")
         program_ids.add(analysis["program_id"])
         result["results"].append(f"processing analysis {analysis["analysis_id"]}...")
 
@@ -505,6 +508,7 @@ def parse_s3_url(url):
         if "samples" not in analysis or len(analysis["samples"]) == 0:
             result["results"][-1] = f"error processing analysis {analysis["analysis_id"]}: No samples were specified"
             break
+        response = create_analysis(analysis, overwrite)
 
         # remove the temporary "processing..." message
         result["results"].pop()
