@@ -26,7 +26,6 @@ KATSU_URL = os.environ.get("KATSU_URL")
 IS_TESTING = os.getenv("IS_TESTING", False)
 
 
-def create_analysis(analysis, do_not_index=False):
     url = f"{DRS_URL}/ga4gh/drs/v1/objects"
     result = {
         "errors": []
@@ -436,7 +435,6 @@ def parse_s3_url(url):
     raise Exception(f"URI {url} cannot be parsed as an S3-style URI")
 
 
-def htsget_ingest(ingest_json, do_not_index=False, results_path=None, result_dict=None):
     result = {
         "results": [],
         "summary": {}
@@ -495,7 +493,6 @@ def htsget_ingest(ingest_json, do_not_index=False, results_path=None, result_dic
         if result_dict is not None and analysis["program_id"] not in result_dict:
             result_dict[analysis["program_id"]] = result
 
-        logger.debug(f"Ingesting {analysis['analysis_id']}, do_not_index = {do_not_index}")
         program_ids.add(analysis["program_id"])
         result["results"].append(f"processing analysis {analysis["analysis_id"]}...")
 
@@ -508,7 +505,6 @@ def htsget_ingest(ingest_json, do_not_index=False, results_path=None, result_dic
         if "samples" not in analysis or len(analysis["samples"]) == 0:
             result["results"][-1] = f"error processing analysis {analysis["analysis_id"]}: No samples were specified"
             break
-        response = create_analysis(analysis, do_not_index)
 
         # remove the temporary "processing..." message
         result["results"].pop()
@@ -542,9 +538,8 @@ def htsget_ingest(ingest_json, do_not_index=False, results_path=None, result_dic
         }
 
     # send off index calls
-    if not do_not_index:
-        for url in to_index:
-            response = requests.get(url, headers=headers)
+    for url in to_index:
+        response = requests.get(url, headers=headers)
 
     # update completeness stats for program_ids with created biosamples
     statistics = {}
