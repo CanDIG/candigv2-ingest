@@ -4,7 +4,7 @@ import requests
 
 
 def parse_args():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description="Extract all drs objects associated with the experiments endpoint result.")
     parser.add_argument('--file', type=str, required=True, help="File with output of experiments call")
     parser.add_argument('--url', type=str, required=True, help="URL of the candig deployment you are retrieving data from")
     parser.add_argument('--token', type=str, required=True, help="site admin token for the candig deployment you are retrieving data from.")
