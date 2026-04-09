@@ -203,10 +203,10 @@ async def ingest():
             ingest_uuid = add_to_queue({"katsu": response})
             response = {"queue_id": ingest_uuid}
     elif "experiments" in dataset and "analyses" in dataset:
-        do_not_index = bool(connexion.request.query_params.get("do_not_index", False))
+        overwrite = bool(connexion.request.query_params.get("overwrite", False))
         response, status_code = htsget_ingest.check_genomic_data(dataset, token)
         if status_code == 200:
-            ingest_uuid = add_to_queue({"htsget": response, "do_not_index": do_not_index})
+            ingest_uuid = add_to_queue({"htsget": response, "overwrite": overwrite})
             response = {"queue_id": ingest_uuid}
     else:
         response = {"error": "dataset does not look like either clinical or sequencing data"}

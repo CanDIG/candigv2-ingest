@@ -26,7 +26,7 @@ KATSU_URL = os.environ.get("KATSU_URL")
 IS_TESTING = os.getenv("IS_TESTING", False)
 
 
-def create_analysis(analysis, do_not_index=False):
+def create_analysis(analysis, overwrite=False):
     url = f"{DRS_URL}/ga4gh/drs/v1/objects"
     result = {
         "errors": []
@@ -46,6 +46,9 @@ def create_analysis(analysis, do_not_index=False):
     analysis_drs_obj = {}
     response = requests.get(f"{url}/{analysis['analysis_id']}", headers=headers)
     if response.status_code == 200:
+        if not overwrite:
+            result["skipped"] = f"Analysis {analysis["analysis_id"]} already exists, skipping"
+            return result
         analysis_drs_obj = response.json()
     analysis_drs_obj["id"] = analysis["analysis_id"]
     analysis_drs_obj["name"] = analysis["analysis_id"]
@@ -436,7 +439,7 @@ def parse_s3_url(url):
     raise Exception(f"URI {url} cannot be parsed as an S3-style URI")
 
 
-def htsget_ingest(ingest_json, do_not_index=False, results_path=None, result_dict=None):
+def htsget_ingest(ingest_json, overwrite=False, results_path=None, result_dict=None):
     result = {
         "results": [],
         "summary": {}
@@ -455,8 +458,15 @@ def htsget_ingest(ingest_json, do_not_index=False, results_path=None, result_dic
     status_code = 200
     result["errors"] = []
     if "experiments" in ingest_json:
-        result["summary"]["experiments"] = {"total": len(ingest_json["experiments"]), "ingested": 0}
+        result["summary"]["experiments"] = {"total": len(ingest_json["experiments"]), "ingested": 0, "skipped": 0}
     for experiment in ingest_json["experiments"]:
+        response = requests.get(f"{url}/{experiment["experiment_id"]}", headers=headers)
+        if response.status_code == 200:
+            if not overwrite:
+                result["results"].append(f"Experiment {experiment["experiment_id"]} already exists, skipping")
+                result["summary"]["experiments"]["skipped"] += 1
+                continue
+
         experiment_drs_obj = {
             "id": experiment["experiment_id"],
             "name": experiment["submitter_sample_id"],
@@ -473,7 +483,16 @@ def htsget_ingest(ingest_json, do_not_index=False, results_path=None, result_dic
             result["summary"]["experiments"]["ingested"] += 1
 
     if "runs" in ingest_json:
+        result["summary"]["runs"] = {"total": len(ingest_json["runs"]), "ingested": 0, "skipped": 0}
+
         for run in ingest_json["runs"]:
+            response = requests.get(f"{url}/{run["run_id"]}", headers=headers)
+            if response.status_code == 200:
+                if not overwrite:
+                    result["results"].append(f"Run {run["run_id"]} already exists, skipping")
+                    result["summary"]["runs"]["skipped"] += 1
+                    continue
+
             result["results"].append(f"processing run {run["run_id"]}...")
             response = create_run(run)
             result["results"].pop()
@@ -490,12 +509,12 @@ def htsget_ingest(ingest_json, do_not_index=False, results_path=None, result_dic
 
 
     if "analyses" in ingest_json:
-        result["summary"]["analyses"] = {"total": len(ingest_json["analyses"]), "ingested": 0}
+        result["summary"]["analyses"] = {"total": len(ingest_json["analyses"]), "ingested": 0, "skipped": 0}
     for analysis in ingest_json["analyses"]:
         if result_dict is not None and analysis["program_id"] not in result_dict:
             result_dict[analysis["program_id"]] = result
 
-        logger.debug(f"Ingesting {analysis['analysis_id']}, do_not_index = {do_not_index}")
+        logger.debug(f"Ingesting {analysis['analysis_id']}")
         program_ids.add(analysis["program_id"])
         result["results"].append(f"processing analysis {analysis["analysis_id"]}...")
 
@@ -508,12 +527,15 @@ def htsget_ingest(ingest_json, do_not_index=False, results_path=None, result_dic
         if "samples" not in analysis or len(analysis["samples"]) == 0:
             result["results"][-1] = f"error processing analysis {analysis["analysis_id"]}: No samples were specified"
             break
-        response = create_analysis(analysis, do_not_index)
+        response = create_analysis(analysis, overwrite)
 
         # remove the temporary "processing..." message
         result["results"].pop()
 
-        if len(response["errors"]) > 0:
+        if "skipped" in response:
+            result["results"].append(response["skipped"])
+            result["summary"]["analyses"]["skipped"] += 1
+        elif len(response["errors"]) > 0:
             for err in response["errors"]:
                 if "403" in err:
                     status_code = 403
@@ -542,9 +564,8 @@ def htsget_ingest(ingest_json, do_not_index=False, results_path=None, result_dic
         }
 
     # send off index calls
-    if not do_not_index:
-        for url in to_index:
-            response = requests.get(url, headers=headers)
+    for url in to_index:
+        response = requests.get(url, headers=headers)
 
     # update completeness stats for program_ids with created biosamples
     statistics = {}
