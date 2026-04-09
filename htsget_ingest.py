@@ -46,6 +46,9 @@ def create_analysis(analysis, overwrite=False):
     analysis_drs_obj = {}
     response = requests.get(f"{url}/{analysis['analysis_id']}", headers=headers)
     if response.status_code == 200:
+        if not overwrite:
+            result["skipped"] = f"Analysis {analysis["analysis_id"]} already exists, skipping"
+            return result
         analysis_drs_obj = response.json()
     analysis_drs_obj["id"] = analysis["analysis_id"]
     analysis_drs_obj["name"] = analysis["analysis_id"]
@@ -455,8 +458,15 @@ def htsget_ingest(ingest_json, overwrite=False, results_path=None, result_dict=N
     status_code = 200
     result["errors"] = []
     if "experiments" in ingest_json:
-        result["summary"]["experiments"] = {"total": len(ingest_json["experiments"]), "ingested": 0}
+        result["summary"]["experiments"] = {"total": len(ingest_json["experiments"]), "ingested": 0, "skipped": 0}
     for experiment in ingest_json["experiments"]:
+        response = requests.get(f"{url}/{experiment["experiment_id"]}", headers=headers)
+        if response.status_code == 200:
+            if not overwrite:
+                result["results"].append(f"Experiment {experiment["experiment_id"]} already exists, skipping")
+                result["summary"]["experiments"]["skipped"] += 1
+                continue
+
         experiment_drs_obj = {
             "id": experiment["experiment_id"],
             "name": experiment["submitter_sample_id"],
@@ -473,7 +483,16 @@ def htsget_ingest(ingest_json, overwrite=False, results_path=None, result_dict=N
             result["summary"]["experiments"]["ingested"] += 1
 
     if "runs" in ingest_json:
+        result["summary"]["runs"] = {"total": len(ingest_json["runs"]), "ingested": 0, "skipped": 0}
+
         for run in ingest_json["runs"]:
+            response = requests.get(f"{url}/{run["run_id"]}", headers=headers)
+            if response.status_code == 200:
+                if not overwrite:
+                    result["results"].append(f"Run {run["run_id"]} already exists, skipping")
+                    result["summary"]["runs"]["skipped"] += 1
+                    continue
+
             result["results"].append(f"processing run {run["run_id"]}...")
             response = create_run(run)
             result["results"].pop()
@@ -490,7 +509,7 @@ def htsget_ingest(ingest_json, overwrite=False, results_path=None, result_dict=N
 
 
     if "analyses" in ingest_json:
-        result["summary"]["analyses"] = {"total": len(ingest_json["analyses"]), "ingested": 0}
+        result["summary"]["analyses"] = {"total": len(ingest_json["analyses"]), "ingested": 0, "skipped": 0}
     for analysis in ingest_json["analyses"]:
         if result_dict is not None and analysis["program_id"] not in result_dict:
             result_dict[analysis["program_id"]] = result
@@ -513,7 +532,10 @@ def htsget_ingest(ingest_json, overwrite=False, results_path=None, result_dict=N
         # remove the temporary "processing..." message
         result["results"].pop()
 
-        if len(response["errors"]) > 0:
+        if "skipped" in response:
+            result["results"].append(response["skipped"])
+            result["summary"]["analyses"]["skipped"] += 1
+        elif len(response["errors"]) > 0:
             for err in response["errors"]:
                 if "403" in err:
                     status_code = 403
