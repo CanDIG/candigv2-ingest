@@ -7,8 +7,8 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Given a list of drs objects returned from extract_drs.py and a list of updated mappings of samples to programs, update the drs objects to the correct programs.")
     parser.add_argument('--input', type=str, required=True, help="File with output of extract_drs.py")
     parser.add_argument('--corrected', type=str, required=True, help="File with correct mapping of samples to programs (csv, columns should be Submitter Sample ID, correct Program ID)")
-    parser.add_argument('--url', type=str, required=True, help="URL of the candig deployment you are retrieving data from")
-    parser.add_argument('--token', type=str, required=True, help="site admin token for the candig deployment you are retrieving data from.")
+    parser.add_argument('--url', type=str, required=True, help="URL of the candig deployment for which you want to update data")
+    parser.add_argument('--token', type=str, required=True, help="site admin token for the candig deployment for which you want to update data")
 
     args = parser.parse_args()
     return args
