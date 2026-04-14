@@ -513,9 +513,9 @@ def htsget_ingest(ingest_json, overwrite=False, results_path=None, result_dict=N
                     if "403" in err:
                         status_code = 403
                         break
-                    result["results"].append(f"error processing {response["id"]} {response["name"]} in experiment {run["experiment_id"]}: {err}")
+                    result["results"].append(f"error processing {response["id"]} {response["name"]} in run {run["run_id"]}: {err}")
             else:
-                result["results"].append(f"processed {response["id"]} {response["name"]} for experiment {run["experiment_id"]}")
+                result["results"].append(f"processed {response["id"]} {response["name"]} for run {run["run_id"]}")
                 if "sample" in response:
                     result["results"].append(response["sample"])
 
@@ -552,9 +552,9 @@ def htsget_ingest(ingest_json, overwrite=False, results_path=None, result_dict=N
                 if "403" in err:
                     status_code = 403
                     break
-                result["results"].append(f"error processing {response["id"]} {response["name"]} in experiment {analysis["analysis_id"]}: {err}")
+                result["results"].append(f"error processing {response["id"]} {response["name"]} in analysis {analysis["analysis_id"]}: {err}")
         else:
-            result["results"].append(f"processed {response["id"]} {response["name"]} for experiment {analysis["analysis_id"]}")
+            result["results"].append(f"processed {response["id"]} {response["name"]} for analysis {analysis["analysis_id"]}")
             if "sample" in response:
                 result["results"].append(response["sample"])
             result["summary"]["analyses"]["ingested"] += 1
