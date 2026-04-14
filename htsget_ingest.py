@@ -81,6 +81,9 @@ def create_analysis(analysis, overwrite=False):
         response = requests.get(f"{url}/{clin_sample['experiment_id']}", headers=headers)
         if response.status_code == 200:
             experiment_drs_obj = response.json()
+            if experiment_drs_obj["program"] != analysis["program_id"]:
+                result["errors"].append(f"matching experiment drs object {clin_sample['experiment_id']} is not in program {analysis["program_id"]}")
+                return result
         else:
             result["errors"].append(f"couldn't find experiment drs object {clin_sample['experiment_id']}: {response.status_code} {response.text}")
             return result
