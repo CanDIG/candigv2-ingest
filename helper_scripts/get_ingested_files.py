@@ -83,10 +83,27 @@ def get_completeness(experiment_objects, program_list):
     genomic_completeness_df = pd.DataFrame(genomic_completeness_dict)
     return genomic_completeness_df
 
+def get_all_programs(url, token):
+    headers = {"Authorization": f"Bearer {token}",
+               "Content-Type": "application/json; charset=utf-8"}
+    response = rq.get(f"{url}/katsu/v3/authorized/programs/", headers=headers)
+    if response.status_code == 200:
+        response_json = response.json()
+        program_list = [x["program_id"] for x in response_json['items']]
+        return program_list
+    else:
+        print("could not retrieve list of programs, please check token expiry and try again")
+        print(response.status_code)
+        sys.exit()
+
 def main():
     args = parse_args()
-    program_list = args.programs
-    program_list = [item.strip() for item in program_list.split(',')]
+    if args.programs:
+        program_list = args.programs
+        program_list = [item.strip() for item in program_list.split(',')]
+    else:
+        print(f"Getting list of all programs from {args.url}")
+        program_list = get_all_programs(args.url, args.token)
     print(f"Getting data for {program_list}")
     experiments = get_genomic_data(args.token, args.url, args.save_api_output, args.read_api_output, program_list)
     if len(experiments) > 0:
