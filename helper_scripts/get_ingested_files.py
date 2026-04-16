@@ -92,7 +92,7 @@ def get_all_programs(url, token):
         program_list = [x["program_id"] for x in response_json['items']]
         return program_list
     else:
-        print("could not retrieve list of programs, please check token expiry and try again")
+        print("could not retrieve list of programs, please check that you are authorized or the token expiry and try again")
         print(response.status_code)
         sys.exit()
 
