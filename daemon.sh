@@ -33,6 +33,7 @@ do
         echo "Restarting daemon"
         if [[ -f $TOUCH_FILE ]]; then
             rm $TOUCH_FILE
+        fi
         python daemon.py &
         pid=$!
     fi
