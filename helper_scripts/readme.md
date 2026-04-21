@@ -17,3 +17,8 @@ A CanDIG instance renamed the program_id and updated clinical data. This script 
 `get_ingested_files.py`
 
 Returns a list of ingested sequencing files for the CanDIG instance. 
+
+`submit_program_registrations.py`
+
+Submits all program registrations in a csv file, adding team members and program curators as specified. Only adds 
+program registrations that do not already exist.
