@@ -1,6 +1,5 @@
 
 import argparse
-from pathlib import Path
 import pandas as pd
 import requests as rq
 from pprint import pprint
