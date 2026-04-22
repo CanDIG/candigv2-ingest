@@ -2,7 +2,6 @@
 import argparse
 import pandas as pd
 import requests as rq
-from pprint import pprint
 import sys
 
 
