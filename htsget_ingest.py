@@ -57,7 +57,7 @@ def create_analysis(analysis, overwrite=False):
     analysis_drs_obj["reference_genome"] = analysis["metadata"]["reference"]
     analysis_drs_obj["version"] = "v1"
     analysis_drs_obj["metadata"] = analysis["metadata"]
-    analysis_drs_obj["metadata"]["verified"] = 0
+    analysis_drs_obj["metadata"]["last_verified"] = ""
     if "contents" not in analysis_drs_obj:
         analysis_drs_obj["contents"] = []
 
@@ -159,7 +159,7 @@ def create_analysis(analysis, overwrite=False):
                 # ingest matrix
                 response = requests.get(f"{DRS_URL}/ga4gh/drs/v1/objects/{analysis["main"]["name"]}/download", headers=headers)
                 if response.status_code == 200:
-                    analysis_drs_obj['metadata']['verified'] = 1
+                    analysis_drs_obj['metadata']['last_verified'] = str(datetime.now())
                     raw_tsv_data = response.text.strip()
                     lines = raw_tsv_data.split("\n")
                     titles = lines.pop(0).split("\t")
@@ -250,7 +250,7 @@ def create_analysis(analysis, overwrite=False):
             else:
                 result["errors"].append(f"could not verify analysis: {response.json()['message']}")
                 return result
-        analysis_drs_obj['metadata']['verified'] = 1
+        analysis_drs_obj['metadata']['last_verified'] = str(datetime.now())
 
         # flag the analysis_drs_object for indexing:
         index_url =f"{HTSGET_URL}/htsget/v1/{analysis_drs_obj['id']}/index"
