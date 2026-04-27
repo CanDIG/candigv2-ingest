@@ -114,7 +114,7 @@ def create_analysis(analysis, overwrite=False):
         not_found = True
         if len(analysis_drs_obj["contents"]) > 0:
             for i in range(0, len(analysis_drs_obj["contents"])):
-                if analysis_drs_obj["contents"][i]["name"] == clin_sample["experiment_id"]:
+                if analysis_drs_obj["contents"][i]["name"] == experiment_drs_obj["name"]:
                     not_found = False
                     analysis_drs_obj["contents"][i] = contents_obj
                     break
