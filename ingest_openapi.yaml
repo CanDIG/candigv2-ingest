@@ -3,6 +3,8 @@ info:
   version: v1.1.0
   title: 'CanDIGv2 Ingest Service'
   description: 'API for ingesting data into the CanDIG stack'
+servers:
+  - url: /ingest
 paths:
   /service-info:
     get:
