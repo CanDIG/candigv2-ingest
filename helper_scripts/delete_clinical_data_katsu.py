@@ -2,7 +2,7 @@ import requests as rq
 import sys
 import argparse
 
-# deletes clinical data for UHN node from katsu only.
+# deletes clinical data for a given candig node from katsu only.
 # Program auths and genomic data are not touched
 
 
