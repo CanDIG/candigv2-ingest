@@ -32,7 +32,6 @@ def main():
             return
 
     result = []
-    errors = []
     analyses = set()
     for sample in biosamples:
         if "analyses" in sample and len(sample["analyses"]) > 0:
