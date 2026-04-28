@@ -57,6 +57,7 @@ def create_analysis(analysis, overwrite=False):
     analysis_drs_obj["reference_genome"] = analysis["metadata"]["reference"]
     analysis_drs_obj["version"] = "v1"
     analysis_drs_obj["metadata"] = analysis["metadata"]
+    analysis_drs_obj["metadata"]["last_verified"] = ""
     if "contents" not in analysis_drs_obj:
         analysis_drs_obj["contents"] = []
 
@@ -113,7 +114,7 @@ def create_analysis(analysis, overwrite=False):
         not_found = True
         if len(analysis_drs_obj["contents"]) > 0:
             for i in range(0, len(analysis_drs_obj["contents"])):
-                if analysis_drs_obj["contents"][i]["name"] == clin_sample["experiment_id"]:
+                if analysis_drs_obj["contents"][i]["name"] == experiment_drs_obj["name"]:
                     not_found = False
                     analysis_drs_obj["contents"][i] = contents_obj
                     break
@@ -135,7 +136,8 @@ def create_analysis(analysis, overwrite=False):
             response = requests.post(f"{TAKUAN_URL}/experiment/{experiment_drs_obj["id"]}/features", headers=headers)
             if response.status_code == 200:
                 logger.info(f"experiment {experiment_drs_obj["id"]} already ingested")
-                return result
+                if not overwrite:
+                    return result
         except Exception as e:
             logger.info(f"exception looking up {TAKUAN_URL}/experiment/{experiment_drs_obj["id"]}/features: {type(e)} {str(e)}")
 
@@ -157,6 +159,7 @@ def create_analysis(analysis, overwrite=False):
                 # ingest matrix
                 response = requests.get(f"{DRS_URL}/ga4gh/drs/v1/objects/{analysis["main"]["name"]}/download", headers=headers)
                 if response.status_code == 200:
+                    analysis_drs_obj['metadata']['last_verified'] = str(datetime.now())
                     raw_tsv_data = response.text.strip()
                     lines = raw_tsv_data.split("\n")
                     titles = lines.pop(0).split("\t")
@@ -247,9 +250,18 @@ def create_analysis(analysis, overwrite=False):
             else:
                 result["errors"].append(f"could not verify analysis: {response.json()['message']}")
                 return result
+        analysis_drs_obj['metadata']['last_verified'] = str(datetime.now())
+
         # flag the analysis_drs_object for indexing:
-        url =f"{HTSGET_URL}/htsget/v1/{analysis_drs_obj['id']}/index"
-        result["to_index"] = [url]
+        index_url =f"{HTSGET_URL}/htsget/v1/{analysis_drs_obj['id']}/index"
+        result["to_index"] = [index_url]
+
+    # update the analysis_drs_object
+    response = requests.post(url, json=analysis_drs_obj, headers=headers)
+    if response.status_code != 200:
+        result["errors"].append(f"error posting analysis drs object {analysis_drs_obj['id']}: {response.status_code} {response.text}")
+        return result
+
     return result
 
 

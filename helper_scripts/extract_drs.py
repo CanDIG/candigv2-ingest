@@ -4,8 +4,8 @@ import requests
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="Extract all drs objects associated with the experiments endpoint result.")
-    parser.add_argument('--file', type=str, required=True, help="File with output of experiments call")
+    parser = argparse.ArgumentParser(description="Extract all drs objects associated with the biosamples endpoint result.")
+    parser.add_argument('--file', type=str, required=False, help="File with output of biosamples call")
     parser.add_argument('--url', type=str, required=True, help="URL of the candig deployment you are retrieving data from")
     parser.add_argument('--token', type=str, required=True, help="site admin token for the candig deployment you are retrieving data from.")
     parser.add_argument('--output', type=str, required=True, help="output file to write to")
@@ -17,22 +17,31 @@ def parse_args():
 def main():
     args = parse_args()
 
-    with open(args.file, "r") as f:
-        experiments = json.load(f)
+    headers = {"Authorization": f"Bearer {args.token}",
+       "Content-Type": "application/json; charset=utf-8"}
+
+    if args.file is not None:
+        with open(args.file, "r") as f:
+            biosamples = json.load(f)
+    else:
+        response = requests.post(f"{args.url}/drs/ga4gh/drs/v1/biosamples", headers=headers, json={})
+        if response.status_code == 200:
+            biosamples = response.json()
+        else:
+            print(f"Couldn't get a list of biosamples: {response.status_code} {response.text}")
+            return
 
     experiment_drs_objects = {}
-    for exp in experiments:
+    for sample in biosamples:
         # collect all of the ExperimentDrsObjects
-        if len(exp["genomes"]) > 0:
-            experiment_drs_objects[exp["experiment_id"]] = exp["genomes"]
-        if len(exp["transcriptomes"]) > 0:
-            experiment_drs_objects[exp["experiment_id"]] = exp["transcriptomes"]
+        if len(sample["experiments"]["wgs"]) > 0:
+            experiment_drs_objects[sample["biosample_id"]] = sample["experiments"]["wgs"]
+        if len(sample["experiments"]["wts"]) > 0:
+            experiment_drs_objects[sample["biosample_id"]] = sample["experiments"]["wts"]
 
     print("Gathered all experiment drs objects")
     result = {}
     errors = []
-    headers = {"Authorization": f"Bearer {args.token}",
-       "Content-Type": "application/json; charset=utf-8"}
     contents_types = ["analysis", "variant", "read", "transcript", "index"]
 
     while len(experiment_drs_objects) > 0:
