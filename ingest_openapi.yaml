@@ -4,7 +4,7 @@ info:
   title: 'CanDIGv2 Ingest Service'
   description: 'API for ingesting data into the CanDIG stack'
 servers:
-  - url: https://YOUR_CANDIG_DOMAIN/ingest
+  - url: https://your-candig-domain/ingest
 paths:
   /service-info:
     get:
