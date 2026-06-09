@@ -33,7 +33,7 @@ jobs:
                   parent_repository: ${{ env.PARENT_REPOSITORY }}
                   checkout_branch: ${{ env.CHECKOUT_BRANCH}}
                   pr_against_branch: ${{ env.PR_AGAINST_BRANCH }}
-                  pr_title: "${{ github.repository }} merging: ${{ env.PR_TITLE }}"
-                  pr_description: "PR triggered by update to develop branch on ${{ github.repository }}. Commit hash: `${{ github.sha }}`. PR link: [#${{ env.PR_NUMBER }}](https://github.com/${{ github.repository }}/pull/${{ env.PR_NUMBER }})"
+                  pr_title: "${{ github.repository }} merging: ${{ github.event.pull_request.title }}"
+                  pr_description: "PR triggered by update to develop branch on ${{ github.repository }}. Commit hash: `${{ github.sha }}`. PR link: [#${{ github.event.pull_request.number }}](https://github.com/${{ github.repository }}/pull/${{ github.event.pull_request.number }})"
                   owner: ${{ env.OWNER }}
                   submodule_path: lib/candig-ingest/candigv2-ingest
