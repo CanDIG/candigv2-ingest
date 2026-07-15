@@ -25,4 +25,7 @@ program registrations that do not already exist.
 
 `index_unindexed.sh`
 
-Searches the database for variant files that are not fully indexed and creates a list of curl commands to index them again. Pipe the output of this script to a file and run the curl commands in batches if there are too many to do at once.
+Searches the database for variant files that are not fully indexed and creates a list of curl commands to index them again. Pipe the output of this script to a file and run the curl commands in batches if there are too many to do at once. 
+
+> [!IMPORTANT]
+> This script needs to be run on the VM where your CanDIG node is deployed as it needs direct access to the postgres docker container.
