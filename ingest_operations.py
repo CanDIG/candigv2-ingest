@@ -125,8 +125,7 @@ def delete_s3_credential(endpoint_id, bucket_id):
 @app.route('/site-role/<path:role_type>')
 def list_role(role_type):
     try:
-        token = connexion.request.headers['Authorization'].split("Bearer ")[1]
-        if not authx.auth.is_action_allowed_for_program(token, method="GET", path="/ingest/site-role", program=None):
+        if not authx.auth.is_site_admin(connexion.request):
             return {"error": f"User not authorized to list site roles"}, 403
 
         result, status_code = auth.get_role_type(role_type)
@@ -138,9 +137,7 @@ def list_role(role_type):
 @app.route('/site-role/<path:role_type>/user_id/<path:user_id>')
 def is_user_in_role(role_type, user_id):
     try:
-        token = connexion.request.headers['Authorization'].split("Bearer ")[1]
-
-        if not authx.auth.is_action_allowed_for_program(token, method="GET", path="/ingest/site-role", program=None):
+        if not authx.auth.is_site_admin(connexion.request):
             return {"error": f"User not authorized to list site roles"}, 403
 
         result, status_code = auth.get_role_type(role_type)
@@ -154,8 +151,7 @@ def is_user_in_role(role_type, user_id):
 @app.route('/site-role/<path:role_type>/user_id/<path:user_id>')
 def add_user_to_role(role_type, user_id):
     try:
-        token = connexion.request.headers['Authorization'].split("Bearer ")[1]
-        if not authx.auth.is_action_allowed_for_program(token, method="POST", path="/ingest/site-role", program=None):
+        if not authx.auth.is_site_admin(connexion.request):
             return {"error": f"User not authorized to add to site roles"}, 403
 
         result, status_code = auth.get_role_type(role_type)
@@ -171,8 +167,7 @@ def add_user_to_role(role_type, user_id):
 @app.route('/site-role/<path:role_type>/user_id/<path:user_id>')
 def remove_user_from_role(role_type, user_id):
     try:
-        token = connexion.request.headers['Authorization'].split("Bearer ")[1]
-        if not authx.auth.is_action_allowed_for_program(token, method="GET", path="/ingest/site-role", program=None):
+        if not authx.auth.is_site_admin(connexion.request):
             return {"error": f"User not authorized to remove users from site roles"}, 403
 
         result, status_code = auth.get_role_type(role_type)
