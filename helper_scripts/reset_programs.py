@@ -4,12 +4,12 @@ import requests
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="Given a list of drs objects returned from extract_drs.py and a list of updated mappings of samples to programs, update the drs objects to the correct programs.")
+    parser = argparse.ArgumentParser(description="Given a list of drs objects returned from extract_drs.py and a list of updated mappings of samples to programs, update the drs objects to the correct programs.",
+                                     formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('--input', type=str, required=True, help="File with output of extract_drs.py")
     parser.add_argument('--corrected', type=str, required=True,
-                        help="CSV File with correct mapping of samples to programs. Columns should be: "
-                             "'Submitter Sample ID': the submitter sample id that links to all the objects that need to"
-                             "be moved, "
+                        help="CSV File with correct mapping of samples to programs. Columns should be: \n"
+                             "'Submitter Sample ID': the submitter sample id that links to all the objects that need to be moved, \n"
                              "'Program ID': The program_id of the program that the objects should be moved to")
     parser.add_argument('--url', type=str, required=True, help="URL of the candig deployment for which you want to update data")
     parser.add_argument('--token', type=str, required=True, help="site admin token for the candig deployment for which you want to update data")
