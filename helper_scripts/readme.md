@@ -103,7 +103,7 @@ options:
 
 ## `verified_analyses.py`
 
-Checks the verification status of ingested sequencing files according to the output of a call to the `biosamples` endpoint. This lets you know whether the link to the location of each sequencing file is still valid or needs to be updated. 
+Checks the verification status of ingested sequencing files according to the output of a call to the `biosamples` endpoint. This lets you know when the analysis files were last verified and judge whether or not they need to be verified again.
 
 > [!TIP]
 > Need to make a call to the biosamples endpoint first with the samples/programs you want to check and save to a file, then specify its path as the --file argument.
