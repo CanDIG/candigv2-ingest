@@ -54,11 +54,16 @@ def add_program(program_auth):
     Authorized only if the requesting service is allowed to write Opa's vault secrets.
     """
     program_id = program_auth["program_id"]
-    response, status_code = get_program(program_id)
+    existing_program, status_code = get_program(program_id)
     if status_code < 300 or status_code == 404:
         # create or update the program itself
         program_auth["program_curators"] = list(map(lambda x: x.lower(), program_auth["program_curators"]))
         program_auth["team_members"] = list(map(lambda x: x.lower(), program_auth["team_members"]))
+        if "dac_authorizations" not in program_auth:
+            program_auth["dac_authorizations"] = {}
+        if "dac_authorizations" in existing_program:
+            for user in existing_program["dac_authorizations"]:
+                program_auth["dac_authorizations"][user] = existing_program["dac_authorizations"][user]
 
         if "date_created" not in program_auth:
             from datetime import datetime

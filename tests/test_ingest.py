@@ -36,7 +36,7 @@ def verify_callback(request, context):
 def test_htsget_ingest(requests_mock):
     matcher = re.compile(f"{DRS_URL}/ga4gh/drs/v1/objects/.+")
     requests_mock.post(f"{DRS_URL}/ga4gh/drs/v1/objects", json=callback, status_code=200)
-    requests_mock.get(matcher, status_code=200, json={"id": "sdfs", "name": "sfdfs", "contents": []})
+    requests_mock.get(matcher, status_code=200, json={"id": "sdfs", "name": "sfdfs", "contents": [], "program": "LOCAL-SYNTH_01"})
     matcher = re.compile(f"{HTSGET_URL}/htsget/v1/.+/index")
     requests_mock.get(matcher, status_code=200)
     matcher = re.compile(f"{HTSGET_URL}/htsget/v1/.+/verify")
@@ -63,11 +63,16 @@ def test_htsget_ingest(requests_mock):
     with open("tests/genomic_ingest.json", "r") as f:
         data = json.load(f)
         for sample in data["analyses"]:
-            response = htsget_ingest.link_genomic_data(sample)
+            response = htsget_ingest.create_analysis(sample, overwrite=True)
             print(json.dumps(response, indent=4))
-            assert len(response["errors"]) == 0
-            assert "name" in response
-            assert "sample" in response
+            if sample["program_id"] == "LOCAL-SYNTH_02":
+                # there will be a mismatch error for the program: "...is not in program LOCAL-SYNTH_02"
+                assert len(response["errors"]) == 1
+                assert "is not in program LOCAL-SYNTH_02" in str(response["errors"])
+            else:
+                assert len(response["errors"]) == 0
+                assert "name" in response
+                assert "sample" in response
 
     # bad sample:
     bad_s3_sample = {
@@ -92,6 +97,6 @@ def test_htsget_ingest(requests_mock):
             }
         ]
     }
-    response = htsget_ingest.link_genomic_data(bad_s3_sample)
+    response = htsget_ingest.create_analysis(bad_s3_sample, overwrite=True)
     print(json.dumps(response, indent=4))
     assert len(response["errors"]) == 1

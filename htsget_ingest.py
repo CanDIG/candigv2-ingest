@@ -10,6 +10,7 @@ import sys
 from urllib.parse import urlparse
 from clinical_etl.schema import openapi_to_jsonschema
 import jsonschema
+from datetime import datetime
 from candigv2_logging.logging import CanDIGLogger
 
 
@@ -25,7 +26,7 @@ KATSU_URL = os.environ.get("KATSU_URL")
 IS_TESTING = os.getenv("IS_TESTING", False)
 
 
-def link_genomic_data(analysis, do_not_index=False):
+def create_analysis(analysis, overwrite=False):
     url = f"{DRS_URL}/ga4gh/drs/v1/objects"
     result = {
         "errors": []
@@ -45,6 +46,9 @@ def link_genomic_data(analysis, do_not_index=False):
     analysis_drs_obj = {}
     response = requests.get(f"{url}/{analysis['analysis_id']}", headers=headers)
     if response.status_code == 200:
+        if not overwrite:
+            result["skipped"] = f"Analysis {analysis["analysis_id"]} already exists, skipping"
+            return result
         analysis_drs_obj = response.json()
     analysis_drs_obj["id"] = analysis["analysis_id"]
     analysis_drs_obj["name"] = analysis["analysis_id"]
@@ -53,6 +57,7 @@ def link_genomic_data(analysis, do_not_index=False):
     analysis_drs_obj["reference_genome"] = analysis["metadata"]["reference"]
     analysis_drs_obj["version"] = "v1"
     analysis_drs_obj["metadata"] = analysis["metadata"]
+    analysis_drs_obj["metadata"]["last_verified"] = ""
     if "contents" not in analysis_drs_obj:
         analysis_drs_obj["contents"] = []
 
@@ -76,6 +81,9 @@ def link_genomic_data(analysis, do_not_index=False):
         response = requests.get(f"{url}/{clin_sample['experiment_id']}", headers=headers)
         if response.status_code == 200:
             experiment_drs_obj = response.json()
+            if experiment_drs_obj["program"] != analysis["program_id"]:
+                result["errors"].append(f"matching experiment drs object {clin_sample['experiment_id']} is not in program {analysis["program_id"]}")
+                return result
         else:
             result["errors"].append(f"couldn't find experiment drs object {clin_sample['experiment_id']}: {response.status_code} {response.text}")
             return result
@@ -109,7 +117,7 @@ def link_genomic_data(analysis, do_not_index=False):
         not_found = True
         if len(analysis_drs_obj["contents"]) > 0:
             for i in range(0, len(analysis_drs_obj["contents"])):
-                if analysis_drs_obj["contents"][i]["name"] == clin_sample["experiment_id"]:
+                if analysis_drs_obj["contents"][i]["name"] == experiment_drs_obj["name"]:
                     not_found = False
                     analysis_drs_obj["contents"][i] = contents_obj
                     break
@@ -122,97 +130,111 @@ def link_genomic_data(analysis, do_not_index=False):
         result["errors"].append(f"error posting analysis drs object {analysis_drs_obj['id']}: {response.status_code} {response.text}")
         return result
     else:
-        result["sample"] = f"connected submitter_sample_id {contents_obj["name"]} to analysis_sample_id {contents_obj["id"]}"
+        result["sample"] = f"connected submitter_sample_id {contents_obj["name"]} to experiment_id {experiment_drs_obj["id"]} to analysis_sample_id {contents_obj["id"]}"
 
     # send the data to the downstream service: either htsget or takuan
     if analysis_drs_obj["metadata"]["analysis_type"] == "sequence_annotation":
-        if "analysis_attribute" in analysis_drs_obj["metadata"] and analysis_drs_obj["metadata"]["analysis_attribute"]["subtype"] == "expression_count":
-            assembly_id = "GCA_000001405.27"
-            if "reference_assembly_id" in analysis_drs_obj["metadata"]:
-                assembly_id = analysis_drs_obj["metadata"]["reference_assembly_id"]
-            # first, create experiment in Takuan:
-            experiment_json = {
-                "experiment_result_id": experiment_drs_obj["id"],
-                "assembly_id": assembly_id,
-                "assembly_name": analysis_drs_obj["metadata"]["reference"],
-                "extra_properties": {}
-            }
-            response = requests.post(f"{TAKUAN_URL}/experiment", json=experiment_json, headers=headers)
-            logger.debug(f"takuan experiment post {response.status_code}, {response.text}")
-
-            # ingest matrix
-            response = requests.get(f"{DRS_URL}/ga4gh/drs/v1/objects/{analysis["main"]["name"]}/download", headers=headers)
+        # look to see if this is already ingested:
+        try:
+            response = requests.post(f"{TAKUAN_URL}/experiment/{experiment_drs_obj["id"]}/features", headers=headers)
             if response.status_code == 200:
-                raw_tsv_data = response.text.strip()
-                lines = raw_tsv_data.split("\n")
-                titles = lines.pop(0).split("\t")
+                logger.info(f"experiment {experiment_drs_obj["id"]} already ingested")
+                if not overwrite:
+                    return result
+        except Exception as e:
+            logger.info(f"exception looking up {TAKUAN_URL}/experiment/{experiment_drs_obj["id"]}/features: {type(e)} {str(e)}")
 
-                # verify that all required columns are present:
-                if "gene_id_column" not in analysis_drs_obj["metadata"]["analysis_attribute"]:
-                    result["errors"].append(f"no gene_id column present")
-                    return result
-                if "length_column" not in analysis_drs_obj["metadata"]["analysis_attribute"]:
-                    result["errors"].append(f"no length column present")
-                    return result
-                if "count_column" not in analysis_drs_obj["metadata"]["analysis_attribute"]:
-                    result["errors"].append(f"no count column present")
-                    return result
-
-                norm_method = None
-                if "norm_column" in analysis_drs_obj["metadata"]["analysis_attribute"]:
-                    if "norm_method" not in analysis_drs_obj["metadata"]["analysis_attribute"]:
-                        result["errors"].append(f"norm_column present but no norm_method specified")
-                        return result
-                    norm_method = analysis_drs_obj["metadata"]["analysis_attribute"]["norm_method"]
-                    norm_title = analysis_drs_obj["metadata"]["analysis_attribute"]["norm_column"]
-
-                gene_id_title = analysis_drs_obj["metadata"]["analysis_attribute"]["gene_id_column"]
-                count_title = analysis_drs_obj["metadata"]["analysis_attribute"]["count_column"]
-                length_title = analysis_drs_obj["metadata"]["analysis_attribute"]["length_column"]
-                if gene_id_title not in titles:
-                    result["errors"].append(f"column {gene_id_title} not present in ingest file")
-                    return result
-                if count_title not in titles:
-                    result["errors"].append(f"column {count_title} not present in ingest file")
-                    return result
-                if length_title not in titles:
-                    result["errors"].append(f"column {length_title} not present in ingest file")
-                    return result
-
-                mapping = {
-                    "sample_id": experiment_drs_obj["id"],
-                    "file_type": "tsv",
-                    "feature_col": gene_id_title,
-                    "raw_count_col": count_title,
-                    "length_col": length_title
+        try:
+            if "analysis_attribute" in analysis_drs_obj["metadata"] and analysis_drs_obj["metadata"]["analysis_attribute"]["subtype"] == "expression_count":
+                assembly_id = "GCA_000001405.27"
+                if "reference_assembly_id" in analysis_drs_obj["metadata"]:
+                    assembly_id = analysis_drs_obj["metadata"]["reference_assembly_id"]
+                # first, create experiment in Takuan:
+                experiment_json = {
+                    "experiment_result_id": experiment_drs_obj["id"],
+                    "assembly_id": assembly_id,
+                    "assembly_name": analysis_drs_obj["metadata"]["reference"],
+                    "extra_properties": {}
                 }
-                if norm_method is not None:
-                    if norm_title not in titles:
-                        result["errors"].append(f"column {norm_title} not present in ingest file")
+                response = requests.post(f"{TAKUAN_URL}/experiment", json=experiment_json, headers=headers)
+                logger.info(f"takuan experiment post {response.status_code}, {response.text}")
+
+                # ingest matrix
+                response = requests.get(f"{DRS_URL}/ga4gh/drs/v1/objects/{analysis["main"]["name"]}/download", headers=headers)
+                if response.status_code == 200:
+                    analysis_drs_obj['metadata']['last_verified'] = str(datetime.now())
+                    raw_tsv_data = response.text.strip()
+                    lines = raw_tsv_data.split("\n")
+                    titles = lines.pop(0).split("\t")
+
+                    # verify that all required columns are present:
+                    if "gene_id_column" not in analysis_drs_obj["metadata"]["analysis_attribute"]:
+                        result["errors"].append(f"no gene_id column present")
                         return result
-                    mapping[f"{norm_method.lower()}_count_col"] = norm_title
+                    if "length_column" not in analysis_drs_obj["metadata"]["analysis_attribute"]:
+                        result["errors"].append(f"no length column present")
+                        return result
+                    if "count_column" not in analysis_drs_obj["metadata"]["analysis_attribute"]:
+                        result["errors"].append(f"no count column present")
+                        return result
 
-                if "TPM" in titles:
-                    mapping["tpm_count_col"] = "TPM"
-                if "tpm" in titles:
-                    mapping["tpm_count_col"] = "tpm"
-                if "FPKM" in titles:
-                    mapping["fpkm_count_col"] = "FPKM"
-                if "fpkm" in titles:
-                    mapping["fpkm_count_col"] = "fpkm"
-                if "GETMM" in titles:
-                    mapping["getmm_count_col"] = "GETMM"
-                if "getmm" in titles:
-                    mapping["getmm_count_col"] = "getmm"
+                    norm_method = None
+                    if "norm_column" in analysis_drs_obj["metadata"]["analysis_attribute"]:
+                        if "norm_method" not in analysis_drs_obj["metadata"]["analysis_attribute"]:
+                            result["errors"].append(f"norm_column present but no norm_method specified")
+                            return result
+                        norm_method = analysis_drs_obj["metadata"]["analysis_attribute"]["norm_method"]
+                        norm_title = analysis_drs_obj["metadata"]["analysis_attribute"]["norm_column"]
 
-                response = requests.post(
-                    f"{TAKUAN_URL}/experiment/{experiment_drs_obj["id"]}/ingest/single",
-                    files={"data": raw_tsv_data}, data=mapping
-                )
-                if response.status_code != 200:
-                    result["errors"].append(f"takuan ingest error: {response.status_code} {response.text}")
-            else:
-                result["errors"].append(f"could not load analysis: {response.text}")
+                    gene_id_title = analysis_drs_obj["metadata"]["analysis_attribute"]["gene_id_column"]
+                    count_title = analysis_drs_obj["metadata"]["analysis_attribute"]["count_column"]
+                    length_title = analysis_drs_obj["metadata"]["analysis_attribute"]["length_column"]
+                    if gene_id_title not in titles:
+                        result["errors"].append(f"column {gene_id_title} not present in ingest file")
+                        return result
+                    if count_title not in titles:
+                        result["errors"].append(f"column {count_title} not present in ingest file")
+                        return result
+                    if length_title not in titles:
+                        result["errors"].append(f"column {length_title} not present in ingest file")
+                        return result
+
+                    mapping = {
+                        "sample_id": experiment_drs_obj["id"],
+                        "file_type": "tsv",
+                        "feature_col": gene_id_title,
+                        "raw_count_col": count_title,
+                        "length_col": length_title
+                    }
+                    if norm_method is not None:
+                        if norm_title not in titles:
+                            result["errors"].append(f"column {norm_title} not present in ingest file")
+                            return result
+                        mapping[f"{norm_method.lower()}_count_col"] = norm_title
+
+                    if "TPM" in titles:
+                        mapping["tpm_count_col"] = "TPM"
+                    if "tpm" in titles:
+                        mapping["tpm_count_col"] = "tpm"
+                    if "FPKM" in titles:
+                        mapping["fpkm_count_col"] = "FPKM"
+                    if "fpkm" in titles:
+                        mapping["fpkm_count_col"] = "fpkm"
+                    if "GETMM" in titles:
+                        mapping["getmm_count_col"] = "GETMM"
+                    if "getmm" in titles:
+                        mapping["getmm_count_col"] = "getmm"
+
+                    response = requests.post(
+                        f"{TAKUAN_URL}/experiment/{experiment_drs_obj["id"]}/ingest/single",
+                        files={"data": raw_tsv_data}, data=mapping
+                    )
+                    if response.status_code != 200:
+                        result["errors"].append(f"takuan ingest error: {response.status_code} {response.text}")
+                else:
+                    result["errors"].append(f"could not load analysis: {response.text}")
+        except Exception as e:
+            result["errors"].append(f"error ingesting takuan {experiment_drs_obj["id"]} {analysis["main"]["name"]}: {type(e)} {str(e)}")
     else:
         # send it to htsget
         # verify that the genomic file exists and is readable
@@ -223,23 +245,133 @@ def link_genomic_data(analysis, do_not_index=False):
             result["errors"].append(f"could not verify analysis: {response.text}")
             return result
         elif not response.json()['result']:
-            result["errors"].append(f"could not verify analysis: {response.json()['message']}")
-            return result
-        else:
-            # flag the analysis_drs_object for indexing:
-            url =f"{HTSGET_URL}/htsget/v1/{analysis_drs_obj['id']}/index"
-            result["to_index"] = [url]
+            # was an analysis_date specified? if so, it's not an error if the verification fails because it doesn't have one
+            if 'does not have any associated analysis date' in response.json()['message']:
+                if 'analysis_date' not in analysis_drs_obj['metadata']:
+                    result["errors"].append(f"could not verify analysis: {response.text}")
+                    return result
+            else:
+                result["errors"].append(f"could not verify analysis: {response.json()['message']}")
+                return result
+        analysis_drs_obj['metadata']['last_verified'] = str(datetime.now())
+
+        # flag the analysis_drs_object for indexing:
+        index_url =f"{HTSGET_URL}/htsget/v1/{analysis_drs_obj['id']}/index"
+        result["to_index"] = [index_url]
+
+    # update the analysis_drs_object
+    response = requests.post(url, json=analysis_drs_obj, headers=headers)
+    if response.status_code != 200:
+        result["errors"].append(f"error posting analysis drs object {analysis_drs_obj['id']}: {response.status_code} {response.text}")
+        return result
+
     return result
 
 
-def add_file_drs_object(analysis_drs_obj, file, type, headers):
+def create_run(run):
+    url = f"{DRS_URL}/ga4gh/drs/v1/objects"
+    result = {
+        "errors": []
+    }
+
+    # Use service token to authenticate this with htsget
+    headers = {}
+    if not IS_TESTING:
+        headers = {
+            "X-Service-Token": create_service_token(),
+            "Content-Type": "application/json"
+        }
+
+    run_drs_obj = {}
+    response = requests.get(f"{url}/{run['run_id']}", headers=headers)
+    if response.status_code == 200:
+        run_drs_obj = response.json()
+    run_drs_obj["id"] = run["run_id"]
+    run_drs_obj["name"] = run["experiment_id"]
+    run_drs_obj["description"] = "raw_reads"
+    run_drs_obj["program"] = run["program_id"]
+    run_drs_obj["version"] = "v1"
+    run_drs_obj["metadata"] = run["metadata"]
+    if "contents" not in run_drs_obj:
+        run_drs_obj["contents"] = []
+
+    # add files to contents
+    for file in run["files"]:
+        response = add_file_drs_object(run_drs_obj, file, run["metadata"]["filetype"], headers)
+        result["name"] = response["name"]
+        result["id"] = response["id"]
+        if "error" in response:
+            result["errors"].append(response["error"])
+            return result
+
+    response = requests.get(f"{url}/{run['experiment_id']}", headers=headers)
+    if response.status_code == 200:
+        experiment_drs_obj = response.json()
+    else:
+        result["errors"].append(f"couldn't find experiment drs object {run['experiment_id']}: {response.status_code} {response.text}")
+        return result
+
+    # add the RunDrsObject to its contents, if it's not already there:
+    not_found = True
+    if len(experiment_drs_obj["contents"]) > 0:
+        for obj in experiment_drs_obj["contents"]:
+            if obj["name"] == run["run_id"]:
+                not_found = False
+    if not_found:
+        contents_obj = {
+            "name": run["run_id"],
+            "id": run["run_id"],
+            "drs_uri": [f"{DRS_HOST_URL}/{run['run_id']}"]
+        }
+        experiment_drs_obj["contents"].append(contents_obj)
+
+    # update the experiment_drs_object in the database:
+    response = requests.post(f"{url}", json=experiment_drs_obj, headers=headers)
+    if response.status_code != 200:
+        result["errors"].append(f"error updating experiment drs object {experiment_drs_obj['id']}: {response.status_code} {response.text}")
+        return result
+
+    # then add the experiment to the RunDrsObject's contents, if it's not already there:
+    contents_obj = {
+        "name": experiment_drs_obj["name"],
+        "id": run["experiment_id"],
+        "drs_uri": [f"{DRS_HOST_URL}/{run['experiment_id']}"]
+    }
+    not_found = True
+    if len(run_drs_obj["contents"]) > 0:
+        for i in range(0, len(run_drs_obj["contents"])):
+            if run_drs_obj["contents"][i]["name"] == run["experiment_id"]:
+                not_found = False
+                run_drs_obj["contents"][i] = contents_obj
+                break
+    if not_found:
+        run_drs_obj["contents"].append(contents_obj)
+
+    # finally, post the run_drs_object
+    response = requests.post(url, json=run_drs_obj, headers=headers)
+    if response.status_code != 200:
+        result["errors"].append(f"error posting run drs object {run_drs_obj['id']}: {response.status_code} {response.text}")
+        return result
+
+    verify_url = f"{HTSGET_URL}/htsget/v1/{run_drs_obj['id']}/verify"
+
+    response = requests.get(verify_url, headers=headers)
+    if response.status_code != 200:
+        result["errors"].append(f"could not verify run: {response.text}")
+        return result
+
+    result["sample"] = f"connected experiment {run["experiment_id"]} to run {run["run_id"]}"
+    return result
+
+
+def add_file_drs_object(drs_obj, file, type, headers):
     url = f"{DRS_URL}/ga4gh/drs/v1/objects"
     obj = {
         "access_methods": [],
         "id": file['name'],
         "name": file['name'],
         "description": type,
-        "program": analysis_drs_obj["program"],
+        "program": drs_obj["program"],
         "version": "v1"
     }
     contents_obj = {
@@ -256,14 +388,14 @@ def add_file_drs_object(analysis_drs_obj, file, type, headers):
 
     # is this file already in the master object? If so, replace it:
     not_found = True
-    if len(analysis_drs_obj["contents"]) > 0:
-        for i in range(0, len(analysis_drs_obj["contents"])):
-            if analysis_drs_obj["contents"][i]["name"] == file["name"]:
-                analysis_drs_obj["contents"][i] = contents_obj
+    if len(drs_obj["contents"]) > 0:
+        for i in range(0, len(drs_obj["contents"])):
+            if drs_obj["contents"][i]["name"] == file["name"]:
+                drs_obj["contents"][i] = contents_obj
                 not_found = False
                 break
     if not_found:
-        analysis_drs_obj["contents"].append(contents_obj)
+        drs_obj["contents"].append(contents_obj)
     response = requests.post(url, json=obj, headers=headers)
     if response.status_code > 200:
         contents_obj["error"] =  f"error creating file drs object: {response.status_code} {response.text}"
@@ -322,9 +454,10 @@ def parse_s3_url(url):
     raise Exception(f"URI {url} cannot be parsed as an S3-style URI")
 
 
-def htsget_ingest(ingest_json, do_not_index=False, results_path=None, result_dict=None):
+def htsget_ingest(ingest_json, overwrite=False, results_path=None, result_dict=None):
     result = {
-        "results": []
+        "results": [],
+        "summary": {}
     }
     url = f"{DRS_URL}/ga4gh/drs/v1/objects"
     # Use service token to authenticate this with htsget
@@ -339,7 +472,16 @@ def htsget_ingest(ingest_json, do_not_index=False, results_path=None, result_dic
     to_index = []
     status_code = 200
     result["errors"] = []
+    if "experiments" in ingest_json:
+        result["summary"]["experiments"] = {"total": len(ingest_json["experiments"]), "ingested": 0, "skipped": 0}
     for experiment in ingest_json["experiments"]:
+        response = requests.get(f"{url}/{experiment["experiment_id"]}", headers=headers)
+        if response.status_code == 200:
+            if not overwrite:
+                result["results"].append(f"Experiment {experiment["experiment_id"]} already exists, skipping")
+                result["summary"]["experiments"]["skipped"] += 1
+                continue
+
         experiment_drs_obj = {
             "id": experiment["experiment_id"],
             "name": experiment["submitter_sample_id"],
@@ -352,16 +494,47 @@ def htsget_ingest(ingest_json, do_not_index=False, results_path=None, result_dic
         response = requests.post(f"{url}", json=experiment_drs_obj, headers=headers)
         if response.status_code != 200:
             result["errors"].append(f"error creating experiment drs object {experiment_drs_obj['id']}: {response.status_code} {response.text}")
+        else:
+            result["summary"]["experiments"]["ingested"] += 1
 
+    if "runs" in ingest_json:
+        result["summary"]["runs"] = {"total": len(ingest_json["runs"]), "ingested": 0, "skipped": 0}
+
+        for run in ingest_json["runs"]:
+            response = requests.get(f"{url}/{run["run_id"]}", headers=headers)
+            if response.status_code == 200:
+                if not overwrite:
+                    result["results"].append(f"Run {run["run_id"]} already exists, skipping")
+                    result["summary"]["runs"]["skipped"] += 1
+                    continue
+
+            result["results"].append(f"processing run {run["run_id"]}...")
+            response = create_run(run)
+            result["results"].pop()
+            if len(response["errors"]) > 0:
+                for err in response["errors"]:
+                    if "403" in err:
+                        status_code = 403
+                        break
+                    result["results"].append(f"error processing {response["id"]} {response["name"]} in run {run["run_id"]}: {err}")
+            else:
+                result["results"].append(f"processed {response["id"]} {response["name"]} for run {run["run_id"]}")
+                if "sample" in response:
+                    result["results"].append(response["sample"])
+
+
+    if "analyses" in ingest_json:
+        result["summary"]["analyses"] = {"total": len(ingest_json["analyses"]), "ingested": 0, "skipped": 0}
     for analysis in ingest_json["analyses"]:
         if result_dict is not None and analysis["program_id"] not in result_dict:
             result_dict[analysis["program_id"]] = result
 
-        logger.debug(f"Ingesting {analysis['analysis_id']}, do_not_index = {do_not_index}")
+        logger.debug(f"Ingesting {analysis['analysis_id']}")
         program_ids.add(analysis["program_id"])
         result["results"].append(f"processing analysis {analysis["analysis_id"]}...")
 
         if results_path is not None and result_dict is not None:
+            result_dict["last_updated"] = str(datetime.now())
             with open(results_path, "w") as f:
                 json.dump(result_dict, f)
 
@@ -369,24 +542,33 @@ def htsget_ingest(ingest_json, do_not_index=False, results_path=None, result_dic
         if "samples" not in analysis or len(analysis["samples"]) == 0:
             result["results"][-1] = f"error processing analysis {analysis["analysis_id"]}: No samples were specified"
             break
-        response = link_genomic_data(analysis, do_not_index)
+        response = create_analysis(analysis, overwrite)
 
         # remove the temporary "processing..." message
         result["results"].pop()
 
-        if len(response["errors"]) > 0:
+        if "skipped" in response:
+            result["results"].append(response["skipped"])
+            result["summary"]["analyses"]["skipped"] += 1
+        elif len(response["errors"]) > 0:
             for err in response["errors"]:
                 if "403" in err:
                     status_code = 403
                     break
-                result["results"].append(f"error processing {response["id"]} {response["name"]} in experiment {analysis["analysis_id"]}: {err}")
+                result["results"].append(f"error processing {response["id"]} {response["name"]} in analysis {analysis["analysis_id"]}: {err}")
         else:
-            result["results"].append(f"processed {response["id"]} {response["name"]} for experiment {analysis["analysis_id"]}")
+            result["results"].append(f"processed {response["id"]} {response["name"]} for analysis {analysis["analysis_id"]}")
             if "sample" in response:
                 result["results"].append(response["sample"])
+            result["summary"]["analyses"]["ingested"] += 1
 
         if "to_index" in response:
             to_index.extend(response.pop("to_index"))
+
+    if results_path is not None and result_dict is not None:
+        result_dict["last_updated"] = str(datetime.now())
+        with open(results_path, "w") as f:
+            json.dump(result_dict, f)
 
     # Use service token to authenticate this with htsget
     headers = {}
@@ -397,25 +579,24 @@ def htsget_ingest(ingest_json, do_not_index=False, results_path=None, result_dic
         }
 
     # send off index calls
-    if not do_not_index:
-        for url in to_index:
-            response = requests.get(url, headers=headers)
+    for url in to_index:
+        response = requests.get(url, headers=headers)
 
-    # update completeness stats for program_ids with created experiments
+    # update completeness stats for program_ids with created biosamples
     statistics = {}
     for program_id in program_ids:
-        url = f"{HTSGET_URL}/htsget/v1/experiments"
+        url = f"{HTSGET_URL}/htsget/v1/biosamples"
         response = requests.get(url, headers=headers, params={"program": program_id})
         if response.status_code == 200:
-            for experiment in response.json():
-                logger.debug(experiment)
+            for biosample in response.json():
+                logger.debug(biosample)
                 if program_id not in statistics:
                     statistics[program_id] = { 'genomes': 0, 'transcriptomes': 0, 'all': 0 }
-                if len(experiment['genomes']) > 0 and len(experiment['transcriptomes']) > 0:
+                if len(biosample["experiments"]["wgs"]) > 0 and len(biosample["experiments"]["wts"]) > 0:
                     statistics[program_id]['all'] += 1
-                if len(experiment['genomes']) > 0:
+                if len(biosample["experiments"]["wgs"]) > 0:
                     statistics[program_id]['genomes'] += 1
-                if len(experiment['transcriptomes']) > 0:
+                if len(biosample["experiments"]["wts"]) > 0:
                     statistics[program_id]['transcriptomes'] += 1
         else:
             result["errors"].append(f"Could not collect completeness stats for program: {response.text}")
@@ -453,12 +634,17 @@ def check_genomic_data(dataset, token):
     for experiment in dataset["experiments"]:
         program_id = experiment["program_id"]
         if program_id not in by_program:
-            by_program[program_id] = {"experiments": [], "analyses": []}
+            by_program[program_id] = {"experiments": [], "runs": [], "analyses": []}
         by_program[program_id]["experiments"].append(experiment)
+    for run in dataset["runs"]:
+        program_id = run["program_id"]
+        if program_id not in by_program:
+            by_program[program_id] = {"experiments": [], "runs": [], "analyses": []}
+        by_program[program_id]["runs"].append(run)
     for analysis in dataset["analyses"]:
         program_id = analysis["program_id"]
         if program_id not in by_program:
-            by_program[program_id] = {"experiments": [], "analyses": []}
+            by_program[program_id] = {"experiments": [], "runs": [], "analyses": []}
         by_program[program_id]["analyses"].append(analysis)
 
 

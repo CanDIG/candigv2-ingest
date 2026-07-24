@@ -125,8 +125,7 @@ def delete_s3_credential(endpoint_id, bucket_id):
 @app.route('/site-role/<path:role_type>')
 def list_role(role_type):
     try:
-        token = connexion.request.headers['Authorization'].split("Bearer ")[1]
-        if not authx.auth.is_action_allowed_for_program(token, method="GET", path="/ingest/site-role", program=None):
+        if not authx.auth.is_site_admin(connexion.request):
             return {"error": f"User not authorized to list site roles"}, 403
 
         result, status_code = auth.get_role_type(role_type)
@@ -138,9 +137,7 @@ def list_role(role_type):
 @app.route('/site-role/<path:role_type>/user_id/<path:user_id>')
 def is_user_in_role(role_type, user_id):
     try:
-        token = connexion.request.headers['Authorization'].split("Bearer ")[1]
-
-        if not authx.auth.is_action_allowed_for_program(token, method="GET", path="/ingest/site-role", program=None):
+        if not authx.auth.is_site_admin(connexion.request):
             return {"error": f"User not authorized to list site roles"}, 403
 
         result, status_code = auth.get_role_type(role_type)
@@ -154,8 +151,7 @@ def is_user_in_role(role_type, user_id):
 @app.route('/site-role/<path:role_type>/user_id/<path:user_id>')
 def add_user_to_role(role_type, user_id):
     try:
-        token = connexion.request.headers['Authorization'].split("Bearer ")[1]
-        if not authx.auth.is_action_allowed_for_program(token, method="POST", path="/ingest/site-role", program=None):
+        if not authx.auth.is_site_admin(connexion.request):
             return {"error": f"User not authorized to add to site roles"}, 403
 
         result, status_code = auth.get_role_type(role_type)
@@ -171,8 +167,7 @@ def add_user_to_role(role_type, user_id):
 @app.route('/site-role/<path:role_type>/user_id/<path:user_id>')
 def remove_user_from_role(role_type, user_id):
     try:
-        token = connexion.request.headers['Authorization'].split("Bearer ")[1]
-        if not authx.auth.is_action_allowed_for_program(token, method="GET", path="/ingest/site-role", program=None):
+        if not authx.auth.is_site_admin(connexion.request):
             return {"error": f"User not authorized to remove users from site roles"}, 403
 
         result, status_code = auth.get_role_type(role_type)
@@ -203,10 +198,10 @@ async def ingest():
             ingest_uuid = add_to_queue({"katsu": response})
             response = {"queue_id": ingest_uuid}
     elif "experiments" in dataset and "analyses" in dataset:
-        do_not_index = bool(connexion.request.query_params.get("do_not_index", False))
+        overwrite = bool(connexion.request.query_params.get("overwrite", False))
         response, status_code = htsget_ingest.check_genomic_data(dataset, token)
         if status_code == 200:
-            ingest_uuid = add_to_queue({"htsget": response, "do_not_index": do_not_index})
+            ingest_uuid = add_to_queue({"htsget": response, "overwrite": overwrite})
             response = {"queue_id": ingest_uuid}
     else:
         response = {"error": "dataset does not look like either clinical or sequencing data"}
@@ -244,8 +239,7 @@ def get_ingest_status(queue_id):
         with open(results_path) as f:
             json_data = json.load(f)
             # os.remove(results_path)
-            if "complete" in json_data:
-                json_data.pop("complete")
+            if "complete" in json_data and json_data["complete"] == True:
                 return json_data, 201
             return json_data, 200
     except:
