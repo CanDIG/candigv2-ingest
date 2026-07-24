@@ -7,7 +7,7 @@ import argparse
 
 
 def parse_args():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description="Delete clinical data at a CanDIG node without deleting program registrations or genomic data.")
     parser.add_argument('--url', type=str, required=True, help="Url of your candig instance")
     parser.add_argument('--exclude', type=str, required=False,
                         help="Comma-delimited list of programs to exclude from the deletion, all other programs at the "

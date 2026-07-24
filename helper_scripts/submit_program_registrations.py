@@ -9,7 +9,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--input', type=str, required=True,
                         help="Csv file that has at least one column with the column header specified with the "
-                             "--column-name argument, expected output from ")
+                             "--column-name argument")
     parser.add_argument('--column-name', type=str, default="program_id",
                         help="exact column name in the csv where the program id is specified. Default: 'program_id'")
     parser.add_argument('--url', type=str, required=True, help="Full URL of the CanDIG node")
