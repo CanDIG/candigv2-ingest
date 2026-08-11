@@ -25,6 +25,8 @@ def test_prepare_clinical_ingest():
         print(json.dumps(result, indent=4))
         assert len(result) == 1
         assert len(result["SYNTH_01"]["schemas"]["systemic_therapies"]) == 16
+        # v4 introduces radiopharmaceutical_therapies; two are present on different donors
+        assert len(result["SYNTH_01"]["schemas"]["radiopharmaceutical_therapies"]) == 2
         # MoH v4: the `programs` root is ingested as a program object carrying both
         # its metadata fields and the computed completeness statistics.
         programs = result["SYNTH_01"]["schemas"]["programs"]

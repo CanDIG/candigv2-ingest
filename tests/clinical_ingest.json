@@ -175,7 +175,8 @@
                             },
                             "treatment_type": [
                                 "Systemic therapy",
-                                "Radiation therapy"
+                                "Radiation therapy",
+                                "Radiopharmaceutical Therapy"
                             ],
                             "radiations": [
                                 {
@@ -208,6 +209,22 @@
                                         "month_interval": 6
                                     },
                                     "systemic_therapy_type": "Chemotherapy"
+                                }
+                            ],
+                            "radiopharmaceutical_therapies": [
+                                {
+                                    "rxnorm_code": "1665501",
+                                    "agent_name": "Lutetium Lu 177 dotatate",
+                                    "radionuclide": "Lutetium-177",
+                                    "start_date": {
+                                        "day_interval": 170,
+                                        "month_interval": 5
+                                    },
+                                    "cumulative_drug_dose": 7400.0,
+                                    "drug_dose_units": "MBq",
+                                    "number_of_cycles": 4,
+                                    "mass_value": 0.5,
+                                    "mass_unit_ucum": "mg"
                                 }
                             ]
                         }
@@ -648,7 +665,8 @@
                             },
                             "treatment_type": [
                                 "Radiation therapy",
-                                "Systemic therapy"
+                                "Systemic therapy",
+                                "Radiopharmaceutical Therapy"
                             ],
                             "radiations": [
                                 {
@@ -686,6 +704,20 @@
                                     "number_of_cycles": 8,
                                     "prescribed_cumulative_drug_dose": 27.5,
                                     "systemic_therapy_type": "Hormone therapy"
+                                }
+                            ],
+                            "radiopharmaceutical_therapies": [
+                                {
+                                    "rxnorm_code": "284679",
+                                    "agent_name": "Radium Ra 223 dichloride",
+                                    "radionuclide": "Radium-223",
+                                    "start_date": {
+                                        "day_interval": 145,
+                                        "month_interval": 4
+                                    },
+                                    "cumulative_drug_dose": 6.6,
+                                    "drug_dose_units": "MBq",
+                                    "number_of_cycles": 6
                                 }
                             ]
                         }
