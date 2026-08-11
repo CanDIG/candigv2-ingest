@@ -1,5 +1,5 @@
 requests==2.33.1
 requests-mock>=1.12.1
 candigv2-authx@git+https://github.com/CanDIG/candigv2-authx.git@v2.9.1
-clinical_etl@git+https://github.com/CanDIG/clinical_ETL_code.git@v3.4.0
+clinical_etl@git+https://github.com/CanDIG/clinical_ETL_code.git@v4-program-donor-multiroot
 candigv2-logging@git+https://github.com/CanDIG/candigv2-logging.git@v1.0.4

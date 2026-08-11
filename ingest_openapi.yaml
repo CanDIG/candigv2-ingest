@@ -607,100 +607,54 @@ components:
         - secret_key
     ProgramWithClinicalDonors:
       type: object
+      description: >
+        A MoH v4 clinical ingest payload as produced by clinical_etl's CSVConvert.
+        It carries two top-level roots: `programs` (one program metadata object per
+        program) and `donors` (the donor-rooted clinical tree). Each donor references
+        its program via its own `program_id`.
       required:
-        - program_id
-        - program_name
-        - program_description
-        - status
-        - context
-        - principal_investigators
-        - lead_organizations
-        - funding_sources
         - openapi_url
-        - donors
         - schema_class
+        - programs
+        - donors
       properties:
         openapi_url:
           type: string
           description: URL of schema used to generate this mapping
+        schema_class:
+          type: string
+          description: "name of the class that the Katsu openAPI schema represents, e.g. MoHSchemaV4"
         katsu_sha:
           type: string
           description: the SHA of the version of Katsu used to generate the schema.
-        schema_class:
-          type: string
-          description: name of the class that the Katsu openAPI schema represents
-        program_id:
-          description: "Unique identifier of the program"
-          type: string
-        program_name:
-          description: "The official name of the program, may be used for display purposes."
-          type: string
-        program_description:
-          description: "A detailed description of the program’s purpose, hypothesis, and design."
-          type: string
-        keywords:
-          description: "List of specific terms that describe the focus and content of the program."
+        programs:
           type: array
+          description: Program metadata objects, one per program in this dataset.
           items:
-            type: string
-        status:
-          description: "Indicate if the study is completed or ongoing."
-          type: string
-          enum:
-            - Ongoing
-            - Completed
-        context:
-          description: "Indicate if the program was conducted in a clinical setting or as part of a research project."
-          type: string
-          enum:
-            - Clinical
-            - Research
-        participant_criteria:
-          description: "Inclusion/exclusion criteria for participants (e.g., specific cancer type, age range)."
-          type: string
-        principal_investigators:
-          description: "List of lead researchers responsible for the study in the format: FirstName LastName, Affiliation."
-          type: array
-          items:
-            type: string
-            example: "John Doe, Example Research Institute"
-        lead_organizations:
-          description: "List of institutions or organizations leading the study using its full official name."
-          type: array
-          items:
-            type: string
-        collaborators:
-          description: "List of researchers, institutions or companies involved in the study. FirstName LastName (if individula) or Organization full official name, Role"
-          type: array
-          items:
-            type: string
-          example: [ "Emily John, Data Contributor", "Biotech Inc., Industry Partner" ]
-        funding_sources:
-          description: "List of organizations or agencies funding the study in the format: Funder name, Grant number"
-          type: array
-          items:
-            type: string
-          example: [ "National Example Foundation, NEF-12345", "Example Health Research Council" ]
-        publication_links:
-          description: "List of URL links to academic papers or reports associated with the study. providing a DOI URL formatted as https://doi.org/ followed by the DOI number."
-          type: array
-          items:
-            type: string
-            pattern: ^https:\/\/doi\.org\/10\.[0-9]{4,}\/
-            example: "https://doi.org/10.1016/j.ccell.2025.03.014"
-        pancan_cohort:
-          description: "Indicate whether program is part of the Pan-Canadian Genome Library (PCGL) cohort."
-          type: boolean
-        pancan_id:
-          description: "If the program is part of Pan-Canadian Genome Library (PCGL) cohort (pancan_cohort is 'Yes'), then indicate the name of the PCGL cohort here."
-          type: string
+            $ref: "#/components/schemas/ProgramIngest"
         donors:
           type: array
+          description: DonorWithClinicalData objects, as specified in the schema in openapi_url
           items:
             type: object
-            description: A DonorWithClinicalData object, as specified in the schema in openapi_url
         statistics:
           $ref: "#/components/schemas/Statistics"
+
+    ProgramIngest:
+      type: object
+      description: >
+        A single program metadata object as emitted in the `programs` root of a MoH v4
+        clinical ingest payload. Mirrors katsu's ProgramIngestSchema: the ProgramMetadata
+        fields plus the program identifier.
+      allOf:
+        - type: object
+          required:
+            - program_id
+          properties:
+            program_id:
+              description: "Unique identifier of the program"
+              type: string
+        - $ref: "#/components/schemas/ProgramMetadata"
 
     ClinicalDonor:
       type: object
@@ -1189,8 +1143,7 @@ components:
           pattern: '^\d{4}-\d{2}-\d{2}$'
           description: date program was created, for embargo purposes. This may or may not be the date of ingest.
         metadata:
-          type: object
-          ref: "#/components/schemas/ProgramMetadata"
+          $ref: "#/components/schemas/ProgramMetadata"
       required:
         - program_id
         - program_curators

@@ -6,12 +6,24 @@ from http import HTTPStatus
 import requests
 from authx.auth import get_site_admin_token, create_service_token, is_action_allowed_for_program
 from auth import get_program
+from clinical_etl.mohschemav2 import MoHSchemaV2
 from clinical_etl.mohschemav3 import MoHSchemaV3
+from clinical_etl.mohschemav4 import MoHSchemaV4
 from candigv2_logging.logging import initialize, CanDIGLogger
 
 KATSU_URL = os.environ.get("KATSU_URL")
 
 logger = CanDIGLogger(__file__)
+
+# The clinical data file names the schema class it was generated against
+# (see the `schema_class` field written by clinical_etl's CSVConvert). We default
+# to the current MoH v4 model when the field is absent.
+SCHEMA_CLASSES = {
+    "MoHSchemaV2": MoHSchemaV2,
+    "MoHSchemaV3": MoHSchemaV3,
+    "MoHSchemaV4": MoHSchemaV4,
+}
+DEFAULT_SCHEMA_CLASS = "MoHSchemaV4"
 
 
 def read_json(file_path):
@@ -198,25 +210,43 @@ def traverse_clinical_field(fields, field: dict, ctype, parents, types, ingested
 
 
 def prepare_clinical_data_for_ingest(ingest_json):
-    """A single file ingest which validates and loads an MOH donor_with_clinical_data object from JSON.
-    JSON format:
-    [
+    """A single file ingest which validates and loads MoH clinical data from JSON.
+
+    From MoH v4 onwards the clinical data file has two top-level roots emitted by
+    clinical_etl's CSVConvert:
         {
-            "submitter_donor_id": ...,
-            "program_id": ...,
-            ...
-            primary_site: {...},
-            primary_diagnoses: {...},
-            ...
+            "openapi_url": ...,
+            "schema_class": "MoHSchemaV4",
+            "programs": [ {"program_id": ..., "program_name": ..., ...} ],
+            "donors": [
+                {
+                    "submitter_donor_id": ...,
+                    "program_id": ...,
+                    "primary_diagnoses": {...},
+                    ...
+                }
+                ...
+            ]
         }
-        ...
-    ]
-    (Fully outlined in MOH Schema)
+    `programs` carries the program metadata object(s); `donors` is the donor-rooted
+    clinical tree. Older files (V2/V3) omit `programs` and only supply `donors`.
+    (Fully outlined in the MoH Schema.)
     """
-    schema = MoHSchemaV3(ingest_json["openapi_url"])
+    schema_class_name = ingest_json.get("schema_class", DEFAULT_SCHEMA_CLASS)
+    if schema_class_name not in SCHEMA_CLASSES:
+        raise ValueError(
+            f"Unknown schema_class '{schema_class_name}'. Expected one of {list(SCHEMA_CLASSES.keys())}."
+        )
+    schema = SCHEMA_CLASSES[schema_class_name](ingest_json["openapi_url"])
 
     types = ["programs"]
     types.extend(schema.validation_schema.keys())
+
+    # Program metadata is supplied as its own top-level root (MoH v4). Index it by
+    # program_id so each program's clinical tree can be paired with its metadata.
+    program_metadata = {}
+    for program in ingest_json.get("programs", []):
+        program_metadata[program["program_id"]] = program
 
     # split ingest by program_id:
     by_program = {}
@@ -230,7 +260,12 @@ def prepare_clinical_data_for_ingest(ingest_json):
     for program_id in by_program.keys():
         errors = by_program[program_id]["errors"]
         logger.info(f"Validating input for program {program_id}")
-        schema.validate_ingest_map(by_program[program_id])
+        # validate both roots: the donor clinical tree and, when present, the
+        # program metadata for this program.
+        ingest_map = {"donors": by_program[program_id]["donors"]}
+        if program_id in program_metadata:
+            ingest_map["programs"] = [program_metadata[program_id]]
+        schema.validate_ingest_map(ingest_map)
         if len(schema.validation_errors) > 0:
             errors.append([str(line) for line in schema.validation_errors])
             continue
@@ -248,10 +283,13 @@ def prepare_clinical_data_for_ingest(ingest_json):
             except Exception as e:
                 logger.error(traceback.format_exc())
                 errors.append(str(e))
+        # Build the program object to ingest: the program metadata fields from the
+        # input (falling back to just the id for pre-v4 files) plus the computed
+        # completeness statistics stored in the program's metadata field.
+        program_obj = dict(program_metadata.get(program_id, {"program_id": program_id}))
+        program_obj["metadata"] = schema.statistics.copy()
         by_program[program_id]["schemas"] = fields
-        by_program[program_id]["schemas"]["programs"] = [
-            {"program_id": program_id, "metadata": schema.statistics.copy()}
-        ]
+        by_program[program_id]["schemas"]["programs"] = [program_obj]
     return by_program
 
 
