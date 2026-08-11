@@ -106,15 +106,18 @@ def main(args):
     programs = {}
     with open(f'{ingest_repo_dir}/tests/small_dataset_clinical_ingest.json', "r") as f:
         full_json = json.load(f)
-    # split ingest files by program
+    # file-level metadata written by clinical_etl (schema the data was generated against)
+    file_meta = {k: full_json[k] for k in ("openapi_url", "schema_class", "katsu_sha") if k in full_json}
+    # program metadata objects, indexed by program_id (MoH v4 `programs` root)
+    program_meta = {p["program_id"]: p for p in full_json.get("programs", [])}
+    # split ingest files by program, carrying each program's metadata and donors
     for donor in full_json['donors']:
-        try:
-            programs[donor['program_id']]['donors'].append(donor)
-        except KeyError as e:
-            programs[donor['program_id']] = {
-                "openapi_url": "https://raw.githubusercontent.com/CanDIG/katsu/develop/chord_metadata_service/mohpackets/docs/schemas/schema.yml",
-                "schema_class": "MoHSchemaV3",
-                "donors": [donor]}
+        program_id = donor['program_id']
+        if program_id not in programs:
+            programs[program_id] = {**file_meta, "donors": []}
+            if program_id in program_meta:
+                programs[program_id]["programs"] = [program_meta[program_id]]
+        programs[program_id]['donors'].append(donor)
     for program, content in programs.items():
         print(f"Saving {program}.json to tests/")
         with open(f"{ingest_repo_dir}/tests/{program}.json", "w+") as f:
