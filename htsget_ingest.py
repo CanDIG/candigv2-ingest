@@ -636,11 +636,12 @@ def check_genomic_data(dataset, token):
         if program_id not in by_program:
             by_program[program_id] = {"experiments": [], "runs": [], "analyses": []}
         by_program[program_id]["experiments"].append(experiment)
-    for run in dataset["runs"]:
-        program_id = run["program_id"]
-        if program_id not in by_program:
-            by_program[program_id] = {"experiments": [], "runs": [], "analyses": []}
-        by_program[program_id]["runs"].append(run)
+    if "runs" in dataset:
+        for run in dataset["runs"]:
+            program_id = run["program_id"]
+            if program_id not in by_program:
+                by_program[program_id] = {"experiments": [], "runs": [], "analyses": []}
+            by_program[program_id]["runs"].append(run)
     for analysis in dataset["analyses"]:
         program_id = analysis["program_id"]
         if program_id not in by_program:
