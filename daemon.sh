@@ -5,7 +5,9 @@ TOUCH_FILE=$DAEMON_PATH/last_touch.txt
 python daemon.py &
 pid=$!
 
-interval=$((30*60)) # the length of time to wait for updates in TOUCH_FILE
+# This effectivley puts a time limit on the acceptable length of a program.  When the daemon restarts, ingestion of the whole JSON restarts.
+# 36h is a best estimate based on the largest programs (currently 1200 - 1420 donours, which could take ~18-24h to ingest).
+interval=$((60*60*36)) # 36h. The length of time to wait for updates in TOUCH_FILE
 
 while true
 do
