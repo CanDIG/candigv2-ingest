@@ -40,6 +40,8 @@ options:
 
 A CanDIG instance renamed the program_id and updated clinical data. This script (along with `extract_drs`) updated the program_ids in the sequencing metadata without having to re-ingest all of the sequencing data.
 
+Objects are listed one program at a time, and any object already in its target program is skipped, so if the run stops part way (e.g. the token expires) it can be re-run with a fresh token to pick up where it left off.
+
 ```commandline
 usage: reset_programs.py [-h] --input INPUT --corrected CORRECTED --url URL --token TOKEN
 
