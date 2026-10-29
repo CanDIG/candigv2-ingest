@@ -35,20 +35,39 @@ def main():
     headers = {"Authorization": f"Bearer {args.token}",
            "Content-Type": "application/json; charset=utf-8"}
 
-    experiment_drs_objects = []
+    drs_url = f"{args.url}/drs/ga4gh/drs/v1"
+
+    # list objects one program at a time, rather than one GET per object
+    response = requests.get(f"{drs_url}/programs", headers=headers)
+    if response.status_code != 200:
+        raise SystemExit(f"Couldn't list programs: {response.status_code} {response.text}")
+    current_objects = {}
+    for program in response.json():
+        response = requests.get(f"{drs_url}/objects", headers=headers, params={"program_id": program})
+        if response.status_code != 200:
+            raise SystemExit(f"Couldn't list objects for {program}: {response.status_code} {response.text}")
+        for obj in response.json():
+            current_objects[obj["id"]] = obj
+        print(f"listed {program}")
+
     for sample_id in experiments["result"]:
         # find the matching program
         if sample_id in sample_map:
             program_id = sample_map[sample_id]
             # fix the related objects
             for drs_obj_id in experiments["result"][sample_id]:
-                response = requests.get(f"{args.url}/drs/ga4gh/drs/v1/objects/{drs_obj_id}", headers=headers)
-                if response.status_code == 200:
-                    new_object = response.json()
-                    print(f"in {drs_obj_id}: changing {new_object["program"]} to {program_id}")
-                    new_object["program"] = program_id
-                    response = requests.post(f"{args.url}/drs/ga4gh/drs/v1/objects", headers=headers, json=new_object)
-                    print(response.status_code, response.text)
+                if drs_obj_id not in current_objects:
+                    continue
+                new_object = current_objects[drs_obj_id]
+                # already moved, e.g. by an earlier run that stopped part way
+                if new_object.get("program") == program_id:
+                    continue
+                print(f"in {drs_obj_id}: changing {new_object.get("program")} to {program_id}")
+                new_object["program"] = program_id
+                response = requests.post(f"{drs_url}/objects", headers=headers, json=new_object)
+                print(response.status_code, response.text)
+                if response.status_code in (401, 403):
+                    raise SystemExit("Token expired or unauthorized; get a new token and re-run to continue")
 
 if __name__ == "__main__":
     main()
