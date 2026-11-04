@@ -23,27 +23,32 @@ options:
 
 Given the output from a call to the `biosamples` endpoint, collect all of the drs objects for those experiments. Written to go alongside the `reset_programs.py` script.
 
+Each program's objects are fetched with a single listing call (falling back to one request per object if a listing fails), and requests are made concurrently (`--workers`, default 8). The output file has three keys: `result` (sample id → related drs object ids), `programs` (sample id → the sample's program at extraction time, used by `reset_programs.py` to know which programs to list) and `errors` (object ids that couldn't be retrieved). The output is written once, at the end of the run.
+
 ```commandline
-usage: extract_drs.py [-h] [--file FILE] --url URL --token TOKEN --output OUTPUT
+usage: extract_drs.py [-h] [--file FILE] --url URL --token TOKEN --output OUTPUT [--workers WORKERS]
 
 Extract all drs objects associated with the biosamples endpoint result.
 
 options:
-  -h, --help       show this help message and exit
-  --file FILE      File with output of biosamples call
-  --url URL        URL of the candig deployment you are retrieving data from
-  --token TOKEN    site admin token for the candig deployment you are retrieving data from.
-  --output OUTPUT  output file to write to
+  -h, --help         show this help message and exit
+  --file FILE        File with output of biosamples call
+  --url URL          URL of the candig deployment you are retrieving data from
+  --token TOKEN      site admin token for the candig deployment you are retrieving data from.
+  --output OUTPUT    output file to write to
+  --workers WORKERS  number of concurrent requests to make to DRS
 ```
 
 ## `reset_programs.py`
 
 A CanDIG instance renamed the program_id and updated clinical data. This script (along with `extract_drs`) updated the program_ids in the sequencing metadata without having to re-ingest all of the sequencing data.
 
-Objects are listed one program at a time, and any object already in its target program is skipped, so if the run stops part way (e.g. the token expires) it can be re-run with a fresh token to pick up where it left off.
+Objects are listed one program at a time (both the target programs and, if the `extract_drs.py` output includes them, the programs the samples were in at extraction), and any object already in its target program is skipped, so a run that stops part way can be re-run to pick up where it left off. Objects that couldn't be listed are fetched individually. An object shared by samples that map to different programs is skipped and reported. Progress, with an estimate of the time remaining, is printed every 100 objects.
+
+`--token` is optional: if it's omitted, or the token is about to expire or a request is rejected with a 401/403, the script prompts for a new site admin token (input hidden) and carries on. Entering nothing at the prompt stops the run.
 
 ```commandline
-usage: reset_programs.py [-h] --input INPUT --corrected CORRECTED --url URL --token TOKEN
+usage: reset_programs.py [-h] --input INPUT --corrected CORRECTED --url URL [--token TOKEN]
 
 Given a list of drs objects returned from extract_drs.py and a list of updated mappings of samples to programs, update the drs objects to the correct programs.
 
@@ -55,7 +60,7 @@ options:
                         'Submitter Sample ID': the submitter sample id that links to all the objects that need to be moved, 
                         'Program ID': The program_id of the program that the objects should be moved to
   --url URL             URL of the candig deployment for which you want to update data
-  --token TOKEN         site admin token for the candig deployment for which you want to update data
+  --token TOKEN         site admin token for the candig deployment for which you want to update data; if omitted, or when it expires, you'll be prompted for one
 ```
 
 ## `get_ingested_files.py`
