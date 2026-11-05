@@ -1,8 +1,8 @@
 openapi: 3.0.0
 info:
   version: v1.1.0
-  title: 'CanDIGv2 Ingest Service'
-  description: 'API for ingesting data into the CanDIG stack'
+  title: "CanDIGv2 Ingest Service"
+  description: "API for ingesting data into the CanDIG stack"
 servers:
   - url: https://your-candig-domain/ingest
 paths:
@@ -24,14 +24,14 @@ paths:
       description: Add credentials for an S3 bucket
       operationId: ingest_operations.add_s3_credential
       requestBody:
-        $ref: '#/components/requestBodies/S3CredentialRequest'
+        $ref: "#/components/requestBodies/S3CredentialRequest"
       responses:
-          200:
-            description: Success
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/S3Credential'
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/S3Credential"
   /s3-credential/endpoint/{endpoint_id}/bucket/{bucket_id}:
     parameters:
       - in: path
@@ -49,23 +49,23 @@ paths:
       description: Get credentials for an S3 bucket
       operationId: ingest_operations.get_s3_credential
       responses:
-          200:
-            description: Success
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/S3Credential"
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/S3Credential"
     delete:
       summary: Delete credentials for an S3 bucket
       description: Delete credentials for an S3 bucket
       operationId: ingest_operations.delete_s3_credential
       responses:
-          200:
-            description: Success
-            content:
-              application/json:
-                schema:
-                  type: object
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
 
   /site-role/{role_type}:
     parameters:
@@ -142,14 +142,14 @@ paths:
       description: Add authorization information for a new program (or overwrite authorization information for an existing program). Information in the request body replaces any existing information for the program.
       operationId: ingest_operations.add_program
       requestBody:
-        $ref: '#/components/requestBodies/ProgramIngestRequest'
+        $ref: "#/components/requestBodies/ProgramIngestRequest"
       responses:
-          200:
-            description: Success
-            content:
-              application/json:
-                schema:
-                  $ref: "#/components/schemas/Program"
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Program"
     get:
       summary: List registered programs
       description: List programs authorized on server
@@ -237,7 +237,7 @@ paths:
       description: Approve bulk pending users for CanDIG access
       operationId: ingest_operations.approve_pending_users
       requestBody:
-        $ref: '#/components/requestBodies/ApprovePendingUserRequest'
+        $ref: "#/components/requestBodies/ApprovePendingUserRequest"
       responses:
         200:
           description: Success
@@ -300,7 +300,7 @@ paths:
       description: Add bulk preapproved users for CanDIG access
       operationId: ingest_operations.add_preapproved_users
       requestBody:
-        $ref: '#/components/requestBodies/AddPreapprovedUserRequest'
+        $ref: "#/components/requestBodies/AddPreapprovedUserRequest"
       responses:
         200:
           description: Success
@@ -385,14 +385,14 @@ paths:
       description: Authorize a program for a user (or update a program auth for a user)
       operationId: ingest_operations.add_dac_authz_for_user
       requestBody:
-        $ref: '#/components/requestBodies/DACAuthorizationRequest'
+        $ref: "#/components/requestBodies/DACAuthorizationRequest"
       responses:
         200:
           description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserAuthorization'
+                $ref: "#/components/schemas/UserAuthorization"
   /user/{user_id}/dac_authorization/{program_id}:
     parameters:
       - in: path
@@ -536,46 +536,45 @@ components:
   requestBodies:
     S3CredentialRequest:
       content:
-        'application/json':
+        "application/json":
           schema:
             $ref: "#/components/schemas/S3Credential"
     IngestRequest:
       content:
-        'application/json':
+        "application/json":
           schema:
             oneOf:
-            - $ref: "#/components/schemas/SequencingIngest"
-            - $ref: "#/components/schemas/ClinicalDonor"
-            - $ref: "#/components/schemas/ProgramWithClinicalDonors"
+              - $ref: "#/components/schemas/SequencingIngest"
+              - $ref: "#/components/schemas/ClinicalDonor"
     ProgramIngestRequest:
       content:
-        'application/json':
+        "application/json":
           schema:
             $ref: "#/components/schemas/Program"
     ApprovePendingUserRequest:
       content:
-        'application/json':
+        "application/json":
           schema:
             type: array
             items:
               type: string
     AddPreapprovedUserRequest:
       content:
-        'application/json':
+        "application/json":
           schema:
             type: array
             items:
               type: string
     RoleTypeRequest:
       content:
-        'application/json':
+        "application/json":
           schema:
             type: array
             items:
               type: string
     DACAuthorizationRequest:
       content:
-        'application/json':
+        "application/json":
           schema:
             oneOf:
               - $ref: "#/components/schemas/DACAuthorization"
@@ -605,109 +604,17 @@ components:
         - bucket
         - access_key
         - secret_key
-    ProgramWithClinicalDonors:
-      type: object
-      required:
-        - program_id
-        - program_name
-        - program_description
-        - status
-        - context
-        - principal_investigators
-        - lead_organizations
-        - funding_sources
-        - openapi_url
-        - donors
-        - schema_class
-      properties:
-        openapi_url:
-          type: string
-          description: URL of schema used to generate this mapping
-        katsu_sha:
-          type: string
-          description: the SHA of the version of Katsu used to generate the schema.
-        schema_class:
-          type: string
-          description: name of the class that the Katsu openAPI schema represents
-        program_id:
-          description: "Unique identifier of the program"
-          type: string
-        program_name:
-          description: "The official name of the program, may be used for display purposes."
-          type: string
-        program_description:
-          description: "A detailed description of the program’s purpose, hypothesis, and design."
-          type: string
-        keywords:
-          description: "List of specific terms that describe the focus and content of the program."
-          type: array
-          items:
-            type: string
-        status:
-          description: "Indicate if the study is completed or ongoing."
-          type: string
-          enum:
-            - Ongoing
-            - Completed
-        context:
-          description: "Indicate if the program was conducted in a clinical setting or as part of a research project."
-          type: string
-          enum:
-            - Clinical
-            - Research
-        participant_criteria:
-          description: "Inclusion/exclusion criteria for participants (e.g., specific cancer type, age range)."
-          type: string
-        principal_investigators:
-          description: "List of lead researchers responsible for the study in the format: FirstName LastName, Affiliation."
-          type: array
-          items:
-            type: string
-            example: "John Doe, Example Research Institute"
-        lead_organizations:
-          description: "List of institutions or organizations leading the study using its full official name."
-          type: array
-          items:
-            type: string
-        collaborators:
-          description: "List of researchers, institutions or companies involved in the study. FirstName LastName (if individula) or Organization full official name, Role"
-          type: array
-          items:
-            type: string
-          example: [ "Emily John, Data Contributor", "Biotech Inc., Industry Partner" ]
-        funding_sources:
-          description: "List of organizations or agencies funding the study in the format: Funder name, Grant number"
-          type: array
-          items:
-            type: string
-          example: [ "National Example Foundation, NEF-12345", "Example Health Research Council" ]
-        publication_links:
-          description: "List of URL links to academic papers or reports associated with the study. providing a DOI URL formatted as https://doi.org/ followed by the DOI number."
-          type: array
-          items:
-            type: string
-            pattern: ^https:\/\/doi\.org\/10\.[0-9]{4,}\/
-            example: "https://doi.org/10.1016/j.ccell.2025.03.014"
-        pancan_cohort:
-          description: "Indicate whether program is part of the Pan-Canadian Genome Library (PCGL) cohort."
-          type: boolean
-        pancan_id:
-          description: "If the program is part of Pan-Canadian Genome Library (PCGL) cohort (pancan_cohort is 'Yes'), then indicate the name of the PCGL cohort here."
-          type: string
-        donors:
-          type: array
-          items:
-            type: object
-            description: A DonorWithClinicalData object, as specified in the schema in openapi_url
-        statistics:
-          $ref: "#/components/schemas/Statistics"
-
     ClinicalDonor:
       type: object
+      description: Clinical data output by clinical_ETL. Schemas with more than one root (e.g. MoHSchemaV4) emit a top-level array per root; at least one of donors or programs must be present.
       required:
         - openapi_url
-        - donors
         - schema_class
+      anyOf:
+        - required:
+            - donors
+        - required:
+            - programs
       properties:
         openapi_url:
           type: string
@@ -717,6 +624,10 @@ components:
           items:
             type: object
             description: A DonorWithClinicalData object, as specified in the schema in openapi_url
+        programs:
+          type: array
+          items:
+            $ref: "#/components/schemas/ClinicalProgram"
         katsu_sha:
           type: string
           description: the SHA of the version of Katsu used to generate the schema.
@@ -1189,25 +1100,31 @@ components:
           pattern: '^\d{4}-\d{2}-\d{2}$'
           description: date program was created, for embargo purposes. This may or may not be the date of ingest.
         metadata:
-          type: object
-          ref: "#/components/schemas/ProgramMetadata"
+          $ref: "#/components/schemas/ProgramMetadata"
       required:
         - program_id
         - program_curators
         - team_members
+    ClinicalProgram:
+      description: Program metadata to ingest into Katsu, as specified by ProgramIngestSchema in openapi_url. Missing recommended fields are reported as warnings by clinical_ETL rather than rejected here.
+      allOf:
+        - $ref: "#/components/schemas/ProgramMetadata"
+        - type: object
+          required:
+            - program_id
+          properties:
+            program_id:
+              description: "Unique identifier of the program"
+              type: string
+              pattern: ^[A-Za-z0-9\-\._]{1,64}$
     ProgramMetadata:
       type: object
-      required:
-        - program_name
-        - program_description
-        - status
-        - context
-        - principal_investigators
-        - lead_organizations
-        - funding_sources
       properties:
         program_name:
           description: "The official name of the program, may be used for display purposes."
+          type: string
+        program_url:
+          description: "URL of the program's website."
           type: string
         program_description:
           description: "A detailed description of the program’s purpose, hypothesis, and design."
@@ -1244,17 +1161,22 @@ components:
           items:
             type: string
         collaborators:
-          description: "List of researchers, institutions or companies involved in the study. FirstName LastName (if individula) or Organization full official name, Role"
+          description: "List of researchers, institutions or companies involved in the study. FirstName LastName (if individual) or Organization full official name, Role"
           type: array
           items:
             type: string
-          example: [ "Emily John, Data Contributor", "Biotech Inc., Industry Partner" ]
+          example:
+            ["Emily John, Data Contributor", "Biotech Inc., Industry Partner"]
         funding_sources:
           description: "List of organizations or agencies funding the study in the format: Funder name, Grant number"
           type: array
           items:
             type: string
-          example: [ "National Example Foundation, NEF-12345", "Example Health Research Council" ]
+          example:
+            [
+              "National Example Foundation, NEF-12345",
+              "Example Health Research Council",
+            ]
         publication_links:
           description: "List of URL links to academic papers or reports associated with the study. providing a DOI URL formatted as https://doi.org/ followed by the DOI number."
           type: array
@@ -1264,7 +1186,10 @@ components:
             example: "https://doi.org/10.1016/j.ccell.2025.03.014"
         pancan_cohort:
           description: "Indicate whether program is part of the Pan-Canadian Genome Library (PCGL) cohort."
-          type: boolean
+          type: string
+          enum:
+            - "Yes"
+            - "No"
         pancan_id:
           description: "If the program is part of Pan-Canadian Genome Library (PCGL) cohort (pancan_cohort is 'Yes'), then indicate the name of the PCGL cohort here."
           type: string
