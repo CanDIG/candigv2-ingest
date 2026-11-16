@@ -2,6 +2,7 @@ import argparse
 
 from authx.auth import get_site_admin_token, is_action_allowed_for_program, create_service_token, get_s3_url
 from auth import get_program
+from config import DAEMON_PATH
 import os
 import re
 import json
@@ -24,6 +25,7 @@ TAKUAN_URL = os.getenv("RNAGET_URL", f"{CANDIG_URL}/rnaget")
 DRS_HOST_URL = "drs://" + CANDIG_URL.replace(f"{urlparse(CANDIG_URL).scheme}://","") + "/drs"
 KATSU_URL = os.environ.get("KATSU_URL")
 IS_TESTING = os.getenv("IS_TESTING", False)
+TOUCH_FILE = os.getenv("TOUCH_FILE", f"{DAEMON_PATH}/last_touch.txt")
 
 
 def create_analysis(analysis, overwrite=False):
@@ -31,6 +33,9 @@ def create_analysis(analysis, overwrite=False):
     result = {
         "errors": []
     }
+
+    with open(TOUCH_FILE, "w") as f:
+        f.write(str(int(datetime.now().timestamp())))
 
     # Use service token to authenticate this with htsget
     headers = {}

@@ -8,8 +8,11 @@ from authx.auth import get_site_admin_token, create_service_token, is_action_all
 from auth import get_program
 from clinical_etl.mohschemav3 import MoHSchemaV3
 from candigv2_logging.logging import initialize, CanDIGLogger
+from config import DAEMON_PATH
+from datetime import datetime
 
 KATSU_URL = os.environ.get("KATSU_URL")
+TOUCH_FILE = os.getenv("TOUCH_FILE", f"{DAEMON_PATH}/last_touch.txt")
 
 logger = CanDIGLogger(__file__)
 
@@ -67,6 +70,9 @@ def ingest_schemas(fields, batch_size=1000, results_path=None, result_dict=None,
     }
 
     for type in fields:
+        with open(TOUCH_FILE, "w") as f:
+            f.write(str(int(datetime.now().timestamp())))
+
         if len(fields[type]) > 0:
             ingest_url = f"{KATSU_URL}/v3/ingest/{type}/"
 

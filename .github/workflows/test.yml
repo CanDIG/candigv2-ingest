@@ -17,6 +17,8 @@ jobs:
       SERVICE_NAME: "candig-ingest"
       APPROLE_TOKEN_FILE: ${{github.workspace}}/approle-token
       ROLE_ID_FILE: ${{github.workspace}}/roleid
+      DAEMON_PATH: ${{github.workspace}}/tmp
+      TOUCH_FILE: ${{github.workspace}}/last_touch.txt
     steps:
       - uses: actions/checkout@v6
       - name: Set up Python ${{ matrix.python-version }}
@@ -30,6 +32,7 @@ jobs:
         run: |
           echo "sdfsdfs" > ${{ env.APPROLE_TOKEN_FILE }}
           echo "sdfsdfs" > ${{ env.ROLE_ID_FILE }}
+          echo "sdfsdfs" > ${{ env.TOUCH_FILE }}
       - name: Test with pytest
         run: |
           pytest

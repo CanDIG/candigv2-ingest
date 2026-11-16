@@ -1,7 +1,5 @@
 #!/bin/bash
 
-TOUCH_FILE=$DAEMON_PATH/last_touch.txt
-
 python daemon.py &
 pid=$!
 

@@ -13,6 +13,8 @@ logger = CanDIGLogger(__file__)
 
 initialize()
 
+TOUCH_FILE = os.getenv("TOUCH_FILE", f"{DAEMON_PATH}/last_touch.txt")
+
 
 def ingest_file(file_path):
     json_data = None
@@ -33,7 +35,7 @@ def ingest_file(file_path):
                 json_data = json_data["katsu"]
                 programs = list(json_data.keys())
                 for program_id in programs:
-                    with open(f"{DAEMON_PATH}/last_touch.txt", "w") as f:
+                    with open(TOUCH_FILE, "w") as f:
                         f.write(str(int(datetime.now().timestamp())))
                     try:
                         ingest_results, status_code = ingest_schemas(json_data[program_id]["schemas"], results_path=results_path, result_dict=results, program_id=program_id)
@@ -49,7 +51,7 @@ def ingest_file(file_path):
                 for program_id in programs:
                     results[program_id] = {}
                 for program_id in programs:
-                    with open(f"{DAEMON_PATH}/last_touch.txt", "w") as f:
+                    with open(TOUCH_FILE, "w") as f:
                         f.write(str(int(datetime.now().timestamp())))
                     try:
                         ingest_results, status_code = htsget_ingest(json_data[program_id], overwrite=overwrite, results_path=results_path, result_dict=results)
@@ -76,10 +78,10 @@ def ingest_file(file_path):
 
 class DaemonHandler(watchdog.events.FileSystemEventHandler):
     def on_created(self, event):
-        with open(f"{DAEMON_PATH}/last_touch.txt", "w") as f:
+        with open(TOUCH_FILE, "w") as f:
             f.write(str(int(datetime.now().timestamp())))
         ingest_file(event.src_path)
-        os.remove(f"{DAEMON_PATH}/last_touch.txt")
+        os.remove(TOUCH_FILE)
 
 
 if __name__ == "__main__":
